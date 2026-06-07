@@ -1,0 +1,128 @@
+'use client'
+
+import { useState, type FormEvent } from 'react'
+import { useRouter } from 'next/navigation'
+import { Eye, EyeOff } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+
+export default function CounselorLoginPage() {
+  const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    setError(null)
+    setLoading(true)
+
+    const supabase = createClient()
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (signInError) {
+      setError('Invalid email or password')
+      setLoading(false)
+      return
+    }
+
+    const { data: counselor } = await supabase
+      .from('counselors')
+      .select('id, name, status')
+      .eq('email', email)
+      .single()
+
+    if (!counselor) {
+      await supabase.auth.signOut()
+      setError('Account not set up. Contact admin.')
+      setLoading(false)
+      return
+    }
+
+    if (counselor.status !== 'active') {
+      await supabase.auth.signOut()
+      setError('Your account is inactive. Contact admin.')
+      setLoading(false)
+      return
+    }
+
+    router.push('/dashboard')
+    router.refresh()
+  }
+
+  const inputClassName =
+    'w-full rounded-xl border border-text bg-bg px-4 py-3 text-text outline-none focus:border-blue'
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-text px-4">
+      <div className="w-full max-w-[400px] rounded-[20px] bg-bg p-8">
+        <div className="mb-8 flex flex-col items-center gap-2">
+          <img src="/logo.png" alt="ACE Altius Consulting" className="h-16 w-auto" />
+        </div>
+
+        <h1 className="text-center text-2xl font-semibold text-blue">Counselor Portal</h1>
+        <p className="mt-1 text-center text-sm text-text">Sign in to your dashboard</p>
+
+        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+          <div>
+            <label htmlFor="email" className="sr-only">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              className={inputClassName}
+            />
+          </div>
+
+          <div className="relative">
+            <label htmlFor="password" className="sr-only">
+              Password
+            </label>
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className={`${inputClassName} pr-12`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-text/60 hover:text-text"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-full bg-green py-3 text-sm font-bold text-text transition-opacity hover:opacity-90 disabled:opacity-60"
+          >
+            {loading ? 'Signing in...' : 'Sign in →'}
+          </button>
+
+          {error && (
+            <p className="text-center text-sm text-orange" role="alert">
+              {error}
+            </p>
+          )}
+        </form>
+      </div>
+    </div>
+  )
+}

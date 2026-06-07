@@ -1,0 +1,65 @@
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+
+:root {
+  --bg: #E6E8E7;
+  --green: #B7C733;
+  --orange: #E48328;
+  --text: #0A3F3A;
+  --blue: #2083B9;
+  --black: #000000;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-green: var(--green);
+  --color-orange: var(--orange);
+  --color-text: var(--text);
+  --color-blue: var(--blue);
+  --color-black: var(--black);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist-sans), sans-serif;
+}
+
+/* Rocky/stone texture overlay */
+.bg-texture {
+  position: relative;
+}
+
+.bg-texture::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* No-JS fallback: stacked sections */
+.js-enabled .landing-fallback {
+  display: none;
+}
+
+.inverted-scroll {
+  display: none;
+}
+
+.js-enabled .inverted-scroll {
+  display: block;
+}
+
+.inverted-scroll [data-scroll-proxy] {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.inverted-scroll [data-scroll-proxy]::-webkit-scrollbar {
+  display: none;
+}

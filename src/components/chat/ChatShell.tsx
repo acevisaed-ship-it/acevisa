@@ -1,0 +1,174 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { Calendar } from 'lucide-react'
+import type { ChatMessage } from '@/types'
+import { ChatBubble } from './ChatBubble'
+import { ChatHeader } from './ChatHeader'
+import { ChatInput } from './ChatInput'
+import { MeetingRequestModal } from './MeetingRequestModal'
+import { TypingIndicator } from './TypingIndicator'
+
+const MEETING_SUCCESS_MSG =
+  'Your meeting request has been sent! A counselor will confirm your slot within a few hours.'
+
+type Props = {
+  clientId: string
+  clientName: string
+}
+
+export function ChatShell({ clientId, clientName }: Props) {
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [inputValue, setInputValue] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [showMeetingModal, setShowMeetingModal] = useState(false)
+
+  useEffect(() => {
+    async function loadHistory() {
+      const res = await fetch(`/api/chat/history?clientId=${clientId}`)
+      const data = await res.json()
+      if (data.messages?.length) {
+        setMessages(data.messages)
+        return
+      }
+
+      setIsLoading(true)
+      try {
+        const initRes = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ clientId, message: '__init__' }),
+        })
+        const initData = await initRes.json()
+        if (initData.content) {
+          setMessages([
+            {
+              id: crypto.randomUUID(),
+              sender: 'ai',
+              message_text: initData.content,
+              timestamp: new Date().toISOString(),
+            },
+          ])
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    loadHistory()
+  }, [clientId])
+
+  const handleSend = async (message: string) => {
+    if (!message.trim() || isLoading) return
+
+    const studentMsg: ChatMessage = {
+      id: crypto.randomUUID(),
+      sender: 'student',
+      message_text: message,
+      timestamp: new Date().toISOString(),
+    }
+    setMessages((prev) => [...prev, studentMsg])
+    setInputValue('')
+    setIsLoading(true)
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId, message }),
+      })
+
+      const data = await res.json()
+
+      if (data.content) {
+        const aiMsg: ChatMessage = {
+          id: crypto.randomUUID(),
+          sender: 'ai',
+          message_text: data.content,
+          timestamp: new Date().toISOString(),
+        }
+        setMessages((prev) => [...prev, aiMsg])
+      }
+
+      if (data.type === 'conversation_complete' && data.score >= 7) {
+        setTimeout(() => {
+          window.location.href = `/schedule/${clientId}`
+        }, 3000)
+      }
+    } catch (err) {
+      console.error('Chat error:', err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleMeetingSuccess = () => {
+    setShowMeetingModal(false)
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        sender: 'ai',
+        message_text: MEETING_SUCCESS_MSG,
+        timestamp: new Date().toISOString(),
+      },
+    ])
+  }
+
+  return (
+    <div className="mx-auto flex h-dvh max-w-[390px] flex-col bg-bg">
+      <ChatHeader clientName={clientName} />
+
+      <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4">
+        {messages.length === 0 && !isLoading ? (
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-10 w-10 text-blue/40"
+              aria-hidden="true"
+            >
+              <path
+                d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <p className="text-sm text-text/60">Starting your session...</p>
+          </div>
+        ) : (
+          messages.map((msg) => <ChatBubble key={msg.id} message={msg} />)
+        )}
+        {isLoading && <TypingIndicator />}
+      </div>
+
+      <div className="border-t border-text/10 px-4 pt-3">
+        <button
+          type="button"
+          onClick={() => setShowMeetingModal(true)}
+          className="flex w-full items-center justify-center gap-2 rounded-full border border-blue py-2 text-sm text-blue transition-opacity hover:opacity-80"
+        >
+          <Calendar className="h-4 w-4" aria-hidden="true" />
+          Request a meeting with a counselor
+        </button>
+      </div>
+
+      <ChatInput
+        value={inputValue}
+        onChange={setInputValue}
+        onSend={handleSend}
+        disabled={isLoading}
+      />
+
+      {showMeetingModal && (
+        <MeetingRequestModal
+          clientId={clientId}
+          onClose={() => setShowMeetingModal(false)}
+          onSuccess={handleMeetingSuccess}
+        />
+      )}
+    </div>
+  )
+}
