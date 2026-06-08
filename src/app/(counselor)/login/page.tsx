@@ -12,6 +12,11 @@ export default function CounselorLoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetLoading, setResetLoading] = useState(false)
+  const [resetMessage, setResetMessage] = useState<string | null>(null)
+  const [resetError, setResetError] = useState<string | null>(null)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -54,6 +59,27 @@ export default function CounselorLoginPage() {
     router.refresh()
   }
 
+  async function handleForgotPassword(e: FormEvent) {
+    e.preventDefault()
+    setResetMessage(null)
+    setResetError(null)
+    setResetLoading(true)
+
+    const supabase = createClient()
+    const { error: resetPasswordError } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+
+    if (resetPasswordError) {
+      setResetError(resetPasswordError.message)
+      setResetLoading(false)
+      return
+    }
+
+    setResetMessage('Check your email for a reset link')
+    setResetLoading(false)
+  }
+
   const inputClassName =
     'w-full rounded-xl border border-text bg-bg px-4 py-3 text-text outline-none focus:border-blue'
 
@@ -67,61 +93,121 @@ export default function CounselorLoginPage() {
         <h1 className="text-center text-2xl font-semibold text-blue">Counselor Portal</h1>
         <p className="mt-1 text-center text-sm text-text">Sign in to your dashboard</p>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-          <div>
-            <label htmlFor="email" className="sr-only">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              className={inputClassName}
-            />
-          </div>
+        {showForgotPassword ? (
+          <form onSubmit={handleForgotPassword} className="mt-8 space-y-4">
+            <div>
+              <label htmlFor="reset-email" className="sr-only">
+                Email
+              </label>
+              <input
+                id="reset-email"
+                type="email"
+                autoComplete="email"
+                required
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                placeholder="Email"
+                className={inputClassName}
+              />
+            </div>
 
-          <div className="relative">
-            <label htmlFor="password" className="sr-only">
-              Password
-            </label>
-            <input
-              id="password"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              className={`${inputClassName} pr-12`}
-            />
+            <button
+              type="submit"
+              disabled={resetLoading}
+              className="w-full rounded-full bg-green py-3 text-sm font-bold text-text transition-opacity hover:opacity-90 disabled:opacity-60"
+            >
+              {resetLoading ? 'Sending...' : 'Send reset link'}
+            </button>
+
+            {resetMessage && (
+              <p className="text-center text-sm text-green" role="status">
+                {resetMessage}
+              </p>
+            )}
+
+            {resetError && (
+              <p className="text-center text-sm text-orange" role="alert">
+                {resetError}
+              </p>
+            )}
+
             <button
               type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-text/60 hover:text-text"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              onClick={() => {
+                setShowForgotPassword(false)
+                setResetMessage(null)
+                setResetError(null)
+              }}
+              className="w-full text-center text-sm text-blue hover:underline"
             >
-              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              Back to login
             </button>
-          </div>
+          </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+            <div>
+              <label htmlFor="email" className="sr-only">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                className={inputClassName}
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-full bg-green py-3 text-sm font-bold text-text transition-opacity hover:opacity-90 disabled:opacity-60"
-          >
-            {loading ? 'Signing in...' : 'Sign in →'}
-          </button>
+            <div className="relative">
+              <label htmlFor="password" className="sr-only">
+                Password
+              </label>
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className={`${inputClassName} pr-12`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-text/60 hover:text-text"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+            </div>
 
-          {error && (
-            <p className="text-center text-sm text-orange" role="alert">
-              {error}
-            </p>
-          )}
-        </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-full bg-green py-3 text-sm font-bold text-text transition-opacity hover:opacity-90 disabled:opacity-60"
+            >
+              {loading ? 'Signing in...' : 'Sign in →'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
+              className="w-full text-center text-sm text-blue hover:underline"
+            >
+              Forgot password?
+            </button>
+
+            {error && (
+              <p className="text-center text-sm text-orange" role="alert">
+                {error}
+              </p>
+            )}
+          </form>
+        )}
       </div>
     </div>
   )
