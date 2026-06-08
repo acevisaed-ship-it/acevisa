@@ -71,7 +71,7 @@ export function BriefShell({
         counselorName={counselorName}
         counselorAvatarUrl={counselorAvatarUrl}
       />
-      <main className="flex-1 bg-bg p-6 md:p-8">
+      <main className="flex-1 bg-bg p-4 md:p-8">
       <div className="mx-auto max-w-[900px]">
         {/* Top bar */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -94,7 +94,7 @@ export function BriefShell({
 
         {/* Page title */}
         <div className="mb-8 flex flex-wrap items-center gap-4">
-          <h1 className="text-3xl font-bold text-blue">{client.name}</h1>
+          <h1 className="text-2xl font-bold text-blue sm:text-3xl">{client.name}</h1>
           {score !== null && (
             <span
               className="flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold text-text"
@@ -189,14 +189,17 @@ export function BriefShell({
         <BriefCard>
           <h2 className="mb-4 text-lg font-bold text-text">Recommended Service Pathway</h2>
           {pathwaySteps ? (
-            <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+            <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:gap-3">
               {pathwaySteps.map((step, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="rounded-xl border border-blue bg-bg px-4 py-3 text-sm font-medium text-text">
+                <div key={i} className="flex flex-col items-center gap-2 sm:flex-row sm:gap-3">
+                  <div className="w-full rounded-xl border border-blue bg-bg px-4 py-3 text-sm font-medium text-text sm:w-auto">
                     {step}
                   </div>
                   {i < pathwaySteps.length - 1 && (
-                    <span className="hidden shrink-0 text-xl font-bold text-green sm:block">→</span>
+                    <>
+                      <span className="shrink-0 text-xl font-bold text-green sm:hidden">↓</span>
+                      <span className="hidden shrink-0 text-xl font-bold text-green sm:block">→</span>
+                    </>
                   )}
                 </div>
               ))}
@@ -273,7 +276,9 @@ export function BriefShell({
 
         {/* Section G — AI Strategy Chat */}
         <BriefCard>
-          <StrategyChat clientId={client.id} />
+          <div className="flex min-h-[50vh] flex-col lg:min-h-0">
+            <StrategyChat clientId={client.id} />
+          </div>
         </BriefCard>
       </div>
     </main>

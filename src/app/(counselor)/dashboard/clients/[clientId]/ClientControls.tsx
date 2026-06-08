@@ -57,7 +57,7 @@ export function ClientControls({ clientId, initialStage, initialNotes }: Props) 
           value={stage}
           disabled={isPending || saving === 'stage'}
           onChange={(e) => handleStageChange(Number(e.target.value))}
-          className="w-full rounded-xl border border-text/20 bg-white px-3 py-2 text-sm text-text focus:border-blue focus:outline-none disabled:opacity-50"
+          className="min-h-[48px] w-full rounded-xl border border-text/20 bg-white px-3 py-2 text-sm text-text focus:border-blue focus:outline-none disabled:opacity-50"
         >
           {Object.entries(PIPELINE_STAGES).map(([value, label]) => (
             <option key={value} value={value}>
@@ -86,7 +86,7 @@ export function ClientControls({ clientId, initialStage, initialNotes }: Props) 
           type="button"
           disabled={isPending || saving === 'notes'}
           onClick={handleSaveNotes}
-          className="mt-2 rounded-full bg-blue px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="mt-2 min-h-[44px] w-full rounded-full bg-blue px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 sm:w-auto"
         >
           {saving === 'notes' ? 'Saving…' : 'Save notes'}
         </button>

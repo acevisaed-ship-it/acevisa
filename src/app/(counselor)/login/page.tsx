@@ -81,11 +81,11 @@ export default function CounselorLoginPage() {
   }
 
   const inputClassName =
-    'w-full rounded-xl border border-text bg-bg px-4 py-3 text-text outline-none focus:border-blue'
+    'min-h-[52px] w-full rounded-xl border border-text bg-bg px-4 py-3 text-text outline-none focus:border-blue'
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-text px-4">
-      <div className="w-full max-w-[400px] rounded-[20px] bg-bg p-8">
+    <div className="flex min-h-screen items-center justify-center bg-text px-4 py-6">
+      <div className="w-full rounded-[20px] bg-bg p-6 sm:max-w-[400px] sm:p-8">
         <div className="mb-8 flex flex-col items-center gap-2">
           <img src="/logo.png" alt="ACE Altius Consulting" className="h-16 w-auto" />
         </div>
@@ -114,7 +114,7 @@ export default function CounselorLoginPage() {
             <button
               type="submit"
               disabled={resetLoading}
-              className="w-full rounded-full bg-green py-3 text-sm font-bold text-text transition-opacity hover:opacity-90 disabled:opacity-60"
+              className="min-h-[52px] w-full rounded-full bg-green py-3 text-sm font-bold text-text transition-opacity hover:opacity-90 disabled:opacity-60"
             >
               {resetLoading ? 'Sending...' : 'Send reset link'}
             </button>
@@ -188,7 +188,7 @@ export default function CounselorLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-full bg-green py-3 text-sm font-bold text-text transition-opacity hover:opacity-90 disabled:opacity-60"
+              className="min-h-[52px] w-full rounded-full bg-green py-3 text-sm font-bold text-text transition-opacity hover:opacity-90 disabled:opacity-60"
             >
               {loading ? 'Signing in...' : 'Sign in →'}
             </button>

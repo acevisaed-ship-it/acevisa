@@ -22,7 +22,7 @@ export function MeetingCard({ id, clientName, scheduledTime, showDate }: Props) 
         </div>
         <Link
           href={`/dashboard/brief/${id}`}
-          className="inline-flex shrink-0 items-center justify-center rounded-full border border-text/20 px-4 py-2 text-sm font-medium text-text transition-colors hover:border-text/40"
+          className="inline-flex w-full shrink-0 items-center justify-center rounded-full border border-text/20 px-4 py-2.5 text-sm font-medium text-text transition-colors hover:border-text/40 sm:w-auto sm:min-h-[44px]"
         >
           View Brief →
         </Link>

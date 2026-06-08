@@ -29,7 +29,7 @@ interface FormData {
 }
 
 const inputClass =
-  'w-full rounded-card border border-text/20 bg-bg px-4 py-3.5 text-base text-text placeholder:text-text/40 outline-none transition-colors duration-700 focus:border-blue'
+  'min-h-[48px] w-full rounded-card border border-text/20 bg-bg px-4 py-3.5 text-base text-text placeholder:text-text/40 outline-none transition-colors duration-700 focus:border-blue'
 
 export function RegistrationSection() {
   const router = useRouter()
@@ -122,7 +122,7 @@ export function RegistrationSection() {
             )}
 
             <div>
-              <label htmlFor="name" className="mb-1.5 block text-sm text-text">
+              <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-text">
                 Full name
               </label>
               <input
@@ -136,7 +136,7 @@ export function RegistrationSection() {
             </div>
 
             <div>
-              <label htmlFor="phone" className="mb-1.5 block text-sm text-text">
+              <label htmlFor="phone" className="mb-1.5 block text-sm font-medium text-text">
                 Phone number
               </label>
               <input
@@ -151,7 +151,7 @@ export function RegistrationSection() {
             </div>
 
             <div>
-              <label htmlFor="city" className="mb-1.5 block text-sm text-text">
+              <label htmlFor="city" className="mb-1.5 block text-sm font-medium text-text">
                 City
               </label>
               <input
@@ -165,7 +165,7 @@ export function RegistrationSection() {
             </div>
 
             <div>
-              <label htmlFor="language" className="mb-1.5 block text-sm text-text">
+              <label htmlFor="language" className="mb-1.5 block text-sm font-medium text-text">
                 Preferred language
               </label>
               <select
@@ -184,7 +184,7 @@ export function RegistrationSection() {
             </div>
 
             <div>
-              <label htmlFor="interested_in" className="mb-1.5 block text-sm text-text">
+              <label htmlFor="interested_in" className="mb-1.5 block text-sm font-medium text-text">
                 Interested in
               </label>
               <select

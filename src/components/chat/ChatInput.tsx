@@ -25,7 +25,7 @@ export function ChatInput({
   return (
     <form
       onSubmit={handleSubmit}
-      className="sticky bottom-0 flex items-center gap-2 border-t border-text/10 bg-bg px-4 py-3"
+      className="sticky bottom-0 flex items-center gap-2 border-t border-text/10 bg-bg px-4 py-3 pb-[env(safe-area-inset-bottom,0px)]"
     >
       <input
         type="text"
@@ -33,13 +33,13 @@ export function ChatInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder="Type your message..."
         disabled={disabled}
-        className="min-w-0 flex-1 rounded-full border border-text bg-bg px-4 py-2.5 text-sm text-text placeholder:text-text/40 outline-none focus:border-blue disabled:opacity-50"
+        className="min-h-[48px] min-w-0 flex-1 rounded-full border border-text bg-bg px-4 py-2.5 text-sm text-text placeholder:text-text/40 outline-none focus:border-blue disabled:opacity-50"
       />
       <button
         type="submit"
         disabled={disabled || !value.trim()}
         aria-label="Send message"
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green text-text transition-opacity disabled:opacity-40"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-green text-text transition-opacity disabled:opacity-40"
       >
         <svg
           viewBox="0 0 24 24"

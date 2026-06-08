@@ -54,13 +54,13 @@ export function StrategyChat({ clientId }: Props) {
   }
 
   return (
-    <div>
+    <div className="flex flex-1 flex-col">
       <h2 className="text-lg font-bold text-blue">Strategy Assistant</h2>
       <p className="mt-1 text-sm text-text/60">
         Ask anything about this client&apos;s case before the meeting.
       </p>
 
-      <div className="mt-4 max-h-[400px] space-y-3 overflow-y-auto rounded-xl bg-bg p-4">
+      <div className="mt-4 min-h-0 flex-1 space-y-3 overflow-y-auto rounded-xl bg-bg p-4 max-h-[50vh] sm:max-h-[400px]">
         {messages.length === 0 && !isLoading && (
           <p className="text-center text-sm text-text/40">
             Start by asking about visa strategy, objection handling, or case planning.
@@ -85,20 +85,20 @@ export function StrategyChat({ clientId }: Props) {
         {isLoading && <TypingIndicator />}
       </div>
 
-      <form onSubmit={handleSend} className="mt-4 flex items-center gap-2">
+      <form onSubmit={handleSend} className="mt-4 flex shrink-0 items-center gap-2">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask about visa strategy, objection handling, case planning..."
           disabled={isLoading}
-          className="min-w-0 flex-1 rounded-full border border-text/20 bg-bg px-4 py-2.5 text-sm text-text placeholder:text-text/40 outline-none focus:border-blue disabled:opacity-50"
+          className="min-h-[48px] min-w-0 flex-1 rounded-full border border-text/20 bg-bg px-4 py-2.5 text-sm text-text placeholder:text-text/40 outline-none focus:border-blue disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={isLoading || !input.trim()}
           aria-label="Send message"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green text-text transition-opacity disabled:opacity-40"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-green text-text transition-opacity disabled:opacity-40"
         >
           <svg
             viewBox="0 0 24 24"

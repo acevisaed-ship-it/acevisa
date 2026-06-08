@@ -77,7 +77,7 @@ export function ServicesSection() {
           </h2>
         </motion.div>
 
-        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
           {services.map((item, i) => {
             const Icon = item.icon
             return (

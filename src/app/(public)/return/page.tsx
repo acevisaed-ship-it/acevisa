@@ -4,7 +4,7 @@ import { useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/Button'
 
 const inputClass =
-  'w-full rounded-card border border-text/20 bg-bg px-4 py-3.5 text-base text-text placeholder:text-text/40 outline-none transition-colors duration-700 focus:border-blue'
+  'min-h-[52px] w-full rounded-card border border-text/20 bg-bg px-4 py-3.5 text-base text-text placeholder:text-text/40 outline-none transition-colors duration-700 focus:border-blue'
 
 export default function ReturnPage() {
   const [phone, setPhone] = useState('')
@@ -40,7 +40,7 @@ export default function ReturnPage() {
   return (
     <main className="bg-texture flex min-h-screen items-center justify-center bg-bg px-5 py-24">
       <div
-        className="w-full max-w-[400px] rounded-[20px] border border-text/10 bg-white/80 p-8 shadow-sm"
+        className="w-full rounded-[20px] border border-text/10 bg-white/80 p-6 shadow-sm sm:max-w-[400px] sm:p-8"
         style={{ background: 'rgba(255,255,255,0.9)' }}
       >
         <div className="mb-6 flex justify-center">
@@ -75,7 +75,7 @@ export default function ReturnPage() {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full py-4 text-base font-bold"
+            className="min-h-[52px] w-full py-4 text-base font-bold"
           >
             {loading ? 'Looking up your session...' : 'Continue →'}
           </Button>

@@ -144,11 +144,11 @@ export function ChatShell({ clientId, clientName }: Props) {
         {isLoading && <TypingIndicator />}
       </div>
 
-      <div className="border-t border-text/10 px-4 pt-3">
+      <div className="border-t border-text/10 px-4 pt-3 pb-[env(safe-area-inset-bottom,0px)]">
         <button
           type="button"
           onClick={() => setShowMeetingModal(true)}
-          className="flex w-full items-center justify-center gap-2 rounded-full border border-blue py-2 text-sm text-blue transition-opacity hover:opacity-80"
+          className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-blue py-2.5 text-sm text-blue transition-opacity hover:opacity-80"
         >
           <Calendar className="h-4 w-4" aria-hidden="true" />
           Request a meeting with a counselor

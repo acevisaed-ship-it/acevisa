@@ -96,7 +96,7 @@ export default async function CounselorDashboardPage() {
   const taskRows = (tasks ?? []) as TaskRowData[]
 
   return (
-    <main className="flex-1 p-6 md:p-8">
+    <main className="flex-1 p-4 md:p-8">
       <header className="mb-8">
         <h1 className="text-2xl font-semibold text-blue md:text-3xl">
           {getPKTGreeting()}, {counselor.name}
@@ -104,7 +104,7 @@ export default async function CounselorDashboardPage() {
         <p className="mt-1 text-sm text-text">{formatPKTDateLong()}</p>
       </header>
 
-      <div className="mb-8 grid gap-4 sm:grid-cols-3">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard label="Meetings today" value={meetingsTodayCount ?? 0} />
         <StatCard label="Qualified leads" value={qualifiedLeadsCount ?? 0} />
         <StatCard label="Open tasks" value={openTasksCount ?? 0} />

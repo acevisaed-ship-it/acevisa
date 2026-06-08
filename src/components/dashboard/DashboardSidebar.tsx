@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { CheckSquare, Home, Kanban, Users } from 'lucide-react'
+import { CheckSquare, Home, Kanban, Users, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { ProfilePicture } from '@/components/dashboard/ProfilePicture'
 import { cn } from '@/lib/utils'
@@ -25,9 +25,21 @@ type Props = {
   counselorId: string
   counselorName: string
   avatarUrl?: string | null
+  isOpen: boolean
+  onClose: () => void
 }
 
-export function DashboardSidebar({ counselorId, counselorName, avatarUrl }: Props) {
+function SidebarContent({
+  counselorId,
+  counselorName,
+  avatarUrl,
+  onNavigate,
+}: {
+  counselorId: string
+  counselorName: string
+  avatarUrl?: string | null
+  onNavigate?: () => void
+}) {
   const pathname = usePathname()
 
   async function handleSignOut() {
@@ -42,7 +54,7 @@ export function DashboardSidebar({ counselorId, counselorName, avatarUrl }: Prop
   }
 
   return (
-    <aside className="hidden w-60 shrink-0 flex-col bg-text text-bg md:flex">
+    <>
       <div className="flex items-center gap-2 px-6 py-6 text-black">
         <img src="/logo.png" alt="ACE Altius Consulting" className="h-10 w-auto" />
       </div>
@@ -54,8 +66,9 @@ export function DashboardSidebar({ counselorId, counselorName, avatarUrl }: Prop
             <Link
               key={href}
               href={href}
+              onClick={onNavigate}
               className={cn(
-                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+                'flex min-h-[48px] items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
                 active
                   ? 'bg-green text-text'
                   : 'text-bg hover:bg-[rgba(183,199,51,0.15)]'
@@ -80,11 +93,64 @@ export function DashboardSidebar({ counselorId, counselorName, avatarUrl }: Prop
         <button
           type="button"
           onClick={handleSignOut}
-          className="mt-2 text-sm text-orange hover:underline"
+          className="mt-2 min-h-[44px] text-sm text-orange hover:underline"
         >
           Sign out
         </button>
       </div>
-    </aside>
+    </>
+  )
+}
+
+export function DashboardSidebar({
+  counselorId,
+  counselorName,
+  avatarUrl,
+  isOpen,
+  onClose,
+}: Props) {
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside className="hidden w-60 shrink-0 flex-col bg-text text-bg lg:flex">
+        <SidebarContent
+          counselorId={counselorId}
+          counselorName={counselorName}
+          avatarUrl={avatarUrl}
+        />
+      </aside>
+
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Mobile sidebar panel */}
+      <aside
+        className={cn(
+          'fixed left-0 top-0 z-50 flex h-full w-[280px] flex-col bg-text transition-transform duration-300 lg:hidden',
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-3 top-3 flex min-h-[44px] min-w-[44px] items-center justify-center text-bg"
+          aria-label="Close menu"
+        >
+          <X className="h-5 w-5" />
+        </button>
+        <SidebarContent
+          counselorId={counselorId}
+          counselorName={counselorName}
+          avatarUrl={avatarUrl}
+          onNavigate={onClose}
+        />
+      </aside>
+    </>
   )
 }

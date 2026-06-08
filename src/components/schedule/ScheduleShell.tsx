@@ -203,7 +203,7 @@ export function ScheduleShell({ clientId }: Props) {
         key={slot.utc}
         type="button"
         onClick={() => setSelectedSlot(slot)}
-        className="rounded-full px-2 py-3 text-xs font-medium leading-tight transition-all"
+        className="min-h-[44px] rounded-full px-2 py-3 text-xs font-medium leading-tight transition-all"
         style={{
           backgroundColor: styles.backgroundColor,
           color: styles.color,
@@ -252,7 +252,7 @@ export function ScheduleShell({ clientId }: Props) {
             onClick={() => {
               window.location.href = '/'
             }}
-            className="mt-4 w-full rounded-full bg-green py-4 text-base font-bold text-text"
+            className="mt-4 min-h-[52px] w-full rounded-full bg-green py-4 text-base font-bold text-text"
           >
             Back to home →
           </button>
@@ -273,7 +273,7 @@ export function ScheduleShell({ clientId }: Props) {
       </header>
 
       {counselor && (
-        <div className="mb-6 flex items-center gap-4 rounded-[20px] border border-text/12 bg-white/80 p-4">
+        <div className="mb-6 flex w-full items-center gap-4 rounded-[20px] border border-text/12 bg-white/80 p-4">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green text-sm font-bold text-text">
             {getInitials(counselor.name)}
           </div>
@@ -296,7 +296,7 @@ export function ScheduleShell({ clientId }: Props) {
                 key={day.dateKey}
                 type="button"
                 onClick={() => handleDaySelect(day.dateKey)}
-                className="shrink-0 rounded-full px-4 py-2.5 text-sm font-semibold transition-colors"
+                className="min-h-[44px] shrink-0 rounded-full px-4 py-2.5 text-sm font-semibold transition-colors"
                 style={{
                   backgroundColor: isSelected ? '#0A3F3A' : '#E6E8E7',
                   border: '1px solid #0A3F3A',
@@ -373,7 +373,7 @@ export function ScheduleShell({ clientId }: Props) {
             type="button"
             onClick={handleConfirm}
             disabled={booking}
-            className="w-full rounded-full bg-green py-4 text-base font-bold text-text disabled:opacity-60"
+            className="min-h-[52px] w-full rounded-full bg-green py-4 text-base font-bold text-text disabled:opacity-60"
           >
             {booking ? 'Booking...' : 'Confirm this time →'}
           </button>

@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
+import { DashboardShell } from '@/components/dashboard/DashboardShell'
 import { getAuthenticatedCounselor } from '@/lib/supabase/server'
 
 export default async function DashboardLayout({
@@ -14,13 +14,12 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-bg">
-      <DashboardSidebar
-        counselorId={counselor.id}
-        counselorName={counselor.name}
-        avatarUrl={counselor.avatar_url}
-      />
-      <div className="flex min-h-screen flex-1 flex-col">{children}</div>
-    </div>
+    <DashboardShell
+      counselorId={counselor.id}
+      counselorName={counselor.name}
+      avatarUrl={counselor.avatar_url}
+    >
+      {children}
+    </DashboardShell>
   )
 }

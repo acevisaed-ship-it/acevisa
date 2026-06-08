@@ -216,18 +216,18 @@ export default async function ClientRecordPage({ params }: Props) {
         </section>
       </div>
 
-      <div className="mt-8 flex flex-wrap gap-3">
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         {latestMeeting && (
           <Link
             href={`/dashboard/brief/${latestMeeting.id}`}
-            className="inline-flex items-center rounded-full border border-text/20 bg-white px-4 py-2 text-sm font-medium text-text transition-colors hover:border-text/40"
+            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-full border border-text/20 bg-white px-4 py-2 text-sm font-medium text-text transition-colors hover:border-text/40 sm:w-auto"
           >
             View AI Brief →
           </Link>
         )}
         <Link
           href={`/chat/${clientId}`}
-          className="inline-flex items-center rounded-full border border-blue/30 px-4 py-2 text-sm font-medium text-blue transition-colors hover:border-blue/50"
+          className="inline-flex min-h-[44px] w-full items-center justify-center rounded-full border border-blue/30 px-4 py-2 text-sm font-medium text-blue transition-colors hover:border-blue/50 sm:w-auto"
         >
           View Chat →
         </Link>

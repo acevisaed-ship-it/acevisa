@@ -26,7 +26,7 @@ export function HeroSection() {
       />
       <div className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-orange/10 blur-3xl" />
 
-      <div className="relative z-10 mx-auto grid w-full max-w-6xl gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
+      <div className="relative z-10 mx-auto grid w-full max-w-6xl grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -39,7 +39,7 @@ export function HeroSection() {
             pakistan&apos;s smartest study abroad platform
           </p>
 
-          <h1 className="text-[clamp(2.5rem,8vw,6rem)] font-semibold leading-[0.95] tracking-tight text-blue lowercase">
+          <h1 className="text-[clamp(2rem,8vw,4.5rem)] font-semibold leading-[0.95] tracking-tight text-blue lowercase">
             your future
             <br />
             is up there
@@ -71,9 +71,9 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 32 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.15, ease: 'easeInOut' }}
-          className="flex justify-center lg:justify-end"
+          className="flex w-full justify-center lg:justify-end"
         >
-          <Card variant="glass" className="w-full max-w-sm space-y-6 p-8">
+          <Card variant="glass" className="w-full max-w-sm space-y-6 p-6 sm:p-8">
             {stats.map((stat) => (
               <div key={stat.label} className="border-b border-text/10 pb-4 last:border-0 last:pb-0">
                 <p className="text-2xl font-semibold text-blue md:text-3xl">
