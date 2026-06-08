@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { ArrowLeft, Brain, CheckCircle, CheckCircle2, Clock } from 'lucide-react'
+import { ChatHeader } from '@/components/chat/ChatHeader'
 import type { AIProfileData, Client, Conversation, Document } from '@/types'
 import {
   buildConversationDigest,
@@ -16,6 +17,8 @@ import { StrategyChat } from './StrategyChat'
 type Props = {
   meetingTime: string
   counselorId: string
+  counselorName: string
+  counselorAvatarUrl?: string | null
   initialOnline: boolean
   initialAutoReply: boolean
   client: Client
@@ -47,6 +50,8 @@ const DOCUMENT_STATUS = {
 export function BriefShell({
   meetingTime,
   counselorId,
+  counselorName,
+  counselorAvatarUrl,
   initialOnline,
   initialAutoReply,
   client,
@@ -60,7 +65,13 @@ export function BriefShell({
   const pathwaySteps = getPathwaySteps(profile)
 
   return (
-    <main className="flex-1 bg-bg p-6 md:p-8">
+    <>
+      <ChatHeader
+        clientName={client.name}
+        counselorName={counselorName}
+        counselorAvatarUrl={counselorAvatarUrl}
+      />
+      <main className="flex-1 bg-bg p-6 md:p-8">
       <div className="mx-auto max-w-[900px]">
         {/* Top bar */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -266,5 +277,6 @@ export function BriefShell({
         </BriefCard>
       </div>
     </main>
+    </>
   )
 }

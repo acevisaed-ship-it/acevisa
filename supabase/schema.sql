@@ -13,6 +13,7 @@ CREATE TABLE counselors (
   status text DEFAULT 'active',
   base_salary numeric,
   commission_rate numeric,
+  avatar_url text,
   created_at timestamptz DEFAULT now()
 );
 

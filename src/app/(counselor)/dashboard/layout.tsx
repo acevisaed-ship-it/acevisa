@@ -15,7 +15,11 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-screen bg-bg">
-      <DashboardSidebar counselorName={counselor.name} />
+      <DashboardSidebar
+        counselorId={counselor.id}
+        counselorName={counselor.name}
+        avatarUrl={counselor.avatar_url}
+      />
       <div className="flex min-h-screen flex-1 flex-col">{children}</div>
     </div>
   )

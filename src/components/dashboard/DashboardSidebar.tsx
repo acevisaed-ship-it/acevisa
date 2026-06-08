@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { CheckSquare, Home, Kanban, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { ProfilePicture } from '@/components/dashboard/ProfilePicture'
 import { cn } from '@/lib/utils'
 
 type NavItem = {
@@ -21,10 +22,12 @@ const navItems: NavItem[] = [
 ]
 
 type Props = {
+  counselorId: string
   counselorName: string
+  avatarUrl?: string | null
 }
 
-export function DashboardSidebar({ counselorName }: Props) {
+export function DashboardSidebar({ counselorId, counselorName, avatarUrl }: Props) {
   const pathname = usePathname()
 
   async function handleSignOut() {
@@ -66,6 +69,13 @@ export function DashboardSidebar({ counselorName }: Props) {
       </nav>
 
       <div className="border-t border-bg/10 px-6 py-5">
+        <ProfilePicture
+          counselorId={counselorId}
+          counselorName={counselorName}
+          avatarUrl={avatarUrl}
+          size={48}
+          className="mb-3 items-start"
+        />
         <p className="font-bold text-bg">{counselorName}</p>
         <button
           type="button"

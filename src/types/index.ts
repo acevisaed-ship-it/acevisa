@@ -45,6 +45,7 @@ export type Counselor = {
   status: CounselorAccountStatus
   base_salary: number | null
   commission_rate: number | null
+  avatar_url: string | null
   created_at: string
 }
 

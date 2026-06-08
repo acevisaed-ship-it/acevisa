@@ -57,6 +57,8 @@ export default async function BriefPage({ params }: Props) {
     <BriefShell
       meetingTime={meeting.scheduled_time}
       counselorId={counselor.id}
+      counselorName={counselor.name}
+      counselorAvatarUrl={counselor.avatar_url}
       initialOnline={counselorStatus?.is_online ?? false}
       initialAutoReply={counselorStatus?.auto_reply_enabled ?? false}
       client={client as Client}
