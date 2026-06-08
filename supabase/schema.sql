@@ -141,6 +141,17 @@ CREATE TABLE counselor_status (
   updated_at timestamptz DEFAULT now()
 );
 
+CREATE TABLE response_tracking (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  client_id uuid REFERENCES clients(id),
+  counselor_id uuid REFERENCES counselors(id),
+  student_message_at timestamptz NOT NULL,
+  response_at timestamptz,
+  response_by text,
+  response_time_seconds integer,
+  created_at timestamptz DEFAULT now()
+);
+
 -- Indexes for common queries
 CREATE INDEX idx_clients_counselor_id ON clients(counselor_id);
 CREATE INDEX idx_clients_pipeline_stage ON clients(pipeline_stage);
@@ -150,6 +161,8 @@ CREATE INDEX idx_meetings_counselor_id ON meetings(counselor_id);
 CREATE INDEX idx_meetings_scheduled_time ON meetings(scheduled_time);
 CREATE INDEX idx_tasks_counselor_id ON tasks(counselor_id);
 CREATE INDEX idx_knowledge_base_category ON knowledge_base(category);
+CREATE INDEX idx_response_tracking_client_id ON response_tracking(client_id);
+CREATE INDEX idx_response_tracking_counselor_id ON response_tracking(counselor_id);
 
 -- Campaign / ad source system
 CREATE TABLE campaigns (
@@ -165,3 +178,19 @@ CREATE TABLE campaigns (
 );
 
 CREATE INDEX idx_campaigns_ad_source_code ON campaigns(ad_source_code);
+
+CREATE TABLE complaints (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  client_id uuid REFERENCES clients(id),
+  client_name text,
+  client_phone text,
+  subject text NOT NULL,
+  body text NOT NULL,
+  status text DEFAULT 'open',
+  acknowledged_by uuid REFERENCES counselors(id),
+  acknowledged_at timestamptz,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX idx_complaints_status ON complaints(status);
+CREATE INDEX idx_complaints_client_id ON complaints(client_id);

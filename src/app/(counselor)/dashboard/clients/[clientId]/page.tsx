@@ -9,6 +9,7 @@ import {
 } from '@/lib/pkt'
 import type { Client, Document, Escalation, Meeting, Task } from '@/types'
 import { ClientControls } from './ClientControls'
+import { PendingProfileUpdates } from './PendingProfileUpdates'
 
 type Props = {
   params: Promise<{ clientId: string }>
@@ -37,6 +38,8 @@ export default async function ClientRecordPage({ params }: Props) {
     { data: tasks },
     { data: escalations },
     { data: documents },
+    { data: activityLog },
+    { data: pendingUpdates },
   ] = await Promise.all([
     supabase
       .from('meetings')
@@ -59,6 +62,18 @@ export default async function ClientRecordPage({ params }: Props) {
       .select('*')
       .eq('client_id', clientId)
       .order('updated_at', { ascending: false }),
+    supabase
+      .from('student_activity_log')
+      .select('*')
+      .eq('client_id', clientId)
+      .order('created_at', { ascending: false })
+      .limit(50),
+    supabase
+      .from('profile_update_requests')
+      .select('id, triggered_by_message, proposed_changes, reviewed_fields, created_at')
+      .eq('client_id', clientId)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false }),
   ])
 
   const meetingRows = (meetings ?? []) as Meeting[]
@@ -80,6 +95,14 @@ export default async function ClientRecordPage({ params }: Props) {
       <h1 className="mb-6 text-2xl font-bold text-blue md:text-3xl">
         {typedClient.name}
       </h1>
+
+      <PendingProfileUpdates
+        updates={(pendingUpdates ?? []).map((u) => ({
+          ...u,
+          proposed_changes: u.proposed_changes as Record<string, string>,
+          reviewed_fields: (u.reviewed_fields ?? {}) as Record<string, string>,
+        }))}
+      />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-2xl border border-text/10 bg-white p-5">
@@ -232,6 +255,53 @@ export default async function ClientRecordPage({ params }: Props) {
           View Chat →
         </Link>
       </div>
+
+      <section className="mt-8 rounded-2xl border border-text/10 bg-white p-5">
+        <h2 className="text-lg font-bold text-text">Activity History</h2>
+        <p className="mb-4 text-xs italic text-text/60">
+          All entries are permanent and cannot be modified.
+        </p>
+
+        {(activityLog ?? []).length === 0 ? (
+          <EmptyState text="No activity recorded yet." />
+        ) : (
+          <ul className="space-y-0">
+            {(activityLog ?? []).map((entry, index) => (
+              <li
+                key={entry.id}
+                className={`relative flex gap-4 pb-6 ${
+                  index < (activityLog ?? []).length - 1
+                    ? 'border-l border-text/15 pl-6 ml-2'
+                    : 'pl-6 ml-2'
+                }`}
+              >
+                <span
+                  className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full"
+                  style={{
+                    backgroundColor: getActivityBadgeColor(entry.action_type),
+                  }}
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex flex-wrap items-center gap-2">
+                    <time className="text-xs text-text/60">
+                      {formatPKTRegistrationDate(entry.created_at)}
+                    </time>
+                    <span
+                      className="inline-flex rounded-full px-2 py-0.5 text-xs font-medium text-white"
+                      style={{
+                        backgroundColor: getActivityBadgeColor(entry.action_type),
+                      }}
+                    >
+                      {entry.action_type.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+                  <p className="text-sm text-text">{entry.description}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </main>
   )
 }
@@ -272,4 +342,23 @@ function ActivityBlock({
 
 function EmptyState({ text }: { text: string }) {
   return <p className="text-sm text-text/60">{text}</p>
+}
+
+function getActivityBadgeColor(actionType: string): string {
+  if (actionType === 'panic_detected' || actionType === 'complaint_received') {
+    return '#DC2626'
+  }
+  if (actionType.startsWith('meeting_')) {
+    return '#2563EB'
+  }
+  if (actionType === 'brief_viewed') {
+    return '#16A34A'
+  }
+  if (actionType.startsWith('task_')) {
+    return '#EA580C'
+  }
+  if (actionType.startsWith('profile_update_')) {
+    return '#E48328'
+  }
+  return '#0A3F3A'
 }

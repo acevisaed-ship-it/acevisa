@@ -3,11 +3,13 @@
 import { useState } from 'react'
 import { Menu } from 'lucide-react'
 import { DashboardSidebar } from './DashboardSidebar'
+import { ProfilePicture } from './ProfilePicture'
 
 type Props = {
   counselorId: string
   counselorName: string
   avatarUrl?: string | null
+  headerActions?: React.ReactNode
   children: React.ReactNode
 }
 
@@ -15,6 +17,7 @@ export function DashboardShell({
   counselorId,
   counselorName,
   avatarUrl,
+  headerActions,
   children,
 }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -32,7 +35,7 @@ export function DashboardShell({
           <Menu className="h-6 w-6" />
         </button>
         <img src="/logo.png" alt="ACE Altius Consulting" className="h-8 w-auto" />
-        <div className="w-11" aria-hidden="true" />
+        <div className="flex items-center gap-2">{headerActions}</div>
       </header>
 
       <DashboardSidebar
@@ -43,7 +46,20 @@ export function DashboardShell({
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="flex min-h-screen flex-1 flex-col pt-14 lg:pt-0">{children}</div>
+      <div className="flex min-h-screen flex-1 flex-col pt-14 lg:pt-0">
+        {/* Desktop top bar */}
+        <header className="hidden shrink-0 items-center justify-end gap-3 border-b border-text/10 bg-bg px-6 py-3 lg:flex">
+          {headerActions}
+          <ProfilePicture
+            counselorId={counselorId}
+            counselorName={counselorName}
+            avatarUrl={avatarUrl}
+            size={36}
+          />
+          <span className="text-sm font-semibold text-text">{counselorName}</span>
+        </header>
+        {children}
+      </div>
     </div>
   )
 }

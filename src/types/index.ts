@@ -190,3 +190,17 @@ export type CounselorStatus = {
   auto_reply_message: string
   updated_at: string
 }
+
+export type ProfileUpdateRequestStatus = 'pending' | 'approved' | 'rejected'
+
+export type ProfileUpdateRequest = {
+  id: string
+  client_id: string
+  triggered_by_message: string
+  proposed_changes: Record<string, string>
+  reviewed_fields: Record<string, string>
+  status: ProfileUpdateRequestStatus
+  reviewed_by: string | null
+  reviewed_at: string | null
+  created_at: string
+}

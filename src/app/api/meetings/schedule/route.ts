@@ -1,3 +1,4 @@
+import { logActivity } from '@/lib/activityLog'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getBaseUrl } from '@/lib/utils'
 import { NextResponse } from 'next/server'
@@ -56,6 +57,14 @@ export async function POST(request: Request) {
     console.error('Meeting insert error:', error)
     return NextResponse.json({ error: 'Failed to schedule meeting' }, { status: 500 })
   }
+
+  await logActivity({
+    clientId,
+    counselorId: finalCounselorId ?? undefined,
+    actionType: 'meeting_scheduled',
+    description: `Meeting scheduled for ${scheduledTimeUTC}`,
+    metadata: { meetingId: meeting.id, scheduledTime: scheduledTimeUTC },
+  })
 
   await supabase
     .from('clients')

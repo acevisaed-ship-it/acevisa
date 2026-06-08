@@ -1,3 +1,4 @@
+import { logActivity } from '@/lib/activityLog'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getBaseUrl } from '@/lib/utils'
 import { NextResponse } from 'next/server'
@@ -60,6 +61,13 @@ export async function POST(request: Request) {
     console.error('Meeting request error:', error)
     return NextResponse.json({ error: 'Failed to submit request' }, { status: 500 })
   }
+
+  await logActivity({
+    clientId,
+    actionType: 'meeting_requested',
+    description: `Student requested a meeting on ${preferredDate} (${preferredTimeOfDay})`,
+    metadata: { preferredDate, preferredTimeOfDay, note },
+  })
 
   if (note) {
     await supabase.from('conversations').insert({

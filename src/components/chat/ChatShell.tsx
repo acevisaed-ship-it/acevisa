@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Calendar } from 'lucide-react'
+import { Calendar, Clock } from 'lucide-react'
 import type { ChatMessage } from '@/types'
 import { ChatBubble } from './ChatBubble'
 import { ChatHeader } from './ChatHeader'
@@ -144,14 +144,23 @@ export function ChatShell({ clientId, clientName }: Props) {
         {isLoading && <TypingIndicator />}
       </div>
 
-      <div className="border-t border-text/10 px-4 pt-3 pb-[env(safe-area-inset-bottom,0px)]">
+      {/* Meeting options row — above input bar */}
+      <div className="flex gap-2 px-3 pb-2">
+        <a
+          href={`/schedule/${clientId}`}
+          className="flex flex-1 items-center justify-center gap-2 rounded-full border border-[#B7C733] bg-[#B7C733]/10 px-3 py-2 text-sm font-semibold text-[#0A3F3A] transition-colors hover:bg-[#B7C733]/20"
+        >
+          <Calendar size={15} />
+          Book a slot →
+        </a>
+
         <button
           type="button"
           onClick={() => setShowMeetingModal(true)}
-          className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full border border-blue py-2.5 text-sm text-blue transition-opacity hover:opacity-80"
+          className="flex flex-1 items-center justify-center gap-2 rounded-full border border-[#2083B9] bg-[#2083B9]/10 px-3 py-2 text-sm font-semibold text-[#2083B9] transition-colors hover:bg-[#2083B9]/20"
         >
-          <Calendar className="h-4 w-4" aria-hidden="true" />
-          Request a meeting with a counselor
+          <Clock size={15} />
+          Request time
         </button>
       </div>
 

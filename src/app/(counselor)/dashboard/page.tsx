@@ -10,6 +10,7 @@ import {
 import { MeetingCard } from '@/components/dashboard/MeetingCard'
 import { StatCard } from '@/components/dashboard/StatCard'
 import { TaskRow } from '@/components/dashboard/TaskRow'
+import { ComplaintRow } from '@/components/dashboard/ComplaintRow'
 
 type MeetingRow = {
   id: string
@@ -21,6 +22,13 @@ type TaskRowData = {
   id: string
   task_text: string
   due_date: string | null
+}
+
+type ComplaintRowData = {
+  id: string
+  client_name: string | null
+  subject: string
+  created_at: string
 }
 
 function getClientName(clients: MeetingRow['clients']): string {
@@ -41,6 +49,15 @@ export default async function CounselorDashboardPage() {
   const { startUTC: upcomingStart } = getPKTDayBounds(tomorrowPKT)
   const { endUTC: upcomingEnd } = getPKTDayBounds(weekEndPKT)
 
+  const { data: counselorClients } = await supabase
+    .from('clients')
+    .select('id')
+    .eq('counselor_id', counselor.id)
+
+  const clientIds = (counselorClients ?? []).map((c) => c.id)
+
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+
   const [
     { data: todayMeetings },
     { data: upcomingMeetings },
@@ -48,6 +65,8 @@ export default async function CounselorDashboardPage() {
     { count: meetingsTodayCount },
     { count: qualifiedLeadsCount },
     { count: openTasksCount },
+    { data: responseStats },
+    { data: complaints },
   ] = await Promise.all([
     supabase
       .from('meetings')
@@ -89,11 +108,46 @@ export default async function CounselorDashboardPage() {
       .select('*', { count: 'exact', head: true })
       .eq('counselor_id', counselor.id)
       .eq('status', 'pending'),
+    clientIds.length > 0
+      ? supabase
+          .from('response_tracking')
+          .select('response_time_seconds')
+          .not('response_time_seconds', 'is', null)
+          .eq('response_by', 'ai')
+          .gte('created_at', sevenDaysAgo)
+          .in('client_id', clientIds)
+      : Promise.resolve({ data: [] as { response_time_seconds: number | null }[] }),
+    clientIds.length > 0
+      ? supabase
+          .from('complaints')
+          .select('*')
+          .eq('status', 'open')
+          .in('client_id', clientIds)
+          .order('created_at', { ascending: false })
+          .limit(5)
+      : Promise.resolve({ data: [] as ComplaintRowData[] }),
   ])
+
+  const avgResponse = responseStats?.length
+    ? Math.round(
+        responseStats.reduce((s, r) => s + (r.response_time_seconds || 0), 0) /
+          responseStats.length
+      )
+    : null
+
+  const avgResponseColor: 'green' | 'orange' | 'red' | 'default' =
+    avgResponse === null
+      ? 'default'
+      : avgResponse < 10
+        ? 'green'
+        : avgResponse <= 30
+          ? 'orange'
+          : 'red'
 
   const todayRows = (todayMeetings ?? []) as MeetingRow[]
   const upcomingRows = (upcomingMeetings ?? []) as MeetingRow[]
   const taskRows = (tasks ?? []) as TaskRowData[]
+  const complaintRows = (complaints ?? []) as ComplaintRowData[]
 
   return (
     <main className="flex-1 p-4 md:p-8">
@@ -104,10 +158,15 @@ export default async function CounselorDashboardPage() {
         <p className="mt-1 text-sm text-text">{formatPKTDateLong()}</p>
       </header>
 
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Meetings today" value={meetingsTodayCount ?? 0} />
         <StatCard label="Qualified leads" value={qualifiedLeadsCount ?? 0} />
         <StatCard label="Open tasks" value={openTasksCount ?? 0} />
+        <StatCard
+          label="Avg AI Response"
+          value={avgResponse !== null ? `${avgResponse} sec` : '—'}
+          valueColor={avgResponseColor}
+        />
       </div>
 
       <section className="mb-10">
@@ -147,7 +206,7 @@ export default async function CounselorDashboardPage() {
         )}
       </section>
 
-      <section>
+      <section className="mb-10">
         <div className="mb-4 flex items-center justify-between gap-4">
           <h2 className="text-lg font-bold text-text">Open tasks</h2>
           <Link href="/dashboard/tasks" className="text-sm text-blue hover:underline">
@@ -160,6 +219,25 @@ export default async function CounselorDashboardPage() {
           <div className="space-y-3">
             {taskRows.slice(0, 5).map((task) => (
               <TaskRow key={task.id} taskText={task.task_text} dueDate={task.due_date} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section>
+        <h2 className="mb-4 text-lg font-bold text-text">Complaints</h2>
+        {complaintRows.length === 0 ? (
+          <p className="text-text/60">No open complaints.</p>
+        ) : (
+          <div className="space-y-3">
+            {complaintRows.map((complaint) => (
+              <ComplaintRow
+                key={complaint.id}
+                id={complaint.id}
+                clientName={complaint.client_name || 'Unknown'}
+                subject={complaint.subject}
+                createdAt={complaint.created_at}
+              />
             ))}
           </div>
         )}

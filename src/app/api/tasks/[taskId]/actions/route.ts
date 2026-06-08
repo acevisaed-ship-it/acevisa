@@ -1,0 +1,81 @@
+import { createAdminClient, getAuthenticatedCounselor } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ taskId: string }> }
+) {
+  const counselor = await getAuthenticatedCounselor()
+  if (!counselor) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { taskId } = await params
+  const supabase = createAdminClient()
+  const { data } = await supabase
+    .from('task_actions')
+    .select('*, counselors(name)')
+    .eq('task_id', taskId)
+    .order('created_at', { ascending: true })
+
+  return NextResponse.json({ actions: data || [] })
+}
+
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ taskId: string }> }
+) {
+  const counselor = await getAuthenticatedCounselor()
+  if (!counselor) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { counselorId, actionType, noteText, newStatus, reminderAt } = await request.json()
+  const { taskId } = await params
+  const supabase = createAdminClient()
+
+  const { data: task } = await supabase
+    .from('tasks')
+    .select('*, clients(name, counselor_id)')
+    .eq('id', taskId)
+    .eq('counselor_id', counselor.id)
+    .single()
+
+  if (!task) return NextResponse.json({ error: 'Task not found' }, { status: 404 })
+
+  await supabase.from('task_actions').insert({
+    task_id: taskId,
+    counselor_id: counselorId || counselor.id,
+    action_type: actionType,
+    note_text: noteText || null,
+    old_status: task.status,
+    new_status: newStatus || null,
+    reminder_at: reminderAt || null,
+  })
+
+  const taskUpdate: Record<string, unknown> = {
+    last_action_at: new Date().toISOString(),
+    notes_count: (task.notes_count || 0) + (actionType === 'note' ? 1 : 0),
+  }
+  if (newStatus) taskUpdate.status = newStatus
+  if (reminderAt) taskUpdate.reminder_at = reminderAt
+
+  await supabase.from('tasks').update(taskUpdate).eq('id', taskId)
+
+  const clientId = task.client_id
+  const actionDescriptions: Record<string, string> = {
+    note: `Counselor added note to task: "${task.task_text?.substring(0, 60)}${task.task_text?.length > 60 ? '…' : ''}"`,
+    status_update: `Task status changed from ${task.status} to ${newStatus}: "${task.task_text?.substring(0, 40)}…"`,
+    reminder_set: `Reminder set for task: "${task.task_text?.substring(0, 60)}…"`,
+  }
+
+  await supabase.from('student_activity_log').insert({
+    client_id: clientId,
+    counselor_id: counselorId || counselor.id,
+    action_type: `task_${actionType}`,
+    description: actionDescriptions[actionType] || `Task action: ${actionType}`,
+    metadata: { task_id: taskId, note: noteText, new_status: newStatus },
+  })
+
+  return NextResponse.json({ success: true })
+}

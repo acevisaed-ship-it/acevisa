@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation'
 import { BriefShell } from '@/components/brief/BriefShell'
+import { logActivity } from '@/lib/activityLog'
+import { formatPKTRegistrationDate } from '@/lib/pkt'
 import { createAdminClient, getAuthenticatedCounselor } from '@/lib/supabase/server'
 import type { AIProfileData, Client, Conversation, Document } from '@/types'
 
@@ -50,6 +52,14 @@ export default async function BriefPage({ params }: Props) {
   ])
 
   if (!client) notFound()
+
+  logActivity({
+    clientId: client.id,
+    counselorId: counselor.id,
+    actionType: 'brief_viewed',
+    description: `Counselor viewed client brief before meeting on ${formatPKTRegistrationDate(meeting.scheduled_time)}`,
+    metadata: { meetingId },
+  }).catch(() => {})
 
   const profile = (aiProfile?.profile_json as AIProfileData | null) ?? null
 

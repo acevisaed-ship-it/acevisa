@@ -1,8 +1,28 @@
+import { logActivity } from '@/lib/activityLog'
+import { createNotification } from '@/lib/notifications'
+import { detectProfileUpdates } from '@/lib/profileUpdates'
 import { createAdminClient } from '@/lib/supabase/server'
 import { anthropic } from '@/lib/anthropic'
 import { getBaseUrl } from '@/lib/utils'
 import { NextResponse } from 'next/server'
 import type { AIProfileData } from '@/types'
+
+const PANIC_KEYWORDS = [
+  // Distress
+  'kill myself', 'want to die', 'end my life', 'suicide', 'give up on life',
+  // Threats
+  'threatening me', 'being forced', 'blackmail', 'extortion',
+  // Scam signals
+  'already paid someone', 'they took my money', 'fake agent', 'cheated me',
+  'lost all my money', 'paid and disappeared',
+  // Extreme urgency
+  'emergency visa', 'deportation', 'detained', 'arrested',
+]
+
+function detectPanic(message: string): string[] {
+  const lower = message.toLowerCase()
+  return PANIC_KEYWORDS.filter((kw) => lower.includes(kw))
+}
 
 type ChatResponse = {
   type: string
@@ -69,7 +89,32 @@ function parseClaudeResponse(rawContent: string): ChatResponse {
   }
 }
 
+async function completeResponseTracking(
+  supabase: ReturnType<typeof createAdminClient>,
+  trackingId: string | undefined,
+  studentMsgTime: Date
+) {
+  if (!trackingId) return
+
+  const responseAt = new Date()
+  const secondsDiff = Math.floor(
+    (responseAt.getTime() - studentMsgTime.getTime()) / 1000
+  )
+
+  await supabase
+    .from('response_tracking')
+    .update({
+      response_at: responseAt.toISOString(),
+      response_by: 'ai',
+      response_time_seconds: secondsDiff,
+    })
+    .eq('id', trackingId)
+}
+
 export async function POST(request: Request) {
+  const studentMsgTime = new Date()
+  let trackingId: string | undefined
+
   const { clientId, message } = await request.json()
 
   if (!clientId || !message) {
@@ -116,13 +161,113 @@ Use this context to make your opening message highly relevant to their specific 
   }
 
   if (isInit && campaignOpeningLine) {
+    const stageTag = 'stage_1'
     await supabase.from('conversations').insert({
       client_id: clientId,
       message_text: campaignOpeningLine,
       sender: 'ai',
-      stage_tag: 'stage_1',
+      stage_tag: stageTag,
+    })
+    await logActivity({
+      clientId,
+      actionType: 'ai_message_sent',
+      description: `AI sent message at stage ${stageTag}`,
+      metadata: { stage: stageTag },
     })
     return NextResponse.json({ type: 'message', content: campaignOpeningLine })
+  }
+
+  if (!isInit) {
+    await supabase.from('conversations').insert({
+      client_id: clientId,
+      message_text: message,
+      sender: 'student',
+      stage_tag: 'active',
+    })
+
+    const { data: trackingRow } = await supabase
+      .from('response_tracking')
+      .insert({
+        client_id: clientId,
+        counselor_id: client.counselor_id || null,
+        student_message_at: studentMsgTime.toISOString(),
+      })
+      .select('id')
+      .single()
+
+    trackingId = trackingRow?.id
+
+    const triggeredKeywords = detectPanic(message)
+    if (triggeredKeywords.length > 0) {
+      const { data: panicEvent } = await supabase
+        .from('panic_events')
+        .insert({
+          client_id: clientId,
+          trigger_message: message,
+          trigger_keywords: triggeredKeywords,
+          status: 'open',
+        })
+        .select('id')
+        .single()
+
+      await logActivity({
+        clientId,
+        actionType: 'panic_detected',
+        description: `Panic keywords detected in student message: ${triggeredKeywords.join(', ')}`,
+        metadata: { keywords: triggeredKeywords, panicEventId: panicEvent?.id },
+      })
+
+      if (client.counselor_id) {
+        await createNotification({
+          counselorId: client.counselor_id,
+          type: 'panic',
+          title: `🚨 ${client.name} — urgent message detected`,
+          body: `"${message.substring(0, 100)}${message.length > 100 ? '…' : ''}"`,
+          clientId,
+        })
+      }
+
+      const panicResponse =
+        'I can see this is a very difficult situation. Please know that a real counselor from our team will reach out to you very shortly — we\'re treating this as a priority. If you are in immediate danger, please contact emergency services (15 in Pakistan). We are here for you.'
+
+      await supabase.from('conversations').insert({
+        client_id: clientId,
+        message_text: panicResponse,
+        sender: 'ai',
+        stage_tag: 'panic_escalation',
+      })
+
+      await completeResponseTracking(supabase, trackingId, studentMsgTime)
+
+      return NextResponse.json({ type: 'message', content: panicResponse })
+    }
+
+    const proposedChanges = detectProfileUpdates(message)
+    if (Object.keys(proposedChanges).length > 0) {
+      await supabase.from('profile_update_requests').insert({
+        client_id: clientId,
+        triggered_by_message: message,
+        proposed_changes: proposedChanges,
+        status: 'pending',
+      })
+
+      await logActivity({
+        clientId,
+        actionType: 'profile_update_detected',
+        description: `Profile update detected in chat: ${Object.keys(proposedChanges).join(', ')}`,
+        metadata: { proposedChanges },
+      })
+
+      if (client.counselor_id) {
+        await createNotification({
+          counselorId: client.counselor_id,
+          type: 'profile_update',
+          title: `Profile update detected — ${client.name}`,
+          body: `Student shared new info: ${Object.keys(proposedChanges).join(', ')}`,
+          clientId,
+        })
+      }
+    }
   }
 
   if (!isInit && client.counselor_id) {
@@ -133,34 +278,28 @@ Use this context to make your opening message highly relevant to their specific 
       .single()
 
     if (status?.is_online && status?.auto_reply_enabled) {
-      await supabase.from('conversations').insert({
-        client_id: clientId,
-        message_text: message,
-        sender: 'student',
-        stage_tag: 'active',
-      })
-
       const autoMsg =
         status.auto_reply_message || "I'll get back to you in a moment!"
 
+      const stageTag = 'auto_reply'
       await supabase.from('conversations').insert({
         client_id: clientId,
         message_text: autoMsg,
         sender: 'ai',
-        stage_tag: 'auto_reply',
+        stage_tag: stageTag,
       })
+
+      await logActivity({
+        clientId,
+        actionType: 'ai_message_sent',
+        description: `AI sent message at stage ${stageTag}`,
+        metadata: { stage: stageTag },
+      })
+
+      await completeResponseTracking(supabase, trackingId, studentMsgTime)
 
       return NextResponse.json({ type: 'message', content: autoMsg })
     }
-  }
-
-  if (!isInit) {
-    await supabase.from('conversations').insert({
-      client_id: clientId,
-      message_text: message,
-      sender: 'student',
-      stage_tag: 'active',
-    })
   }
 
   const { data: history } = await supabase
@@ -202,11 +341,19 @@ Use this context to make your opening message highly relevant to their specific 
 
   const parsed = parseClaudeResponse(rawContent)
 
+  const stageTag = 'active'
   await supabase.from('conversations').insert({
     client_id: clientId,
     message_text: parsed.content,
     sender: 'ai',
-    stage_tag: 'active',
+    stage_tag: stageTag,
+  })
+
+  await logActivity({
+    clientId,
+    actionType: 'ai_message_sent',
+    description: `AI sent message at stage ${stageTag}`,
+    metadata: { stage: stageTag },
   })
 
   if (parsed.type === 'flag_escalation' && parsed.question) {
@@ -247,6 +394,10 @@ Use this context to make your opening message highly relevant to their specific 
         pipeline_stage: newStage,
       })
       .eq('id', clientId)
+  }
+
+  if (!isInit) {
+    await completeResponseTracking(supabase, trackingId, studentMsgTime)
   }
 
   return NextResponse.json({
