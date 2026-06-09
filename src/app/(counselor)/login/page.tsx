@@ -37,7 +37,7 @@ export default function CounselorLoginPage() {
 
     const { data: counselor } = await supabase
       .from('counselors')
-      .select('id, name, status')
+      .select('id, name, status, role')
       .eq('email', email)
       .single()
 
@@ -55,7 +55,7 @@ export default function CounselorLoginPage() {
       return
     }
 
-    router.push('/dashboard')
+    router.push(counselor.role === 'admin' ? '/admin' : '/dashboard')
     router.refresh()
   }
 
