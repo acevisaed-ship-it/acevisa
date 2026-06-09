@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { getScoreBadgeColor } from '@/lib/brief'
 import { formatPKTRegistrationDate } from '@/lib/pkt'
+import { TransferModal } from '@/components/admin/TransferModal'
 import type { Client } from '@/types'
 
 type Stage = {
@@ -11,13 +12,27 @@ type Stage = {
   label: string
 }
 
+type CounselorOption = { id: string; name: string }
+
 type Props = {
   stages: Stage[]
   clientsByStage: Record<number, Client[]>
   meetingByClient: Record<string, string>
+  basePath?: string
+  allowTransfer?: boolean
+  viewingCounselorId?: string
+  counselors?: CounselorOption[]
 }
 
-export function PipelineView({ stages, clientsByStage, meetingByClient }: Props) {
+export function PipelineView({
+  stages,
+  clientsByStage,
+  meetingByClient,
+  basePath = '/dashboard',
+  allowTransfer = false,
+  viewingCounselorId,
+  counselors = [],
+}: Props) {
   const defaultStage = useMemo(() => {
     let maxStage = stages[0]?.stage ?? 1
     let maxCount = 0
@@ -32,8 +47,11 @@ export function PipelineView({ stages, clientsByStage, meetingByClient }: Props)
   }, [stages, clientsByStage])
 
   const [activeStage, setActiveStage] = useState(defaultStage)
+  const [transferClient, setTransferClient] = useState<Client | null>(null)
 
   const stageClients = clientsByStage[activeStage] ?? []
+  const briefBasePath = `${basePath}/brief`
+  const clientBasePath = allowTransfer ? '/admin/clients' : `${basePath}/clients`
 
   function renderClientCard(client: Client) {
     const meetingId = meetingByClient[client.id]
@@ -72,18 +90,27 @@ export function PipelineView({ stages, clientsByStage, meetingByClient }: Props)
         <div className="mt-2 flex flex-wrap gap-2">
           {showBrief && (
             <Link
-              href={`/dashboard/brief/${meetingId}`}
+              href={`${briefBasePath}/${meetingId}`}
               className="inline-flex min-h-[44px] items-center rounded-full border border-text/20 px-3 py-1.5 text-xs font-medium text-text transition-colors hover:border-text/40"
             >
               View Brief →
             </Link>
           )}
           <Link
-            href={`/dashboard/clients/${client.id}`}
+            href={`${clientBasePath}/${client.id}`}
             className="inline-flex min-h-[44px] items-center rounded-full border border-blue/30 px-3 py-1.5 text-xs font-medium text-blue transition-colors hover:border-blue/50"
           >
             View Client →
           </Link>
+          {allowTransfer && (
+            <button
+              type="button"
+              onClick={() => setTransferClient(client)}
+              className="inline-flex min-h-[44px] items-center rounded-full border border-orange/40 px-3 py-1.5 text-xs font-medium text-orange transition-colors hover:border-orange/60"
+            >
+              Transfer →
+            </button>
+          )}
         </div>
 
         {client.registration_date && (
@@ -108,9 +135,7 @@ export function PipelineView({ stages, clientsByStage, meetingByClient }: Props)
               type="button"
               onClick={() => setActiveStage(stage)}
               className={`shrink-0 rounded-full px-3 py-2 text-sm font-bold transition-colors ${
-                isActive
-                  ? 'bg-green text-text'
-                  : 'bg-bg text-text'
+                isActive ? 'bg-green text-text' : 'bg-bg text-text'
               }`}
             >
               {label} ({count})
@@ -161,6 +186,21 @@ export function PipelineView({ stages, clientsByStage, meetingByClient }: Props)
           })}
         </div>
       </div>
+
+      {transferClient && (
+        <TransferModal
+          clientId={transferClient.id}
+          clientName={transferClient.name}
+          currentCounselorId={viewingCounselorId ?? null}
+          currentCounselorName={null}
+          counselors={counselors}
+          onClose={() => setTransferClient(null)}
+          onSuccess={() => {
+            setTransferClient(null)
+            window.location.reload()
+          }}
+        />
+      )}
     </>
   )
 }

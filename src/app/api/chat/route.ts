@@ -1,4 +1,5 @@
 import { logActivity } from '@/lib/activityLog'
+import { hasMeetingIntent } from '@/lib/meetingIntent'
 import { createNotification } from '@/lib/notifications'
 import { detectProfileUpdates } from '@/lib/profileUpdates'
 import { createAdminClient } from '@/lib/supabase/server'
@@ -266,6 +267,43 @@ Use this context to make your opening message highly relevant to their specific 
           body: `Student shared new info: ${Object.keys(proposedChanges).join(', ')}`,
           clientId,
         })
+      }
+    }
+
+    if (hasMeetingIntent(message)) {
+      try {
+        const bookingResult = await fetch(`${getBaseUrl()}/api/meetings/auto-book`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ clientId, message, client }),
+        })
+        const booking = await bookingResult.json()
+
+        if (booking.handled) {
+          const stageTag = 'auto_booking'
+          await supabase.from('conversations').insert({
+            client_id: clientId,
+            message_text: booking.responseMessage,
+            sender: 'ai',
+            stage_tag: stageTag,
+          })
+
+          await logActivity({
+            clientId,
+            actionType: 'ai_message_sent',
+            description: `AI sent message at stage ${stageTag}`,
+            metadata: { stage: stageTag },
+          })
+
+          await completeResponseTracking(supabase, trackingId, studentMsgTime)
+
+          return NextResponse.json({
+            type: 'message',
+            content: booking.responseMessage,
+          })
+        }
+      } catch (err) {
+        console.error('Auto-booking failed (falling through to Claude):', err)
       }
     }
   }

@@ -14,17 +14,21 @@ type NavItem = {
   exact?: boolean
 }
 
-const navItems: NavItem[] = [
-  { href: '/dashboard', label: "Today's Briefing", icon: Home, exact: true },
-  { href: '/dashboard/pipeline', label: 'Pipeline', icon: Kanban },
-  { href: '/dashboard/tasks', label: 'Tasks', icon: CheckSquare },
-  { href: '/dashboard/clients', label: 'Clients', icon: Users },
-]
+function buildNavItems(basePath: string): NavItem[] {
+  return [
+    { href: basePath, label: "Today's Briefing", icon: Home, exact: true },
+    { href: `${basePath}/pipeline`, label: 'Pipeline', icon: Kanban },
+    { href: `${basePath}/tasks`, label: 'Tasks', icon: CheckSquare },
+    { href: `${basePath}/clients`, label: 'Clients', icon: Users },
+  ]
+}
 
 type Props = {
   counselorId: string
   counselorName: string
   avatarUrl?: string | null
+  basePath?: string
+  adminView?: boolean
   isOpen: boolean
   onClose: () => void
 }
@@ -33,14 +37,19 @@ function SidebarContent({
   counselorId,
   counselorName,
   avatarUrl,
+  basePath = '/dashboard',
+  adminView = false,
   onNavigate,
 }: {
   counselorId: string
   counselorName: string
   avatarUrl?: string | null
+  basePath?: string
+  adminView?: boolean
   onNavigate?: () => void
 }) {
   const pathname = usePathname()
+  const navItems = buildNavItems(basePath)
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -90,13 +99,23 @@ function SidebarContent({
           className="mb-3 items-start"
         />
         <p className="font-bold text-bg">{counselorName}</p>
-        <button
-          type="button"
-          onClick={handleSignOut}
-          className="mt-2 min-h-[44px] text-sm text-orange hover:underline"
-        >
-          Sign out
-        </button>
+        {adminView ? (
+          <Link
+            href="/admin/counselors"
+            onClick={onNavigate}
+            className="mt-2 inline-flex min-h-[44px] items-center text-sm text-orange hover:underline"
+          >
+            ← Back to admin
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="mt-2 min-h-[44px] text-sm text-orange hover:underline"
+          >
+            Sign out
+          </button>
+        )}
       </div>
     </>
   )
@@ -106,6 +125,8 @@ export function DashboardSidebar({
   counselorId,
   counselorName,
   avatarUrl,
+  basePath = '/dashboard',
+  adminView = false,
   isOpen,
   onClose,
 }: Props) {
@@ -117,6 +138,8 @@ export function DashboardSidebar({
           counselorId={counselorId}
           counselorName={counselorName}
           avatarUrl={avatarUrl}
+          basePath={basePath}
+          adminView={adminView}
         />
       </aside>
 
@@ -148,6 +171,8 @@ export function DashboardSidebar({
           counselorId={counselorId}
           counselorName={counselorName}
           avatarUrl={avatarUrl}
+          basePath={basePath}
+          adminView={adminView}
           onNavigate={onClose}
         />
       </aside>

@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS campaigns (
   target_service text,
   opening_line text NOT NULL,
   context_hint text,
+  default_counselor_id uuid REFERENCES counselors(id),
   is_active boolean DEFAULT true,
   created_at timestamptz DEFAULT now()
 );

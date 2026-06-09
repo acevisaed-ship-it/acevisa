@@ -27,6 +27,7 @@ interface Task {
 interface Props {
   task: Task
   counselorId: string
+  readOnly?: boolean
   onClose: () => void
   onUpdated: () => void
 }
@@ -37,12 +38,18 @@ const STATUS_COLORS: Record<string, string> = {
   done: 'bg-[#B7C733]/30 text-[#0A3F3A]',
 }
 
-export function TaskDetailPanel({ task, counselorId, onClose, onUpdated }: Props) {
+export function TaskDetailPanel({
+  task,
+  counselorId,
+  readOnly = false,
+  onClose,
+  onUpdated,
+}: Props) {
   const [actions, setActions] = useState<TaskAction[]>([])
   const [note, setNote] = useState('')
   const [reminderInput, setReminderInput] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [tab, setTab] = useState<'update' | 'history'>('update')
+  const [tab, setTab] = useState<'update' | 'history'>(readOnly ? 'history' : 'update')
 
   useEffect(() => {
     fetch(`/api/tasks/${task.id}/actions`)
@@ -118,7 +125,7 @@ export function TaskDetailPanel({ task, counselorId, onClose, onUpdated }: Props
         </div>
 
         <div className="flex border-b border-[#0A3F3A]/10">
-          {(['update', 'history'] as const).map((t) => (
+          {(readOnly ? (['history'] as const) : (['update', 'history'] as const)).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -134,7 +141,12 @@ export function TaskDetailPanel({ task, counselorId, onClose, onUpdated }: Props
         </div>
 
         <div className="flex-1 space-y-4 overflow-y-auto p-5">
-          {tab === 'update' && (
+          {readOnly && (
+            <p className="rounded-xl bg-[#E48328]/10 px-3 py-2 text-sm text-[#0A3F3A]/70">
+              Admin view — task updates are read-only.
+            </p>
+          )}
+          {tab === 'update' && !readOnly && (
             <>
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-[#0A3F3A]/70">

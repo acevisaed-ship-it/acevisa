@@ -10,6 +10,9 @@ type Props = {
   counselorName: string
   avatarUrl?: string | null
   headerActions?: React.ReactNode
+  basePath?: string
+  adminView?: boolean
+  banner?: React.ReactNode
   children: React.ReactNode
 }
 
@@ -18,6 +21,9 @@ export function DashboardShell({
   counselorName,
   avatarUrl,
   headerActions,
+  basePath = '/dashboard',
+  adminView = false,
+  banner,
   children,
 }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -42,6 +48,8 @@ export function DashboardShell({
         counselorId={counselorId}
         counselorName={counselorName}
         avatarUrl={avatarUrl}
+        basePath={basePath}
+        adminView={adminView}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
@@ -58,6 +66,7 @@ export function DashboardShell({
           />
           <span className="text-sm font-semibold text-text">{counselorName}</span>
         </header>
+        {banner}
         {children}
       </div>
     </div>

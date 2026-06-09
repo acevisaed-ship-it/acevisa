@@ -1,6 +1,7 @@
 import { createServerClient as createSupabaseServerClient } from '@supabase/ssr'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 
 export function createAdminClient() {
   return createSupabaseClient(
@@ -45,11 +46,45 @@ export async function getAuthenticatedCounselor() {
   const admin = createAdminClient()
   const { data: counselor } = await admin
     .from('counselors')
-    .select('id, name, email, status, avatar_url')
+    .select('id, name, email, status, avatar_url, role')
     .eq('email', user.email)
     .single()
 
   if (!counselor || counselor.status !== 'active') return null
+
+  return counselor
+}
+
+export async function getAuthenticatedAdmin() {
+  const supabase = await createServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user?.email) return null
+
+  const admin = createAdminClient()
+  const { data: account } = await admin
+    .from('counselors')
+    .select('id, name, email, status, avatar_url, role')
+    .eq('email', user.email)
+    .single()
+
+  if (!account || account.status !== 'active' || account.role !== 'admin') return null
+
+  return account
+}
+
+export async function requireAdmin() {
+  const counselor = await getAuthenticatedCounselor()
+
+  if (!counselor) {
+    redirect('/login')
+  }
+
+  if (counselor.role !== 'admin') {
+    redirect('/dashboard')
+  }
 
   return counselor
 }

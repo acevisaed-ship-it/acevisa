@@ -56,6 +56,9 @@ export type Client = {
   language: ClientLanguage
   city: string | null
   counselor_id: string | null
+  previous_counselor_id?: string | null
+  assigned_by?: string | null
+  assigned_at?: string | null
   ad_source: string | null
   registration_date: string
   qualification_score: number | null

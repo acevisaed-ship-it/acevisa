@@ -10,6 +10,7 @@ CREATE TABLE counselors (
   email text UNIQUE NOT NULL,
   phone text,
   ad_ref_code text UNIQUE,
+  role text DEFAULT 'counselor',
   status text DEFAULT 'active',
   base_salary numeric,
   commission_rate numeric,
@@ -173,6 +174,7 @@ CREATE TABLE campaigns (
   target_service text,
   opening_line text NOT NULL,
   context_hint text,
+  default_counselor_id uuid REFERENCES counselors(id),
   is_active boolean DEFAULT true,
   created_at timestamptz DEFAULT now()
 );
