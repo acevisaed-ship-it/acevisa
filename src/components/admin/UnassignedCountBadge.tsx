@@ -36,7 +36,7 @@ export function UnassignedCountBadge({ initialCount, className }: Props) {
   return (
     <span
       className={cn(
-        'ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-orange px-1.5 text-[10px] font-bold text-white',
+        'ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-600 px-1.5 text-[10px] font-bold text-white',
         className
       )}
     >

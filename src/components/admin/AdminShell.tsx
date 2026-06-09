@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Menu } from 'lucide-react'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
+import { NotificationBell } from '@/components/dashboard/NotificationBell'
 import { ProfilePicture } from '@/components/dashboard/ProfilePicture'
 
 type Props = {
@@ -34,12 +35,15 @@ export function AdminShell({
           <Menu className="h-6 w-6" />
         </button>
         <img src="/logo.png" alt="ACE Altius Consulting" className="h-8 w-auto" />
-        <ProfilePicture
-          counselorId={adminId}
-          counselorName={adminName}
-          avatarUrl={avatarUrl}
-          size={32}
-        />
+        <div className="flex items-center gap-2">
+          <NotificationBell counselorId={adminId} context="admin" />
+          <ProfilePicture
+            counselorId={adminId}
+            counselorName={adminName}
+            avatarUrl={avatarUrl}
+            size={32}
+          />
+        </div>
       </header>
 
       <AdminSidebar
@@ -53,6 +57,7 @@ export function AdminShell({
 
       <div className="flex min-h-screen flex-1 flex-col pt-14 lg:pt-0">
         <header className="hidden shrink-0 items-center justify-end gap-3 border-b border-text/10 bg-bg px-6 py-3 lg:flex">
+          <NotificationBell counselorId={adminId} context="admin" />
           <ProfilePicture
             counselorId={adminId}
             counselorName={adminName}

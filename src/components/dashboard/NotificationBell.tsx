@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Bell,
   CheckCheck,
@@ -44,7 +45,49 @@ function timeAgo(date: string) {
   return `${Math.floor(hrs / 24)}d ago`
 }
 
-export function NotificationBell({ counselorId }: { counselorId: string }) {
+function getNotificationHref(
+  notification: Notification,
+  context: 'admin' | 'counselor'
+): string | null {
+  const { type, client_id, meeting_id } = notification
+
+  if (context === 'admin') {
+    switch (type) {
+      case 'chat_message':
+        return client_id ? '/admin/unassigned' : null
+      case 'panic':
+      case 'meeting_request':
+      case 'profile_update':
+        return client_id ? `/admin/clients/${client_id}` : null
+      case 'complaint':
+        return '/admin/complaints'
+      default:
+        return null
+    }
+  }
+
+  switch (type) {
+    case 'chat_message':
+    case 'panic':
+    case 'profile_update':
+      return client_id ? `/dashboard/clients/${client_id}` : null
+    case 'meeting_request':
+      if (meeting_id) return `/dashboard/brief/${meeting_id}`
+      return client_id ? `/dashboard/clients/${client_id}` : null
+    case 'complaint':
+      return client_id ? `/dashboard/clients/${client_id}` : null
+    default:
+      return null
+  }
+}
+
+type Props = {
+  counselorId: string
+  context?: 'admin' | 'counselor'
+}
+
+export function NotificationBell({ counselorId, context = 'counselor' }: Props) {
+  const router = useRouter()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -91,6 +134,15 @@ export function NotificationBell({ counselorId }: { counselorId: string }) {
     )
   }
 
+  const handleNotificationClick = async (notification: Notification) => {
+    await markRead(notification.id)
+    const href = getNotificationHref(notification, context)
+    if (href) {
+      setOpen(false)
+      router.push(href)
+    }
+  }
+
   return (
     <div className="relative" ref={ref}>
       <button
@@ -130,7 +182,7 @@ export function NotificationBell({ counselorId }: { counselorId: string }) {
               notifications.map((n) => (
                 <div
                   key={n.id}
-                  onClick={() => markRead(n.id)}
+                  onClick={() => handleNotificationClick(n)}
                   className={`flex gap-3 px-4 py-3 border-b border-[#0A3F3A]/6 cursor-pointer hover:bg-[#E6E8E7]/40 transition-colors ${
                     !n.is_read ? 'bg-[#E6E8E7]/60' : ''
                   }`}
