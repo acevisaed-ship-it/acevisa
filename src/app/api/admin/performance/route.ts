@@ -1,0 +1,95 @@
+import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { createAdminClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+
+function parseMonth(monthParam: string | null) {
+  const now = new Date()
+  const fallback = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  const month = monthParam && /^\d{4}-\d{2}$/.test(monthParam) ? monthParam : fallback
+  const [year, mon] = month.split('-').map(Number)
+  const start = new Date(Date.UTC(year, mon - 1, 1))
+  const end = new Date(Date.UTC(year, mon, 1))
+  return { month, start: start.toISOString(), end: end.toISOString() }
+}
+
+export async function GET(request: Request) {
+  const { error } = await requireAdminApi()
+  if (error) return error
+
+  const monthParam = new URL(request.url).searchParams.get('month')
+  const { month, start, end } = parseMonth(monthParam)
+
+  const supabase = createAdminClient()
+
+  const [
+    { data: counselors },
+    { data: clients },
+    { data: meetings },
+    { data: responseRows },
+    { data: tasks },
+  ] = await Promise.all([
+    supabase
+      .from('counselors')
+      .select('id, name')
+      .eq('role', 'counselor')
+      .eq('status', 'active')
+      .order('name'),
+    supabase.from('clients').select('id, counselor_id, qualification_score'),
+    supabase
+      .from('meetings')
+      .select('counselor_id, status, scheduled_time')
+      .gte('scheduled_time', start)
+      .lt('scheduled_time', end)
+      .in('status', ['scheduled', 'completed']),
+    supabase
+      .from('response_tracking')
+      .select('counselor_id, response_time_seconds, response_by, response_at')
+      .eq('response_by', 'counselor')
+      .not('response_time_seconds', 'is', null)
+      .gte('response_at', start)
+      .lt('response_at', end),
+    supabase
+      .from('tasks')
+      .select('counselor_id, status, negligence_flagged'),
+  ])
+
+  const performance = (counselors ?? []).map((counselor) => {
+    const counselorClients = (clients ?? []).filter((c) => c.counselor_id === counselor.id)
+    const totalClients = counselorClients.length
+    const qualifiedClients = counselorClients.filter(
+      (c) => (c.qualification_score ?? 0) >= 7
+    ).length
+    const conversionRate = totalClients > 0 ? (qualifiedClients / totalClients) * 100 : 0
+
+    const meetingsThisMonth = (meetings ?? []).filter(
+      (m) => m.counselor_id === counselor.id
+    ).length
+
+    const counselorResponses = (responseRows ?? []).filter(
+      (r) => r.counselor_id === counselor.id
+    )
+    const avgResponseTimeSeconds =
+      counselorResponses.length > 0
+        ? counselorResponses.reduce((sum, r) => sum + (r.response_time_seconds ?? 0), 0) /
+          counselorResponses.length
+        : null
+
+    const counselorTasks = (tasks ?? []).filter((t) => t.counselor_id === counselor.id)
+    const openTasks = counselorTasks.filter((t) => t.status === 'pending').length
+    const negligenceFlags = counselorTasks.filter((t) => t.negligence_flagged).length
+
+    return {
+      counselorId: counselor.id,
+      counselorName: counselor.name,
+      activeClients: totalClients,
+      meetingsThisMonth,
+      avgResponseTimeSeconds,
+      openTasks,
+      negligenceFlags,
+      conversionRate: Math.round(conversionRate * 10) / 10,
+      needsAttention: negligenceFlags > 0,
+    }
+  })
+
+  return NextResponse.json({ month, counselors: performance })
+}

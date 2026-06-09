@@ -29,7 +29,7 @@ export async function getPipelineData(counselorId: string): Promise<PipelineData
       .from('meetings')
       .select('id, client_id')
       .eq('counselor_id', counselorId)
-      .order('created_at', { ascending: false }),
+      .order('scheduled_time', { ascending: false }),
   ])
 
   const meetingByClient: Record<string, string> = {}

@@ -20,10 +20,12 @@ export default async function BriefPage({ params }: Props) {
     .from('meetings')
     .select('id, client_id, counselor_id, scheduled_time')
     .eq('id', meetingId)
-    .eq('counselor_id', counselor.id)
     .single()
 
   if (!meeting) notFound()
+
+  const isAdmin = counselor.role === 'admin'
+  if (!isAdmin && meeting.counselor_id !== counselor.id) notFound()
 
   const [
     { data: client },

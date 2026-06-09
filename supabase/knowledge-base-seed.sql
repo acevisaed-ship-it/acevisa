@@ -1,0 +1,14 @@
+-- Pre-populate knowledge base entries — run in Supabase SQL Editor after Phase 3 UI is built
+
+INSERT INTO knowledge_base (category, topic, answer, is_active) VALUES
+  ('Study Visa', 'UK blocked account requirement', 'UK student visas require a bank statement showing you can cover your first years tuition plus 9 months living costs at 1334 GBP per month. This must be shown for 28 consecutive days before applying.', true),
+  ('Study Visa', 'Germany blocked account 2025', 'Germany requires a blocked account of 11208 EUR to show you can support yourself for one year. The money is released monthly after arrival. This is separate from tuition and is a visa requirement.', true),
+  ('Study Visa', 'Canada study permit processing time', 'Canada study permit processing from Pakistan currently takes 8 to 16 weeks on average. Student Direct Stream SDS is not available from Pakistan. Apply as early as possible before your intake.', true),
+  ('Study Visa', 'Australia student visa subclass 500', 'Australia student visa requires proof of enrollment, financial capacity, English proficiency, and genuine temporary entrant GTE statement. Processing takes 4 to 8 weeks. Health insurance OSHC is mandatory.', true),
+  ('Study Visa', 'Hungary upfront university fee', 'Most Hungarian universities require full first semester or first year tuition to be paid before the visa is issued. This is 3000 to 8000 EUR depending on the university, paid before you have a visa guarantee.', true),
+  ('Work Abroad', 'UAE work visa requirements', 'UAE employment visa is sponsored by the employer. You need a valid job offer first. Processing takes 2 to 4 weeks. No IELTS required but most employers require English proficiency.', true),
+  ('Work Abroad', 'Canada work permit pathways', 'Canada work permits include employer-specific work permits requiring LMIA, and open work permits for spouses of skilled workers or international students. Processing varies from 2 weeks to 6 months.', true),
+  ('Language & IELTS', 'IELTS minimum scores by country', 'UK universities typically require IELTS 6.0 to 6.5. Canada requires 6.0 to 6.5 for most programs. Germany accepts IELTS 6.0 for most public universities. Australia requires 6.0 to 6.5 for undergraduate and 6.5 for postgraduate.', true),
+  ('Language & IELTS', 'IELTS preparation timeline', 'Most students improve by 0.5 to 1 band per month of focused preparation. Plan for 2 to 3 months minimum if starting from scratch. ACE offers IELTS coaching as a standalone service before the visa process begins.', true),
+  ('General', 'ACE service fee structure', 'ACE charges a service fee that is split into stages. An initial consultation is free with no commitment. Service fees are charged only when you decide to proceed. No upfront full payment is required. All costs are disclosed before you sign anything.', true)
+ON CONFLICT DO NOTHING;

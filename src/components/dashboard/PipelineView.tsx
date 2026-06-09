@@ -55,7 +55,8 @@ export function PipelineView({
 
   function renderClientCard(client: Client) {
     const meetingId = meetingByClient[client.id]
-    const showBrief = client.pipeline_stage >= 2 && meetingId !== undefined
+    const isQualifiedOrBeyond = client.pipeline_stage >= 2
+    const hasMeeting = meetingId !== undefined
     const score = client.qualification_score
     const scoreColor =
       score !== null && score > 0 ? getScoreBadgeColor(score) : null
@@ -87,15 +88,20 @@ export function PipelineView({
           </span>
         )}
 
-        <div className="mt-2 flex flex-wrap gap-2">
-          {showBrief && (
-            <Link
-              href={`${briefBasePath}/${meetingId}`}
-              className="inline-flex min-h-[44px] items-center rounded-full border border-text/20 px-3 py-1.5 text-xs font-medium text-text transition-colors hover:border-text/40"
-            >
-              View Brief →
-            </Link>
-          )}
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          {isQualifiedOrBeyond &&
+            (hasMeeting ? (
+              <Link
+                href={`${briefBasePath}/${meetingId}`}
+                className="inline-flex min-h-[44px] items-center rounded-full border border-text/20 px-3 py-1.5 text-xs font-medium text-text transition-colors hover:border-text/40"
+              >
+                View Brief →
+              </Link>
+            ) : (
+              <span className="text-xs italic text-text/50">
+                No meeting scheduled yet.
+              </span>
+            ))}
           <Link
             href={`${clientBasePath}/${client.id}`}
             className="inline-flex min-h-[44px] items-center rounded-full border border-blue/30 px-3 py-1.5 text-xs font-medium text-blue transition-colors hover:border-blue/50"

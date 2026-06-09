@@ -1,6 +1,11 @@
+'use client'
+
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import type { MeetingStatus } from '@/types'
 import { formatPKTDate, formatPKTTime } from '@/lib/pkt'
+import { toPKT, toUTC } from '@/lib/utils'
 import { BriefCard } from './BriefCard'
 
 export type MeetingWithCounselor = {
@@ -28,6 +33,110 @@ function getStatusStyle(status: MeetingStatus): { bg: string; label: string } {
     default:
       return { bg: '#9CA3AF', label: status }
   }
+}
+
+function utcToPktDatetimeLocal(isoString: string): string {
+  const pkt = toPKT(isoString)
+  const y = pkt.getUTCFullYear()
+  const m = String(pkt.getUTCMonth() + 1).padStart(2, '0')
+  const d = String(pkt.getUTCDate()).padStart(2, '0')
+  const h = String(pkt.getUTCHours()).padStart(2, '0')
+  const min = String(pkt.getUTCMinutes()).padStart(2, '0')
+  return `${y}-${m}-${d}T${h}:${min}`
+}
+
+function pktDatetimeLocalToUtcIso(localValue: string): string {
+  const [datePart, timePart] = localValue.split('T')
+  const [y, m, d] = datePart.split('-').map(Number)
+  const [h, min] = timePart.split(':').map(Number)
+  const pktAsUtc = new Date(Date.UTC(y, m - 1, d, h, min))
+  return toUTC(pktAsUtc).toISOString()
+}
+
+function RescheduleMeetingButton({
+  meetingId,
+  scheduledTime,
+}: {
+  meetingId: string
+  scheduledTime: string
+}) {
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const [datetime, setDatetime] = useState(() => utcToPktDatetimeLocal(scheduledTime))
+  const [submitting, setSubmitting] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setSubmitting(true)
+    setMessage(null)
+
+    try {
+      const res = await fetch(`/api/meetings/${meetingId}/reschedule`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newScheduledTime: pktDatetimeLocalToUtcIso(datetime) }),
+      })
+
+      if (!res.ok) {
+        setMessage('Could not reschedule')
+        return
+      }
+
+      setMessage('Rescheduled')
+      setOpen(false)
+      router.refresh()
+    } catch {
+      setMessage('Could not reschedule')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-start gap-1">
+      {!open ? (
+        <button
+          type="button"
+          onClick={() => {
+            setOpen(true)
+            setMessage(null)
+            setDatetime(utcToPktDatetimeLocal(scheduledTime))
+          }}
+          className="text-sm font-medium text-blue hover:underline"
+        >
+          Reschedule
+        </button>
+      ) : (
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <input
+            type="datetime-local"
+            value={datetime}
+            onChange={(e) => setDatetime(e.target.value)}
+            required
+            className="rounded-lg border border-text/20 bg-white px-2 py-1 text-sm text-text"
+          />
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="text-sm font-medium text-blue hover:underline disabled:opacity-50"
+            >
+              {submitting ? 'Saving…' : 'Save'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="text-sm text-text/60 hover:underline"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
+      {message && <span className="text-xs text-text/70">{message}</span>}
+    </div>
+  )
 }
 
 type Props = {
@@ -72,6 +181,12 @@ export function MeetingsHistorySection({ clientId, meetings }: Props) {
                   >
                     View Brief →
                   </Link>
+                  {meeting.status === 'scheduled' && (
+                    <RescheduleMeetingButton
+                      meetingId={meeting.id}
+                      scheduledTime={meeting.scheduled_time}
+                    />
+                  )}
                 </div>
               </li>
             )
