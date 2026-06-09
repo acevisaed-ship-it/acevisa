@@ -74,6 +74,7 @@ async function findNextAvailableSlots(
 
 export async function POST(request: Request) {
   const { clientId, message, client } = await request.json()
+  console.log('Auto-book API called:', { clientId, messagePreview: message?.slice(0, 80) })
 
   if (!clientId || !message) {
     return NextResponse.json({ handled: false })

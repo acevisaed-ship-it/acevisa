@@ -1,93 +1,108 @@
 import { logActivity } from '@/lib/activityLog'
+import {
+  ACE_MASTER_SYSTEM_PROMPT,
+  POST_CONVERSATION_PROFILE_PROMPT,
+  SPECIALIST_PROMPTS,
+} from '@/lib/acePrompts'
+import { anthropic, PROMPT_CACHE_BETA } from '@/lib/anthropic'
+import {
+  countFearSignals,
+  detectTriggers,
+  getLastStudentMessagesText,
+  hasLegalSignal,
+  type TriggerFlags,
+} from '@/lib/detectTriggers'
 import { hasMeetingIntent } from '@/lib/meetingIntent'
 import { createNotification } from '@/lib/notifications'
 import { detectProfileUpdates } from '@/lib/profileUpdates'
 import { createAdminClient } from '@/lib/supabase/server'
-import { anthropic } from '@/lib/anthropic'
 import { getBaseUrl } from '@/lib/utils'
 import { NextResponse } from 'next/server'
-import type { AIProfileData } from '@/types'
 
 const PANIC_KEYWORDS = [
-  // Distress
-  'kill myself', 'want to die', 'end my life', 'suicide', 'give up on life',
-  'give up on everything', 'want to give up', 'giving up on everything',
-  // Threats
-  'threatening me', 'being forced', 'blackmail', 'extortion',
-  // Scam signals
-  'already paid someone', 'they took my money', 'fake agent', 'cheated me',
-  'lost all my money', 'paid and disappeared',
-  // Extreme urgency
-  'emergency visa', 'deportation', 'detained', 'arrested',
+  'kill myself',
+  'want to die',
+  'end my life',
+  'suicide',
+  'give up on life',
+  'give up on everything',
+  'want to give up',
+  'giving up on everything',
+  'threatening me',
+  'being forced',
+  'blackmail',
+  'extortion',
+  'already paid someone',
+  'they took my money',
+  'fake agent',
+  'cheated me',
+  'lost all my money',
+  'paid and disappeared',
+  'emergency visa',
+  'deportation',
+  'detained',
+  'arrested',
 ]
+
+type AceInternalState = {
+  stage: number
+  qualification_score: number
+  detected_language: string
+  detected_region: string
+  detected_fears: string[]
+  detected_behaviour_type: string
+  service_match: string
+  next_step_target: string
+  escalation_needed: boolean
+  escalation_type: string | null
+}
+
+type AceParsedResponse = {
+  message: string
+  internal: AceInternalState | null
+}
 
 function detectPanic(message: string): string[] {
   const lower = message.toLowerCase()
   return PANIC_KEYWORDS.filter((kw) => lower.includes(kw))
 }
 
-type ChatResponse = {
-  type: string
-  content: string
-  question?: string
-  profile?: AIProfileData
-}
-
-function buildSystemPrompt(
-  client: { name: string; language: string },
-  kbContext: string,
-  campaignContext: string
-): string {
-  return `You are a warm, knowledgeable overseas education counselor working for AceVisa, a Pakistan-based consultancy specialising in international university admissions and visa processing. You are speaking with a prospective student or their family member who has just registered on the portal.
-
-Your goal is to understand their situation fully, help them feel heard and informed, and determine whether they are genuinely ready to proceed with their overseas education journey. You are not selling. You are advising.
-
-CONVERSATION RULES:
-- Ask one or two questions at a time maximum. Never a list of questions.
-- Respond in the language the student chose at registration: ${client.language}. If they switch languages mid-conversation, switch with them.
-- Be warm, patient, and genuinely helpful. Never pushy.
-- Listen to their story before asking structured questions.
-
-KNOWLEDGE BASE — THIS HAS NO EXCEPTIONS:
-For any factual question about visa requirements, document requirements, fees, processing times, university requirements, or service details — search the knowledge base first. Answer ONLY from what is in the knowledge base below. If the answer is not there, respond with exactly: "That is an important detail — I want to make sure you get the most accurate answer rather than a guess. I have flagged this for your counselor who will respond to you directly." Then return the JSON action flag_escalation.
-
-KNOWLEDGE BASE:
-${kbContext}
-${campaignContext}
-
-CONVERSATION STAGES:
-Stage 1 — Welcome and intent (2-3 exchanges): Greet by name (${client.name}), ask what brings them here, listen.
-Stage 2 — Goal profiling (3-5 exchanges): Desired country, field of study, start date, education level.
-Stage 3 — Practical profiling (3-5 exchanges): English test status, budget type, passport status, prior visa refusals.
-Stage 4 — Concern surfacing (2-3 exchanges): Biggest worry, what has stopped them before, family involvement.
-Stage 5 — Wrap up: Thank them, explain a counselor will personally review their case.
-
-RESPONSE FORMAT:
-You must always respond with valid JSON in one of these three formats:
-
-1. Normal message:
-{"type": "message", "content": "your message to the student"}
-
-2. Escalation needed:
-{"type": "flag_escalation", "content": "That is an important detail — I want to make sure you get the most accurate answer rather than a guess. I have flagged this for your counselor who will respond to you directly.", "question": "the exact question that needs counselor input"}
-
-3. Conversation complete (only after Stage 5 wrap up):
-{"type": "conversation_complete", "content": "your final wrap up message", "profile": {"goal_country": "", "study_field": "", "start_date": "", "education_level": "", "english_test_status": "", "budget_type": "", "has_passport": false, "visa_refusals": false, "main_concern": "", "family_involvement": "", "qualification_score": 0, "score_rationale": "", "recommended_service_pathway": "", "psychological_notes": [], "suggested_talking_points": []}}
-
-QUALIFICATION SCORING (internal, never share with student):
-Score 7-10: Clear goal, realistic budget awareness, no major blockers, asking specific process questions.
-Score 4-6: Interested but vague, early research stage, budget unclear.
-Score 1-3: Just browsing, no timeline, no commitment signals.`
-}
-
-function parseClaudeResponse(rawContent: string): ChatResponse {
+function parseAceResponse(rawContent: string): AceParsedResponse {
   try {
     const jsonMatch = rawContent.match(/\{[\s\S]*\}/)
-    return jsonMatch
-      ? JSON.parse(jsonMatch[0])
-      : { type: 'message', content: rawContent }
+    if (!jsonMatch) {
+      return { message: rawContent, internal: null }
+    }
+
+    const parsed = JSON.parse(jsonMatch[0]) as {
+      message?: string
+      internal?: Partial<AceInternalState>
+    }
+
+    if (!parsed.message) {
+      return { message: rawContent, internal: null }
+    }
+
+    return {
+      message: parsed.message,
+      internal: parsed.internal
+        ? {
+            stage: parsed.internal.stage ?? 1,
+            qualification_score: parsed.internal.qualification_score ?? 0,
+            detected_language: parsed.internal.detected_language ?? 'unknown',
+            detected_region: parsed.internal.detected_region ?? 'unknown',
+            detected_fears: parsed.internal.detected_fears ?? [],
+            detected_behaviour_type:
+              parsed.internal.detected_behaviour_type ?? 'undecided',
+            service_match: parsed.internal.service_match ?? 'unknown',
+            next_step_target: parsed.internal.next_step_target ?? '',
+            escalation_needed: parsed.internal.escalation_needed ?? false,
+            escalation_type: parsed.internal.escalation_type ?? null,
+          }
+        : null,
+    }
   } catch {
-    return { type: 'message', content: rawContent }
+    return { message: rawContent, internal: null }
   }
 }
 
@@ -113,6 +128,152 @@ async function completeResponseTracking(
     .eq('id', trackingId)
 }
 
+function buildClientContext(client: {
+  name: string
+  city: string | null
+  language: string
+  ad_source: string | null
+  pipeline_stage: number | null
+  campaignContext: string
+}): string {
+  return `CLIENT: Name: ${client.name}, City: ${client.city || 'Not provided'}, Language: ${client.language}, Ad source: ${client.ad_source || 'direct'}, Stage: ${client.pipeline_stage || 1}
+${client.campaignContext}`
+}
+
+function isConversationComplete(
+  internal: AceInternalState | null,
+  totalMessages: number
+): boolean {
+  if (!internal) return totalMessages >= 15
+
+  return (
+    (internal.qualification_score >= 7 && internal.stage === 4) ||
+    totalMessages >= 15
+  )
+}
+
+async function upsertInternalProfile(
+  supabase: ReturnType<typeof createAdminClient>,
+  clientId: string,
+  internal: AceInternalState
+) {
+  await supabase.from('ai_profiles').upsert(
+    {
+      client_id: clientId,
+      stage: internal.stage,
+      qualification_score: internal.qualification_score,
+      detected_language: internal.detected_language,
+      detected_region: internal.detected_region,
+      detected_fears: internal.detected_fears,
+      detected_behaviour_type: internal.detected_behaviour_type,
+      service_match: internal.service_match,
+      last_updated: new Date().toISOString(),
+    },
+    { onConflict: 'client_id' }
+  )
+}
+
+async function runSpecialistCalls(
+  triggers: TriggerFlags,
+  conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>,
+  clientId: string
+) {
+  const supabase = createAdminClient()
+  const activeSpecialists = (
+    Object.entries(triggers) as Array<[keyof TriggerFlags, boolean]>
+  ).filter(([, active]) => active)
+
+  await Promise.all(
+    activeSpecialists.map(async ([specialistType]) => {
+      const systemPrompt = SPECIALIST_PROMPTS[specialistType]
+      const response = await anthropic.messages.create({
+        model: 'claude-haiku-4-5',
+        max_tokens: 512,
+        system: systemPrompt,
+        messages: conversationHistory,
+      })
+
+      const rawContent =
+        response.content[0].type === 'text' ? response.content[0].text : ''
+
+      let output: Record<string, unknown>
+      try {
+        const jsonMatch = rawContent.match(/\{[\s\S]*\}/)
+        output = jsonMatch
+          ? (JSON.parse(jsonMatch[0]) as Record<string, unknown>)
+          : { raw: rawContent }
+      } catch {
+        output = { raw: rawContent }
+      }
+
+      await supabase.from('specialist_outputs').insert({
+        client_id: clientId,
+        specialist_type: specialistType,
+        output,
+      })
+    })
+  )
+}
+
+async function runPostConversationProfile(
+  conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }>,
+  clientId: string,
+  internal: AceInternalState | null
+) {
+  const supabase = createAdminClient()
+
+  const response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 2048,
+    system: POST_CONVERSATION_PROFILE_PROMPT,
+    messages: conversationHistory,
+  })
+
+  const rawContent =
+    response.content[0].type === 'text' ? response.content[0].text : ''
+
+  const jsonMatch = rawContent.match(/\{[\s\S]*\}/)
+  if (!jsonMatch) return
+
+  const profile = JSON.parse(jsonMatch[0]) as Record<string, unknown>
+  const score =
+    typeof profile.qualification_score === 'number'
+      ? profile.qualification_score
+      : internal?.qualification_score ?? 0
+
+  await supabase.from('ai_profiles').upsert(
+    {
+      client_id: clientId,
+      profile_json: profile,
+      generated_at: new Date().toISOString(),
+      stage: internal?.stage ?? null,
+      qualification_score: score,
+      detected_language:
+        (profile.detected_language as string) ?? internal?.detected_language,
+      detected_region:
+        (profile.detected_region as string) ?? internal?.detected_region,
+      detected_fears:
+        (profile.detected_fears as string[]) ?? internal?.detected_fears,
+      detected_behaviour_type:
+        (profile.detected_behaviour_type as string) ??
+        internal?.detected_behaviour_type,
+      service_match:
+        (profile.service_match as string) ?? internal?.service_match,
+      last_updated: new Date().toISOString(),
+    },
+    { onConflict: 'client_id' }
+  )
+
+  const newStage = score >= 7 ? 2 : 1
+  await supabase
+    .from('clients')
+    .update({
+      qualification_score: score,
+      pipeline_stage: newStage,
+    })
+    .eq('id', clientId)
+}
+
 export async function POST(request: Request) {
   const studentMsgTime = new Date()
   let trackingId: string | undefined
@@ -131,7 +292,9 @@ export async function POST(request: Request) {
 
   const { data: client } = await supabase
     .from('clients')
-    .select('name, language, qualification_score, counselor_id, ad_source')
+    .select(
+      'name, language, city, qualification_score, counselor_id, ad_source, pipeline_stage'
+    )
     .eq('id', clientId)
     .single()
 
@@ -176,7 +339,11 @@ Use this context to make your opening message highly relevant to their specific 
       description: `AI sent message at stage ${stageTag}`,
       metadata: { stage: stageTag },
     })
-    return NextResponse.json({ type: 'message', content: campaignOpeningLine })
+    return NextResponse.json({
+      type: 'message',
+      content: campaignOpeningLine,
+      message: campaignOpeningLine,
+    })
   }
 
   if (!isInit) {
@@ -230,7 +397,7 @@ Use this context to make your opening message highly relevant to their specific 
       }
 
       const panicResponse =
-        'I can see this is a very difficult situation. Please know that a real counselor from our team will reach out to you very shortly — we\'re treating this as a priority. If you are in immediate danger, please contact emergency services (15 in Pakistan). We are here for you.'
+        'I can see this is a very difficult situation. Please know that a real counselor from our team will reach out to you very shortly, we\'re treating this as a priority. If you are in immediate danger, please contact emergency services (15 in Pakistan). We are here for you.'
 
       await supabase.from('conversations').insert({
         client_id: clientId,
@@ -241,39 +408,17 @@ Use this context to make your opening message highly relevant to their specific 
 
       await completeResponseTracking(supabase, trackingId, studentMsgTime)
 
-      return NextResponse.json({ type: 'message', content: panicResponse })
-    }
-
-    const proposedChanges = detectProfileUpdates(message)
-    if (Object.keys(proposedChanges).length > 0) {
-      await supabase.from('profile_update_requests').insert({
-        client_id: clientId,
-        triggered_by_message: message,
-        proposed_changes: proposedChanges,
-        status: 'pending',
+      return NextResponse.json({
+        type: 'message',
+        content: panicResponse,
+        message: panicResponse,
       })
-
-      await logActivity({
-        clientId,
-        actionType: 'profile_update_detected',
-        description: `Profile update detected in chat: ${Object.keys(proposedChanges).join(', ')}`,
-        metadata: { proposedChanges },
-      })
-
-      if (client.counselor_id) {
-        await createNotification({
-          counselorId: client.counselor_id,
-          type: 'profile_update',
-          title: `Profile update detected — ${client.name}`,
-          body: `Student shared new info: ${Object.keys(proposedChanges).join(', ')}`,
-          clientId,
-        })
-      }
     }
 
     if (hasMeetingIntent(message)) {
       try {
-        const bookingResult = await fetch(`${getBaseUrl()}/api/meetings/auto-book`, {
+        const autoBookUrl = `${new URL(request.url).origin}/api/meetings/auto-book`
+        const bookingResult = await fetch(autoBookUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ clientId, message, client }),
@@ -301,10 +446,38 @@ Use this context to make your opening message highly relevant to their specific 
           return NextResponse.json({
             type: 'message',
             content: booking.responseMessage,
+            message: booking.responseMessage,
           })
         }
-      } catch (err) {
-        console.error('Auto-booking failed (falling through to Claude):', err)
+      } catch {
+        // Fall through to Claude on auto-book failure
+      }
+    }
+
+    const proposedChanges = detectProfileUpdates(message)
+    if (Object.keys(proposedChanges).length > 0) {
+      await supabase.from('profile_update_requests').insert({
+        client_id: clientId,
+        triggered_by_message: message,
+        proposed_changes: proposedChanges,
+        status: 'pending',
+      })
+
+      await logActivity({
+        clientId,
+        actionType: 'profile_update_detected',
+        description: `Profile update detected in chat: ${Object.keys(proposedChanges).join(', ')}`,
+        metadata: { proposedChanges },
+      })
+
+      if (client.counselor_id) {
+        await createNotification({
+          counselorId: client.counselor_id,
+          type: 'profile_update',
+          title: `Profile update detected — ${client.name}`,
+          body: `Student shared new info: ${Object.keys(proposedChanges).join(', ')}`,
+          clientId,
+        })
       }
     }
   }
@@ -337,7 +510,11 @@ Use this context to make your opening message highly relevant to their specific 
 
       await completeResponseTracking(supabase, trackingId, studentMsgTime)
 
-      return NextResponse.json({ type: 'message', content: autoMsg })
+      return NextResponse.json({
+        type: 'message',
+        content: autoMsg,
+        message: autoMsg,
+      })
     }
   }
 
@@ -346,6 +523,12 @@ Use this context to make your opening message highly relevant to their specific 
     .select('message_text, sender, timestamp')
     .eq('client_id', clientId)
     .order('timestamp', { ascending: true })
+
+  const { data: existingProfile } = await supabase
+    .from('ai_profiles')
+    .select('stage, detected_region')
+    .eq('client_id', clientId)
+    .maybeSingle()
 
   const { data: knowledgeBase } = await supabase
     .from('knowledge_base')
@@ -366,24 +549,54 @@ Use this context to make your opening message highly relevant to their specific 
         content: msg.message_text,
       }))
 
-  const systemPrompt = buildSystemPrompt(client, kbContext, campaignContext)
-
-  const response = await anthropic.messages.create({
-    model: 'claude-haiku-4-5',
-    max_tokens: 1024,
-    system: systemPrompt,
-    messages: conversationMessages,
+  const clientContext = buildClientContext({
+    name: client.name,
+    city: client.city,
+    language: client.language,
+    ad_source: client.ad_source,
+    pipeline_stage: client.pipeline_stage,
+    campaignContext,
   })
+
+  const response = await anthropic.messages.create(
+    {
+      model: 'claude-haiku-4-5',
+      max_tokens: 1024,
+      system: [
+        {
+          type: 'text',
+          text: ACE_MASTER_SYSTEM_PROMPT,
+          cache_control: { type: 'ephemeral' },
+        },
+        {
+          type: 'text',
+          text: `KNOWLEDGE BASE:\n${kbContext}`,
+        },
+        {
+          type: 'text',
+          text: clientContext,
+        },
+      ],
+      messages: conversationMessages,
+    },
+    {
+      headers: {
+        'anthropic-beta': PROMPT_CACHE_BETA,
+      },
+    }
+  )
 
   const rawContent =
     response.content[0].type === 'text' ? response.content[0].text : ''
 
-  const parsed = parseClaudeResponse(rawContent)
+  const parsed = parseAceResponse(rawContent)
+  const studentMessage = parsed.message
+  const internal = parsed.internal
 
-  const stageTag = 'active'
+  const stageTag = internal ? `stage_${internal.stage}` : 'active'
   await supabase.from('conversations').insert({
     client_id: clientId,
-    message_text: parsed.content,
+    message_text: studentMessage,
     sender: 'ai',
     stage_tag: stageTag,
   })
@@ -395,7 +608,20 @@ Use this context to make your opening message highly relevant to their specific 
     metadata: { stage: stageTag },
   })
 
-  if (parsed.type === 'flag_escalation' && parsed.question) {
+  if (internal) {
+    try {
+      await upsertInternalProfile(supabase, clientId, internal)
+
+      await supabase
+        .from('clients')
+        .update({ qualification_score: internal.qualification_score })
+        .eq('id', clientId)
+    } catch {
+      // Non-fatal: chat continues even if profile upsert fails
+    }
+  }
+
+  if (internal?.escalation_needed) {
     const last5 = (history || []).slice(-5)
     try {
       await fetch(`${getBaseUrl()}/api/escalation/create`, {
@@ -403,36 +629,64 @@ Use this context to make your opening message highly relevant to their specific 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           clientId,
-          questionText: parsed.question,
+          questionText: message || internal.escalation_type || studentMessage,
           conversationContext: last5,
         }),
       })
-    } catch (err) {
-      console.error('Escalation create failed (non-fatal):', err)
+    } catch {
+      // Non-fatal escalation failure
     }
   }
 
-  if (parsed.type === 'conversation_complete' && parsed.profile) {
-    const profile = parsed.profile
-    const score = profile.qualification_score || 0
+  const totalMessages = (history || []).length + 1
+  const conversationComplete = isConversationComplete(internal, totalMessages)
+  const responseType = conversationComplete ? 'conversation_complete' : 'message'
+  const score = internal?.qualification_score
 
-    await supabase.from('ai_profiles').upsert(
-      {
-        client_id: clientId,
-        profile_json: profile,
-        generated_at: new Date().toISOString(),
-      },
-      { onConflict: 'client_id' }
+  if (conversationComplete && internal && score !== undefined && score >= 7) {
+    try {
+      await supabase
+        .from('clients')
+        .update({ pipeline_stage: 2 })
+        .eq('id', clientId)
+    } catch {
+      // Non-fatal pipeline update failure
+    }
+  }
+
+  if (internal) {
+    const studentText = getLastStudentMessagesText(conversationMessages)
+    const fearCount = countFearSignals(studentText)
+    const previousStage = existingProfile?.stage
+    const stallCount =
+      previousStage !== undefined &&
+      previousStage !== null &&
+      previousStage === internal.stage
+        ? 3
+        : 0
+    const regionalLoaded =
+      !!existingProfile?.detected_region &&
+      existingProfile.detected_region !== 'unknown'
+    const legalLoaded = (history || []).some((msg) =>
+      hasLegalSignal(msg.message_text)
     )
 
-    const newStage = score >= 7 ? 2 : 1
-    await supabase
-      .from('clients')
-      .update({
-        qualification_score: score,
-        pipeline_stage: newStage,
-      })
-      .eq('id', clientId)
+    const triggers = detectTriggers(conversationMessages, {
+      stage: internal.stage,
+      fear_count: fearCount,
+      stall_count: stallCount,
+      regional_context_loaded: regionalLoaded,
+      legal_context_loaded: legalLoaded,
+      qualification_score: internal.qualification_score,
+    })
+
+    runSpecialistCalls(triggers, conversationMessages, clientId).catch(() => {})
+  }
+
+  if (conversationComplete) {
+    runPostConversationProfile(conversationMessages, clientId, internal).catch(
+      () => {}
+    )
   }
 
   if (!isInit) {
@@ -440,11 +694,9 @@ Use this context to make your opening message highly relevant to their specific 
   }
 
   return NextResponse.json({
-    type: parsed.type,
-    content: parsed.content,
-    score:
-      parsed.type === 'conversation_complete'
-        ? parsed.profile?.qualification_score
-        : undefined,
+    type: responseType,
+    content: studentMessage,
+    message: studentMessage,
+    score: conversationComplete ? score : undefined,
   })
 }

@@ -12,7 +12,7 @@ const env = Object.fromEntries(
     })
 )
 
-const BASE = 'http://localhost:3000'
+const BASE = process.env.BASE_URL || 'http://localhost:3000'
 const PASSWORD = 'Beta2Test2026!'
 const results = []
 
