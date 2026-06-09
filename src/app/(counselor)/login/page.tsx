@@ -10,6 +10,7 @@ export default function CounselorLoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showForgotPassword, setShowForgotPassword] = useState(false)
@@ -53,6 +54,18 @@ export default function CounselorLoginPage() {
       setError('Your account is inactive. Contact admin.')
       setLoading(false)
       return
+    }
+
+    // Store remember-me preference (persistent cookie, 30 days)
+    document.cookie = `ace_remember=${rememberMe ? '1' : '0'}; path=/; max-age=${30 * 24 * 3600}; SameSite=Lax`
+
+    if (!rememberMe) {
+      // Session-only token — no max-age means it dies when the browser closes
+      const token = crypto.randomUUID()
+      document.cookie = `ace_session_token=${token}; path=/; SameSite=Lax`
+    } else {
+      // Clear any old session-only token if switching to remember me
+      document.cookie = 'ace_session_token=; path=/; max-age=0'
     }
 
     router.push(counselor.role === 'admin' ? '/admin' : '/dashboard')
@@ -183,6 +196,19 @@ export default function CounselorLoginPage() {
               >
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                id="remember-me"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 cursor-pointer accent-blue"
+              />
+              <label htmlFor="remember-me" className="cursor-pointer text-sm text-text">
+                Remember me
+              </label>
             </div>
 
             <button

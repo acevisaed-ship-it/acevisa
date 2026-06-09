@@ -38,6 +38,24 @@ export async function middleware(request: NextRequest) {
   }
 
   if (session?.user?.email && isProtected) {
+    // Enforce "Remember Me = off" — if user didn't choose remember me,
+    // require the session-only cookie (dies when browser closes).
+    const rememberMe = request.cookies.get('ace_remember')?.value
+    const sessionToken = request.cookies.get('ace_session_token')?.value
+
+    if (rememberMe === '0' && !sessionToken) {
+      // Browser was closed and reopened — force re-login
+      const loginResponse = NextResponse.redirect(new URL('/login', request.url))
+      // Clear Supabase auth cookies so the session is truly gone
+      request.cookies.getAll().forEach((cookie) => {
+        if (cookie.name.startsWith('sb-')) {
+          loginResponse.cookies.set(cookie.name, '', { path: '/', maxAge: 0 })
+        }
+      })
+      loginResponse.cookies.set('ace_session_token', '', { path: '/', maxAge: 0 })
+      return loginResponse
+    }
+
     const adminClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!

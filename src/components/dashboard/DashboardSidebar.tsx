@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { CheckSquare, Home, Kanban, Users, X } from 'lucide-react'
+import { clearAceSessionCookies } from '@/lib/auth/session-cookies'
 import { createClient } from '@/lib/supabase/client'
 import { ProfilePicture } from '@/components/dashboard/ProfilePicture'
 import { cn } from '@/lib/utils'
@@ -53,6 +54,7 @@ function SidebarContent({
 
   async function handleSignOut() {
     const supabase = createClient()
+    clearAceSessionCookies()
     await supabase.auth.signOut()
     window.location.href = '/login'
   }
