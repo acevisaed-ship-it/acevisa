@@ -1,0 +1,208 @@
+# ACE Altius Consulting — Cursor Rules
+
+## Project Overview
+AI-powered visa and overseas education consultancy portal built for ACE Altius Consulting (Pakistan). Three user types: **Admin**, **Counselors**, and **Students/Clients**. Production at https://acevisa.vercel.app.
+
+---
+
+## Tech Stack
+- **Framework**: Next.js 16 (App Router) — read `node_modules/next/dist/docs/` before writing Next.js code, APIs have breaking changes from older versions
+- **Language**: TypeScript (strict)
+- **Database**: Supabase (PostgreSQL)
+- **Auth**: Supabase Auth + `@supabase/ssr` + custom middleware session control
+- **Styling**: Tailwind CSS v4 with custom design tokens
+- **Icons**: `lucide-react`
+- **Deployment**: Vercel
+
+---
+
+## Route Structure
+```
+src/app/
+  (public)/          — Landing page, login, reset-password, schedule, chat (unauthenticated)
+  (counselor)/       — /login, /dashboard/** (counselor-facing portal)
+  (admin)/           — /admin/** (admin-facing portal)
+  (student)/         — /portal/**, /student/** (client-facing portal)
+```
+
+Route groups use layouts for auth protection. Never skip the layout check.
+
+---
+
+## Authentication Rules
+
+### Server-side (layouts, server components, API routes)
+```ts
+import { getAuthenticatedCounselor, requireAdmin } from '@/lib/supabase/server'
+
+// In counselor layouts:
+const counselor = await getAuthenticatedCounselor()
+if (!counselor) redirect('/login')
+
+// In admin layouts:
+const admin = await requireAdmin() // handles redirect automatically
+```
+
+### Client-side
+```ts
+import { createClient } from '@/lib/supabase/client'
+const supabase = createClient()
+```
+
+### Session / Remember Me
+The app uses two custom cookies alongside Supabase's auth cookies:
+- `ace_remember` — `'0'` or `'1'`, persistent 30 days, stores user's preference
+- `ace_session_token` — session-only cookie (no maxAge), set only when `ace_remember=0`
+
+The middleware (`src/middleware.ts`) enforces this: if `ace_remember=0` and `ace_session_token` is absent (browser was closed), it clears Supabase cookies and redirects to `/login`.
+
+**Never bypass the middleware session check.**
+
+### Clearing session cookies on sign-out
+```ts
+import { clearAceSessionCookies } from '@/lib/auth/session-cookies'
+clearAceSessionCookies()
+await supabase.auth.signOut()
+```
+
+---
+
+## Supabase Patterns
+
+### Server — always use admin client for DB reads in server components
+```ts
+import { createAdminClient } from '@/lib/supabase/server'
+const supabase = createAdminClient() // uses SERVICE_ROLE_KEY
+const { data } = await supabase.from('table').select('...')
+```
+
+### Client — use anon client for user-initiated mutations
+```ts
+const supabase = createClient()
+await supabase.from('table').insert({...})
+```
+
+### Never expose `SUPABASE_SERVICE_ROLE_KEY` to the client. It is server-only.
+
+### Key tables
+| Table | Purpose |
+|---|---|
+| `counselors` | Staff accounts (role: `counselor` or `admin`) |
+| `clients` | Student/client records |
+| `meetings` | Scheduled meetings |
+| `tasks` | Counselor tasks with due dates and completion tracking |
+| `activity_logs` | Immutable audit trail — never delete rows |
+| `deals` | CRM pipeline (service agreements) |
+| `invoices` | Client invoices |
+| `payments` | Payment records |
+| `expenses` | Business expenses |
+| `commission_rules` | Per-counselor commission rates |
+| `notifications` | In-app notifications |
+| `hr_flags` | HR negligence/escalation flags |
+
+---
+
+## Design System
+
+### Color tokens — use these, never raw hex in components
+```
+bg       #E6E8E7   — page background (light stone)
+text     #0A3F3A   — primary text / sidebar background (dark teal)
+green    #B7C733   — accent / active nav (lime green)
+orange   #E48328   — warnings, CTAs, sign-out
+blue     #2083B9   — links, info states
+black    #000000   — high-contrast text
+```
+
+Usage in Tailwind: `bg-bg`, `text-text`, `bg-green`, `text-orange`, `bg-blue`, etc.
+
+### Logo usage rules
+- **Always** wrap the logo in a white container when placed on a dark background (`bg-text`, `bg-[#0A3F3A]`, or any dark surface):
+```tsx
+<div className="inline-flex items-center justify-center rounded-xl bg-white/95 px-2.5 py-1.5">
+  <img src="/logo.png" alt="ACE Altius Consulting" className="h-9 w-auto" />
+</div>
+```
+- Sizing: sidebar 36px (`h-9`), mobile header 28px (`h-7`), login/hero 64px (`h-16`)
+- On light backgrounds (`bg-bg`), use the img directly without a container
+
+### Icon contrast rule
+Icons placed on the same-color background as themselves must use a contrasting color. For dark `bg-text` headers:
+```tsx
+// Wrong — invisible
+<Bell className="text-[#0A3F3A]" />  // dark icon on dark bg
+
+// Correct
+<Bell className="text-white" />      // or text-bg
+```
+The `NotificationBell` component accepts `variant="dark"` for dark backgrounds.
+
+### Touch targets — mobile accessibility
+All interactive elements must meet 44×44px minimum:
+```tsx
+className="min-h-[44px] min-w-[44px]"
+```
+
+### Border radius
+- Cards/modals: `rounded-[20px]` or `rounded-card`
+- Buttons: `rounded-full` (pill) or `rounded-xl`
+- Nav items: `rounded-xl`
+
+---
+
+## Component Conventions
+
+### Client components — mark explicitly
+```tsx
+'use client'
+```
+Only use when you need: browser APIs, useState, useEffect, event handlers, useRouter.
+
+### Server components — default
+Layouts and pages are server components by default. Fetch data here, pass to client components as props.
+
+### Forms
+- Always use `type FormEvent` and `e.preventDefault()`
+- Show loading state on submit button (`disabled={loading}`)
+- Show inline error messages, never alert()
+
+### Sidebar patterns
+Both `DashboardSidebar` and `AdminSidebar` handle desktop + mobile with the same `SidebarContent` internal component. Mobile uses a slide-in overlay panel. When adding nav items, add to the `navItems` array only — don't add separate mobile/desktop markup.
+
+---
+
+## API Routes
+- Located at `src/app/api/*/route.ts`
+- Always validate the request body before using it
+- Use `createAdminClient()` for DB access in API routes (server context)
+- Return `NextResponse.json({ error: '...' }, { status: 4xx })` for errors
+
+---
+
+## PWA
+- Manifest: `public/manifest.json`
+- Service worker: `public/sw.js`
+- Registration: `src/components/PWARegister.tsx` (client component, mounted in root layout)
+- The service worker uses network-first for navigation and cache-first for static assets
+- API routes (`/api/*`) are always fetched fresh — never cached in SW
+
+---
+
+## File & Naming Conventions
+- Pages: `page.tsx` (default export, PascalCase component name)
+- Layouts: `layout.tsx`
+- Components: PascalCase filename, named export
+- Utilities: camelCase filename
+- All imports use `@/` alias for `src/`
+
+---
+
+## Things to Never Do
+- Don't use `localStorage` or `sessionStorage` — the app uses cookie-based auth
+- Don't call `supabase.auth.getSession()` for auth checks — use `getUser()` or the helper functions (sessions can be spoofed, users cannot)
+- Don't delete rows from `activity_logs` — immutable audit trail
+- Don't expose `SUPABASE_SERVICE_ROLE_KEY` outside server context
+- Don't add nav items as raw JSX — use the `navItems` array in the sidebar components
+- Don't hardcode hex colors in components — use the Tailwind design tokens
+- Don't place a logo on a dark background without a white container
+- Don't use `router.push` without also calling `router.refresh()` after auth state changes
