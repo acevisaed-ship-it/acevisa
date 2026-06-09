@@ -3,9 +3,12 @@ import { createNotification } from '@/lib/notifications'
 import { createAdminClient, getAuthenticatedAdmin } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
-type Params = { params: Promise<{ clientId: string }> }
+export const runtime = 'nodejs'
 
-export async function POST(request: Request, { params }: Params) {
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ clientId: string }> }
+) {
   const admin = await getAuthenticatedAdmin()
   if (!admin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

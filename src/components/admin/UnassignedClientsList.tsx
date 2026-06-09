@@ -45,6 +45,7 @@ export function UnassignedClientsList({ initialClients, counselors }: Props) {
     try {
       const res = await fetch(`/api/admin/clients/${clientId}/assign`, {
         method: 'POST',
+        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ counselorId }),
       })
