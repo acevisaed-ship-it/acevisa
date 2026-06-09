@@ -18,8 +18,13 @@ export function toUTC(date: Date | string): Date {
 }
 
 export function getBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
-  const port = process.env.PORT || '3001'
+  // Local dev must call same-origin APIs, not production NEXT_PUBLIC_BASE_URL
+  if (process.env.NODE_ENV === 'development') {
+    const port = process.env.PORT || '3000'
+    return `http://localhost:${port}`
+  }
+  if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL
+  const port = process.env.PORT || '3000'
   return `http://localhost:${port}`
 }

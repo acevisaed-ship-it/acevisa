@@ -11,6 +11,7 @@ import type { AIProfileData } from '@/types'
 const PANIC_KEYWORDS = [
   // Distress
   'kill myself', 'want to die', 'end my life', 'suicide', 'give up on life',
+  'give up on everything', 'want to give up', 'giving up on everything',
   // Threats
   'threatening me', 'being forced', 'blackmail', 'extortion',
   // Scam signals

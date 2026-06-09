@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { TransitionProvider } from '@/components/landing/AirplaneTransition'
 import './globals.css'
@@ -29,14 +30,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `document.documentElement.classList.add('js-enabled')`,
-          }}
-        />
-      </head>
       <body className="min-h-full flex flex-col bg-bg text-text">
+        <Script id="js-enabled" strategy="beforeInteractive">
+          {`document.documentElement.classList.add('js-enabled')`}
+        </Script>
         <TransitionProvider>{children}</TransitionProvider>
       </body>
     </html>

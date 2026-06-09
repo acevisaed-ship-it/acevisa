@@ -1,6 +1,6 @@
 'use client'
 
-import { type ReactNode } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
   ANIMATION_MS,
@@ -8,10 +8,16 @@ import {
 } from '@/lib/stores/transitionStore'
 
 function AirplaneTransitionOverlay() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const isPlaying = useTransitionStore((s) => s.isPlaying)
   const playId = useTransitionStore((s) => s.playId)
 
-  if (!isPlaying) return null
+  if (!mounted || !isPlaying) return null
 
   return (
     <div

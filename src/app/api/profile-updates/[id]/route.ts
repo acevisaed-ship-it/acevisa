@@ -53,7 +53,8 @@ export async function PATCH(
     .eq('id', updateRequest.client_id)
     .single()
 
-  if (!client || client.counselor_id !== counselor.id) {
+  const isAdmin = counselor.role === 'admin'
+  if (!client || (!isAdmin && client.counselor_id !== counselor.id)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

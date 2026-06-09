@@ -16,6 +16,8 @@ const MEETING_INTENT_KEYWORDS = [
   'meet tomorrow',
   'meet today',
   'meet this',
+  'meet me',
+  'meet you',
   'available on',
   'free on',
   'book me',
@@ -28,6 +30,7 @@ const MEETING_INTENT_KEYWORDS = [
 const TIME_REFERENCE_KEYWORDS: (string | RegExp)[] = [
   'today',
   'tomorrow',
+  'yesterday',
   'monday',
   'tuesday',
   'wednesday',

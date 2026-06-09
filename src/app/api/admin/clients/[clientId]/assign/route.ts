@@ -58,16 +58,25 @@ export async function POST(
   const isTransfer = !!client.counselor_id
   const previousCounselorId = client.counselor_id
 
-  const { error } = await supabase
+  const baseUpdate = {
+    counselor_id: counselorId,
+    updated_at: new Date().toISOString(),
+  }
+
+  let { error } = await supabase
     .from('clients')
     .update({
-      counselor_id: counselorId,
+      ...baseUpdate,
       previous_counselor_id: previousCounselorId || null,
       assigned_by: assignedBy,
       assigned_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
     })
     .eq('id', clientId)
+
+  // Fallback when client-assignment-tracking.sql migration has not been applied
+  if (error?.code === 'PGRST204') {
+    ;({ error } = await supabase.from('clients').update(baseUpdate).eq('id', clientId))
+  }
 
   if (error) {
     console.error('Assign client error:', error)
