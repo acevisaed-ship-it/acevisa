@@ -59,11 +59,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to schedule meeting' }, { status: 500 })
   }
 
+  // Format readable PKT time for the client-facing log
+  const pktMeeting = new Date(new Date(scheduledTimeUTC).getTime() + 5 * 3600 * 1000)
+  const pktLabel = pktMeeting.toLocaleString('en-PK', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  })
+
   await logActivity({
     clientId,
     counselorId: finalCounselorId ?? undefined,
     actionType: 'meeting_scheduled',
-    description: `Meeting scheduled for ${scheduledTimeUTC}`,
+    description: `A meeting has been scheduled for ${pktLabel} PKT.`,
+    visibility: 'shared',
     metadata: { meetingId: meeting.id, scheduledTime: scheduledTimeUTC },
   })
 

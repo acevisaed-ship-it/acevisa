@@ -2,7 +2,16 @@ import { redirect } from 'next/navigation'
 import { StudentSidebar } from '@/components/student/StudentSidebar'
 import { createAdminClient } from '@/lib/supabase/server'
 import { formatPKTDate, formatPKTTime } from '@/lib/pkt'
-import { CheckCircle2, Clock, FileText, MessageCircle, Calendar, ChevronRight } from 'lucide-react'
+import {
+  CheckCircle2,
+  Clock,
+  FileText,
+  MessageCircle,
+  Calendar,
+  Bell,
+  ArrowRightCircle,
+  Info,
+} from 'lucide-react'
 
 type Props = {
   searchParams: Promise<{ clientId?: string }>
@@ -53,6 +62,24 @@ const STAGE_INFO: Record<number, { label: string; description: string; color: st
 
 const PIPELINE_STEPS = [1, 2, 3, 4, 5, 6] as const
 
+// Icon per action_type for the activity feed
+function activityIcon(actionType: string) {
+  switch (actionType) {
+    case 'stage_change': return <ArrowRightCircle className="h-4 w-4 text-[#B7C733]" />
+    case 'meeting_scheduled': return <Calendar className="h-4 w-4 text-[#2083B9]" />
+    case 'counselor_update': return <Bell className="h-4 w-4 text-[#E48328]" />
+    default: return <Info className="h-4 w-4 text-[#0A3F3A]/40" />
+  }
+}
+
+// Format PKT timestamp for the feed: "Monday, 13 June 2026 · 03:45 PM"
+function formatActivityTime(iso: string) {
+  const pkt = new Date(new Date(iso).getTime() + 5 * 3600 * 1000)
+  const day = pkt.toLocaleDateString('en-PK', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  const time = pkt.toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' })
+  return { day, time }
+}
+
 export default async function StudentApplicationPage({ searchParams }: Props) {
   const { clientId } = await searchParams
   if (!clientId) redirect('/')
@@ -70,7 +97,12 @@ export default async function StudentApplicationPage({ searchParams }: Props) {
   const stage = (client.pipeline_stage as number) ?? 1
   const stageInfo = STAGE_INFO[stage] ?? STAGE_INFO[1]
 
-  const [{ data: meetings }, { data: documents }, { count: messageCount }] = await Promise.all([
+  const [
+    { data: meetings },
+    { data: documents },
+    { count: messageCount },
+    { data: activities },
+  ] = await Promise.all([
     supabase
       .from('meetings')
       .select('id, scheduled_time, status')
@@ -85,6 +117,13 @@ export default async function StudentApplicationPage({ searchParams }: Props) {
       .from('conversations')
       .select('id', { count: 'exact', head: true })
       .eq('client_id', clientId),
+    supabase
+      .from('student_activity_log')
+      .select('id, action_type, description, created_at')
+      .eq('client_id', clientId)
+      .eq('visibility', 'shared')
+      .order('created_at', { ascending: false })
+      .limit(50),
   ])
 
   const docsUploaded = (documents ?? []).filter((d) => d.status !== 'requested').length
@@ -173,6 +212,32 @@ export default async function StudentApplicationPage({ searchParams }: Props) {
               <span className="font-semibold">{docsPending} document{docsPending > 1 ? 's' : ''}</span> still needed — upload them in{' '}
               <a href={`/student/documents?clientId=${clientId}`} className="text-[#2083B9] underline">My Documents</a>.
             </p>
+          </div>
+        )}
+
+        {/* Activity feed — shared updates from counselor */}
+        {(activities ?? []).length > 0 && (
+          <div className="mt-6">
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#0A3F3A]/40">Case Updates</h2>
+            <ul className="space-y-3">
+              {(activities ?? []).map((a) => {
+                const { day, time } = formatActivityTime(a.created_at)
+                return (
+                  <li
+                    key={a.id}
+                    className="flex gap-3 rounded-2xl border border-[#0A3F3A]/10 bg-white px-4 py-3"
+                  >
+                    <div className="mt-0.5 shrink-0">{activityIcon(a.action_type)}</div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm text-[#0A3F3A]">{a.description}</p>
+                      <p className="mt-1 text-[10px] text-[#0A3F3A]/40">
+                        {day} · {time} PKT
+                      </p>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
           </div>
         )}
 

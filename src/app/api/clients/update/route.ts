@@ -1,4 +1,5 @@
 import { createAdminClient, getAuthenticatedCounselor } from '@/lib/supabase/server'
+import { logActivity, stageClientLabel } from '@/lib/activityLog'
 import { NextResponse } from 'next/server'
 
 export async function PATCH(request: Request) {
@@ -33,6 +34,18 @@ export async function PATCH(request: Request) {
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  // Auto-log stage changes as shared so the client can see them
+  if (pipeline_stage !== undefined) {
+    await logActivity({
+      clientId,
+      counselorId: counselor.id,
+      actionType: 'stage_change',
+      description: stageClientLabel(pipeline_stage),
+      visibility: 'shared',
+      metadata: { pipeline_stage },
+    })
   }
 
   return NextResponse.json({ success: true })
