@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { PWAInstallButton } from '@/components/PWAInstallButton'
 import { useNavigateWithTransition } from './ScrollContainer'
 
 const stats = [
@@ -64,6 +65,7 @@ export function HeroSection() {
                 Already registered? → Return to your session
               </Link>
             </p>
+            <PWAInstallButton className="mt-3 inline-flex items-center gap-2 rounded-full border border-text/20 px-4 py-2 text-sm font-medium text-text/70 hover:border-text/40 hover:text-text transition-colors" />
           </div>
         </motion.div>
 

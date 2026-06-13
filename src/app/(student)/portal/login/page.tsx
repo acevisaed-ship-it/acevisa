@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { PWAInstallButton } from '@/components/PWAInstallButton'
 
 type View = 'login' | 'forgot'
 
@@ -86,6 +87,9 @@ export default function StudentLoginPage() {
 
         <h1 className="text-center text-2xl font-semibold text-[#0A3F3A]">Student Portal</h1>
         <p className="mt-1 text-center text-sm text-[#0A3F3A]/50">Sign in to track your application</p>
+        <div className="mt-3 flex justify-center">
+          <PWAInstallButton className="inline-flex items-center gap-2 rounded-full border border-[#0A3F3A]/20 px-4 py-2 text-xs font-medium text-[#0A3F3A]/60 hover:border-[#0A3F3A]/40 hover:text-[#0A3F3A] transition-colors" />
+        </div>
 
         {view === 'login' ? (
           <form onSubmit={handleLogin} className="mt-8 space-y-4">
