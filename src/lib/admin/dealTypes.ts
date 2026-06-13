@@ -63,7 +63,18 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   other: 'Other',
 }
 
-export const EXPENSE_CATEGORIES = ['salary', 'office', 'marketing', 'tools', 'other'] as const
+export const EXPENSE_CATEGORIES = [
+  'salary',
+  'office',
+  'marketing',
+  'tools',
+  'utility',
+  'ceo_official',
+  'ceo_home',
+  'ceo_personal',
+  't_and_d',
+  'other',
+] as const
 export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number]
 
 export const EXPENSE_CATEGORY_LABELS: Record<ExpenseCategory, string> = {
@@ -71,6 +82,11 @@ export const EXPENSE_CATEGORY_LABELS: Record<ExpenseCategory, string> = {
   office: 'Office',
   marketing: 'Marketing',
   tools: 'Tools',
+  utility: 'Utility',
+  ceo_official: 'CEO Official Expense',
+  ceo_home: 'CEO Home Expense',
+  ceo_personal: 'CEO Personal Expense',
+  t_and_d: 'Training & Development',
   other: 'Other',
 }
 

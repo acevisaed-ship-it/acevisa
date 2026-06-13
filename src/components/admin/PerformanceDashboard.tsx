@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { cn } from '@/lib/utils'
+import { formatPkr } from '@/lib/admin/dealTypes'
 
 type CounselorPerformance = {
   counselorId: string
@@ -13,6 +14,12 @@ type CounselorPerformance = {
   negligenceFlags: number
   conversionRate: number
   needsAttention: boolean
+  baseSalary: number
+  commissionEarned: number
+  totalCost: number
+  revenueGenerated: number
+  businessContributionPct: number
+  dealsClosed: number
 }
 
 type SortKey = 'conversionRate' | 'avgResponseTimeSeconds' | 'activeClients'
@@ -120,6 +127,10 @@ export function PerformanceDashboard() {
                   <dd className="font-semibold text-text">{c.activeClients}</dd>
                 </div>
                 <div>
+                  <dt className="text-text/50">Deals closed</dt>
+                  <dd className="font-semibold text-text">{c.dealsClosed}</dd>
+                </div>
+                <div>
                   <dt className="text-text/50">Meetings</dt>
                   <dd className="font-semibold text-text">{c.meetingsThisMonth}</dd>
                 </div>
@@ -148,7 +159,38 @@ export function PerformanceDashboard() {
                   <dt className="text-text/50">Conversion</dt>
                   <dd className="font-semibold text-blue">{c.conversionRate}%</dd>
                 </div>
+                <div>
+                  <dt className="text-text/50">Business share</dt>
+                  <dd className="font-semibold text-blue">{c.businessContributionPct}%</dd>
+                </div>
               </dl>
+
+              {/* Cost vs contribution */}
+              <div className="mt-4 pt-4 border-t border-text/5 grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <dt className="text-text/50 text-xs">Revenue generated</dt>
+                  <dd className="font-bold text-text mt-0.5">{formatPkr(c.revenueGenerated)}</dd>
+                </div>
+                <div>
+                  <dt className="text-text/50 text-xs">Total staff cost</dt>
+                  <dd className="font-bold text-orange mt-0.5">{formatPkr(c.totalCost)}</dd>
+                </div>
+              </div>
+              <div className="mt-2 text-xs text-text/40">
+                Base {formatPkr(c.baseSalary)} + Commission {formatPkr(c.commissionEarned)}
+              </div>
+
+              {/* Contribution bar */}
+              {c.businessContributionPct > 0 && (
+                <div className="mt-3">
+                  <div className="h-1.5 rounded-full bg-bg overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-blue transition-all"
+                      style={{ width: `${Math.min(c.businessContributionPct, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
             </article>
           ))}
         </div>

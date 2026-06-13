@@ -27,10 +27,12 @@ export async function GET(request: Request) {
     { data: meetings },
     { data: responseRows },
     { data: tasks },
+    { data: commissionRules },
+    { data: closedDeals },
   ] = await Promise.all([
     supabase
       .from('counselors')
-      .select('id, name')
+      .select('id, name, base_salary, commission_rate')
       .eq('role', 'counselor')
       .eq('status', 'active')
       .order('name'),
@@ -51,7 +53,16 @@ export async function GET(request: Request) {
     supabase
       .from('tasks')
       .select('counselor_id, status, negligence_flagged'),
+    supabase.from('commission_rules').select('counselor_id, commission_rate, base_salary'),
+    supabase
+      .from('deals')
+      .select('id, counselor_id, deal_value, stage, actual_close_date')
+      .in('stage', ['completed', 'agreement_signed'])
+      .gte('actual_close_date', start.slice(0, 10))
+      .lte('actual_close_date', end.slice(0, 10)),
   ])
+
+  const totalRevenue = (closedDeals ?? []).reduce((s, d) => s + Number(d.deal_value), 0)
 
   const performance = (counselors ?? []).map((counselor) => {
     const counselorClients = (clients ?? []).filter((c) => c.counselor_id === counselor.id)
@@ -78,6 +89,17 @@ export async function GET(request: Request) {
     const openTasks = counselorTasks.filter((t) => t.status === 'pending').length
     const negligenceFlags = counselorTasks.filter((t) => t.negligence_flagged).length
 
+    // Cost & contribution
+    const rule = (commissionRules ?? []).find((r) => r.counselor_id === counselor.id)
+    const baseSalary = Number(rule?.base_salary ?? counselor.base_salary ?? 0)
+    const commissionRate = Number(rule?.commission_rate ?? counselor.commission_rate ?? 10)
+    const counselorDeals = (closedDeals ?? []).filter((d) => d.counselor_id === counselor.id)
+    const revenueGenerated = counselorDeals.reduce((s, d) => s + Number(d.deal_value), 0)
+    const commissionEarned = Math.round((revenueGenerated * commissionRate) / 100)
+    const totalCost = baseSalary + commissionEarned
+    const businessContributionPct =
+      totalRevenue > 0 ? Math.round((revenueGenerated / totalRevenue) * 100) : 0
+
     return {
       counselorId: counselor.id,
       counselorName: counselor.name,
@@ -88,6 +110,12 @@ export async function GET(request: Request) {
       negligenceFlags,
       conversionRate: Math.round(conversionRate * 10) / 10,
       needsAttention: negligenceFlags > 0,
+      baseSalary,
+      commissionEarned,
+      totalCost,
+      revenueGenerated,
+      businessContributionPct,
+      dealsClosed: counselorDeals.length,
     }
   })
 

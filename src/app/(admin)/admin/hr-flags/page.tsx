@@ -1,9 +1,5 @@
-import { HrFlagsPanel } from '@/components/admin/HrFlagsPanel'
+import { redirect } from 'next/navigation'
 
 export default function HrFlagsPage() {
-  return (
-    <main className="flex-1 p-4 md:p-8">
-      <HrFlagsPanel />
-    </main>
-  )
+  redirect('/admin/hr')
 }

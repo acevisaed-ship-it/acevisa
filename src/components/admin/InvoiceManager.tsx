@@ -1,7 +1,7 @@
 'use client'
 
-import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import { Download, FileSpreadsheet, Plus, Trash2, X } from 'lucide-react'
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Download, FileSpreadsheet, Paperclip, Plus, Trash2, X } from 'lucide-react'
 import {
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_LABELS,
@@ -15,7 +15,18 @@ import {
   type PaymentMethod,
 } from '@/lib/admin/dealTypes'
 import { downloadInvoicePdf } from '@/lib/admin/generateInvoicePdf'
+import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+
+async function uploadReceipt(file: File): Promise<string | null> {
+  const supabase = createClient()
+  const ext = file.name.split('.').pop() ?? 'pdf'
+  const path = `receipts/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+  const { error } = await supabase.storage.from('receipts').upload(path, file)
+  if (error) { console.error('Receipt upload error:', error); return null }
+  const { data } = supabase.storage.from('receipts').getPublicUrl(path)
+  return data.publicUrl
+}
 
 type ClientOption = { id: string; name: string; counselor_id: string | null }
 type DealOption = { id: string; client_id: string; deal_value: number; service_type: string }
@@ -102,6 +113,8 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('bank_transfer')
   const [referenceNumber, setReferenceNumber] = useState('')
   const [paidAt, setPaidAt] = useState(new Date().toISOString().slice(0, 10))
+  const [paymentReceiptFile, setPaymentReceiptFile] = useState<File | null>(null)
+  const paymentReceiptRef = useRef<HTMLInputElement>(null)
 
   const loadInvoices = useCallback(async () => {
     setLoading(true)
@@ -156,10 +169,15 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
     if (!paymentModal) return
     setSaving(true); setError('')
     try {
+      let receipt_url: string | null = null
+      if (paymentReceiptFile) {
+        receipt_url = await uploadReceipt(paymentReceiptFile)
+        if (!receipt_url) { setError('Receipt upload failed'); setSaving(false); return }
+      }
       const res = await fetch(`/api/admin/invoices/${paymentModal.id}/payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payment_method: paymentMethod, reference_number: referenceNumber, paid_at: paidAt }),
+        body: JSON.stringify({ payment_method: paymentMethod, reference_number: referenceNumber, paid_at: paidAt, receipt_url }),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Failed to record payment'); return }
@@ -398,6 +416,37 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
                 <label className="mb-1.5 block text-sm text-text">Date paid</label>
                 <input type="date" value={paidAt} onChange={(e) => setPaidAt(e.target.value)} className={inputClass} required />
               </div>
+              <div>
+                <label className="mb-1.5 block text-sm text-text">Receipt (optional)</label>
+                <input
+                  ref={paymentReceiptRef}
+                  type="file"
+                  accept="image/*,.pdf"
+                  className="hidden"
+                  onChange={(e) => setPaymentReceiptFile(e.target.files?.[0] ?? null)}
+                />
+                <button
+                  type="button"
+                  onClick={() => paymentReceiptRef.current?.click()}
+                  className={cn(
+                    'flex min-h-[48px] w-full items-center gap-2 rounded-full border px-4 text-sm transition-colors',
+                    paymentReceiptFile
+                      ? 'border-blue bg-blue/5 text-blue'
+                      : 'border-text/20 text-text/60 hover:border-text/40'
+                  )}
+                >
+                  <Paperclip className="h-4 w-4 shrink-0" />
+                  {paymentReceiptFile ? paymentReceiptFile.name : 'Attach receipt (image or PDF)'}
+                  {paymentReceiptFile && (
+                    <span
+                      className="ml-auto text-text/40 hover:text-red-500"
+                      onClick={(e) => { e.stopPropagation(); setPaymentReceiptFile(null); if (paymentReceiptRef.current) paymentReceiptRef.current.value = '' }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </button>
+              </div>
               {error && <p className="text-sm text-orange">{error}</p>}
               <button type="submit" disabled={saving}
                 className="min-h-[52px] w-full rounded-full bg-green py-3 text-sm font-bold text-text disabled:opacity-50">
@@ -429,6 +478,8 @@ function ExpensesTab() {
   const [amount, setAmount] = useState('')
   const [paidAt, setPaidAt] = useState(new Date().toISOString().slice(0, 10))
   const [notes, setNotes] = useState('')
+  const [receiptFile, setReceiptFile] = useState<File | null>(null)
+  const receiptInputRef = useRef<HTMLInputElement>(null)
 
   const loadExpenses = useCallback(async () => {
     setLoading(true)
@@ -446,16 +497,21 @@ function ExpensesTab() {
 
   function openCreate() {
     setCategory('other'); setDescription(''); setAmount(''); setPaidAt(new Date().toISOString().slice(0, 10))
-    setNotes(''); setError(''); setModalOpen(true)
+    setNotes(''); setReceiptFile(null); setError(''); setModalOpen(true)
   }
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault(); setSaving(true); setError('')
     try {
+      let receipt_url: string | null = null
+      if (receiptFile) {
+        receipt_url = await uploadReceipt(receiptFile)
+        if (!receipt_url) { setError('Receipt upload failed — please try again'); setSaving(false); return }
+      }
       const res = await fetch('/api/admin/expenses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category, description, amount: Number(amount), paid_at: paidAt, notes }),
+        body: JSON.stringify({ category, description, amount: Number(amount), paid_at: paidAt, notes, receipt_url }),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Failed to record expense'); return }
@@ -529,6 +585,7 @@ function ExpensesTab() {
                 <th className="px-4 py-3 font-medium">Description</th>
                 <th className="px-4 py-3 font-medium">Amount</th>
                 <th className="px-4 py-3 font-medium">Notes</th>
+                <th className="px-4 py-3 font-medium">Receipt</th>
                 <th className="px-4 py-3 font-medium"></th>
               </tr>
             </thead>
@@ -551,6 +608,18 @@ function ExpensesTab() {
                   <td className="px-4 py-3 text-text">{exp.description}</td>
                   <td className="px-4 py-3 font-semibold text-orange">{formatPkr(Number(exp.amount))}</td>
                   <td className="px-4 py-3 text-text/60 text-xs max-w-[160px] truncate">{exp.notes ?? '—'}</td>
+                  <td className="px-4 py-3">
+                    {(exp as Expense & { receipt_url?: string }).receipt_url ? (
+                      <a
+                        href={(exp as Expense & { receipt_url?: string }).receipt_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs text-blue hover:underline"
+                      >
+                        <Paperclip className="h-3 w-3" /> Receipt
+                      </a>
+                    ) : '—'}
+                  </td>
                   <td className="px-4 py-3">
                     <button type="button" onClick={() => handleDelete(exp.id)} disabled={deleting === exp.id}
                       className="flex h-8 w-8 items-center justify-center rounded-full text-orange/60 hover:bg-orange/10 hover:text-orange disabled:opacity-40"
@@ -610,6 +679,38 @@ function ExpensesTab() {
                 <label className="mb-1.5 block text-sm text-text">Notes (optional)</label>
                 <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2}
                   className="w-full resize-none rounded-2xl border border-text bg-bg px-4 py-2.5 text-sm outline-none focus:border-blue" />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm text-text">Receipt (optional)</label>
+                <input
+                  ref={receiptInputRef}
+                  type="file"
+                  accept="image/*,.pdf"
+                  className="hidden"
+                  onChange={(e) => setReceiptFile(e.target.files?.[0] ?? null)}
+                />
+                <button
+                  type="button"
+                  onClick={() => receiptInputRef.current?.click()}
+                  className={cn(
+                    'flex min-h-[48px] w-full items-center gap-2 rounded-full border px-4 text-sm transition-colors',
+                    receiptFile
+                      ? 'border-blue bg-blue/5 text-blue'
+                      : 'border-text/20 text-text/60 hover:border-text/40'
+                  )}
+                >
+                  <Paperclip className="h-4 w-4 shrink-0" />
+                  {receiptFile ? receiptFile.name : 'Attach receipt (image or PDF)'}
+                  {receiptFile && (
+                    <span
+                      className="ml-auto text-text/40 hover:text-red-500"
+                      onClick={(e) => { e.stopPropagation(); setReceiptFile(null); if (receiptInputRef.current) receiptInputRef.current.value = '' }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </button>
               </div>
 
               {error && <p className="text-sm text-orange">{error}</p>}

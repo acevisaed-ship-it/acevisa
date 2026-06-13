@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   if (error) return error
 
   const body = await request.json()
-  const { category, description, amount, paid_at, notes } = body
+  const { category, description, amount, paid_at, notes, subcategory, counselor_id, receipt_url } = body
 
   if (!category || !EXPENSE_CATEGORIES.includes(category as ExpenseCategory)) {
     return NextResponse.json({ error: 'Valid category is required' }, { status: 400 })
@@ -63,14 +63,17 @@ export async function POST(request: Request) {
     .from('expenses')
     .insert({
       category,
+      subcategory: subcategory?.trim() || null,
       description: description.trim(),
       amount: Number(amount),
       currency: 'PKR',
       paid_at,
       recorded_by: admin?.id ?? null,
       notes: notes?.trim() || null,
+      counselor_id: counselor_id || null,
+      receipt_url: receipt_url || null,
     })
-    .select('id, category, description, amount, currency, paid_at, notes, created_at')
+    .select('id, category, subcategory, description, amount, currency, paid_at, notes, receipt_url, created_at')
     .single()
 
   if (insertError) {
