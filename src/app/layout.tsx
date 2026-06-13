@@ -42,7 +42,14 @@ export default function RootLayout({
     >
       <head>
         <meta name="theme-color" content="#0A3F3A" />
-        <link rel="apple-touch-icon" href="/logo.png" />
+        {/* interactive-widget=resizes-content: on Chrome/Android the visual viewport
+            shrinks when the soft keyboard opens, so dvh units respond and the chat
+            input stays above the keyboard (Bug #5 fix) */}
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, interactive-widget=resizes-content"
+        />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body className="min-h-full flex flex-col bg-bg text-text">
         <Script id="js-enabled" strategy="beforeInteractive">

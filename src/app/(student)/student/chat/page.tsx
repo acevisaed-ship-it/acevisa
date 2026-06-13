@@ -22,11 +22,12 @@ export default async function StudentChatPage({ searchParams }: Props) {
   if (!client) redirect('/')
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-dvh">
       <StudentSidebar clientId={clientId} />
-      <div className="flex flex-1 justify-center pt-14 lg:pt-0">
+      {/* pt-14 offsets the fixed StudentSidebar mobile header (h-14 = 56px); removed on lg */}
+      <main className="flex flex-1 flex-col overflow-hidden pt-14 lg:pt-0">
         <ChatShell clientId={clientId} clientName={client.name} />
-      </div>
+      </main>
     </div>
   )
 }

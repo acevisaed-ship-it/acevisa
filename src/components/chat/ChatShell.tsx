@@ -115,8 +115,11 @@ export function ChatShell({ clientId, clientName }: Props) {
   }
 
   return (
-    <div className="mx-auto flex h-dvh max-w-[390px] flex-col bg-bg">
-      <ChatHeader clientName={clientName} />
+    <div className="mx-auto flex h-full max-w-[390px] flex-col bg-bg">
+      {/* Hidden on mobile — StudentSidebar already provides the fixed top bar */}
+      <div className="hidden lg:block">
+        <ChatHeader clientName={clientName} />
+      </div>
 
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4">
         {messages.length === 0 && !isLoading ? (
