@@ -1,8 +1,18 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Download } from 'lucide-react'
 import { formatPkr } from '@/lib/admin/dealTypes'
 import { cn } from '@/lib/utils'
+
+function downloadExport(type: string, month: string) {
+  const a = document.createElement('a')
+  a.href = `/api/admin/finance/export?type=${type}&month=${month}`
+  a.download = ''
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+}
 
 type Summary = {
   totalInvoiced: number
@@ -94,6 +104,26 @@ export function FinanceSummary() {
           onChange={(e) => setMonth(e.target.value)}
           className="min-h-[44px] rounded-full border border-text/20 bg-white px-4 text-sm text-text outline-none focus:border-blue"
         />
+      </div>
+
+      {/* Export buttons */}
+      <div className="mt-4 flex flex-wrap gap-2">
+        {[
+          { type: 'pl', label: 'P&L Summary' },
+          { type: 'invoices', label: 'Client Invoices' },
+          { type: 'expenses', label: 'Expenses' },
+          { type: 'commissions', label: 'Commissions' },
+        ].map(({ type, label }) => (
+          <button
+            key={type}
+            type="button"
+            onClick={() => downloadExport(type, month)}
+            className="inline-flex items-center gap-1.5 rounded-full border border-text/20 bg-white px-4 py-2 text-xs font-medium text-text/70 hover:border-blue hover:text-blue transition-colors"
+          >
+            <Download className="h-3.5 w-3.5" />
+            {label}
+          </button>
+        ))}
       </div>
 
       {loading ? (

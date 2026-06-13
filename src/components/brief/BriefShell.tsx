@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react'
 import { ChatHeader } from '@/components/chat/ChatHeader'
 import type { AIProfileData, Client, Conversation, Document } from '@/types'
 import { formatPKTMeetingHeader } from '@/lib/pkt'
+import { BehavioralNotesSection } from './BehavioralNotesSection'
 import { ConversationDigestSection } from './ConversationDigestSection'
 import { DocumentsChecklistSection } from './DocumentsChecklistSection'
 import { OnlineStatusToggle } from './OnlineStatusToggle'
@@ -81,6 +82,7 @@ export function BriefShell({
           />
           <ServicePathwaySection profile={profile} />
           <PsychologicalReadSection profile={profile} />
+          <BehavioralNotesSection clientId={client.id} />
           <TalkingPointsSection profile={profile} />
           <DocumentsChecklistSection documents={documents} clientId={client.id} />
 

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ActivityHistorySection } from '@/components/brief/ActivityHistorySection'
+import { BehavioralNotesSection } from '@/components/brief/BehavioralNotesSection'
 import { ConversationDigestSection } from '@/components/brief/ConversationDigestSection'
 import { DocumentsChecklistSection } from '@/components/brief/DocumentsChecklistSection'
 import {
@@ -125,6 +126,7 @@ export default async function AdminClientProfilePage({ params }: Props) {
         />
         <ServicePathwaySection profile={profile} />
         <PsychologicalReadSection profile={profile} />
+        <BehavioralNotesSection clientId={clientId} />
         <TalkingPointsSection profile={profile} />
         <DocumentsChecklistSection documents={(documents ?? []) as Document[]} clientId={clientId} />
         <MeetingsHistorySection clientId={clientId} meetings={meetings ?? []} />

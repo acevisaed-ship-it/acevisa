@@ -1,3 +1,4 @@
+import { runBehavioralAnalysis } from '@/lib/behavioralAnalysis'
 import { logActivity } from '@/lib/activityLog'
 import {
   ACE_MASTER_SYSTEM_PROMPT,
@@ -681,6 +682,12 @@ Use this context to make your opening message highly relevant to their specific 
     })
 
     runSpecialistCalls(triggers, conversationMessages, clientId).catch(() => {})
+  }
+
+  // Auto-trigger behavioral analysis every 5th message (fire-and-forget)
+  const totalMsgCount = (history || []).length + 2 // +2: student msg + this AI reply
+  if (!isInit && totalMsgCount % 5 === 0) {
+    runBehavioralAnalysis(clientId).catch(() => {})
   }
 
   if (conversationComplete) {
