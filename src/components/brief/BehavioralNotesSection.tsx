@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Brain, ChevronDown, ChevronUp, RefreshCw, AlertTriangle } from 'lucide-react'
 import { BriefCard } from './BriefCard'
 
@@ -33,7 +33,7 @@ export function BehavioralNotesSection({ clientId }: Props) {
   const [reanalysing, setReanalysing] = useState(false)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true)
     try {
       const res = await fetch(`/api/ai/behavioral-analysis?clientId=${clientId}`)
@@ -45,9 +45,9 @@ export function BehavioralNotesSection({ clientId }: Props) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [clientId])
 
-  useEffect(() => { load() }, [clientId])
+  useEffect(() => { void load() }, [load])
 
   async function handleReanalyse() {
     setReanalysing(true)
@@ -62,8 +62,6 @@ export function BehavioralNotesSection({ clientId }: Props) {
       setReanalysing(false)
     }
   }
-
-  const latest = notes[0] ?? null
 
   return (
     <BriefCard>

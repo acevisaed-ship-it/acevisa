@@ -8,6 +8,9 @@ const ALLOWED_MIME = new Set([
   'image/webp',
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/zip',
+  'application/x-zip-compressed',
 ])
 
 const MAX_BYTES = 10 * 1024 * 1024 // 10 MB

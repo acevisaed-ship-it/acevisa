@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { CheckCircle2, Clock, Upload, Loader2, ExternalLink } from 'lucide-react'
+import { CheckCircle2, Clock, Upload, Loader2 } from 'lucide-react'
 import type { Document, DocumentStatus } from '@/types'
 
 type Props = {

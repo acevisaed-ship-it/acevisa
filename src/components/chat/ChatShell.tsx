@@ -168,9 +168,17 @@ export function ChatShell({ clientId, clientName }: Props) {
       </div>
 
       <ChatInput
+        clientId={clientId}
         value={inputValue}
         onChange={setInputValue}
         onSend={handleSend}
+        onAttachmentSent={(studentMsg, aiMsg) => {
+          setMessages((prev) => [
+            ...prev,
+            studentMsg as ChatMessage,
+            aiMsg as ChatMessage,
+          ])
+        }}
         disabled={isLoading}
       />
 

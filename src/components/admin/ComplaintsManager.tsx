@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { AlertTriangle, CheckCircle, ChevronDown, ChevronUp, Clock } from 'lucide-react'
+import { CheckCircle, ChevronDown, ChevronUp, Clock } from 'lucide-react'
 
 type Complaint = {
   id: string

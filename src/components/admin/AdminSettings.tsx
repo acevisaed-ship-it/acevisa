@@ -5,8 +5,8 @@ import { Save, Bell, Shield, Database, Palette } from 'lucide-react'
 
 type Section = 'notifications' | 'security' | 'data' | 'appearance'
 
-function SectionTab({ id, label, icon: Icon, active, onClick }: {
-  id: Section; label: string; icon: React.ElementType; active: boolean; onClick: () => void
+function SectionTab({ label, icon: Icon, active, onClick }: {
+  label: string; icon: React.ElementType; active: boolean; onClick: () => void
 }) {
   return (
     <button
@@ -119,7 +119,6 @@ export function AdminSettings() {
         ]).map((tab) => (
           <SectionTab
             key={tab.id}
-            id={tab.id}
             label={tab.label}
             icon={tab.icon}
             active={section === tab.id}

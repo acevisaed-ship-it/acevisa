@@ -12,11 +12,16 @@ const NAV_ITEMS = [
   { href: '/student/complaint', label: 'Raise a Complaint', icon: HelpCircle },
 ]
 
-export function StudentSidebar({ clientId }: { clientId: string }) {
-  const [open, setOpen] = useState(false)
-  const pathname = usePathname()
-
-  const NavLinks = () => (
+function StudentNavLinks({
+  clientId,
+  pathname,
+  onNavigate,
+}: {
+  clientId: string
+  pathname: string | null
+  onNavigate?: () => void
+}) {
+  return (
     <nav className="flex flex-col gap-1 p-4">
       {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
         const isActive = pathname?.startsWith(href)
@@ -24,7 +29,7 @@ export function StudentSidebar({ clientId }: { clientId: string }) {
           <Link
             key={href}
             href={`${href}?clientId=${clientId}`}
-            onClick={() => setOpen(false)}
+            onClick={onNavigate}
             className={`flex min-h-[48px] items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${
               isActive
                 ? 'bg-[#B7C733] text-[#0A3F3A]'
@@ -38,6 +43,11 @@ export function StudentSidebar({ clientId }: { clientId: string }) {
       })}
     </nav>
   )
+}
+
+export function StudentSidebar({ clientId }: { clientId: string }) {
+  const [open, setOpen] = useState(false)
+  const pathname = usePathname()
 
   return (
     <>
@@ -45,11 +55,10 @@ export function StudentSidebar({ clientId }: { clientId: string }) {
       <aside className="hidden min-h-screen w-60 shrink-0 flex-col bg-[#0A3F3A] lg:flex">
         <div className="flex items-center border-b border-white/10 px-4 py-5">
           <div className="inline-flex items-center justify-center rounded-xl bg-white/95 px-2.5 py-1.5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="AceVisa" className="h-8 w-auto" />
           </div>
         </div>
-        <NavLinks />
+        <StudentNavLinks clientId={clientId} pathname={pathname} />
       </aside>
 
       {/* Mobile top bar */}
@@ -63,7 +72,6 @@ export function StudentSidebar({ clientId }: { clientId: string }) {
           <Menu size={20} />
         </button>
         <div className="inline-flex items-center justify-center rounded-xl bg-white/95 px-2 py-1">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="AceVisa" className="h-7 w-auto" />
         </div>
         <div className="w-9" />
@@ -80,7 +88,6 @@ export function StudentSidebar({ clientId }: { clientId: string }) {
           <div className="fixed left-0 top-0 z-50 flex h-full w-64 flex-col bg-[#0A3F3A] lg:hidden">
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
               <div className="inline-flex items-center justify-center rounded-xl bg-white/95 px-2 py-1">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/logo.png" alt="AceVisa" className="h-7 w-auto" />
               </div>
               <button
@@ -92,7 +99,11 @@ export function StudentSidebar({ clientId }: { clientId: string }) {
                 <X size={20} />
               </button>
             </div>
-            <NavLinks />
+            <StudentNavLinks
+              clientId={clientId}
+              pathname={pathname}
+              onNavigate={() => setOpen(false)}
+            />
           </div>
         </>
       )}

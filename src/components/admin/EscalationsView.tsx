@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Flag, CheckCircle, Clock } from 'lucide-react'
+import { CheckCircle, Clock } from 'lucide-react'
 
 type Escalation = {
   id: string

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { UserPlus, Users, CheckCircle, XCircle, Pencil, X, Check } from 'lucide-react'
+import { UserPlus, CheckCircle, XCircle, Pencil, X, Check } from 'lucide-react'
 
 type Counselor = {
   id: string

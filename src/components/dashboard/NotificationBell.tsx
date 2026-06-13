@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Bell,
@@ -95,17 +95,17 @@ export function NotificationBell({ counselorId, context = 'counselor', variant =
 
   const unreadCount = notifications.filter((n) => !n.is_read).length
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     const res = await fetch(`/api/notifications?counselorId=${counselorId}`)
     const data = await res.json()
     setNotifications(data.notifications || [])
-  }
+  }, [counselorId])
 
   useEffect(() => {
     fetchNotifications()
     const interval = setInterval(fetchNotifications, 30000)
     return () => clearInterval(interval)
-  }, [counselorId])
+  }, [fetchNotifications])
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {

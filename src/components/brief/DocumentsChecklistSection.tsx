@@ -133,7 +133,7 @@ export function DocumentsChecklistSection({ documents, clientId }: Props) {
       )}
 
       {docs.length === 0 ? (
-        <p className="text-sm text-text/60">No documents requested yet. Use "Request document" above to ask the client to upload files.</p>
+        <p className="text-sm text-text/60">No documents requested yet. Use &ldquo;Request document&rdquo; above to ask the client to upload files.</p>
       ) : (
         <div className="space-y-3">
           {docs.map((doc) => {

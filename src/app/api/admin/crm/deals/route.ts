@@ -1,7 +1,6 @@
 import {
   DEAL_SERVICE_TYPES,
   DEAL_STAGES,
-  type DealServiceType,
   type DealStage,
 } from '@/lib/admin/dealTypes'
 import { parseClientJoin, parseCounselorName } from '@/lib/admin/parseCounselorJoin'

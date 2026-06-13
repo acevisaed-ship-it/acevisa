@@ -40,7 +40,7 @@ export async function GET() {
     ),
   ]
 
-  let clientCounselorMap = new Map<string, { name: string }>()
+  const clientCounselorMap = new Map<string, { name: string }>()
   if (clientIds.length > 0) {
     const { data: clients } = await supabase
       .from('clients')

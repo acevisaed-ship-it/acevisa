@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, type FormEvent } from 'react'
-import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -32,7 +31,6 @@ const inputClass =
   'min-h-[48px] w-full rounded-card border border-text/20 bg-bg px-4 py-3.5 text-base text-text placeholder:text-text/40 outline-none transition-colors duration-700 focus:border-blue'
 
 export function RegistrationSection() {
-  const router = useRouter()
   const selectedService = useScrollStore((s) => s.selectedService)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

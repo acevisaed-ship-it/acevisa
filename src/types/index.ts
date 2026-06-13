@@ -6,12 +6,17 @@ export type ClientLanguage = 'urdu' | 'english' | 'punjabi' | 'sindhi' | 'pashto
 
 export type ConversationSender = 'ai' | 'student'
 
+export type ChatAttachmentType = 'image' | 'pdf' | 'document' | 'archive'
+
 export type ChatMessage = {
   id: string
   sender: 'ai' | 'student'
   message_text: string
   timestamp: string
   stage_tag?: string
+  attachment_url?: string | null
+  attachment_name?: string | null
+  attachment_type?: ChatAttachmentType | null
 }
 
 export type KnowledgeBaseCategory =
@@ -75,6 +80,9 @@ export type Conversation = {
   sender: ConversationSender
   timestamp: string
   stage_tag: string | null
+  attachment_url?: string | null
+  attachment_name?: string | null
+  attachment_type?: ChatAttachmentType | null
 }
 
 export type AIProfileData = {
