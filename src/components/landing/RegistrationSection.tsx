@@ -21,6 +21,7 @@ const services: ServiceOption[] = [
 interface FormData {
   name: string
   phone: string
+  email: string
   city: string
   language: string
   interested_in: ServiceOption
@@ -38,6 +39,7 @@ export function RegistrationSection() {
   const [form, setForm] = useState<FormData>({
     name: '',
     phone: '',
+    email: '',
     city: '',
     language: 'Urdu',
     interested_in: 'Study Visa',
@@ -145,6 +147,21 @@ export function RegistrationSection() {
                 className={inputClass}
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-text">
+                Email address
+              </label>
+              <input
+                id="email"
+                type="email"
+                required
+                placeholder="yourname@email.com"
+                className={inputClass}
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
             </div>
 

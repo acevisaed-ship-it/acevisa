@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
   const body = await request.json()
-  const { name, phone, city, language, ad_source } = body
+  const { name, phone, email, city, language, ad_source } = body
 
   if (!name || !phone || !language) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -12,15 +12,30 @@ export async function POST(request: Request) {
 
   const supabase = createAdminClient()
   const adSource = ad_source || 'direct'
+  const emailLower = email?.trim()?.toLowerCase() || null
 
-  const { data: existing } = await supabase
+  // Return existing client if phone already registered
+  const { data: existingByPhone } = await supabase
     .from('clients')
     .select('id')
     .eq('phone', phone)
     .maybeSingle()
 
-  if (existing) {
-    return NextResponse.json({ success: true, clientId: existing.id, existing: true })
+  if (existingByPhone) {
+    return NextResponse.json({ success: true, clientId: existingByPhone.id, existing: true })
+  }
+
+  // Also check duplicate email
+  if (emailLower) {
+    const { data: existingByEmail } = await supabase
+      .from('clients')
+      .select('id')
+      .eq('email', emailLower)
+      .maybeSingle()
+
+    if (existingByEmail) {
+      return NextResponse.json({ success: true, clientId: existingByEmail.id, existing: true })
+    }
   }
 
   let assignedCounselorId: string | null = null
@@ -43,12 +58,14 @@ export async function POST(request: Request) {
     .insert({
       name,
       phone,
+      email: emailLower,
       city: city || null,
       language: String(language).toLowerCase(),
       ad_source: adSource,
       counselor_id: assignedCounselorId,
       pipeline_stage: 1,
       qualification_score: 0,
+      portal_password_set: false,
     })
     .select('id')
     .single()
@@ -56,6 +73,32 @@ export async function POST(request: Request) {
   if (error) {
     console.error('Registration error:', error)
     return NextResponse.json({ error: 'Registration failed' }, { status: 500 })
+  }
+
+  // Create Supabase Auth user and send portal setup invite (non-fatal)
+  if (emailLower) {
+    try {
+      const origin = new URL(request.url).origin
+
+      // invite sends a magic link; on click student lands on /portal/setup-password
+      const { data: invited, error: inviteErr } = await supabase.auth.admin.inviteUserByEmail(
+        emailLower,
+        {
+          redirectTo: `${origin}/portal/setup-password?clientId=${newClient.id}`,
+          data: { clientId: newClient.id, name },
+        }
+      )
+
+      if (!inviteErr && invited?.user) {
+        // Link auth user to client record
+        await supabase
+          .from('clients')
+          .update({ auth_user_id: invited.user.id })
+          .eq('id', newClient.id)
+      }
+    } catch (inviteEx) {
+      console.error('[register] invite send failed (non-fatal):', inviteEx)
+    }
   }
 
   if (!assignedCounselorId) {

@@ -10,6 +10,7 @@ interface TaskAction {
   old_status?: string
   new_status?: string
   reminder_at?: string
+  visibility?: string
   created_at: string
   counselors?: { name: string }
 }
@@ -47,6 +48,7 @@ export function TaskDetailPanel({
 }: Props) {
   const [actions, setActions] = useState<TaskAction[]>([])
   const [note, setNote] = useState('')
+  const [noteVisibility, setNoteVisibility] = useState<'internal' | 'shared'>('internal')
   const [reminderInput, setReminderInput] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [tab, setTab] = useState<'update' | 'history'>(readOnly ? 'history' : 'update')
@@ -69,6 +71,7 @@ export function TaskDetailPanel({
         noteText: note || undefined,
         newStatus: newStatus || undefined,
         reminderAt: reminderInput || undefined,
+        visibility: noteVisibility,
       }),
     })
     setNote('')
@@ -159,6 +162,32 @@ export function TaskDetailPanel({
                   rows={3}
                   className="w-full resize-none rounded-xl border border-[#0A3F3A]/20 bg-[#E6E8E7] px-3 py-2 text-sm text-[#0A3F3A] placeholder:text-[#0A3F3A]/40 focus:outline-none focus:ring-2 focus:ring-[#B7C733]"
                 />
+                {/* Visibility toggle */}
+                <div className="mt-2 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setNoteVisibility('internal')}
+                    className={`flex-1 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                      noteVisibility === 'internal'
+                        ? 'border-[#0A3F3A]/40 bg-[#0A3F3A] text-white'
+                        : 'border-[#0A3F3A]/20 bg-white text-[#0A3F3A]/60 hover:bg-[#0A3F3A]/5'
+                    }`}
+                  >
+                    🔒 Internal only
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNoteVisibility('shared')}
+                    className={`flex-1 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                      noteVisibility === 'shared'
+                        ? 'border-[#B7C733] bg-[#B7C733] text-[#0A3F3A]'
+                        : 'border-[#0A3F3A]/20 bg-white text-[#0A3F3A]/60 hover:bg-[#0A3F3A]/5'
+                    }`}
+                  >
+                    👁 Share with client
+                  </button>
+                </div>
+
                 <button
                   onClick={() => submitAction('note')}
                   disabled={!note.trim() || submitting}
@@ -275,9 +304,20 @@ export function TaskDetailPanel({
                         </span>
                       </div>
                       {action.action_type === 'note' && (
-                        <p className="mt-0.5 rounded-xl bg-[#E6E8E7] px-3 py-2 text-sm text-[#0A3F3A]/80">
-                          {action.note_text}
-                        </p>
+                        <div className="mt-0.5">
+                          <p className="rounded-xl bg-[#E6E8E7] px-3 py-2 text-sm text-[#0A3F3A]/80">
+                            {action.note_text}
+                          </p>
+                          {action.visibility === 'shared' ? (
+                            <span className="mt-1 inline-block rounded-full bg-[#B7C733]/20 px-2 py-0.5 text-[10px] font-semibold text-[#0A3F3A]">
+                              👁 Shared with client
+                            </span>
+                          ) : (
+                            <span className="mt-1 inline-block rounded-full bg-[#0A3F3A]/10 px-2 py-0.5 text-[10px] font-semibold text-[#0A3F3A]/50">
+                              🔒 Internal
+                            </span>
+                          )}
+                        </div>
                       )}
                       {action.action_type === 'status_update' && (
                         <p className="mt-0.5 text-sm text-[#0A3F3A]/60">

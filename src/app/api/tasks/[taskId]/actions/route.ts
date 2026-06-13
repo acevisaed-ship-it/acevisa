@@ -30,7 +30,7 @@ export async function POST(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { counselorId, actionType, noteText, newStatus, reminderAt } = await request.json()
+  const { counselorId, actionType, noteText, newStatus, reminderAt, visibility } = await request.json()
   const { taskId } = await params
   const supabase = createAdminClient()
 
@@ -51,6 +51,7 @@ export async function POST(
     old_status: task.status,
     new_status: newStatus || null,
     reminder_at: reminderAt || null,
+    visibility: actionType === 'note' ? (visibility === 'shared' ? 'shared' : 'internal') : 'internal',
   })
 
   const taskUpdate: Record<string, unknown> = {
@@ -69,11 +70,14 @@ export async function POST(
     reminder_set: `Reminder set for task: "${task.task_text?.substring(0, 60)}…"`,
   }
 
+  const noteVisibility = visibility === 'shared' ? 'shared' : 'internal'
+
   await supabase.from('student_activity_log').insert({
     client_id: clientId,
     counselor_id: counselorId || counselor.id,
     action_type: `task_${actionType}`,
     description: actionDescriptions[actionType] || `Task action: ${actionType}`,
+    visibility: actionType === 'note' ? noteVisibility : 'internal',
     metadata: { task_id: taskId, note: noteText, new_status: newStatus },
   })
 
