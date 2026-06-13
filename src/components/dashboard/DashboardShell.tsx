@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Menu } from 'lucide-react'
 import { DashboardSidebar } from './DashboardSidebar'
 import { ProfilePicture } from './ProfilePicture'
+import { NotificationBell } from './NotificationBell'
 
 type Props = {
   counselorId: string
@@ -40,8 +41,12 @@ export function DashboardShell({
         >
           <Menu className="h-6 w-6" />
         </button>
-        <img src="/logo.png" alt="ACE Altius Consulting" className="h-8 w-auto" />
-        <div className="flex items-center gap-2">{headerActions}</div>
+        <div className="inline-flex items-center justify-center rounded-xl bg-white/95 px-2 py-1">
+          <img src="/logo.png" alt="ACE Altius Consulting" className="h-7 w-auto" />
+        </div>
+        <div className="flex items-center gap-2">
+          <NotificationBell counselorId={counselorId} variant="dark" />
+        </div>
       </header>
 
       <DashboardSidebar

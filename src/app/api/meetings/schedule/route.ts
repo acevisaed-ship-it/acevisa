@@ -1,6 +1,7 @@
 import { logActivity } from '@/lib/activityLog'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getBaseUrl } from '@/lib/utils'
+import { sendEmail, meetingBookedEmailHtml } from '@/lib/email'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
@@ -88,6 +89,33 @@ export async function POST(request: Request) {
     })
   } catch (emailError) {
     console.error('Email notification failed (non-fatal):', emailError)
+  }
+
+  // Email the counselor that a meeting was just booked with them (non-fatal)
+  if (finalCounselorId) {
+    const [{ data: counselor }, { data: clientRecord }] = await Promise.all([
+      supabase.from('counselors').select('email, name').eq('id', finalCounselorId).single(),
+      supabase.from('clients').select('name, phone').eq('id', clientId).single(),
+    ])
+
+    if (counselor && clientRecord) {
+      const pkt = new Date(new Date(scheduledTimeUTC).getTime() + 5 * 3600 * 1000)
+      const timeLabel = pkt.toLocaleString('en-PK', {
+        weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+      })
+      await sendEmail({
+        to: counselor.email,
+        subject: `New meeting booked — ${clientRecord.name}`,
+        html: meetingBookedEmailHtml({
+          counselorName: counselor.name,
+          clientName: clientRecord.name,
+          clientPhone: clientRecord.phone,
+          scheduledTime: `${timeLabel} PKT`,
+          dashboardUrl: `${getBaseUrl()}/dashboard/clients/${clientId}`,
+        }),
+      })
+    }
   }
 
   return NextResponse.json({ success: true, meetingId: meeting.id })

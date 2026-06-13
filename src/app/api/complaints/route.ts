@@ -2,6 +2,8 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { logActivity } from '@/lib/activityLog'
 import { createNotification } from '@/lib/notifications'
+import { sendEmail, complaintEmailHtml } from '@/lib/email'
+import { getBaseUrl } from '@/lib/utils'
 
 export async function GET(request: Request) {
   const clientId = new URL(request.url).searchParams.get('clientId')
@@ -87,6 +89,28 @@ export async function POST(request: Request) {
       title: `Complaint received — ${resolvedName || 'Unknown'}`,
       body: subject,
       clientId: clientId || undefined,
+    })
+  }
+
+  // Email all admins about the new complaint (non-fatal)
+  const { data: admins } = await supabase
+    .from('counselors')
+    .select('email, name')
+    .eq('role', 'admin')
+    .eq('status', 'active')
+
+  for (const admin of admins ?? []) {
+    await sendEmail({
+      to: admin.email,
+      subject: `New complaint — ${resolvedName}`,
+      html: complaintEmailHtml({
+        adminName: admin.name,
+        clientName: resolvedName,
+        subject: subject.trim(),
+        body: body.trim(),
+        complaintId: complaint.id,
+        dashboardUrl: `${getBaseUrl()}/admin/complaints`,
+      }),
     })
   }
 

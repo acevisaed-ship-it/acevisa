@@ -1,0 +1,39 @@
+---
+description: Apply Supabase SQL and migrations via CLI instead of dashboard
+globs: acevisa/supabase/**/*.sql
+alwaysApply: true
+---
+
+# Supabase SQL — run via CLI
+
+This project is linked to Supabase (`qefhuepmjbtmijgoguca`). Apply schema changes, seeds, and fixes from the `acevisa/` directory — never ask the user to paste SQL in the dashboard.
+
+## When you write or change SQL
+
+1. Save the file under `acevisa/supabase/` (or `acevisa/supabase/migrations/`).
+2. Run it immediately:
+
+```bash
+cd acevisa
+supabase db execute --file ./supabase/<filename>.sql
+```
+
+For a one-off query:
+
+```bash
+cd acevisa
+supabase db execute "SELECT * FROM clients LIMIT 5"
+```
+
+3. Confirm success from CLI output before marking the task done.
+4. If execution fails, fix the SQL and re-run — do not hand off to the user.
+
+## Prerequisites
+
+- `supabase login` must be completed (browser auth).
+- Project must be linked: `supabase link --project-ref qefhuepmjbtmijgoguca`
+
+## Conventions
+
+- Prefer idempotent SQL (`IF NOT EXISTS`, `ON CONFLICT`, etc.) when altering schema.
+- Name migration files descriptively: `add-meetings-table.sql`, `seed-beta2.sql`.

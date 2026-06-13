@@ -15,6 +15,7 @@ import { createAdminClient, requireAdmin } from '@/lib/supabase/server'
 import type { AIProfileData, Client, Conversation, Document } from '@/types'
 import { ClientControls } from '@/app/(counselor)/dashboard/clients/[clientId]/ClientControls'
 import { PendingProfileUpdates } from '@/app/(counselor)/dashboard/clients/[clientId]/PendingProfileUpdates'
+import { CopyPortalLink } from '@/components/CopyPortalLink'
 
 type Props = {
   params: Promise<{ clientId: string }>
@@ -85,12 +86,15 @@ export default async function AdminClientProfilePage({ params }: Props) {
   return (
     <main className="flex-1 bg-bg p-4 md:p-8">
       <div className="mx-auto max-w-[900px]">
-        <Link
-          href="/admin/clients"
-          className="mb-4 inline-flex items-center text-sm text-blue hover:underline"
-        >
-          ← Back to all clients
-        </Link>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <Link
+            href="/admin/clients"
+            className="inline-flex items-center text-sm text-blue hover:underline"
+          >
+            ← Back to all clients
+          </Link>
+          <CopyPortalLink clientId={clientId} />
+        </div>
 
         <ClientProfileHeader client={typedClient} score={score} />
 
@@ -122,7 +126,7 @@ export default async function AdminClientProfilePage({ params }: Props) {
         <ServicePathwaySection profile={profile} />
         <PsychologicalReadSection profile={profile} />
         <TalkingPointsSection profile={profile} />
-        <DocumentsChecklistSection documents={(documents ?? []) as Document[]} />
+        <DocumentsChecklistSection documents={(documents ?? []) as Document[]} clientId={clientId} />
         <MeetingsHistorySection clientId={clientId} meetings={meetings ?? []} />
         <ActivityHistorySection entries={activityLog ?? []} />
       </div>

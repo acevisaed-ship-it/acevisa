@@ -1,12 +1,9 @@
-function AdminPlaceholder({ title, subtitle }: { title: string; subtitle: string }) {
-  return (
-    <main className="flex-1 p-4 md:p-8">
-      <h1 className="text-2xl font-semibold text-blue md:text-3xl">{title}</h1>
-      <p className="mt-2 text-text/60">{subtitle}</p>
-    </main>
-  )
-}
+import { AdminSettings } from '@/components/admin/AdminSettings'
 
 export default function AdminSettingsPage() {
-  return <AdminPlaceholder title="Settings" subtitle="Admin settings — Phase 3" />
+  return (
+    <main className="flex-1 p-4 md:p-8">
+      <AdminSettings />
+    </main>
+  )
 }

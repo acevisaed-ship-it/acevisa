@@ -1,0 +1,268 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { UserPlus, Users, CheckCircle, XCircle, Pencil, X, Check } from 'lucide-react'
+
+type Counselor = {
+  id: string
+  name: string
+  email: string
+  status: 'active' | 'inactive'
+  role: 'counselor' | 'admin'
+  clientCount: number
+  avatarUrl: string | null
+}
+
+type NewCounselor = {
+  name: string
+  email: string
+  password: string
+  role: 'counselor' | 'admin'
+}
+
+export function TeamManagement() {
+  const [counselors, setCounselors] = useState<Counselor[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showAdd, setShowAdd] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editName, setEditName] = useState('')
+  const [form, setForm] = useState<NewCounselor>({ name: '', email: '', password: '', role: 'counselor' })
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch('/api/admin/team')
+      .then((r) => r.json())
+      .then((d) => setCounselors(d.counselors ?? []))
+      .finally(() => setLoading(false))
+  }, [])
+
+  async function addCounselor() {
+    if (!form.name || !form.email || !form.password) {
+      setError('Name, email and password are required.')
+      return
+    }
+    setSaving(true)
+    setError(null)
+    const res = await fetch('/api/admin/team', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form),
+    })
+    const data = await res.json()
+    if (!res.ok) {
+      setError(data.error ?? 'Failed to create counselor')
+    } else {
+      setCounselors((prev) => [data.counselor, ...prev])
+      setShowAdd(false)
+      setForm({ name: '', email: '', password: '', role: 'counselor' })
+    }
+    setSaving(false)
+  }
+
+  async function toggleStatus(id: string, currentStatus: string) {
+    const newStatus = currentStatus === 'active' ? 'inactive' : 'active'
+    const res = await fetch('/api/admin/team', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status: newStatus }),
+    })
+    if (res.ok) {
+      setCounselors((prev) => prev.map((c) => c.id === id ? { ...c, status: newStatus as 'active' | 'inactive' } : c))
+    }
+  }
+
+  async function saveName(id: string) {
+    const res = await fetch('/api/admin/team', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, name: editName }),
+    })
+    if (res.ok) {
+      setCounselors((prev) => prev.map((c) => c.id === id ? { ...c, name: editName } : c))
+      setEditingId(null)
+    }
+  }
+
+  const active = counselors.filter((c) => c.status === 'active').length
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold text-blue md:text-3xl">Team Management</h1>
+          <p className="mt-1 text-sm text-text/60">
+            {active} active · {counselors.length} total
+          </p>
+        </div>
+        <button
+          onClick={() => { setShowAdd(true); setError(null) }}
+          className="flex items-center gap-2 rounded-full bg-text px-4 py-2 text-sm font-semibold text-bg transition-opacity hover:opacity-80"
+        >
+          <UserPlus className="h-4 w-4" />
+          Add Member
+        </button>
+      </div>
+
+      {showAdd && (
+        <div className="mt-6 rounded-2xl border border-text/10 bg-white p-5">
+          <h2 className="mb-4 text-base font-semibold text-text">New Team Member</h2>
+          {error && <p className="mb-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-text/60">Name</label>
+              <input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="Full name"
+                className="w-full rounded-xl border border-text/20 bg-bg px-3 py-2 text-sm text-text outline-none focus:border-blue"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-text/60">Email</label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                placeholder="email@example.com"
+                className="w-full rounded-xl border border-text/20 bg-bg px-3 py-2 text-sm text-text outline-none focus:border-blue"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-text/60">Password</label>
+              <input
+                type="password"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                placeholder="Temporary password"
+                className="w-full rounded-xl border border-text/20 bg-bg px-3 py-2 text-sm text-text outline-none focus:border-blue"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-text/60">Role</label>
+              <select
+                value={form.role}
+                onChange={(e) => setForm({ ...form, role: e.target.value as 'counselor' | 'admin' })}
+                className="w-full rounded-xl border border-text/20 bg-bg px-3 py-2 text-sm text-text outline-none focus:border-blue"
+              >
+                <option value="counselor">Counselor</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+          </div>
+          <div className="mt-4 flex gap-2">
+            <button
+              onClick={addCounselor}
+              disabled={saving}
+              className="rounded-full bg-text px-4 py-2 text-sm font-semibold text-bg disabled:opacity-50"
+            >
+              {saving ? 'Creating...' : 'Create'}
+            </button>
+            <button
+              onClick={() => { setShowAdd(false); setError(null) }}
+              className="rounded-full bg-text/10 px-4 py-2 text-sm font-semibold text-text"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {loading ? (
+        <div className="mt-6 space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-16 animate-pulse rounded-2xl bg-text/5" />
+          ))}
+        </div>
+      ) : (
+        <div className="mt-6 overflow-x-auto rounded-2xl border border-text/10 bg-white">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-text/10 text-left text-xs font-semibold uppercase tracking-wide text-text/50">
+                <th className="px-4 py-3">Member</th>
+                <th className="px-4 py-3">Role</th>
+                <th className="px-4 py-3">Clients</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-text/6">
+              {counselors.map((c) => (
+                <tr key={c.id} className="hover:bg-bg/40">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-text/10 text-xs font-semibold text-text">
+                        {c.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        {editingId === c.id ? (
+                          <div className="flex items-center gap-1">
+                            <input
+                              value={editName}
+                              onChange={(e) => setEditName(e.target.value)}
+                              className="rounded border border-text/20 px-2 py-0.5 text-sm text-text outline-none"
+                            />
+                            <button onClick={() => saveName(c.id)} className="text-green hover:opacity-80">
+                              <Check className="h-4 w-4" />
+                            </button>
+                            <button onClick={() => setEditingId(null)} className="text-text/40 hover:text-text">
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <p className="font-medium text-text">{c.name}</p>
+                        )}
+                        <p className="text-xs text-text/50">{c.email}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${
+                      c.role === 'admin' ? 'bg-blue/15 text-blue' : 'bg-text/10 text-text/70'
+                    }`}>
+                      {c.role}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-text/70">{c.clientCount}</td>
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                      c.status === 'active'
+                        ? 'bg-green/20 text-text'
+                        : 'bg-text/10 text-text/50'
+                    }`}>
+                      {c.status === 'active'
+                        ? <CheckCircle className="h-3 w-3" />
+                        : <XCircle className="h-3 w-3" />}
+                      {c.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => { setEditingId(c.id); setEditName(c.name) }}
+                        className="rounded-lg p-1.5 text-text/40 hover:bg-text/10 hover:text-text"
+                        title="Edit name"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => toggleStatus(c.id, c.status)}
+                        className={`rounded-full px-3 py-1 text-xs font-semibold transition-opacity hover:opacity-80 ${
+                          c.status === 'active'
+                            ? 'bg-red-100 text-red-600'
+                            : 'bg-green/20 text-text'
+                        }`}
+                      >
+                        {c.status === 'active' ? 'Deactivate' : 'Activate'}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}

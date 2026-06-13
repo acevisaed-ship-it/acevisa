@@ -82,7 +82,7 @@ export function BriefShell({
           <ServicePathwaySection profile={profile} />
           <PsychologicalReadSection profile={profile} />
           <TalkingPointsSection profile={profile} />
-          <DocumentsChecklistSection documents={documents} />
+          <DocumentsChecklistSection documents={documents} clientId={client.id} />
 
           <BriefCard>
             <div className="flex min-h-[50vh] flex-col lg:min-h-0">

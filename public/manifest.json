@@ -1,0 +1,37 @@
+{
+  "name": "ACE Altius Consulting",
+  "short_name": "ACE Portal",
+  "description": "AI-powered overseas education consultancy portal",
+  "start_url": "/login",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#E6E8E7",
+  "theme_color": "#0A3F3A",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/dashboard",
+      "description": "Counselor dashboard"
+    },
+    {
+      "name": "Admin",
+      "url": "/admin",
+      "description": "Admin panel"
+    }
+  ]
+}

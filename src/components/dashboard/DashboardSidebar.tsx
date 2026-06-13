@@ -66,8 +66,10 @@ function SidebarContent({
 
   return (
     <>
-      <div className="flex items-center gap-2 px-6 py-6 text-black">
-        <img src="/logo.png" alt="ACE Altius Consulting" className="h-10 w-auto" />
+      <div className="flex items-center px-4 py-5">
+        <div className="inline-flex items-center justify-center rounded-xl bg-white/95 px-2.5 py-1.5">
+          <img src="/logo.png" alt="ACE Altius Consulting" className="h-9 w-auto" />
+        </div>
       </div>
 
       <nav className="flex flex-1 flex-col gap-1 px-3">

@@ -34,9 +34,11 @@ export function AdminShell({
         >
           <Menu className="h-6 w-6" />
         </button>
-        <img src="/logo.png" alt="ACE Altius Consulting" className="h-8 w-auto" />
+        <div className="inline-flex items-center justify-center rounded-xl bg-white/95 px-2 py-1">
+          <img src="/logo.png" alt="ACE Altius Consulting" className="h-7 w-auto" />
+        </div>
         <div className="flex items-center gap-2">
-          <NotificationBell counselorId={adminId} context="admin" />
+          <NotificationBell counselorId={adminId} context="admin" variant="dark" />
           <ProfilePicture
             counselorId={adminId}
             counselorName={adminName}

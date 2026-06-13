@@ -84,9 +84,10 @@ function getNotificationHref(
 type Props = {
   counselorId: string
   context?: 'admin' | 'counselor'
+  variant?: 'light' | 'dark'
 }
 
-export function NotificationBell({ counselorId, context = 'counselor' }: Props) {
+export function NotificationBell({ counselorId, context = 'counselor', variant = 'light' }: Props) {
   const router = useRouter()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [open, setOpen] = useState(false)
@@ -147,10 +148,14 @@ export function NotificationBell({ counselorId, context = 'counselor' }: Props) 
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#0A3F3A]/10 hover:bg-[#0A3F3A]/20 transition-colors"
+        className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
+          variant === 'dark'
+            ? 'bg-white/15 hover:bg-white/25 text-white'
+            : 'bg-[#0A3F3A]/10 hover:bg-[#0A3F3A]/20 text-[#0A3F3A]'
+        }`}
         aria-label="Notifications"
       >
-        <Bell size={20} className="text-[#0A3F3A]" />
+        <Bell size={20} />
         {unreadCount > 0 && (
           <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#E48328] text-[10px] font-bold text-white">
             {unreadCount > 9 ? '9+' : unreadCount}

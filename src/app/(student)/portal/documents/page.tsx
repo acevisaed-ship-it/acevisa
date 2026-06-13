@@ -1,20 +1,11 @@
-'use client'
+import { redirect } from 'next/navigation'
 
-import { useEffect, useState } from 'react'
+type Props = {
+  searchParams: Promise<{ clientId?: string }>
+}
 
-export default function StudentDocumentsPage() {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) return null
-
-  return (
-    <main className="min-h-screen bg-brand-light p-6">
-      <h1 className="text-2xl font-semibold text-brand-dark">Documents</h1>
-      <p className="mt-2 text-brand-gray">Document upload — scaffold placeholder</p>
-    </main>
-  )
+export default async function PortalDocumentsPage({ searchParams }: Props) {
+  const { clientId } = await searchParams
+  if (!clientId) redirect('/')
+  redirect(`/student/documents?clientId=${clientId}`)
 }
