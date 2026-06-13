@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
 import { BriefShell } from '@/components/brief/BriefShell'
+import { resolveAiProfile } from '@/lib/brief'
 import { createAdminClient, requireAdmin } from '@/lib/supabase/server'
-import type { AIProfileData, Client, Conversation, Document } from '@/types'
+import type { Client, Conversation, Document } from '@/types'
 
 type Props = {
   params: Promise<{ counselorId: string; meetingId: string }>
@@ -42,7 +43,9 @@ export default async function AdminCounselorBriefPage({ params }: Props) {
     supabase.from('clients').select('*').eq('id', meeting.client_id).single(),
     supabase
       .from('ai_profiles')
-      .select('profile_json')
+      .select(
+        'profile_json, stage, qualification_score, detected_language, detected_region, detected_fears, detected_behaviour_type, service_match'
+      )
       .eq('client_id', meeting.client_id)
       .maybeSingle(),
     supabase
@@ -60,7 +63,7 @@ export default async function AdminCounselorBriefPage({ params }: Props) {
 
   if (!client) notFound()
 
-  const profile = (aiProfile?.profile_json as AIProfileData | null) ?? null
+  const { profile, isPartial: profilePartial } = resolveAiProfile(aiProfile)
 
   return (
     <BriefShell
@@ -72,6 +75,7 @@ export default async function AdminCounselorBriefPage({ params }: Props) {
       initialAutoReply={counselorStatus?.auto_reply_enabled ?? false}
       client={client as Client}
       profile={profile}
+      profilePartial={profilePartial}
       conversations={(conversations ?? []) as Conversation[]}
       documents={(documents ?? []) as Document[]}
     />

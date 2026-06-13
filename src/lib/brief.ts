@@ -1,5 +1,72 @@
 import type { AIProfileData, Conversation } from '@/types'
 
+export type AiProfileRow = {
+  profile_json: AIProfileData | null
+  stage?: number | null
+  qualification_score?: number | null
+  detected_language?: string | null
+  detected_region?: string | null
+  detected_fears?: string[] | null
+  detected_behaviour_type?: string | null
+  service_match?: string | null
+}
+
+function formatServiceMatch(serviceMatch: string | null | undefined): string {
+  if (!serviceMatch || serviceMatch === 'unknown') return '—'
+  return serviceMatch
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+/** Full profile_json when available; otherwise a partial view from per-message columns. */
+export function resolveAiProfile(row: AiProfileRow | null | undefined): {
+  profile: AIProfileData | null
+  isPartial: boolean
+} {
+  if (!row) return { profile: null, isPartial: false }
+  if (row.profile_json) {
+    return { profile: row.profile_json as AIProfileData, isPartial: false }
+  }
+
+  const fears = Array.isArray(row.detected_fears) ? row.detected_fears : []
+  const hasColumnData =
+    row.stage != null ||
+    (row.qualification_score != null && Number(row.qualification_score) > 0) ||
+    (!!row.detected_language && row.detected_language !== 'unknown') ||
+    (!!row.detected_region && row.detected_region !== 'unknown') ||
+    (!!row.service_match && row.service_match !== 'unknown') ||
+    (!!row.detected_behaviour_type && row.detected_behaviour_type !== 'undecided') ||
+    fears.length > 0
+
+  if (!hasColumnData) return { profile: null, isPartial: false }
+
+  return {
+    profile: {
+      goal_country:
+        row.detected_region && row.detected_region !== 'unknown'
+          ? row.detected_region
+          : null,
+      study_field: null,
+      start_date: null,
+      education_level: null,
+      english_test_status: null,
+      budget_type: null,
+      has_passport: null,
+      visa_refusals: null,
+      main_concern: fears[0] ?? null,
+      family_involvement: null,
+      qualification_score: Number(row.qualification_score ?? 0),
+      score_rationale: row.detected_behaviour_type
+        ? `Behaviour type: ${row.detected_behaviour_type.replace(/_/g, ' ')}`
+        : 'Building from ongoing conversation — full profile pending.',
+      recommended_service_pathway: formatServiceMatch(row.service_match),
+      psychological_notes: fears,
+      suggested_talking_points: [],
+    },
+    isPartial: true,
+  }
+}
+
 export const PIPELINE_STAGES: Record<number, string> = {
   1: 'New lead',
   2: 'Qualified',

@@ -20,6 +20,29 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { getBaseUrl } from '@/lib/utils'
 import { NextResponse } from 'next/server'
 
+const PIPELINE_STAGE_LABELS: Record<number, string> = {
+  1: 'New Lead',
+  2: 'Qualified',
+  3: 'Registered Client',
+  4: 'Documents in Progress',
+  5: 'Application Submitted',
+  6: 'Visa Outcome',
+  7: 'Alumni',
+}
+
+function stageTagLabel(stageTag: string): string {
+  if (stageTag === 'active') return 'AI assistant responded to client'
+  if (stageTag === 'auto_booking') return 'AI booked a meeting automatically'
+  if (stageTag === 'auto_reply') return 'AI sent auto-reply (counselor away)'
+  const match = stageTag.match(/^stage_(\d+)$/)
+  if (match) {
+    const n = Number(match[1])
+    const label = PIPELINE_STAGE_LABELS[n]
+    return label ? `AI responded — ${label}` : `AI responded at stage ${n}`
+  }
+  return 'AI assistant responded'
+}
+
 const PANIC_KEYWORDS = [
   'kill myself',
   'want to die',
@@ -158,7 +181,7 @@ async function upsertInternalProfile(
   clientId: string,
   internal: AceInternalState
 ) {
-  await supabase.from('ai_profiles').upsert(
+  const { error } = await supabase.from('ai_profiles').upsert(
     {
       client_id: clientId,
       stage: internal.stage,
@@ -172,6 +195,7 @@ async function upsertInternalProfile(
     },
     { onConflict: 'client_id' }
   )
+  if (error) throw error
 }
 
 async function runSpecialistCalls(
@@ -337,7 +361,7 @@ Use this context to make your opening message highly relevant to their specific 
     await logActivity({
       clientId,
       actionType: 'ai_message_sent',
-      description: `AI sent message at stage ${stageTag}`,
+      description: 'AI sent campaign opening message to client',
       metadata: { stage: stageTag },
     })
     return NextResponse.json({
@@ -438,7 +462,7 @@ Use this context to make your opening message highly relevant to their specific 
           await logActivity({
             clientId,
             actionType: 'ai_message_sent',
-            description: `AI sent message at stage ${stageTag}`,
+            description: 'AI booked a meeting automatically',
             metadata: { stage: stageTag },
           })
 
@@ -505,7 +529,7 @@ Use this context to make your opening message highly relevant to their specific 
       await logActivity({
         clientId,
         actionType: 'ai_message_sent',
-        description: `AI sent message at stage ${stageTag}`,
+        description: 'AI sent auto-reply (counselor is currently away)',
         metadata: { stage: stageTag },
       })
 
@@ -527,7 +551,7 @@ Use this context to make your opening message highly relevant to their specific 
 
   const { data: existingProfile } = await supabase
     .from('ai_profiles')
-    .select('stage, detected_region')
+    .select('stage, detected_region, profile_json')
     .eq('client_id', clientId)
     .maybeSingle()
 
@@ -605,7 +629,7 @@ Use this context to make your opening message highly relevant to their specific 
   await logActivity({
     clientId,
     actionType: 'ai_message_sent',
-    description: `AI sent message at stage ${stageTag}`,
+    description: stageTagLabel(stageTag),
     metadata: { stage: stageTag },
   })
 
@@ -617,8 +641,8 @@ Use this context to make your opening message highly relevant to their specific 
         .from('clients')
         .update({ qualification_score: internal.qualification_score })
         .eq('id', clientId)
-    } catch {
-      // Non-fatal: chat continues even if profile upsert fails
+    } catch (err) {
+      console.error('[chat] ai_profiles upsert failed:', err)
     }
   }
 
@@ -690,9 +714,12 @@ Use this context to make your opening message highly relevant to their specific 
     runBehavioralAnalysis(clientId).catch(() => {})
   }
 
-  if (conversationComplete) {
+  const needsFullProfile =
+    totalMessages >= 15 && !existingProfile?.profile_json
+
+  if (conversationComplete || needsFullProfile) {
     runPostConversationProfile(conversationMessages, clientId, internal).catch(
-      () => {}
+      (err) => console.error('[chat] post-conversation profile failed:', err)
     )
   }
 

@@ -6,6 +6,7 @@ import { BriefCard } from './BriefCard'
 type Props = {
   client: Client
   profile: AIProfileData | null
+  profilePartial?: boolean
   counselorName?: string | null
   footer?: React.ReactNode
 }
@@ -13,6 +14,7 @@ type Props = {
 export function ProfileSummarySection({
   client,
   profile,
+  profilePartial = false,
   counselorName,
   footer,
 }: Props) {
@@ -82,6 +84,11 @@ export function ProfileSummarySection({
                 <span className="font-bold">Recommended pathway:</span>{' '}
                 {profile.recommended_service_pathway || '—'}
               </p>
+              {profilePartial && (
+                <p className="text-sm italic text-text/60">
+                  Partial profile — full summary generates after conversation completes.
+                </p>
+              )}
             </>
           ) : (
             <>

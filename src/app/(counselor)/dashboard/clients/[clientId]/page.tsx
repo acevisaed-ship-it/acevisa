@@ -11,8 +11,9 @@ import { MeetingsHistorySection } from '@/components/brief/MeetingsHistorySectio
 import { PsychologicalReadSection } from '@/components/brief/PsychologicalReadSection'
 import { ServicePathwaySection } from '@/components/brief/ServicePathwaySection'
 import { TalkingPointsSection } from '@/components/brief/TalkingPointsSection'
+import { resolveAiProfile } from '@/lib/brief'
 import { createAdminClient, getAuthenticatedCounselor } from '@/lib/supabase/server'
-import type { AIProfileData, Client, Conversation, Document } from '@/types'
+import type { Client, Conversation, Document } from '@/types'
 import { ClientControls } from './ClientControls'
 import { PendingProfileUpdates } from './PendingProfileUpdates'
 import { CopyPortalLink } from '@/components/CopyPortalLink'
@@ -49,7 +50,9 @@ export default async function ClientRecordPage({ params }: Props) {
   ] = await Promise.all([
     supabase
       .from('ai_profiles')
-      .select('profile_json')
+      .select(
+        'profile_json, stage, qualification_score, detected_language, detected_region, detected_fears, detected_behaviour_type, service_match'
+      )
       .eq('client_id', clientId)
       .maybeSingle(),
     supabase
@@ -77,7 +80,7 @@ export default async function ClientRecordPage({ params }: Props) {
       .order('created_at', { ascending: false }),
   ])
 
-  const profile = (aiProfile?.profile_json as AIProfileData | null) ?? null
+  const { profile, isPartial: profilePartial } = resolveAiProfile(aiProfile)
   const score = typedClient.qualification_score ?? profile?.qualification_score ?? null
 
   return (
@@ -106,6 +109,7 @@ export default async function ClientRecordPage({ params }: Props) {
         <ProfileSummarySection
           client={typedClient}
           profile={profile}
+          profilePartial={profilePartial}
           counselorName={counselor.name}
           footer={
             <ClientControls

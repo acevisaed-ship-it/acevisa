@@ -26,6 +26,7 @@ type Props = {
   initialAutoReply: boolean
   client: Client
   profile: AIProfileData | null
+  profilePartial?: boolean
   conversations: Conversation[]
   documents: Document[]
 }
@@ -39,6 +40,7 @@ export function BriefShell({
   initialAutoReply,
   client,
   profile,
+  profilePartial = false,
   conversations,
   documents,
 }: Props) {
@@ -75,7 +77,11 @@ export function BriefShell({
 
           <ClientProfileHeader client={client} score={score} />
 
-          <ProfileSummarySection client={client} profile={profile} />
+          <ProfileSummarySection
+            client={client}
+            profile={profile}
+            profilePartial={profilePartial}
+          />
           <ConversationDigestSection
             conversations={conversations}
             profile={profile}
