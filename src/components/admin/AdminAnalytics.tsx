@@ -4,8 +4,75 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
   Users, UserCheck, AlertTriangle, CheckSquare, Calendar,
-  TrendingUp, Handshake, MessageSquare,
+  TrendingUp, Handshake, MessageSquare, Smartphone, Copy, Check,
 } from 'lucide-react'
+
+const APP_INSTALL_URL = 'https://acevisa.vercel.app/install'
+
+function ShareAppCard() {
+  const [copied, setCopied] = useState(false)
+
+  function copyLink() {
+    navigator.clipboard.writeText(APP_INSTALL_URL)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=8&data=${encodeURIComponent(APP_INSTALL_URL)}`
+
+  return (
+    <div className="col-span-2 md:col-span-3 xl:col-span-4 rounded-2xl border border-blue/20 bg-blue/5 p-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
+        {/* QR code */}
+        <div className="flex shrink-0 flex-col items-center gap-2">
+          <img
+            src={qrUrl}
+            alt="QR code to install ACE Portal app"
+            className="h-[120px] w-[120px] rounded-xl border border-blue/20 bg-white"
+          />
+          <p className="text-[10px] text-text/40">Scan to install</p>
+        </div>
+
+        {/* Text + actions */}
+        <div className="flex flex-1 flex-col justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="rounded-xl bg-blue/10 p-2">
+              <Smartphone className="h-5 w-5 text-blue" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-text">Share App with Clients</p>
+              <p className="mt-0.5 text-xs text-text/60">
+                Send this link or show the QR code to clients — they can install the ACE Portal directly on their phone without the App Store.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <code className="flex-1 truncate rounded-lg bg-white border border-text/10 px-3 py-2 text-xs text-text/70 select-all">
+              {APP_INSTALL_URL}
+            </code>
+            <button
+              type="button"
+              onClick={copyLink}
+              className="flex items-center gap-1.5 rounded-lg bg-blue px-3 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+            >
+              {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? 'Copied!' : 'Copy Link'}
+            </button>
+            <a
+              href={APP_INSTALL_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 rounded-lg border border-blue/30 px-3 py-2 text-xs font-semibold text-blue transition-colors hover:bg-blue/10"
+            >
+              Open Page
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 type Analytics = {
   totalClients: number
@@ -148,6 +215,9 @@ export function AdminAnalytics() {
           icon={Handshake}
           href="/admin/crm"
         />
+
+        {/* Share App card — spans full width */}
+        <ShareAppCard />
       </div>
 
       {data.overdueTasks > 0 && (
