@@ -1,4 +1,5 @@
-import { createAdminClient, requireAdminApi } from '@/lib/supabase/server'
+import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function GET() {

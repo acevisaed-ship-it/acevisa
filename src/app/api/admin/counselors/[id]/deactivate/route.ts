@@ -1,4 +1,5 @@
-import { createAdminClient, requireAdminApi } from '@/lib/supabase/server'
+import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function PATCH(
@@ -28,7 +29,7 @@ export async function PATCH(
   const authUser = authUsers?.users?.find((u) => u.email === counselor.email)
 
   if (authUser) {
-    await supabase.auth.admin.updateUser(authUser.id, { ban_duration: '876600h' }) // ~100 years
+    await supabase.auth.admin.updateUserById(authUser.id, { ban_duration: '876600h' }) // ~100 years
   }
 
   // Set status inactive in counselors table
