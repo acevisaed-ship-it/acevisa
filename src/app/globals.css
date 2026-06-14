@@ -96,6 +96,10 @@ body {
   from { transform: rotateX(0deg); }
   to   { transform: rotateX(360deg); }
 }
+@keyframes globe-spin-y {
+  from { transform: rotateY(0deg); }
+  to   { transform: rotateY(360deg); }
+}
 @keyframes globe-float {
   0%, 100% { transform: translateY(0px) rotate(0deg); }
   50%       { transform: translateY(-12px) rotate(180deg); }

@@ -23,16 +23,17 @@ export function HeroSection() {
       {/* Animated background — all elements live here */}
       <HeroAnimations />
 
-      {/* Man pointing to ACE — bottom-left, fills the red box area */}
+      {/* Man pointing to ACE — bottom-left, fills the blue box area */}
       <div
-        className="pointer-events-none absolute bottom-0 left-0 z-[6]"
+        className="pointer-events-none absolute bottom-0 z-[6]"
         aria-hidden="true"
+        style={{ left: '-1%' }}
       >
         <img
           src="/man pointing to ace.svg"
           alt=""
           className="w-auto"
-          style={{ height: 'clamp(280px, 42vh, 520px)' }}
+          style={{ height: 'clamp(480px, 74vh, 820px)' }}
         />
       </div>
 

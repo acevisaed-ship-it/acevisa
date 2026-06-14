@@ -561,7 +561,7 @@ function EarthOrbitSystem() {
           style={{
             width: '100%', height: '100%', objectFit: 'contain',
             opacity: 1,
-            animation: 'globe-spin-x 28s linear infinite',
+            animation: 'globe-spin-y 28s linear infinite',
             transformOrigin: 'center center',
             willChange: 'transform',
           }}
