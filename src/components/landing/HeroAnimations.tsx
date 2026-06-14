@@ -11,7 +11,10 @@ const CLOUD_SRCS = [
   '/Cloud with many arcs.svg',
 ]
 const STAR_SRCS  = ['/Orange Star.svg', '/Blue Star.svg', '/Green star.svg']
+// Commercial jets — index 0 = orange (plane A), index 1 = blue (plane B)
 const PLANE_SRCS = ['/Orange plane.svg', '/Blue plane.svg', '/Green Plane.svg']
+
+// Paper planes — includes plain + all coloured variants
 const PAPER_SRCS = [
   '/paper airplane.svg',
   '/paper plane Orange 2.svg',
@@ -19,6 +22,7 @@ const PAPER_SRCS = [
   '/paper plane Green 2.svg',
   '/paper plane blue 1.svg',
   '/paper plane Green.svg',
+  '/plane.svg',
 ]
 
 // ─── Client-side random helpers ───────────────────────────────────────────
@@ -113,15 +117,17 @@ function StarField() {
 // ════════════════════════════════════════════════════════════════════════════
 // 1. CLOUD LAYER
 //    Right → left only. Spawn in top 5–50 % band. All 4 cloud types.
-//    Speed 3–4× slower than before (90–180 s to cross screen).
+//    Full opacity. Four formation types: spread | merged | stacked | cluster.
 // ════════════════════════════════════════════════════════════════════════════
 
+type CloudFormation = 'spread' | 'merged' | 'stacked' | 'cluster'
+
 interface CloudDot {
-  src:     string
-  size:    number
-  opacity: number
-  offsetX: number
-  offsetY: number
+  src:    string
+  size:   number
+  x:      number   // absolute offset within the group container
+  y:      number
+  zIdx:   number
 }
 
 interface CloudGroupData {
@@ -130,15 +136,68 @@ interface CloudGroupData {
   speed:       number
   delay:       number
   repeatDelay: number
+  formation:   CloudFormation
+  cW:          number   // container width
+  cH:          number   // container height
   dots:        CloudDot[]
 }
 
+function buildFormation(formation: CloudFormation, count: number): { dots: CloudDot[]; cW: number; cH: number } {
+  const dots: CloudDot[] = []
+
+  if (formation === 'spread') {
+    // Side-by-side with moderate overlap and slight vertical wobble
+    let cursor = 0
+    for (let j = 0; j < count; j++) {
+      const size = rn(110, 230)
+      dots.push({ src: pick(CLOUD_SRCS), size, x: cursor, y: rn(-15, 20), zIdx: j })
+      cursor += size * rn(0.55, 0.82)   // partial overlap
+    }
+    return { dots, cW: cursor + 240, cH: 180 }
+  }
+
+  if (formation === 'merged') {
+    // Heavy overlap — clouds blend into one mass
+    for (let j = 0; j < count; j++) {
+      const size = rn(130, 260)
+      dots.push({ src: pick(CLOUD_SRCS), size, x: rn(0, 70), y: rn(-10, 10), zIdx: j })
+    }
+    return { dots, cW: 360, cH: 180 }
+  }
+
+  if (formation === 'stacked') {
+    // Clouds piled on top of each other vertically (tower / cumulus look)
+    for (let j = 0; j < count; j++) {
+      const size = rn(100, 210)
+      dots.push({
+        src: pick(CLOUD_SRCS), size,
+        x: rn(-20, 50),
+        y: j * rn(28, 48),   // each layer above the last
+        zIdx: count - j,      // higher layers paint over lower
+      })
+    }
+    return { dots, cW: 320, cH: count * 55 + 120 }
+  }
+
+  // cluster — scattered arrangement in a loose blob
+  for (let j = 0; j < count; j++) {
+    const size = rn(90, 210)
+    dots.push({
+      src: pick(CLOUD_SRCS), size,
+      x: rn(0, 220),
+      y: rn(-30, 60),
+      zIdx: j,
+    })
+  }
+  return { dots, cW: 460, cH: 230 }
+}
+
 function CloudGroup({ g, vw }: { g: CloudGroupData; vw: number }) {
-  const buf = 500
+  const buf = g.cW + 120
   return (
     <motion.div
-      className="pointer-events-none absolute flex items-start"
-      style={{ top: `${g.topPct}%`, left: 0 }}
+      className="pointer-events-none absolute"
+      style={{ top: `${g.topPct}%`, left: 0, width: g.cW, height: g.cH }}
       initial={{ x: vw + buf }}
       animate={{ x: -buf }}
       transition={{
@@ -156,12 +215,12 @@ function CloudGroup({ g, vw }: { g: CloudGroupData; vw: number }) {
           alt=""
           aria-hidden
           style={{
-            position:   'relative',
-            marginLeft: d.offsetX,
-            top:        d.offsetY,
-            width:      d.size,
-            opacity:    d.opacity,
-            flexShrink: 0,
+            position: 'absolute',
+            left:     d.x,
+            top:      d.y,
+            width:    d.size,
+            zIndex:   d.zIdx,
+            opacity:  1,        // full opacity — no transparency
           }}
         />
       ))}
@@ -173,24 +232,18 @@ function CloudLayer({ vw }: { vw: number }) {
   const [groups, setGroups] = useState<CloudGroupData[]>([])
 
   useEffect(() => {
+    const FORMATIONS: CloudFormation[] = ['spread', 'merged', 'stacked', 'cluster']
     setGroups(
-      Array.from({ length: ri(4, 7) }, (_, i) => {
-        const baseSrc = pick(CLOUD_SRCS)
-        const count   = ri(2, 4)
-        const dots: CloudDot[] = Array.from({ length: count }, (_, j) => ({
-          src:     j === 0 ? baseSrc : pick(CLOUD_SRCS),
-          size:    rn(100, 220),
-          opacity: rn(0.40, 0.90),
-          offsetX: j === 0 ? 0 : rn(0, 80),
-          offsetY: rn(-25, 25),
-        }))
+      Array.from({ length: ri(5, 8) }, (_, i) => {
+        const formation = FORMATIONS[i % FORMATIONS.length] as CloudFormation  // ensure all 4 types appear
+        const count     = formation === 'merged' ? ri(3, 5) : ri(2, 4)
+        const { dots, cW, cH } = buildFormation(formation, count)
         return {
-          id:          i,
-          topPct:      rn(5, 50),    // upper band only
-          speed:       rn(90, 180),  // 3–4× slower
-          delay:       rn(0, 35),
-          repeatDelay: rn(6, 20),
-          dots,
+          id: i, formation, dots, cW, cH,
+          topPct:      rn(5, 48),
+          speed:       rn(90, 180),
+          delay:       rn(0, 40),
+          repeatDelay: rn(5, 18),
         }
       })
     )
@@ -304,6 +357,97 @@ function FreeRoamingPaperPlanes({ vw, vh }: { vw: number; vh: number }) {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+// 2b. BEE ORANGE PLANE
+//     One orange paper plane that drifts left→right with erratic, bee-like
+//     Y movement driven by three overlapping sine waves at different
+//     frequencies. Rotates to face its instantaneous velocity vector.
+//     Loops continuously; randomises path on each crossing.
+// ════════════════════════════════════════════════════════════════════════════
+
+function BeeOrangePlane({ vw, vh }: { vw: number; vh: number }) {
+  const mx  = useMotionValue(-80)
+  const my  = useMotionValue(0)
+  const rot = useMotionValue(0)
+  const t0  = useRef<number | null>(null)
+  const [ready, setReady] = useState(false)
+
+  // All mutable crossing params live here — updated on each loop
+  const p = useRef({
+    speedX: 70,
+    baseY:  300,
+    a1: 80,  f1: 0.45, ph1: 0,
+    a2: 35,  f2: 1.40, ph2: 1,
+    a3: 14,  f3: 3.10, ph3: 2,
+    cycleStart: 0,
+  })
+
+  const randomise = (currentVh: number) => {
+    const pr = p.current
+    pr.speedX = rn(55, 100)
+    pr.baseY  = currentVh * rn(0.20, 0.72)
+    pr.a1  = rn(55, 120);  pr.f1  = rn(0.25, 0.70);  pr.ph1 = rn(0, Math.PI * 2)
+    pr.a2  = rn(22, 58);   pr.f2  = rn(1.00, 2.30);  pr.ph2 = rn(0, Math.PI * 2)
+    pr.a3  = rn(8,  24);   pr.f3  = rn(2.50, 4.60);  pr.ph3 = rn(0, Math.PI * 2)
+  }
+
+  useEffect(() => {
+    if (!vw || !vh) return
+    randomise(vh)
+    setReady(true)
+  }, [vw, vh])
+
+  useAnimationFrame((t) => {
+    if (!ready) return
+    if (t0.current === null) t0.current = t
+    const elapsed = (t - t0.current) / 1000
+    const pr      = p.current
+    const cyc     = elapsed - pr.cycleStart
+
+    // When the plane exits the right edge, restart from left with new params
+    const rawX = -80 + cyc * pr.speedX
+    if (rawX > vw + 80) {
+      pr.cycleStart = elapsed
+      randomise(vh)
+      return
+    }
+
+    const yOff = (e: number) =>
+      pr.a1 * Math.sin(pr.f1 * e + pr.ph1) +
+      pr.a2 * Math.sin(pr.f2 * e + pr.ph2) +
+      pr.a3 * Math.sin(pr.f3 * e + pr.ph3)
+
+    const clampY = (v: number) => Math.max(40, Math.min(vh - 80, v))
+
+    const x  = rawX
+    const y  = clampY(pr.baseY + yOff(cyc))
+    const dt = 0.05   // small lookahead for angle
+    const nx = x + pr.speedX * dt
+    const ny = clampY(pr.baseY + yOff(cyc + dt))
+
+    mx.set(x)
+    my.set(y)
+    rot.set(Math.atan2(ny - y, nx - x) * 180 / Math.PI)
+  })
+
+  if (!ready) return null
+
+  return (
+    <motion.div
+      className="pointer-events-none absolute"
+      style={{
+        left: 0, top: 0,
+        width: 46,
+        x: mx, y: my, rotate: rot,
+        translateX: '-50%', translateY: '-50%',
+        willChange: 'transform',
+      }}
+    >
+      <img src="/paper plane Orange 2.svg" alt="" aria-hidden className="h-auto w-full" />
+    </motion.div>
+  )
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 // 3. EARTH + ORBITING PLANES (exactly 2)
 //    Earth: 100 % opacity, large enough to fill the right column.
 // ════════════════════════════════════════════════════════════════════════════
@@ -411,13 +555,13 @@ function EarthOrbitSystem() {
       </div>
 
       {/* Earth — 100 % opaque; covers planes on back arc */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 2 }}>
+      <div style={{ position: 'absolute', inset: 0, zIndex: 2, perspective: '900px' }}>
         <img
           src="/Earth.svg" alt="" aria-hidden
           style={{
             width: '100%', height: '100%', objectFit: 'contain',
             opacity: 1,
-            animation: 'globe-spin 28s linear infinite',
+            animation: 'globe-spin-x 28s linear infinite',
             transformOrigin: 'center center',
             willChange: 'transform',
           }}
@@ -502,13 +646,13 @@ function AirplaneLayer({ vw, vh }: { vw: number; vh: number }) {
         id: 0, startX: aStartX, startY: aStartY, endX: aEndX, endY: aEndY,
         angle: planeAngle(aDx, aDy, true), flipX: true,
         speed: rn(80, 140), delay: 0,
-        size: rn(100, 170), src: pick(PLANE_SRCS), opacity: rn(0.55, 0.80),
+        size: rn(100, 170), src: PLANE_SRCS[0], opacity: rn(0.60, 0.85), // always Orange
       },
       {
         id: 1, startX: bStartX, startY: bStartY, endX: bEndX, endY: bEndY,
         angle: planeAngle(bDx, bDy, false), flipX: false,
         speed: rn(90, 150), delay: rn(10, 30),
-        size: rn(100, 170), src: pick(PLANE_SRCS), opacity: rn(0.55, 0.80),
+        size: rn(100, 170), src: PLANE_SRCS[1], opacity: rn(0.60, 0.85), // always Blue
       },
     ])
   }, [vw, vh])
@@ -581,6 +725,7 @@ export function HeroAnimations() {
       {/* z-5 Free-roaming directed paper planes */}
       <div className="absolute inset-0 z-[5]">
         <FreeRoamingPaperPlanes vw={vw} vh={vh} />
+        <BeeOrangePlane vw={vw} vh={vh} />
       </div>
     </div>
   )

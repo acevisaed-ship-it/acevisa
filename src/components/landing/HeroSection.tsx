@@ -31,8 +31,8 @@ export function HeroSection() {
         <img
           src="/man pointing to ace.svg"
           alt=""
-          className="h-auto"
-          style={{ width: 'clamp(180px, 20vw, 320px)' }}
+          className="w-auto"
+          style={{ height: 'clamp(280px, 42vh, 520px)' }}
         />
       </div>
 
