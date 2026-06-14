@@ -23,6 +23,19 @@ export function HeroSection() {
       {/* Animated background — all elements live here */}
       <HeroAnimations />
 
+      {/* Man pointing to ACE — bottom-left, fills the red box area */}
+      <div
+        className="pointer-events-none absolute bottom-0 left-0 z-[6]"
+        aria-hidden="true"
+      >
+        <img
+          src="/man pointing to ace.svg"
+          alt=""
+          className="h-auto"
+          style={{ width: 'clamp(180px, 20vw, 320px)' }}
+        />
+      </div>
+
       {/* UI Content — always above everything (z-10) */}
       <div className="relative z-10 mx-auto grid w-full max-w-6xl grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
 
@@ -36,7 +49,7 @@ export function HeroSection() {
           <img
             src="/Hero Page LOGO.svg"
             alt="ACE Altius Consulting"
-            className="h-28 w-auto md:h-32"
+            className="w-full max-w-[520px] h-auto"
           />
 
           <p className="text-sm font-bold uppercase tracking-widest text-orange md:text-base">
@@ -68,7 +81,7 @@ export function HeroSection() {
             <p className="mt-4">
               <Link
                 href="/return"
-                className="text-sm text-text underline-offset-2 hover:underline md:text-base"
+                className="inline-block text-sm text-text underline-offset-2 transition-all duration-200 hover:underline hover:scale-105 md:text-base"
               >
                 Already Registered? → Return To Your Session
               </Link>

@@ -22,7 +22,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={cn(
-          'rounded-card p-6 transition-all duration-700 ease-in-out',
+          'rounded-card p-6 transition-all duration-200 ease-out hover:scale-[1.025] hover:-translate-y-1 hover:shadow-xl',
           variants[variant],
           highlighted && 'ring-2 ring-orange ring-offset-2 ring-offset-bg',
           className
