@@ -49,6 +49,42 @@ const services: {
   },
 ]
 
+// Journey stage figures — diagonal ascending left→right
+const journeyStages = [
+  {
+    src: '/student walking.svg',
+    label: 'Student',
+    delay: 0,
+    bottom: '4%',
+    left: '2%',
+    size: 90,
+  },
+  {
+    src: '/confident student.svg',
+    label: 'Achiever',
+    delay: 0.15,
+    bottom: '8%',
+    left: '22%',
+    size: 100,
+  },
+  {
+    src: '/Doctor.svg',
+    label: 'Professional',
+    delay: 0.3,
+    bottom: '14%',
+    left: '44%',
+    size: 108,
+  },
+  {
+    src: '/corporate man.svg',
+    label: 'Corporate',
+    delay: 0.45,
+    bottom: '20%',
+    left: '66%',
+    size: 115,
+  },
+]
+
 export function ServicesSection() {
   const navigate = useNavigateWithTransition()
   const setSelectedService = useScrollStore((s) => s.setSelectedService)
@@ -58,8 +94,125 @@ export function ServicesSection() {
   }
 
   return (
-    <div className="bg-texture flex h-full flex-col justify-center overflow-y-auto bg-bg px-5 py-24 md:px-10">
-      <div className="mx-auto w-full max-w-5xl">
+    <div className="bg-texture relative flex h-full flex-col justify-center overflow-hidden bg-bg px-5 py-24 md:px-10">
+
+      {/* ── Journey stages illustration ──────────────────────────── */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+
+        {/* Dashed ascending path line */}
+        <svg
+          className="absolute inset-0 h-full w-full"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M 0,95% C 25%,88% 50%,75% 75%,60% L 100%,45%"
+            fill="none"
+            stroke="#0A3F3A"
+            strokeWidth="1.5"
+            strokeDasharray="8 8"
+            opacity="0.12"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+
+        {/* Journey figures */}
+        {journeyStages.map((stage) => (
+          <motion.div
+            key={stage.src}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: 'easeOut', delay: stage.delay }}
+            style={{
+              position: 'absolute',
+              bottom: stage.bottom,
+              left: stage.left,
+              width: stage.size,
+              height: 'auto',
+              animation: `float-bob ${6 + stage.delay * 4}s ease-in-out infinite`,
+              animationDelay: `${stage.delay * 2}s`,
+            }}
+          >
+            <img
+              src={stage.src}
+              alt=""
+              className="h-auto w-full object-contain opacity-20"
+            />
+          </motion.div>
+        ))}
+
+        {/* Arrow between stages */}
+        {[0, 1, 2].map((i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, scale: 0 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.6 + i * 0.1 }}
+            style={{
+              position: 'absolute',
+              bottom: `${9 + i * 6}%`,
+              left: `${12 + i * 22}%`,
+              fontSize: 18,
+              color: '#E48328',
+              opacity: 0.35,
+              fontWeight: 700,
+            }}
+          >
+            →
+          </motion.div>
+        ))}
+
+        {/* Stars */}
+        <div style={{ position: 'absolute', top: '10%', right: '8%', width: 24, animation: 'star-pulse 3.5s ease-in-out infinite' }}>
+          <img src="/Orange Star.svg" alt="" className="w-full opacity-25" />
+        </div>
+        <div style={{ position: 'absolute', top: '30%', left: '5%', width: 18, animation: 'star-pulse 4.8s ease-in-out infinite', animationDelay: '1.5s' }}>
+          <img src="/Blue Star.svg" alt="" className="w-full opacity-20" />
+        </div>
+        <div style={{ position: 'absolute', top: '15%', left: '50%', width: 16, animation: 'star-pulse 5.5s ease-in-out infinite', animationDelay: '2.5s' }}>
+          <img src="/Green star.svg" alt="" className="w-full opacity-20" />
+        </div>
+
+        {/* Helmet + backpack floating in background */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.8 }}
+          style={{
+            position: 'absolute',
+            top: '12%',
+            right: '3%',
+            width: 55,
+            animation: 'float-bob 7s ease-in-out infinite',
+            animationDelay: '1s',
+          }}
+        >
+          <img src="/helmet orange.svg" alt="" className="w-full opacity-15" style={{ opacity: 0.15 }} />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 1 }}
+          style={{
+            position: 'absolute',
+            top: '8%',
+            left: '35%',
+            width: 48,
+            animation: 'float-bob-delayed 9s ease-in-out infinite',
+          }}
+        >
+          <img src="/student bacpack.svg" alt="" className="w-full opacity-15" style={{ opacity: 0.15 }} />
+        </motion.div>
+      </div>
+      {/* ── /Journey stages ──────────────────────────────────────── */}
+
+      {/* Content */}
+      <div className="relative z-10 mx-auto w-full max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

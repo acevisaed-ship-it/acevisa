@@ -13,6 +13,7 @@ const stories = [
     destination: 'University of Manchester',
     flag: '🇬🇧',
     quote: 'They made the whole UK process feel simple. I had my offer in 8 weeks.',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&h=450&q=80',
   },
   {
     name: 'Sara',
@@ -20,6 +21,7 @@ const stories = [
     destination: 'Dublin Business School',
     flag: '🇮🇪',
     quote: 'The AI chat answered everything at midnight. My counselor sealed the deal.',
+    image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=600&h=450&q=80',
   },
   {
     name: 'Usman',
@@ -27,6 +29,7 @@ const stories = [
     destination: 'Toronto Metropolitan',
     flag: '🇨🇦',
     quote: 'From IELTS prep to visa filing — one team, zero confusion.',
+    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=600&h=450&q=80',
   },
 ]
 
@@ -69,7 +72,13 @@ export function GallerySection() {
               className="w-[min(85vw,320px)] shrink-0 snap-center md:w-auto"
             >
               <Card className="flex h-full flex-col gap-4">
-                <div className="aspect-[4/3] w-full rounded-[12px] bg-text/10" />
+                <div className="aspect-[4/3] w-full overflow-hidden rounded-[12px]">
+                  <img
+                    src={story.image}
+                    alt={`${story.name} from ${story.city}`}
+                    className="h-full w-full object-cover object-center transition-transform duration-500 hover:scale-105"
+                  />
+                </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xl" aria-hidden="true">
                     {story.flag}
