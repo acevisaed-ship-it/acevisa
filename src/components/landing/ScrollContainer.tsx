@@ -4,10 +4,9 @@ import {
   useRef,
   useEffect,
   useCallback,
-  useState,
   type ReactNode,
 } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   SECTION_COUNT,
   useScrollStore,
@@ -18,107 +17,90 @@ interface ScrollContainerProps {
   children: ReactNode[]
 }
 
-function SectionWrapper({
-  index,
-  scrollY,
-  viewportHeight,
-  children,
-}: {
-  index: number
-  scrollY: ReturnType<typeof useScroll>['scrollY']
-  viewportHeight: number
-  children: ReactNode
-}) {
-  const y = useTransform(scrollY, (latest) => latest - index * viewportHeight)
-
-  return (
-    <motion.section
-      style={{ y }}
-      className="absolute left-0 right-0 top-0 h-screen w-full"
-      aria-label={`Section ${index + 1}`}
-    >
-      {children}
-    </motion.section>
-  )
-}
+// How long (ms) to lock input after a section change, preventing rapid multi-skip
+const SNAP_COOLDOWN = 750
 
 export function ScrollContainer({ children }: ScrollContainerProps) {
-  const scrollRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const [viewportHeight, setViewportHeight] = useState(800)
+  const cooldownRef   = useRef(false)
+  const touchStartY   = useRef(0)
+
+  const currentSection = useScrollStore((s) => s.currentSection)
   const setScrollToSection = useScrollStore((s) => s.setScrollToSection)
 
-  const { scrollY } = useScroll({
-    container: scrollRef,
-  })
-
-  const scrollToSection = useCallback((index: number) => {
-    const el = scrollRef.current
-    if (!el) return
+  const goToSection = useCallback((index: number) => {
+    if (cooldownRef.current) return
     const clamped = Math.max(0, Math.min(SECTION_COUNT - 1, index))
-    el.scrollTo({ top: clamped * viewportHeight, behavior: 'auto' })
     useScrollStore.setState({ currentSection: clamped })
-  }, [viewportHeight])
+    cooldownRef.current = true
+    setTimeout(() => { cooldownRef.current = false }, SNAP_COOLDOWN)
+  }, [])
 
+  // Expose scrollToSection so other components (nav, buttons) can call it
   useEffect(() => {
-    setViewportHeight(window.innerHeight)
-    setScrollToSection(scrollToSection)
+    setScrollToSection(goToSection)
+  }, [setScrollToSection, goToSection])
 
-    const onResize = () => setViewportHeight(window.innerHeight)
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-  }, [setScrollToSection, scrollToSection])
-
+  // Wheel snap
   useEffect(() => {
-    const el = scrollRef.current
-    const container = containerRef.current
-    if (!el || !container) return
+    const el = containerRef.current
+    if (!el) return
 
     const onWheel = (e: WheelEvent) => {
       e.preventDefault()
-      el.scrollTop -= e.deltaY
+      if (cooldownRef.current) return
+      if (Math.abs(e.deltaY) < 10) return          // ignore tiny nudges
+      const dir = e.deltaY > 0 ? 1 : -1
+      goToSection(useScrollStore.getState().currentSection + dir)
     }
 
-    let touchStartY = 0
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [goToSection])
 
-    const onTouchStart = (e: TouchEvent) => {
-      touchStartY = e.touches[0].clientY
-    }
-
-    const onTouchMove = (e: TouchEvent) => {
-      e.preventDefault()
-      const deltaY = touchStartY - e.touches[0].clientY
-      touchStartY = e.touches[0].clientY
-      el.scrollTop += deltaY
-    }
-
-    container.addEventListener('wheel', onWheel, { passive: false })
-    container.addEventListener('touchstart', onTouchStart, { passive: true })
-    container.addEventListener('touchmove', onTouchMove, { passive: false })
-
-    return () => {
-      container.removeEventListener('wheel', onWheel)
-      container.removeEventListener('touchstart', onTouchStart)
-      container.removeEventListener('touchmove', onTouchMove)
-    }
-  }, [])
-
+  // Touch swipe snap
   useEffect(() => {
-    const el = scrollRef.current
+    const el = containerRef.current
     if (!el) return
 
-    const onScroll = () => {
-      const section = Math.round(el.scrollTop / viewportHeight)
-      useScrollStore.setState({ currentSection: section })
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartY.current = e.touches[0].clientY
     }
 
-    el.addEventListener('scroll', onScroll, { passive: true })
-    return () => el.removeEventListener('scroll', onScroll)
-  }, [viewportHeight])
+    const onTouchEnd = (e: TouchEvent) => {
+      const delta = touchStartY.current - e.changedTouches[0].clientY
+      if (Math.abs(delta) < 40) return             // too short to be a swipe
+      if (cooldownRef.current) return
+      const dir = delta > 0 ? 1 : -1
+      goToSection(useScrollStore.getState().currentSection + dir)
+    }
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true })
+    el.addEventListener('touchend',   onTouchEnd,   { passive: true })
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart)
+      el.removeEventListener('touchend',   onTouchEnd)
+    }
+  }, [goToSection])
+
+  // Keyboard navigation
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+        e.preventDefault()
+        goToSection(useScrollStore.getState().currentSection + 1)
+      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+        e.preventDefault()
+        goToSection(useScrollStore.getState().currentSection - 1)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [goToSection])
 
   return (
     <>
-      {/* No-JS fallback */}
+      {/* No-JS fallback — sections stack normally */}
       <div className="landing-fallback">
         {children.map((child, i) => (
           <section key={i} className="min-h-screen w-full">
@@ -127,33 +109,34 @@ export function ScrollContainer({ children }: ScrollContainerProps) {
         ))}
       </div>
 
-      {/* Inverted scroll (JS enabled) */}
+      {/* JS-enabled: fixed viewport, one section at a time */}
       <div
         ref={containerRef}
         className="inverted-scroll fixed inset-0 overflow-hidden bg-bg"
+        style={{ touchAction: 'none' }}
       >
-        <div className="relative h-full w-full">
-          {children.map((child, index) => (
-            <SectionWrapper
+        {children.map((child, index) => {
+          // Compute vertical offset relative to the active section
+          const offset = (index - currentSection) * 100   // in vh units
+
+          return (
+            <motion.section
               key={index}
-              index={index}
-              scrollY={scrollY}
-              viewportHeight={viewportHeight}
+              aria-label={`Section ${index + 1}`}
+              className="absolute inset-0 h-full w-full"
+              initial={false}
+              animate={{ y: `${offset}vh` }}
+              transition={{
+                type: 'spring',
+                stiffness: 280,
+                damping: 36,
+                mass: 1,
+              }}
             >
               {child}
-            </SectionWrapper>
-          ))}
-        </div>
-
-        <div
-          ref={scrollRef}
-          data-scroll-proxy
-          className="pointer-events-none absolute inset-0 overflow-y-scroll opacity-0"
-          tabIndex={0}
-          aria-label="Scroll to navigate sections"
-        >
-          <div style={{ height: `${SECTION_COUNT * viewportHeight}px` }} />
-        </div>
+            </motion.section>
+          )
+        })}
       </div>
     </>
   )

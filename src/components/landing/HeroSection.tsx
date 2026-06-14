@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { PWAInstallButton } from '@/components/PWAInstallButton'
+import { LandingDecor } from './LandingDecor'
 import { useNavigateWithTransition } from './ScrollContainer'
 
 const stats = [
@@ -31,186 +32,106 @@ export function HeroSection() {
           }}
         />
 
-        {/* Spinning Earth globe — top-right */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '6%',
-            right: '-2%',
-            width: 260,
-            height: 260,
-            animation: 'globe-spin 28s linear infinite',
-            transformOrigin: 'center center',
-            opacity: 0.18,
-          }}
-        >
-          <img src="/Earth.svg" alt="" className="h-full w-full object-contain" />
-        </div>
+        <LandingDecor
+          src="/Earth.svg"
+          size="globe"
+          className="right-[-1%] top-[6%]"
+          style={{ animation: 'globe-spin 28s linear infinite', transformOrigin: 'center center' }}
+          opacity={0.18}
+        />
 
-        {/* Globe on stand — bottom-left, slower float */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '5%',
-            left: '1%',
-            width: 130,
-            height: 130,
-            animation: 'float-bob 6s ease-in-out infinite',
-            opacity: 0.12,
-          }}
-        >
-          <img src="/Globe on stand.svg" alt="" className="h-full w-full object-contain" />
-        </div>
+        <LandingDecor
+          src="/Globe on stand.svg"
+          size="globe-sm"
+          className="bottom-[5%] left-[1%]"
+          style={{ animation: 'float-bob 6s ease-in-out infinite' }}
+          opacity={0.12}
+          hideBelowMd
+        />
 
-        {/* Commercial plane — flies left→right at top */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '18%',
-            left: 0,
-            width: 90,
-            height: 40,
-            animation: 'plane-fly-r 14s linear infinite',
-            animationDelay: '1s',
-          }}
-        >
-          <img src="/plane aerieal top view.svg" alt="" className="h-full w-full object-contain" />
-        </div>
+        <LandingDecor
+          src="/plane aerieal top view.svg"
+          size="plane"
+          className="left-0 top-[18%]"
+          style={{ animation: 'plane-fly-r 14s linear infinite', animationDelay: '1s' }}
+          opacity={0.35}
+        />
 
-        {/* Commercial plane — flies right→left mid-height */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '55%',
-            right: 0,
-            width: 75,
-            height: 34,
-            animation: 'plane-fly-l 18s linear infinite',
-            animationDelay: '7s',
-          }}
-        >
-          <img src="/plane aerieal top view.svg" alt="" className="h-full w-full object-contain" />
-        </div>
+        <LandingDecor
+          src="/plane aerieal top view.svg"
+          size="plane"
+          className="right-0 top-[55%]"
+          style={{ animation: 'plane-fly-l 18s linear infinite', animationDelay: '7s' }}
+          opacity={0.3}
+          hideBelowMd
+        />
 
-        {/* Paper plane — diagonal arc */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '35%',
-            left: 0,
-            width: 52,
-            height: 40,
-            animation: 'paper-plane-arc 20s ease-in-out infinite',
-            animationDelay: '3s',
-          }}
-        >
-          <img src="/paper airplane.svg" alt="" className="h-full w-full object-contain" />
-        </div>
+        <LandingDecor
+          src="/paper airplane.svg"
+          size="accent"
+          className="left-0 top-[35%]"
+          style={{ animation: 'paper-plane-arc 20s ease-in-out infinite', animationDelay: '3s' }}
+          opacity={0.25}
+        />
 
-        {/* Paper plane 2 — opposite arc */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '65%',
-            right: 0,
-            width: 44,
-            height: 34,
-            animation: 'paper-plane-arc2 24s ease-in-out infinite',
-            animationDelay: '10s',
-          }}
-        >
-          <img src="/paper airplane.svg" alt="" className="h-full w-full object-contain" />
-        </div>
+        <LandingDecor
+          src="/paper airplane.svg"
+          size="accent"
+          className="right-0 top-[65%]"
+          style={{ animation: 'paper-plane-arc2 24s ease-in-out infinite', animationDelay: '10s' }}
+          opacity={0.2}
+          hideBelowMd
+        />
 
-        {/* Cloud 1 — drifts slowly across */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '8%',
-            left: 0,
-            width: 160,
-            height: 70,
-            animation: 'cloud-drift 30s linear infinite',
-            animationDelay: '0s',
-          }}
-        >
-          <img src="/cloud.svg" alt="" className="h-full w-full object-contain" />
-        </div>
+        <LandingDecor
+          src="/cloud.svg"
+          size="cloud"
+          className="left-0 top-[8%]"
+          style={{ animation: 'cloud-drift 30s linear infinite' }}
+          opacity={0.75}
+        />
 
-        {/* Cloud 2 — mid height */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '42%',
-            left: 0,
-            width: 120,
-            height: 55,
-            animation: 'cloud-drift-slow 38s linear infinite',
-            animationDelay: '12s',
-          }}
-        >
-          <img src="/cloud.svg" alt="" className="h-full w-full object-contain" />
-        </div>
+        <LandingDecor
+          src="/cloud.svg"
+          size="cloud"
+          className="left-0 top-[42%]"
+          style={{ animation: 'cloud-drift-slow 38s linear infinite', animationDelay: '12s' }}
+          opacity={0.55}
+          hideBelowMd
+        />
 
-        {/* Cloud 3 — near bottom */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '75%',
-            left: 0,
-            width: 140,
-            height: 60,
-            animation: 'cloud-drift 46s linear infinite',
-            animationDelay: '22s',
-          }}
-        >
-          <img src="/cloud.svg" alt="" className="h-full w-full object-contain" />
-        </div>
+        <LandingDecor
+          src="/cloud.svg"
+          size="cloud"
+          className="left-0 top-[75%]"
+          style={{ animation: 'cloud-drift 46s linear infinite', animationDelay: '22s' }}
+          opacity={0.65}
+        />
 
-        {/* Orange star — top left float */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '22%',
-            left: '8%',
-            width: 28,
-            height: 28,
-            animation: 'star-pulse 3.5s ease-in-out infinite',
-            animationDelay: '0.5s',
-          }}
-        >
-          <img src="/Orange Star.svg" alt="" className="h-full w-full object-contain" />
-        </div>
+        <LandingDecor
+          src="/Orange Star.svg"
+          size="star"
+          className="left-[8%] top-[22%]"
+          style={{ animation: 'star-pulse 3.5s ease-in-out infinite', animationDelay: '0.5s' }}
+          opacity={0.5}
+        />
 
-        {/* Blue star — mid right */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '48%',
-            right: '12%',
-            width: 24,
-            height: 24,
-            animation: 'star-pulse 4.2s ease-in-out infinite',
-            animationDelay: '1.8s',
-          }}
-        >
-          <img src="/Blue Star.svg" alt="" className="h-full w-full object-contain" />
-        </div>
+        <LandingDecor
+          src="/Blue Star.svg"
+          size="star"
+          className="right-[12%] top-[48%]"
+          style={{ animation: 'star-pulse 4.2s ease-in-out infinite', animationDelay: '1.8s' }}
+          opacity={0.5}
+          hideBelowMd
+        />
 
-        {/* Green star — bottom right */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '18%',
-            right: '20%',
-            width: 20,
-            height: 20,
-            animation: 'star-pulse 5s ease-in-out infinite',
-            animationDelay: '3s',
-          }}
-        >
-          <img src="/Green star.svg" alt="" className="h-full w-full object-contain" />
-        </div>
+        <LandingDecor
+          src="/Green star.svg"
+          size="star"
+          className="bottom-[18%] right-[20%]"
+          style={{ animation: 'star-pulse 5s ease-in-out infinite', animationDelay: '3s' }}
+          opacity={0.45}
+        />
       </div>
       {/* ── /Animated background ─────────────────────────────────── */}
 

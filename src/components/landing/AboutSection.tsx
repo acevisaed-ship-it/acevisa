@@ -5,6 +5,7 @@ import { GraduationCap, Telescope } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { useScrollStore } from '@/lib/stores/scrollStore'
+import { LandingDecor } from './LandingDecor'
 import { useNavigateWithTransition } from './ScrollContainer'
 
 export function AboutSection() {
@@ -22,132 +23,110 @@ export function AboutSection() {
   }
 
   return (
-    <div className="bg-texture flex h-full flex-col items-center justify-center overflow-y-auto bg-bg px-5 py-24 md:px-10 relative">
+    <div className="bg-texture relative flex h-full flex-col items-center justify-center overflow-y-auto bg-bg px-5 py-24 md:px-10">
 
       {/* ── Illustration layer ───────────────────────────────────── */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
 
-        {/* Left side — Dreamer: sad student on bench */}
-        <motion.div
+        <LandingDecor
+          src="/sad student on bench.svg"
+          size="figure-lg"
+          hideBelowLg
+          className="bottom-[4%] left-[2%]"
+          style={{ animation: 'float-bob 7s ease-in-out infinite', animationDelay: '0.5s' }}
           initial={{ opacity: 0, x: -30 }}
-          whileInView={{ opacity: 1, x: 0 }}
+          whileInView={{ opacity: 0.2, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.9, ease: 'easeOut', delay: 0.3 }}
-          style={{
-            position: 'absolute',
-            bottom: '4%',
-            left: '2%',
-            width: 160,
-            height: 'auto',
-            animation: 'float-bob 7s ease-in-out infinite',
-            animationDelay: '0.5s',
-          }}
-        >
-          <img src="/sad student on bench.svg" alt="" className="h-auto w-full object-contain opacity-20" />
-        </motion.div>
+        />
 
-        {/* Thought bubble above sad student */}
-        <motion.div
+        <LandingDecor
+          src="/thought cloud with graduation cap.svg"
+          size="accent"
+          hideBelowLg
+          className="bottom-[34%] left-[6%]"
+          style={{ animation: 'float-bob 5s ease-in-out infinite', animationDelay: '1s' }}
+          opacity={0.18}
           initial={{ opacity: 0, scale: 0.6 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          whileInView={{ opacity: 0.18, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease: 'easeOut', delay: 0.7 }}
-          style={{
-            position: 'absolute',
-            bottom: '34%',
-            left: '6%',
-            width: 90,
-            height: 'auto',
-            animation: 'float-bob 5s ease-in-out infinite',
-            animationDelay: '1s',
-          }}
-        >
-          <img src="/thought cloud with graduation cap.svg" alt="" className="h-auto w-full object-contain opacity-18" style={{ opacity: 0.18 }} />
-        </motion.div>
+        />
 
-        {/* Right side — Ready student standing */}
-        <motion.div
+        <LandingDecor
+          src="/confident student standing.svg"
+          size="figure"
+          hideBelowLg
+          className="bottom-[4%] right-[3%]"
+          style={{ animation: 'float-bob-delayed 6s ease-in-out infinite', animationDelay: '2s' }}
           initial={{ opacity: 0, x: 30 }}
-          whileInView={{ opacity: 1, x: 0 }}
+          whileInView={{ opacity: 0.2, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.9, ease: 'easeOut', delay: 0.5 }}
-          style={{
-            position: 'absolute',
-            bottom: '4%',
-            right: '3%',
-            width: 130,
-            height: 'auto',
-            animation: 'float-bob-delayed 6s ease-in-out infinite',
-            animationDelay: '2s',
-          }}
-        >
-          <img src="/confident student standing.svg" alt="" className="h-auto w-full object-contain opacity-20" />
-        </motion.div>
+        />
 
-        {/* Energy lines near ready student */}
-        <motion.div
+        <LandingDecor
+          src="/3 lines.svg"
+          size="prop"
+          hideBelowLg
+          className="bottom-[28%] right-[7%]"
+          style={{ animation: 'star-pulse 2.5s ease-in-out infinite' }}
+          opacity={0.3}
           initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          whileInView={{ opacity: 0.3 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 1 }}
-          style={{
-            position: 'absolute',
-            bottom: '28%',
-            right: '7%',
-            width: 50,
-            height: 'auto',
-            animation: 'star-pulse 2.5s ease-in-out infinite',
-          }}
-        >
-          <img src="/3 lines.svg" alt="" className="h-auto w-full object-contain opacity-30" />
-        </motion.div>
+        />
 
-        {/* Stack of documents near dreamer */}
-        <motion.div
+        <LandingDecor
+          src="/stack of documents.svg"
+          size="prop"
+          hideBelowMd
+          className="bottom-[4%] left-[14%]"
+          opacity={0.15}
           initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          whileInView={{ opacity: 0.15 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.9 }}
-          style={{
-            position: 'absolute',
-            bottom: '4%',
-            left: '14%',
-            width: 55,
-            height: 'auto',
-          }}
-        >
-          <img src="/stack of documents.svg" alt="" className="h-auto w-full object-contain opacity-15" style={{ opacity: 0.15 }} />
-        </motion.div>
+        />
 
-        {/* Travel bag near ready student */}
-        <motion.div
+        <LandingDecor
+          src="/travel bag.svg"
+          size="prop"
+          hideBelowMd
+          className="bottom-[4%] right-[14%]"
+          style={{ animation: 'float-bob 8s ease-in-out infinite', animationDelay: '0.3s' }}
+          opacity={0.15}
           initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          whileInView={{ opacity: 0.15 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 1.1 }}
-          style={{
-            position: 'absolute',
-            bottom: '4%',
-            right: '14%',
-            width: 55,
-            height: 'auto',
-            animation: 'float-bob 8s ease-in-out infinite',
-            animationDelay: '0.3s',
-          }}
-        >
-          <img src="/travel bag.svg" alt="" className="h-auto w-full object-contain opacity-15" style={{ opacity: 0.15 }} />
-        </motion.div>
+        />
 
-        {/* Stars scattered */}
-        <div style={{ position: 'absolute', top: '12%', left: '20%', width: 22, animation: 'star-pulse 3.8s ease-in-out infinite', animationDelay: '0.2s' }}>
-          <img src="/Orange Star.svg" alt="" className="w-full opacity-25" />
-        </div>
-        <div style={{ position: 'absolute', top: '20%', right: '18%', width: 18, animation: 'star-pulse 4.5s ease-in-out infinite', animationDelay: '1.4s' }}>
-          <img src="/Blue Star.svg" alt="" className="w-full opacity-25" />
-        </div>
-        <div style={{ position: 'absolute', top: '60%', left: '40%', width: 16, animation: 'star-pulse 5.2s ease-in-out infinite', animationDelay: '2.1s' }}>
-          <img src="/Green star.svg" alt="" className="w-full opacity-20" />
-        </div>
+        <LandingDecor
+          src="/Orange Star.svg"
+          size="star"
+          className="left-[20%] top-[12%]"
+          style={{ animation: 'star-pulse 3.8s ease-in-out infinite', animationDelay: '0.2s' }}
+          opacity={0.25}
+        />
+
+        <LandingDecor
+          src="/Blue Star.svg"
+          size="star"
+          className="right-[18%] top-[20%]"
+          style={{ animation: 'star-pulse 4.5s ease-in-out infinite', animationDelay: '1.4s' }}
+          opacity={0.25}
+        />
+
+        <LandingDecor
+          src="/Green star.svg"
+          size="star"
+          className="left-[40%] top-[60%]"
+          style={{ animation: 'star-pulse 5.2s ease-in-out infinite', animationDelay: '2.1s' }}
+          opacity={0.2}
+          hideBelowMd
+        />
       </div>
       {/* ── /Illustration layer ──────────────────────────────────── */}
 

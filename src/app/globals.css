@@ -53,6 +53,18 @@ body {
   background-size: 180px 180px;
 }
 
+/* ── LandingDecor size tokens ─────────────────────────────── */
+/* Scale with viewport; vmin suits full-screen landing sections. */
+.landing-decor-star       { width: clamp(12px, 1.6vmin, 26px); }
+.landing-decor-prop       { width: clamp(22px, 3vmin, 46px); }
+.landing-decor-accent     { width: clamp(28px, 4.2vmin, 60px); }
+.landing-decor-figure     { width: clamp(36px, 9vmin, 120px); }
+.landing-decor-figure-lg  { width: clamp(44px, 11vmin, 145px); }
+.landing-decor-globe-sm   { width: clamp(48px, 7vmin, 95px); }
+.landing-decor-globe      { width: clamp(72px, 14vmin, 200px); }
+.landing-decor-cloud      { width: clamp(56px, 10vmin, 150px); }
+.landing-decor-plane      { width: clamp(36px, 5.5vmin, 88px); }
+
 /* No-JS fallback: stacked sections */
 .js-enabled .landing-fallback {
   display: none;

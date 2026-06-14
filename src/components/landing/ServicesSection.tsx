@@ -13,6 +13,7 @@ import {
   type ServiceOption,
   useScrollStore,
 } from '@/lib/stores/scrollStore'
+import { LandingDecor } from './LandingDecor'
 import { useNavigateWithTransition } from './ScrollContainer'
 
 const services: {
@@ -49,40 +50,11 @@ const services: {
   },
 ]
 
-// Journey stage figures — diagonal ascending left→right
 const journeyStages = [
-  {
-    src: '/student walking.svg',
-    label: 'Student',
-    delay: 0,
-    bottom: '4%',
-    left: '2%',
-    size: 90,
-  },
-  {
-    src: '/confident student.svg',
-    label: 'Achiever',
-    delay: 0.15,
-    bottom: '8%',
-    left: '22%',
-    size: 100,
-  },
-  {
-    src: '/Doctor.svg',
-    label: 'Professional',
-    delay: 0.3,
-    bottom: '14%',
-    left: '44%',
-    size: 108,
-  },
-  {
-    src: '/corporate man.svg',
-    label: 'Corporate',
-    delay: 0.45,
-    bottom: '20%',
-    left: '66%',
-    size: 115,
-  },
+  { src: '/student walking.svg', delay: 0, bottom: '4%', left: '2%', size: 'figure' as const },
+  { src: '/confident student.svg', delay: 0.15, bottom: '8%', left: '22%', size: 'figure' as const },
+  { src: '/Doctor.svg', delay: 0.3, bottom: '14%', left: '44%', size: 'figure-lg' as const },
+  { src: '/corporate man.svg', delay: 0.45, bottom: '20%', left: '66%', size: 'figure-lg' as const },
 ]
 
 export function ServicesSection() {
@@ -99,9 +71,8 @@ export function ServicesSection() {
       {/* ── Journey stages illustration ──────────────────────────── */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
 
-        {/* Dashed ascending path line */}
         <svg
-          className="absolute inset-0 h-full w-full"
+          className="absolute inset-0 hidden h-full w-full lg:block"
           preserveAspectRatio="none"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -116,33 +87,25 @@ export function ServicesSection() {
           />
         </svg>
 
-        {/* Journey figures */}
         {journeyStages.map((stage) => (
-          <motion.div
+          <LandingDecor
             key={stage.src}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: 'easeOut', delay: stage.delay }}
+            src={stage.src}
+            size={stage.size}
+            hideBelowLg
             style={{
-              position: 'absolute',
               bottom: stage.bottom,
               left: stage.left,
-              width: stage.size,
-              height: 'auto',
               animation: `float-bob ${6 + stage.delay * 4}s ease-in-out infinite`,
               animationDelay: `${stage.delay * 2}s`,
             }}
-          >
-            <img
-              src={stage.src}
-              alt=""
-              className="h-auto w-full object-contain opacity-20"
-            />
-          </motion.div>
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 0.2, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: 'easeOut', delay: stage.delay }}
+          />
         ))}
 
-        {/* Arrow between stages */}
         {[0, 1, 2].map((i) => (
           <motion.div
             key={i}
@@ -150,12 +113,11 @@ export function ServicesSection() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.6 + i * 0.1 }}
+            className="pointer-events-none absolute hidden text-orange lg:block"
             style={{
-              position: 'absolute',
               bottom: `${9 + i * 6}%`,
               left: `${12 + i * 22}%`,
-              fontSize: 18,
-              color: '#E48328',
+              fontSize: 'clamp(14px, 2vmin, 20px)',
               opacity: 0.35,
               fontWeight: 700,
             }}
@@ -164,50 +126,57 @@ export function ServicesSection() {
           </motion.div>
         ))}
 
-        {/* Stars */}
-        <div style={{ position: 'absolute', top: '10%', right: '8%', width: 24, animation: 'star-pulse 3.5s ease-in-out infinite' }}>
-          <img src="/Orange Star.svg" alt="" className="w-full opacity-25" />
-        </div>
-        <div style={{ position: 'absolute', top: '30%', left: '5%', width: 18, animation: 'star-pulse 4.8s ease-in-out infinite', animationDelay: '1.5s' }}>
-          <img src="/Blue Star.svg" alt="" className="w-full opacity-20" />
-        </div>
-        <div style={{ position: 'absolute', top: '15%', left: '50%', width: 16, animation: 'star-pulse 5.5s ease-in-out infinite', animationDelay: '2.5s' }}>
-          <img src="/Green star.svg" alt="" className="w-full opacity-20" />
-        </div>
+        <LandingDecor
+          src="/Orange Star.svg"
+          size="star"
+          className="right-[8%] top-[10%]"
+          style={{ animation: 'star-pulse 3.5s ease-in-out infinite' }}
+          opacity={0.25}
+        />
 
-        {/* Helmet + backpack floating in background */}
-        <motion.div
+        <LandingDecor
+          src="/Blue Star.svg"
+          size="star"
+          className="left-[5%] top-[30%]"
+          style={{ animation: 'star-pulse 4.8s ease-in-out infinite', animationDelay: '1.5s' }}
+          opacity={0.2}
+          hideBelowMd
+        />
+
+        <LandingDecor
+          src="/Green star.svg"
+          size="star"
+          className="left-[50%] top-[15%]"
+          style={{ animation: 'star-pulse 5.5s ease-in-out infinite', animationDelay: '2.5s' }}
+          opacity={0.2}
+          hideBelowMd
+        />
+
+        <LandingDecor
+          src="/helmet orange.svg"
+          size="prop"
+          hideBelowMd
+          className="right-[3%] top-[12%]"
+          style={{ animation: 'float-bob 7s ease-in-out infinite', animationDelay: '1s' }}
+          opacity={0.15}
           initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          whileInView={{ opacity: 0.15 }}
           viewport={{ once: true }}
           transition={{ delay: 0.8 }}
-          style={{
-            position: 'absolute',
-            top: '12%',
-            right: '3%',
-            width: 55,
-            animation: 'float-bob 7s ease-in-out infinite',
-            animationDelay: '1s',
-          }}
-        >
-          <img src="/helmet orange.svg" alt="" className="w-full opacity-15" style={{ opacity: 0.15 }} />
-        </motion.div>
+        />
 
-        <motion.div
+        <LandingDecor
+          src="/student bacpack.svg"
+          size="prop"
+          hideBelowMd
+          className="left-[35%] top-[8%]"
+          style={{ animation: 'float-bob-delayed 9s ease-in-out infinite' }}
+          opacity={0.15}
           initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          whileInView={{ opacity: 0.15 }}
           viewport={{ once: true }}
           transition={{ delay: 1 }}
-          style={{
-            position: 'absolute',
-            top: '8%',
-            left: '35%',
-            width: 48,
-            animation: 'float-bob-delayed 9s ease-in-out infinite',
-          }}
-        >
-          <img src="/student bacpack.svg" alt="" className="w-full opacity-15" style={{ opacity: 0.15 }} />
-        </motion.div>
+        />
       </div>
       {/* ── /Journey stages ──────────────────────────────────────── */}
 
