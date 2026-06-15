@@ -56,31 +56,37 @@ export function BecomeAPartnerSection() {
           opacity={0.25}
           hideBelowMd
         />
-        {/* Flying paper planes */}
-        <LandingDecor
-          src="/paper airplane.svg"
-          hideBelowMd
-          opacity={0.35}
+        {/* Orange paper plane — bee-wander movement (left side) */}
+        <div
+          className="absolute hidden md:block"
           style={{
-            width: '80px',
-            top: '22%',
-            left: '0',
-            animation: 'plane-fly-r 10s ease-in-out infinite',
+            width: '88px',
+            top: '50%',
+            left: '6%',
+            animation: 'plane-bee 9s ease-in-out infinite',
+            animationDelay: '0.8s',
+          }}
+          aria-hidden="true"
+        >
+          <img src="/paper plane Orange 2.svg" alt="" className="w-full" style={{ opacity: 0.9 }} />
+        </div>
+
+        {/* Green plane — flies right → left towards ACE logo (top-left).
+            scaleX(-1) flips it to face the direction of travel. */}
+        <div
+          className="absolute hidden md:block"
+          style={{
+            width: '84px',
+            top: '14%',
+            left: 0,
+            animation: 'plane-fly-l 11s ease-in-out infinite',
             animationDelay: '2s',
+            transform: 'scaleX(-1)',
           }}
-        />
-        <LandingDecor
-          src="/paper airplane.svg"
-          hideBelowMd
-          opacity={0.35}
-          style={{
-            width: '70px',
-            top: '65%',
-            left: '0',
-            animation: 'plane-fly-l 13s ease-in-out infinite',
-            animationDelay: '5s',
-          }}
-        />
+          aria-hidden="true"
+        >
+          <img src="/Green Plane.svg" alt="" className="w-full" style={{ opacity: 0.9 }} />
+        </div>
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-5xl">

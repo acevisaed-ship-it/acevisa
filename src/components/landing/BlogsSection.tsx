@@ -41,15 +41,29 @@ export function BlogsSection() {
           src="/Orange Star.svg" size="star"
           className="left-[10%] top-[15%]"
           style={{ animation: 'star-pulse 3.2s ease-in-out infinite' }}
-          opacity={0.25}
+          opacity={0.3}
         />
         <LandingDecor
           src="/Blue Star.svg" size="star"
           className="right-[12%] top-[60%]"
           style={{ animation: 'star-pulse 4.6s ease-in-out infinite', animationDelay: '1.5s' }}
-          opacity={0.25}
+          opacity={0.3}
           hideBelowMd
         />
+        {/* Orange paper plane — bee-wander movement (erratic wandering, not directional) */}
+        <div
+          className="absolute hidden md:block"
+          style={{
+            width: '88px',
+            top: '18%',
+            left: '6%',
+            animation: 'plane-bee 9s ease-in-out infinite',
+            animationDelay: '0.5s',
+          }}
+          aria-hidden="true"
+        >
+          <img src="/paper plane Orange 2.svg" alt="" className="w-full" style={{ opacity: 0.9 }} />
+        </div>
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-5xl">

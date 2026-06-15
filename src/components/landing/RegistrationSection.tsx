@@ -13,10 +13,9 @@ import { LandingDecor } from './LandingDecor'
 
 // ── Layout config — tweak sizes & positions here ──────────────────────────
 const LAYOUT = {
-  // Graduate girl: 2× larger, pushed right so she overlaps left edge of form
-  figureLeft: { width: 'clamp(600px, 58vw, 920px)', bottom: '0%', left: 'calc(50% - clamp(460px, 45vw, 680px))' },
-  gradCap:    { width: 'clamp(100px, 12vw, 180px)', top: '7%',    left: '5%' },
-  earth:      { width: 'clamp(180px, 20vw, 380px)', top: '3%',    right: '3%' },
+  // Graduate girl — size confirmed good; moved right to hug form's left border
+  figureLeft:  { width: 'clamp(600px, 58vw, 920px)', bottom: '0%', left: 'calc(50% - clamp(300px, 30vw, 460px))' },
+  earth:       { width: 'clamp(180px, 20vw, 380px)', top: '3%',    right: '3%' },
   // Orange paper plane — floats with random-ish bob (no directional fly)
   orangePlane: { width: '100px', top: '22%', left: '30%' },
 }
@@ -122,24 +121,6 @@ export function RegistrationSection() {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.9, ease: 'easeOut', delay: 0.4 }}
-        />
-
-        {/* Graduation cap — top-left */}
-        <LandingDecor
-          src="/Graduation Cap.svg"
-          hideBelowMd
-          opacity={1}
-          style={{
-            width: LAYOUT.gradCap.width,
-            top: LAYOUT.gradCap.top,
-            left: LAYOUT.gradCap.left,
-            animation: 'float-bob 5s ease-in-out infinite',
-            animationDelay: '0.5s',
-          }}
-          initial={{ opacity: 0, y: -10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, delay: 0.5 }}
         />
 
         {/* Earth globe — top-right */}

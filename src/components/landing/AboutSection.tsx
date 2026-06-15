@@ -11,13 +11,13 @@ import { useNavigateWithTransition } from './ScrollContainer'
 // ── Layout config — tweak sizes & positions here without touching JSX ─────
 const LAYOUT = {
   figureLeft:   { width: 'clamp(480px, 40vw, 680px)', bottom: '-2%', left: '0%' },
-  // Sad student 2× larger, stays on right
-  figureRight:  { width: 'clamp(700px, 65vw, 1040px)', bottom: '-2%', right: '-2%' },
-  // Thought cloud moved to top-left corner
-  thoughtCloud: { width: '160px', top: '6%', left: '2%' },
+  // Sad student — reverted to original size
+  figureRight:  { width: 'clamp(480px, 40vw, 680px)', bottom: '-2%', right: '0%' },
+  // Thought cloud — original position (near left figure's upper body)
+  thoughtCloud: { width: '140px', bottom: '62%', left: '1%' },
   threeLines:   { width: '90px',  bottom: '28%', right: '7%' },
   stackDocs:    { width: '100px', bottom: '4%',  left: '14%' },
-  // Travel bag behind sad student — same right anchor, positioned at bottom
+  // Travel bag — moved behind sad student (rendered before him in DOM)
   travelBag:    { width: '360px', bottom: '-4%', right: '4%' },
 }
 
@@ -57,14 +57,14 @@ export function AboutSection() {
           transition={{ duration: 0.9, ease: 'easeOut', delay: 0.3 }}
         />
 
-        {/* Thought cloud — top-left corner */}
+        {/* Thought cloud — near left figure's upper body */}
         <LandingDecor
           src="/thought cloud with graduation cap.svg"
           hideBelowLg
           opacity={1}
           style={{
             width: LAYOUT.thoughtCloud.width,
-            top: LAYOUT.thoughtCloud.top,
+            bottom: LAYOUT.thoughtCloud.bottom,
             left: LAYOUT.thoughtCloud.left,
             animation: 'float-bob 5s ease-in-out infinite',
             animationDelay: '1s',

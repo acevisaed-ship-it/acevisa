@@ -5,14 +5,9 @@ import { Check, Bot, Sparkles } from 'lucide-react'
 
 // ── Layout config ─────────────────────────────────────────────────────────
 const LAYOUT = {
-  // 3 clouds — top-left cluster, behind the nav logo area
-  cloud1: { width: 'clamp(260px, 28vw, 460px)', top: '-4%',  left: '-8%'  },
-  cloud2: { width: 'clamp(200px, 20vw, 340px)', top: '3%',   left: '8%'   },
-  cloud3: { width: 'clamp(160px, 15vw, 260px)', top: '-1%',  left: '20%'  },
-  // Orange paper plane — left → right
-  planeOrange: { width: '88px', top: '30%', left: '0' },
-  // Blue paper plane — enters from right
-  planeBlue:   { width: '80px', top: '58%', left: '0' },
+  // Only the orange plane — flies right → left towards the ACE logo (top-left)
+  // Animation & speed taken from the landing page plane-fly-l keyframe
+  planeOrange: { width: '88px', top: '12%' },
 }
 
 // ─── Application stages ───────────────────────────────────────────────────
@@ -350,35 +345,24 @@ export function AIChatSection() {
   return (
     <div className="bg-grad-teal relative flex h-full flex-col justify-center overflow-hidden px-4 py-8 md:px-10 md:py-16">
 
-      {/* ── Decorative layer — colored planes only ───────────────── */}
+      {/* ── Decorative layer — single orange plane, right → left towards ACE logo ── */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
 
-        {/* Orange plane — flies left → right (same as hero page) */}
+        {/* Orange plane — flies right → left towards the ACE logo in top-left.
+            scaleX(-1) flips the SVG so it faces the direction of travel.
+            Speed & keyframe (plane-fly-l) taken from landing page globals.css. */}
         <div
           className="absolute hidden md:block"
           style={{
             width: LAYOUT.planeOrange.width,
             top: LAYOUT.planeOrange.top,
-            left: LAYOUT.planeOrange.left,
-            animation: 'plane-fly-r 10s ease-in-out infinite',
-            animationDelay: '1.5s',
+            left: 0,
+            animation: 'plane-fly-l 10s ease-in-out infinite',
+            animationDelay: '1s',
+            transform: 'scaleX(-1)',
           }}
         >
           <img src="/Orange plane.svg" alt="" className="w-full" style={{ opacity: 0.9 }} />
-        </div>
-
-        {/* Blue plane — enters from right only (plane-fly-l) */}
-        <div
-          className="absolute hidden md:block"
-          style={{
-            width: LAYOUT.planeBlue.width,
-            top: LAYOUT.planeBlue.top,
-            right: '0',
-            animation: 'plane-fly-l 13s ease-in-out infinite',
-            animationDelay: '4s',
-          }}
-        >
-          <img src="/Blue plane.svg" alt="" className="w-full" style={{ opacity: 0.9 }} />
         </div>
       </div>
       {/* ── /Decorative layer ─────────────────────────────────────── */}
