@@ -76,25 +76,25 @@ export default function StudentLoginPage() {
   }
 
   const inputCls =
-    'min-h-[52px] w-full rounded-xl border border-[#0A3F3A]/20 bg-[#E6E8E7] px-4 py-3 text-[#0A3F3A] outline-none focus:border-[#2083B9]'
+    'min-h-[52px] w-full rounded-xl bg-grad-bg crisp px-4 py-3 text-text outline-none focus:ring-1 focus:ring-blue/40'
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0A3F3A] px-4 py-8">
-      <div className="w-full max-w-sm rounded-[24px] bg-[#E6E8E7] p-6 shadow-2xl sm:p-8">
+    <div className="flex min-h-screen items-center justify-center bg-grad-teal px-4 py-8">
+      <div className="w-full max-w-sm rounded-[24px] bg-grad-bg crisp p-6 sm:p-8">
         <div className="mb-8 flex justify-center">
           <img src="/logo.png" alt="ACE Altius Consulting" className="h-14 w-auto" />
         </div>
 
-        <h1 className="text-center text-2xl font-semibold text-[#0A3F3A]">Student Portal</h1>
-        <p className="mt-1 text-center text-sm text-[#0A3F3A]/50">Sign in to track your application</p>
+        <h1 className="text-center text-2xl font-semibold text-text">Student Portal</h1>
+        <p className="mt-1 text-center text-sm text-text/50">Sign in to track your application</p>
         <div className="mt-3 flex justify-center">
-          <PWAInstallButton className="inline-flex items-center gap-2 rounded-full border border-[#0A3F3A]/20 px-4 py-2 text-xs font-medium text-[#0A3F3A]/60 hover:border-[#0A3F3A]/40 hover:text-[#0A3F3A] transition-colors" />
+          <PWAInstallButton className="inline-flex items-center gap-2 rounded-full bg-grad-bg crisp px-4 py-2 text-xs font-medium text-text/60 hover:brightness-95 hover:text-text transition-all" />
         </div>
 
         {view === 'login' ? (
           <form onSubmit={handleLogin} className="mt-8 space-y-4">
             <div>
-              <label htmlFor="identifier" className="mb-1.5 block text-xs font-medium text-[#0A3F3A]/70">
+              <label htmlFor="identifier" className="mb-1.5 block text-xs font-medium text-text/70">
                 Email address or phone number
               </label>
               <input
@@ -110,7 +110,7 @@ export default function StudentLoginPage() {
             </div>
 
             <div className="relative">
-              <label htmlFor="password" className="mb-1.5 block text-xs font-medium text-[#0A3F3A]/70">
+              <label htmlFor="password" className="mb-1.5 block text-xs font-medium text-text/70">
                 Password
               </label>
               <input
@@ -126,7 +126,7 @@ export default function StudentLoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPw((v) => !v)}
-                className="absolute bottom-3.5 right-4 text-[#0A3F3A]/40 hover:text-[#0A3F3A]"
+                className="absolute bottom-3.5 right-4 text-text/40 hover:text-text"
               >
                 {showPw ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
@@ -139,7 +139,7 @@ export default function StudentLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="min-h-[52px] w-full rounded-full bg-[#B7C733] py-3 text-sm font-bold text-[#0A3F3A] transition-opacity hover:opacity-90 disabled:opacity-60"
+              className="min-h-[52px] w-full rounded-full bg-grad-green crisp-on-dark py-3 text-sm font-bold text-text transition-all hover:brightness-110 disabled:opacity-60"
             >
               {loading ? 'Signing in…' : 'Sign in →'}
             </button>
@@ -147,19 +147,19 @@ export default function StudentLoginPage() {
             <button
               type="button"
               onClick={() => { setView('forgot'); setError(null) }}
-              className="w-full text-center text-sm text-[#2083B9] hover:underline"
+              className="w-full text-center text-sm text-blue hover:underline"
             >
               Forgot password?
             </button>
           </form>
         ) : (
           <form onSubmit={handleForgotPassword} className="mt-8 space-y-4">
-            <p className="text-sm text-[#0A3F3A]/70">
+            <p className="text-sm text-text/70">
               Enter your email address or phone number. If a profile exists, we will send a password reset link.
             </p>
 
             <div>
-              <label htmlFor="fp-identifier" className="mb-1.5 block text-xs font-medium text-[#0A3F3A]/70">
+              <label htmlFor="fp-identifier" className="mb-1.5 block text-xs font-medium text-text/70">
                 Email or phone number
               </label>
               <input
@@ -177,13 +177,13 @@ export default function StudentLoginPage() {
               <p className="rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-600">{fpError}</p>
             )}
             {fpMessage && (
-              <p className="rounded-xl bg-[#B7C733]/20 px-4 py-2.5 text-sm text-[#0A3F3A]">✓ {fpMessage}</p>
+              <p className="rounded-xl bg-green/20 px-4 py-2.5 text-sm text-text">✓ {fpMessage}</p>
             )}
 
             <button
               type="submit"
               disabled={fpLoading}
-              className="min-h-[52px] w-full rounded-full bg-[#B7C733] py-3 text-sm font-bold text-[#0A3F3A] transition-opacity hover:opacity-90 disabled:opacity-60"
+              className="min-h-[52px] w-full rounded-full bg-grad-green crisp-on-dark py-3 text-sm font-bold text-text transition-all hover:brightness-110 disabled:opacity-60"
             >
               {fpLoading ? 'Sending…' : 'Send reset link'}
             </button>
@@ -191,16 +191,16 @@ export default function StudentLoginPage() {
             <button
               type="button"
               onClick={() => { setView('login'); setFpMessage(null); setFpError(null) }}
-              className="w-full text-center text-sm text-[#2083B9] hover:underline"
+              className="w-full text-center text-sm text-blue hover:underline"
             >
               Back to login
             </button>
           </form>
         )}
 
-        <p className="mt-8 text-center text-xs text-[#0A3F3A]/40">
+        <p className="mt-8 text-center text-xs text-text/40">
           New student?{' '}
-          <a href="/" className="text-[#2083B9] hover:underline">Register on our website</a>
+          <a href="/" className="text-blue hover:underline">Register on our website</a>
         </p>
       </div>
     </div>

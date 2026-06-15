@@ -15,7 +15,7 @@ const STAR_SRCS  = ['/Orange Star.svg', '/Blue Star.svg', '/Green star.svg']
 // Commercial jets — index 0 = orange (plane A), index 1 = blue (plane B)
 const PLANE_SRCS = ['/Orange plane.svg', '/Blue plane.svg', '/Green Plane.svg']
 
-// Paper planes — includes plain + all coloured variants
+// Paper planes — coloured variants only (plane.svg reserved for page transitions)
 const PAPER_SRCS = [
   '/paper airplane.svg',
   '/paper plane Orange 2.svg',
@@ -23,7 +23,6 @@ const PAPER_SRCS = [
   '/paper plane Green 2.svg',
   '/paper plane blue 1.svg',
   '/paper plane Green.svg',
-  '/plane.svg',
 ]
 
 // ─── Client-side random helpers ───────────────────────────────────────────
@@ -141,6 +140,8 @@ interface CloudGroupData {
   cW:          number   // container width
   cH:          number   // container height
   dots:        CloudDot[]
+  easeType:    string          // 'linear' | 'easeOut' | 'easeInOut'
+  slowFrac:    number | null   // 0.35–0.75 = pause near ACE zone, null = no pause
 }
 
 function buildFormation(formation: CloudFormation, count: number): { dots: CloudDot[]; cW: number; cH: number } {
@@ -194,19 +195,33 @@ function buildFormation(formation: CloudFormation, count: number): { dots: Cloud
 }
 
 function CloudGroup({ g, vw }: { g: CloudGroupData; vw: number }) {
-  const buf = g.cW + 120
+  const buf   = g.cW + 120
+  const startX = vw + buf
+  const endX   = -buf
+
+  // Keyframe & timing arrays for variable-speed clouds
+  const xFrames = g.slowFrac !== null
+    ? [startX, startX + (endX - startX) * g.slowFrac, endX]
+    : [startX, endX]
+
+  // When a slow-zone is present, spend proportionally more time there
+  // (ACE logo is ~20–50% from left → cloud reaches it 50–80% through journey)
+  const timesArr = g.slowFrac !== null
+    ? [0, Math.min(g.slowFrac * 0.70 + 0.10, 0.88), 1]
+    : [0, 1]
+
   return (
     <motion.div
       className="pointer-events-none absolute"
       style={{ top: `${g.topPct}%`, left: 0, width: g.cW, height: g.cH }}
-      initial={{ x: vw + buf }}
-      animate={{ x: -buf }}
+      animate={{ x: xFrames }}
       transition={{
         duration:    g.speed,
         delay:       g.delay,
         repeat:      Infinity,
         repeatDelay: g.repeatDelay,
-        ease:        'linear',
+        ease:        g.slowFrac !== null ? ['linear', 'easeInOut'] : (g.easeType as 'linear' | 'easeOut' | 'easeInOut'),
+        times:       timesArr,
       }}
     >
       {g.dots.map((d, i) => (
@@ -239,12 +254,15 @@ function CloudLayer({ vw }: { vw: number }) {
         const formation = FORMATIONS[i % FORMATIONS.length] as CloudFormation  // ensure all 4 types appear
         const count     = formation === 'merged' ? ri(3, 5) : ri(2, 4)
         const { dots, cW, cH } = buildFormation(formation, count)
+        const easeOptions = ['linear', 'linear', 'easeOut', 'easeInOut']
         return {
           id: i, formation, dots, cW, cH,
-          topPct:      rn(1, 16),
-          speed:       rn(90, 180),
+          topPct:      rn(0, 8),                              // higher up in sky
+          speed:       rn(55, 280),                           // wide range: some very slow
           delay:       rn(0, 40),
-          repeatDelay: rn(5, 18),
+          repeatDelay: rn(4, 20),
+          easeType:    easeOptions[Math.floor(Math.random() * easeOptions.length)],
+          slowFrac:    Math.random() < 0.40 ? rn(0.40, 0.72) : null,  // 40% get slow zone
         }
       })
     )
@@ -444,6 +462,124 @@ function BeeOrangePlane({ vw, vh }: { vw: number; vh: number }) {
       }}
     >
       <img src="/paper plane Orange 2.svg" alt="" aria-hidden className="h-auto w-full" />
+    </motion.div>
+  )
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// 2c. BEE BLUE PLANE
+//     Blue paper plane with wide X-axis travel, occasional direction reversal,
+//     and gravity coupling: faster when going down on Y, slower going up.
+// ════════════════════════════════════════════════════════════════════════════
+
+function BeeBluePlane({ vw, vh }: { vw: number; vh: number }) {
+  const mx  = useMotionValue(-80)
+  const my  = useMotionValue(0)
+  const rot = useMotionValue(0)
+  const t0  = useRef<number | null>(null)
+  const prevT = useRef<number>(0)
+  const [ready, setReady] = useState(false)
+
+  const s = useRef({
+    x: -80, y: 0,
+    baseVx: 80,
+    // X oscillation — large amplitude, very low frequency → occasional reversals
+    ax1: 0.85, fx1: 0,   // fraction of baseVx; can push vx negative briefly
+    ax2: 0.40, fx2: 0,
+    phx1: 0,  phx2: 0,
+    // Y sine waves (bee motion)
+    ay1: 0, fy1: 0, phy1: 0,
+    ay2: 0, fy2: 0, phy2: 0,
+    ay3: 0, fy3: 0, phy3: 0,
+    baseY: 0,
+    gravK: 0,    // gravity coupling strength
+    cycleStart: 0,
+  })
+
+  const randomise = (cVw: number, cVh: number) => {
+    const p = s.current
+    p.x       = -80
+    p.baseVx  = rn(55, 110)
+    // X modulation amplitudes — sum can exceed 1 for brief reversals
+    p.ax1 = rn(0.60, 0.95); p.fx1 = rn(0.020, 0.055); p.phx1 = rn(0, Math.PI * 2)
+    p.ax2 = rn(0.25, 0.55); p.fx2 = rn(0.005, 0.020); p.phx2 = rn(0, Math.PI * 2)
+    // Y bee waves
+    p.ay1 = rn(50, 110); p.fy1 = rn(0.22, 0.60); p.phy1 = rn(0, Math.PI * 2)
+    p.ay2 = rn(25, 55);  p.fy2 = rn(0.90, 2.00); p.phy2 = rn(0, Math.PI * 2)
+    p.ay3 = rn(8,  22);  p.fy3 = rn(2.00, 4.00); p.phy3 = rn(0, Math.PI * 2)
+    p.baseY  = cVh * rn(0.18, 0.72)
+    p.gravK  = rn(0.8, 2.2)   // higher = stronger gravity coupling
+    p.cycleStart = 0
+  }
+
+  useEffect(() => {
+    if (!vw || !vh) return
+    randomise(vw, vh)
+    setReady(true)
+  }, [vw, vh])
+
+  useAnimationFrame((t) => {
+    if (!ready) return
+    if (t0.current === null) { t0.current = t; prevT.current = t }
+    const dt      = Math.min((t - prevT.current) / 1000, 0.05)
+    prevT.current = t
+    const elapsed = (t - t0.current) / 1000
+    const p       = s.current
+
+    // ── X velocity with slow oscillation — sum > 1 triggers brief reversal ──
+    const xMod  = p.ax1 * Math.sin(p.fx1 * Math.PI * 2 * elapsed + p.phx1)
+                + p.ax2 * Math.sin(p.fx2 * Math.PI * 2 * elapsed + p.phx2)
+    const vxBase = p.baseVx * (1 + xMod)   // can go negative briefly
+
+    // ── Y position via three sine waves ─────────────────────────────────────
+    const yOff = (e: number) =>
+      p.ay1 * Math.sin(p.fy1 * e + p.phy1) +
+      p.ay2 * Math.sin(p.fy2 * e + p.phy2) +
+      p.ay3 * Math.sin(p.fy3 * e + p.phy3)
+
+    const clampY = (v: number) => Math.max(30, Math.min(vh - 60, v))
+
+    const curY  = clampY(p.baseY + yOff(elapsed))
+    const nextY = clampY(p.baseY + yOff(elapsed + 0.05))
+    const dy    = nextY - curY   // positive = moving down
+
+    // ── Gravity coupling: faster X when descending, slower when climbing ─────
+    // Normalise dy by a rough amplitude scale (~50 px) then multiply coupling
+    const gravBoost = 1 + p.gravK * (dy / 55)
+    const vx = vxBase * Math.max(0.08, gravBoost)   // floor at 8% so it doesn't freeze
+
+    p.x += vx * dt
+
+    // Reset when exits right side (or if somehow drifts very far left)
+    if (p.x > vw + 120 || p.x < -300) {
+      randomise(vw, vh)
+      p.x = -80
+    }
+
+    const x  = p.x
+    const y  = curY
+    const nx = x + vx * 0.05
+    const ny = nextY
+
+    mx.set(x)
+    my.set(y)
+    rot.set(Math.atan2(ny - y, nx - x) * 180 / Math.PI)
+  })
+
+  if (!ready) return null
+
+  return (
+    <motion.div
+      className="pointer-events-none absolute"
+      style={{
+        left: 0, top: 0,
+        width: 42,
+        x: mx, y: my, rotate: rot,
+        translateX: '-50%', translateY: '-50%',
+        willChange: 'transform',
+      }}
+    >
+      <img src="/paper Plane Blue 2.svg" alt="" aria-hidden className="h-auto w-full" />
     </motion.div>
   )
 }
@@ -720,6 +856,7 @@ export function HeroAnimations() {
       <div className="absolute inset-0 z-[5]">
         <FreeRoamingPaperPlanes vw={vw} vh={vh} />
         <BeeOrangePlane vw={vw} vh={vh} />
+        <BeeBluePlane vw={vw} vh={vh} />
       </div>
     </div>
   )

@@ -40,8 +40,7 @@ export default function ReturnPage() {
   return (
     <main className="bg-texture flex min-h-screen items-center justify-center bg-bg px-5 py-24">
       <div
-        className="w-full rounded-[20px] border border-text/10 bg-white/80 p-6 shadow-sm sm:max-w-[400px] sm:p-8"
-        style={{ background: 'rgba(255,255,255,0.9)' }}
+        className="w-full rounded-[20px] bg-grad-bg crisp p-6 sm:max-w-[400px] sm:p-8"
       >
         <div className="mb-6 flex justify-center">
           <img src="/logo.png" alt="ACE Altius Consulting" className="h-16 w-auto" />

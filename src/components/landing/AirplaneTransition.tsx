@@ -41,7 +41,7 @@ function AirplaneTransitionOverlay() {
           className="absolute left-1/2 top-1/2"
         >
           <img
-            src="/plane.png"
+            src="/plane.svg"
             alt=""
             aria-hidden="true"
             className="h-auto w-[180px] md:w-[280px]"

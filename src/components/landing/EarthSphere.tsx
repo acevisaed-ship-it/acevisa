@@ -51,7 +51,7 @@ export function EarthSphere({ size }: EarthSphereProps) {
       let material: import('three').MeshPhongMaterial
 
       try {
-        const texture = await new THREE.TextureLoader().loadAsync('/Earth2.png')
+        const texture = await new THREE.TextureLoader().loadAsync('/Earth3.png')
         texture.colorSpace  = THREE.SRGBColorSpace
         texture.anisotropy  = renderer.capabilities.getMaxAnisotropy()
         material = new THREE.MeshPhongMaterial({
