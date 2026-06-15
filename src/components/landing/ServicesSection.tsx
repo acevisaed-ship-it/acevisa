@@ -16,45 +16,85 @@ import {
 import { LandingDecor } from './LandingDecor'
 import { useNavigateWithTransition } from './ScrollContainer'
 
+// ── Layout config — tweak SVG sizes & positions here ─────────────────────
+const LAYOUT = {
+  svgHeight: 'clamp(140px, 16vh, 210px)', // height of each card SVG
+  starOpacity: 0.25,
+}
+
+// ── Card theme config ─────────────────────────────────────────────────────
+const cardThemes = [
+  {
+    // Study Visa — green
+    cardBg:    'var(--grad-green)',
+    iconColor: 'text-white',
+    titleColor:'text-white',
+    descColor: 'text-white/70',
+    btnClass:  'border-white/30 bg-white/20 text-white hover:bg-white/35',
+  },
+  {
+    // Find a Job — orange
+    cardBg:    'var(--grad-orange)',
+    iconColor: 'text-white',
+    titleColor:'text-white',
+    descColor: 'text-white/70',
+    btnClass:  'border-white/30 bg-white/20 text-white hover:bg-white/35',
+  },
+  {
+    // Visit & Immigration — blue
+    cardBg:    'var(--grad-blue)',
+    iconColor: 'text-white',
+    titleColor:'text-white',
+    descColor: 'text-white/70',
+    btnClass:  'border-white/30 bg-white/20 text-white hover:bg-white/35',
+  },
+  {
+    // Language & Test Prep — lime green #B7C733
+    cardBg:    'linear-gradient(135deg, #cdd94e 0%, #B7C733 60%, #96a420 100%)',
+    iconColor: 'text-text',
+    titleColor:'text-text',
+    descColor: 'text-text/70',
+    btnClass:  'border-text/20 bg-text/15 text-text hover:bg-text/25',
+  },
+]
+
 const services: {
   icon: typeof GraduationCap
   title: string
   description: string
   tag?: string
   service: ServiceOption
+  svg: string
 }[] = [
   {
     icon: GraduationCap,
-    title: 'Study Visa & Admissions',
+    title: 'Study Visa',
     description: 'University applications, visa filing, end-to-end support',
     tag: 'most popular',
     service: 'Study Visa',
+    svg: '/student walking.svg',
   },
   {
     icon: Briefcase,
-    title: 'Find a Job Abroad',
+    title: 'Find a Job',
     description: 'Work permit guidance and overseas job placement support',
     service: 'Job Abroad',
+    svg: '/Doctor.svg',
   },
   {
     icon: Globe,
-    title: 'Visit & Immigration Visa',
+    title: 'Visit and Immigration',
     description: 'Visit visas, immigration processing, document preparation included',
     service: 'Visit Visa',
+    svg: '/corporate man.svg',
   },
   {
     icon: BookOpen,
-    title: 'Language Learning & Test Prep',
+    title: 'Language Test and Preparation',
     description: 'IELTS, PTE, language courses — all levels',
     service: 'Language & Test Prep',
+    svg: '/student with files.svg',
   },
-]
-
-const journeyStages = [
-  { src: '/student walking.svg', delay: 0, bottom: '4%', left: '2%', size: 'figure' as const },
-  { src: '/confident student.svg', delay: 0.15, bottom: '8%', left: '22%', size: 'figure' as const },
-  { src: '/Doctor.svg', delay: 0.3, bottom: '14%', left: '44%', size: 'figure-lg' as const },
-  { src: '/corporate man.svg', delay: 0.45, bottom: '20%', left: '66%', size: 'figure-lg' as const },
 ]
 
 export function ServicesSection() {
@@ -68,117 +108,32 @@ export function ServicesSection() {
   return (
     <div className="bg-texture relative flex h-full flex-col justify-center overflow-hidden bg-bg px-5 py-10 md:px-10 md:py-24">
 
-      {/* ── Journey stages illustration ──────────────────────────── */}
+      {/* ── Background stars only ────────────────────────────────── */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
-
-        <svg
-          className="absolute inset-0 hidden h-full w-full lg:block"
-          preserveAspectRatio="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M 0,95% C 25%,88% 50%,75% 75%,60% L 100%,45%"
-            fill="none"
-            stroke="#0A3F3A"
-            strokeWidth="1.5"
-            strokeDasharray="8 8"
-            opacity="0.12"
-            vectorEffect="non-scaling-stroke"
-          />
-        </svg>
-
-        {journeyStages.map((stage) => (
-          <LandingDecor
-            key={stage.src}
-            src={stage.src}
-            size={stage.size}
-            hideBelowLg
-            style={{
-              bottom: stage.bottom,
-              left: stage.left,
-              animation: `float-bob ${6 + stage.delay * 4}s ease-in-out infinite`,
-              animationDelay: `${stage.delay * 2}s`,
-            }}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 0.2, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: 'easeOut', delay: stage.delay }}
-          />
-        ))}
-
-        {[0, 1, 2].map((i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, scale: 0 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.6 + i * 0.1 }}
-            className="pointer-events-none absolute hidden text-orange lg:block"
-            style={{
-              bottom: `${9 + i * 6}%`,
-              left: `${12 + i * 22}%`,
-              fontSize: 'clamp(14px, 2vmin, 20px)',
-              opacity: 0.35,
-              fontWeight: 700,
-            }}
-          >
-            →
-          </motion.div>
-        ))}
-
         <LandingDecor
           src="/Orange Star.svg"
           size="star"
           className="right-[8%] top-[10%]"
           style={{ animation: 'star-pulse 3.5s ease-in-out infinite' }}
-          opacity={0.25}
+          opacity={LAYOUT.starOpacity}
         />
-
         <LandingDecor
           src="/Blue Star.svg"
           size="star"
           className="left-[5%] top-[30%]"
           style={{ animation: 'star-pulse 4.8s ease-in-out infinite', animationDelay: '1.5s' }}
-          opacity={0.2}
+          opacity={LAYOUT.starOpacity}
           hideBelowMd
         />
-
         <LandingDecor
           src="/Green star.svg"
           size="star"
           className="left-[50%] top-[15%]"
           style={{ animation: 'star-pulse 5.5s ease-in-out infinite', animationDelay: '2.5s' }}
-          opacity={0.2}
+          opacity={LAYOUT.starOpacity}
           hideBelowMd
-        />
-
-        <LandingDecor
-          src="/helmet orange.svg"
-          size="prop"
-          hideBelowMd
-          className="right-[3%] top-[12%]"
-          style={{ animation: 'float-bob 7s ease-in-out infinite', animationDelay: '1s' }}
-          opacity={0.15}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 0.15 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.8 }}
-        />
-
-        <LandingDecor
-          src="/student bacpack.svg"
-          size="prop"
-          hideBelowMd
-          className="left-[35%] top-[8%]"
-          style={{ animation: 'float-bob-delayed 9s ease-in-out infinite' }}
-          opacity={0.15}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 0.15 }}
-          viewport={{ once: true }}
-          transition={{ delay: 1 }}
         />
       </div>
-      {/* ── /Journey stages ──────────────────────────────────────── */}
 
       {/* Content */}
       <div className="relative z-10 mx-auto w-full max-w-5xl">
@@ -192,17 +147,16 @@ export function ServicesSection() {
           <p className="mb-3 text-xs font-medium uppercase tracking-widest text-orange">
             what we do
           </p>
-          <h2 className="text-[clamp(1.75rem,6vw,3.5rem)] font-semibold leading-tight text-blue lowercase">
-            four ways we
-            <br />
-            get you there
+          <h2 className="text-[clamp(1.75rem,6vw,3.5rem)] font-semibold leading-tight text-blue">
+            Four Ways To Ace
           </h2>
         </motion.div>
 
-        {/* 2-col on mobile, 2-col on sm+ — cards compact on small screens */}
+        {/* 2-col grid — each cell: [SVG beside Card] */}
         <div className="grid grid-cols-2 gap-3 sm:gap-5">
           {services.map((item, i) => {
             const Icon = item.icon
+            const theme = cardThemes[i]
             return (
               <motion.div
                 key={item.title}
@@ -210,25 +164,38 @@ export function ServicesSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.7, delay: i * 0.08, ease: 'easeInOut' }}
-                className="flex"
+                className="flex items-end gap-2 lg:gap-3"
               >
-                <Card className="flex w-full flex-col gap-3 p-4 md:gap-4 md:p-6">
+                {/* SVG figure beside card — desktop only */}
+                <img
+                  src={item.svg}
+                  alt=""
+                  aria-hidden="true"
+                  className="hidden shrink-0 w-auto object-contain object-bottom lg:block"
+                  style={{ height: LAYOUT.svgHeight }}
+                />
+
+                {/* Card */}
+                <Card
+                  variant="dark"
+                  className="flex flex-1 flex-col gap-3 p-4 md:gap-4 md:p-6"
+                  style={{ background: theme.cardBg }}
+                >
                   <div className="flex items-start justify-between gap-2">
-                    <Icon className="h-5 w-5 shrink-0 text-green md:h-7 md:w-7" strokeWidth={1.5} />
+                    <Icon className={`h-5 w-5 shrink-0 md:h-7 md:w-7 ${theme.iconColor}`} strokeWidth={1.5} />
                     {item.tag && (
-                      <span className="rounded-full bg-orange/15 px-2 py-0.5 text-[10px] font-medium text-orange md:px-3 md:py-1 md:text-xs">
+                      <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-medium text-white md:px-3 md:py-1 md:text-xs">
                         {item.tag}
                       </span>
                     )}
                   </div>
-                  <h3 className="text-[clamp(0.8rem,2.3vw,1.125rem)] font-semibold lowercase leading-snug text-blue">
+                  <h3 className={`text-[clamp(0.8rem,2.3vw,1.125rem)] font-semibold leading-snug ${theme.titleColor}`}>
                     {item.title}
                   </h3>
-                  <p className="hidden flex-1 text-sm text-text/70 sm:block">{item.description}</p>
+                  <p className={`hidden flex-1 text-sm sm:block ${theme.descColor}`}>{item.description}</p>
                   <Button
-                    variant={i % 2 === 0 ? 'primary' : 'secondary'}
                     onClick={() => handleSelect(item.service)}
-                    className="w-full py-2 text-xs md:py-3 md:text-sm"
+                    className={`w-full py-2 text-xs md:py-3 md:text-sm ${theme.btnClass}`}
                   >
                     I need this →
                   </Button>

@@ -8,6 +8,16 @@ import { useScrollStore } from '@/lib/stores/scrollStore'
 import { LandingDecor } from './LandingDecor'
 import { useNavigateWithTransition } from './ScrollContainer'
 
+// ── Layout config — tweak sizes & positions here without touching JSX ─────
+const LAYOUT = {
+  figureLeft:   { width: 'clamp(240px, 20vw, 340px)', bottom: '-2%', left: '0%' },
+  figureRight:  { width: 'clamp(240px, 20vw, 340px)', bottom: '-2%', right: '0%' },
+  thoughtCloud: { width: '140px', bottom: '38%', left: '6%' },
+  threeLines:   { width: '90px',  bottom: '28%', right: '7%' },
+  stackDocs:    { width: '100px', bottom: '4%',  left: '14%' },
+  travelBag:    { width: '100px', bottom: '4%',  right: '14%' },
+}
+
 export function AboutSection() {
   const navigate = useNavigateWithTransition()
   const highlightAce = useScrollStore((s) => s.highlightAce)
@@ -28,77 +38,103 @@ export function AboutSection() {
       {/* ── Illustration layer ───────────────────────────────────── */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
 
+        {/* Left figure: student with files */}
         <LandingDecor
-          src="/sad student on bench.svg"
-          size="figure-lg"
+          src="/student with files.svg"
           hideBelowLg
-          className="bottom-[4%] left-[2%]"
-          style={{ animation: 'float-bob 7s ease-in-out infinite', animationDelay: '0.5s' }}
+          opacity={1}
+          style={{
+            width: LAYOUT.figureLeft.width,
+            bottom: LAYOUT.figureLeft.bottom,
+            left: LAYOUT.figureLeft.left,
+          }}
           initial={{ opacity: 0, x: -30 }}
-          whileInView={{ opacity: 0.2, x: 0 }}
+          whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.9, ease: 'easeOut', delay: 0.3 }}
         />
 
+        {/* Thought cloud — near left figure */}
         <LandingDecor
           src="/thought cloud with graduation cap.svg"
-          size="accent"
           hideBelowLg
-          className="bottom-[34%] left-[6%]"
-          style={{ animation: 'float-bob 5s ease-in-out infinite', animationDelay: '1s' }}
-          opacity={0.18}
+          opacity={1}
+          style={{
+            width: LAYOUT.thoughtCloud.width,
+            bottom: LAYOUT.thoughtCloud.bottom,
+            left: LAYOUT.thoughtCloud.left,
+            animation: 'float-bob 5s ease-in-out infinite',
+            animationDelay: '1s',
+          }}
           initial={{ opacity: 0, scale: 0.6 }}
-          whileInView={{ opacity: 0.18, scale: 1 }}
+          whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease: 'easeOut', delay: 0.7 }}
         />
 
+        {/* Right figure: sad student on bench */}
         <LandingDecor
-          src="/confident student standing.svg"
-          size="figure"
+          src="/sad student on bench.svg"
           hideBelowLg
-          className="bottom-[4%] right-[3%]"
-          style={{ animation: 'float-bob-delayed 6s ease-in-out infinite', animationDelay: '2s' }}
+          opacity={1}
+          style={{
+            width: LAYOUT.figureRight.width,
+            bottom: LAYOUT.figureRight.bottom,
+            right: LAYOUT.figureRight.right,
+          }}
           initial={{ opacity: 0, x: 30 }}
-          whileInView={{ opacity: 0.2, x: 0 }}
+          whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.9, ease: 'easeOut', delay: 0.5 }}
         />
 
+        {/* 3 lines — right side */}
         <LandingDecor
           src="/3 lines.svg"
-          size="prop"
           hideBelowLg
-          className="bottom-[28%] right-[7%]"
-          style={{ animation: 'star-pulse 2.5s ease-in-out infinite' }}
-          opacity={0.3}
+          opacity={1}
+          style={{
+            width: LAYOUT.threeLines.width,
+            bottom: LAYOUT.threeLines.bottom,
+            right: LAYOUT.threeLines.right,
+            animation: 'star-pulse 2.5s ease-in-out infinite',
+          }}
           initial={{ opacity: 0 }}
-          whileInView={{ opacity: 0.3 }}
+          whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 1 }}
         />
 
+        {/* Stack of documents */}
         <LandingDecor
           src="/stack of documents.svg"
-          size="prop"
           hideBelowMd
-          className="bottom-[4%] left-[14%]"
-          opacity={0.15}
+          opacity={1}
+          style={{
+            width: LAYOUT.stackDocs.width,
+            bottom: LAYOUT.stackDocs.bottom,
+            left: LAYOUT.stackDocs.left,
+          }}
           initial={{ opacity: 0 }}
-          whileInView={{ opacity: 0.15 }}
+          whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.9 }}
         />
 
+        {/* Travel bag */}
         <LandingDecor
           src="/travel bag.svg"
-          size="prop"
           hideBelowMd
-          className="bottom-[4%] right-[14%]"
-          style={{ animation: 'float-bob 8s ease-in-out infinite', animationDelay: '0.3s' }}
-          opacity={0.15}
+          opacity={1}
+          style={{
+            width: LAYOUT.travelBag.width,
+            bottom: LAYOUT.travelBag.bottom,
+            right: LAYOUT.travelBag.right,
+            animation: 'float-bob 8s ease-in-out infinite',
+            animationDelay: '0.3s',
+          }}
           initial={{ opacity: 0 }}
-          whileInView={{ opacity: 0.15 }}
+          whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 1.1 }}
         />
@@ -141,15 +177,15 @@ export function AboutSection() {
           transition={{ duration: 0.7, ease: 'easeInOut' }}
         >
           <p className="mb-2 text-xs font-medium uppercase tracking-widest text-orange md:mb-3">
-            who we are
+            Who we are
           </p>
-          <h2 className="text-[clamp(1.6rem,6vw,3.5rem)] font-semibold leading-tight text-blue lowercase">
-            we don&apos;t just
+          <h2 className="text-[clamp(1.6rem,6vw,3.5rem)] font-semibold leading-tight text-blue">
+            We don&apos;t just
             <br />
             send you abroad
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-text/80 md:mt-5 md:text-base">
-            Pakistan-based consultancy combining real counselors with AI
+            Pakistan based Education Consultant combining real counselors with AI
             to make overseas education achievable — not just a dream.
           </p>
         </motion.div>
@@ -157,7 +193,7 @@ export function AboutSection() {
         {/* Cards — side-by-side on ALL screen sizes */}
         <div className="grid w-full grid-cols-2 gap-3 md:gap-6">
 
-          {/* Card 1: Ace my future */}
+          {/* Card 1: Ace my future — dark teal / green button */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -171,8 +207,8 @@ export function AboutSection() {
               className="flex w-full flex-col items-start gap-3 p-4 text-left md:gap-4 md:p-6"
             >
               <GraduationCap className="h-6 w-6 text-green md:h-8 md:w-8" strokeWidth={1.5} />
-              <h3 className="text-[clamp(0.85rem,2.5vw,1.25rem)] font-semibold lowercase leading-snug text-bg">
-                i want to ace my future
+              <h3 className="text-[clamp(0.85rem,2.5vw,1.25rem)] font-semibold leading-snug text-bg">
+                I Want to Ace My Future
               </h3>
               <p className="hidden text-sm text-bg/70 sm:block">
                 I&apos;m serious. Let&apos;s build my path.
@@ -186,7 +222,7 @@ export function AboutSection() {
             </Card>
           </motion.div>
 
-          {/* Card 2: Dreamer */}
+          {/* Card 2: Dreamer — orange */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -195,20 +231,20 @@ export function AboutSection() {
             className="flex"
           >
             <Card
-              variant="light"
+              variant="dark"
               className="flex w-full flex-col items-start gap-3 p-4 text-left md:gap-4 md:p-6"
+              style={{ background: 'var(--grad-orange)' }}
             >
-              <Telescope className="h-6 w-6 text-blue md:h-8 md:w-8" strokeWidth={1.5} />
-              <h3 className="text-[clamp(0.85rem,2.5vw,1.25rem)] font-semibold lowercase leading-snug text-blue">
-                i&apos;m just a dreamer for now
+              <Telescope className="h-6 w-6 text-white md:h-8 md:w-8" strokeWidth={1.5} />
+              <h3 className="text-[clamp(0.85rem,2.5vw,1.25rem)] font-semibold leading-snug text-white">
+                I&apos;m just a dreamer for now
               </h3>
-              <p className="hidden text-sm text-text/70 sm:block">
+              <p className="hidden text-sm text-white/70 sm:block">
                 Show me what&apos;s possible first.
               </p>
               <Button
-                variant="secondary"
                 onClick={handleDreamer}
-                className="mt-auto w-full py-2 text-xs md:py-3 md:text-sm"
+                className="mt-auto w-full border-white/30 bg-white/15 py-2 text-xs text-white hover:bg-white/25 md:py-3 md:text-sm"
               >
                 explore →
               </Button>

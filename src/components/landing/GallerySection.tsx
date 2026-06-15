@@ -82,14 +82,14 @@ export function GallerySection() {
   }
 
   return (
-    <div className="bg-texture flex h-full flex-col justify-center overflow-y-auto bg-bg px-4 py-12 md:px-10 md:py-24">
+    <div className="bg-texture flex h-full flex-col justify-center overflow-y-auto bg-bg px-4 py-8 md:px-10 md:py-24">
       <div className="mx-auto w-full max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: 'easeInOut' }}
-          className="mb-8 text-center md:mb-10"
+          className="mb-5 text-center md:mb-10"
         >
           <p className="mb-3 text-xs font-medium uppercase tracking-widest text-orange">
             dream bigger
@@ -156,8 +156,8 @@ export function GallerySection() {
           ))}
         </div>
 
-        <div className="mt-8 border-t border-text/10 pt-8 text-center md:mt-10 md:pt-10">
-          <h3 className="mb-4 text-lg font-semibold lowercase text-blue md:mb-5 md:text-2xl">
+        <div className="mt-5 border-t border-text/10 pt-5 text-center md:mt-10 md:pt-10">
+          <h3 className="mb-3 text-base font-semibold lowercase text-blue md:mb-5 md:text-2xl">
             ready to write your story?
           </h3>
           {/* Full-width CTA on mobile */}
