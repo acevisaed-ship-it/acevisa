@@ -20,7 +20,9 @@ export function EarthSphere({ size }: EarthSphereProps) {
 
       const scene  = new THREE.Scene()
       const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100)
-      camera.position.z = 2.6
+      // Pull camera back slightly so the sphere doesn't touch canvas edges —
+      // guarantees clean transparent pixels for the clip-path to bite into
+      camera.position.z = 2.85
 
       renderer = new THREE.WebGLRenderer({
         antialias:       true,
@@ -68,30 +70,24 @@ export function EarthSphere({ size }: EarthSphereProps) {
       }
 
       const sphere = new THREE.Mesh(geometry, material)
-      // Tilt slightly so neither pole points directly at camera —
-      // eliminates the equirectangular south-pole distortion blob at bottom
-      sphere.rotation.x = -0.28
+      // Aggressive tilt: south pole moves ~32° off bottom-center.
+      // At -0.55 rad the equirectangular pole-pinch artifact is hidden
+      // completely behind the limb of the sphere from camera's POV.
+      sphere.rotation.x = -0.55
       scene.add(sphere)
 
-      // ── Atmosphere halo ───────────────────────────────────────────────
-      scene.add(new THREE.Mesh(
-        new THREE.SphereGeometry(1.030, 32, 32),
-        new THREE.MeshPhongMaterial({
-          color:       new THREE.Color('#2083B9'),
-          transparent: true,
-          opacity:     0.04,   // reduced — was darkening south-pole edge
-          side:        THREE.BackSide,
-          depthWrite:  false,
-        })
-      ))
+      // Atmosphere halo REMOVED — BackSide material at any opacity renders
+      // as a visible ring outline at the sphere's edge, causing the red oval.
 
       // ── Lighting ──────────────────────────────────────────────────────
-      scene.add(new THREE.AmbientLight(0xffffff, 0.60))
-      const sun = new THREE.DirectionalLight(0xfff8e0, 1.15)
+      // Raise ambient so the tilted southern hemisphere stays visible
+      scene.add(new THREE.AmbientLight(0xffffff, 0.75))
+      const sun = new THREE.DirectionalLight(0xfff8e0, 1.10)
       sun.position.set(4, 2, 3)
       scene.add(sun)
-      const fill = new THREE.DirectionalLight(0x4499cc, 0.18)
-      fill.position.set(-3, -1, -2)
+      // Soft bottom fill so the lower limb isn't pitch-dark after tilt
+      const fill = new THREE.DirectionalLight(0x88aacc, 0.22)
+      fill.position.set(-2, -3, 1)
       scene.add(fill)
 
       // ── Animation ─────────────────────────────────────────────────────
