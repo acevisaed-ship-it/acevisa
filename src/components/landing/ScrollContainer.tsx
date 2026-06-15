@@ -1,6 +1,8 @@
 'use client'
 
 import {
+  Children,
+  isValidElement,
   useRef,
   useEffect,
   useCallback,
@@ -14,13 +16,20 @@ import {
 import { useTransitionStore } from '@/lib/stores/transitionStore'
 
 interface ScrollContainerProps {
-  children: ReactNode[]
+  children: ReactNode
+}
+
+function getSections(children: ReactNode) {
+  return Children.toArray(children)
+    .filter(isValidElement)
+    .slice(0, SECTION_COUNT)
 }
 
 // How long (ms) to lock input after a section change, preventing rapid multi-skip
 const SNAP_COOLDOWN = 750
 
 export function ScrollContainer({ children }: ScrollContainerProps) {
+  const sections = getSections(children)
   const containerRef = useRef<HTMLDivElement>(null)
   const cooldownRef   = useRef(false)
   const touchStartY   = useRef(0)
@@ -102,7 +111,7 @@ export function ScrollContainer({ children }: ScrollContainerProps) {
     <>
       {/* No-JS fallback — sections stack normally */}
       <div className="landing-fallback">
-        {children.map((child, i) => (
+        {sections.map((child, i) => (
           <section key={i} className="min-h-screen w-full">
             {child}
           </section>
@@ -115,13 +124,13 @@ export function ScrollContainer({ children }: ScrollContainerProps) {
         className="inverted-scroll fixed inset-0 overflow-hidden bg-bg"
         style={{ touchAction: 'none' }}
       >
-        {children.map((child, index) => {
+        {sections.map((child, index) => {
           // Compute vertical offset relative to the active section
           const offset = (index - currentSection) * 100   // in vh units
 
           return (
             <motion.section
-              key={index}
+              key={child.key ?? index}
               aria-label={`Section ${index + 1}`}
               className="absolute inset-0 h-full w-full"
               initial={false}
@@ -145,7 +154,7 @@ export function ScrollContainer({ children }: ScrollContainerProps) {
           className="pointer-events-none absolute right-3 top-1/2 z-50 flex -translate-y-1/2 flex-col gap-2"
           aria-hidden="true"
         >
-          {children.map((_, i) => (
+          {sections.map((_, i) => (
             <button
               key={i}
               type="button"

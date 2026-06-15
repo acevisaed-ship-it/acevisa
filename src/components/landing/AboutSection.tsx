@@ -12,10 +12,10 @@ import { useNavigateWithTransition } from './ScrollContainer'
 const LAYOUT = {
   figureLeft:   { width: 'clamp(480px, 40vw, 680px)', bottom: '-2%', left: '0%' },
   figureRight:  { width: 'clamp(480px, 40vw, 680px)', bottom: '-2%', right: '0%' },
-  thoughtCloud: { width: '140px', bottom: '38%', left: '6%' },
+  thoughtCloud: { width: '140px', bottom: '62%', left: '1%' },
   threeLines:   { width: '90px',  bottom: '28%', right: '7%' },
   stackDocs:    { width: '100px', bottom: '4%',  left: '14%' },
-  travelBag:    { width: '100px', bottom: '4%',  right: '14%' },
+  travelBag:    { width: '400px', bottom: '-4%', right: '1%' },
 }
 
 export function AboutSection() {

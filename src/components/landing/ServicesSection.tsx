@@ -18,7 +18,13 @@ import { useNavigateWithTransition } from './ScrollContainer'
 
 // ── Layout config — tweak SVG sizes & positions here ─────────────────────
 const LAYOUT = {
-  svgHeight: 'clamp(280px, 32vh, 420px)', // height of each card SVG
+  // Per-card SVG max-heights (tweak scale here)
+  svgHeights: [
+    'clamp(420px, 48vh, 630px)',  // [0] Study Visa       — 1.5× base
+    'clamp(420px, 48vh, 630px)',  // [1] Find a Job       — larger
+    'clamp(420px, 48vh, 630px)',  // [2] Visit & Immig    — larger
+    'clamp(490px, 56vh, 735px)',  // [3] Language Test    — 1.75× base
+  ],
   starOpacity: 0.25,
 }
 
@@ -65,6 +71,7 @@ const services: {
   tag?: string
   service: ServiceOption
   svg: string
+  svgHeight?: string
 }[] = [
   {
     icon: GraduationCap,
@@ -79,7 +86,7 @@ const services: {
     title: 'Find a Job',
     description: 'Work permit guidance and overseas job placement support',
     service: 'Job Abroad',
-    svg: '/Doctor.svg',
+    svg: '/doctor element.svg',
   },
   {
     icon: Globe,
@@ -172,7 +179,7 @@ export function ServicesSection() {
                   alt=""
                   aria-hidden="true"
                   className="hidden shrink-0 w-auto object-contain object-bottom lg:block"
-                  style={{ maxHeight: LAYOUT.svgHeight, alignSelf: 'stretch', height: '100%' }}
+                  style={{ maxHeight: LAYOUT.svgHeights[i], alignSelf: 'stretch', height: '100%' }}
                 />
 
                 {/* Card */}
