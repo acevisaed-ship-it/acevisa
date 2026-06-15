@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/Button'
@@ -7,6 +8,23 @@ import { Card } from '@/components/ui/Card'
 import { PWAInstallButton } from '@/components/PWAInstallButton'
 import { useNavigateWithTransition } from './ScrollContainer'
 import { HeroAnimations } from './HeroAnimations'
+import { EarthSphere } from './EarthSphere'
+
+function EarthSphereResponsive() {
+  const [size, setSize] = useState(0)
+  useEffect(() => {
+    const update = () => {
+      const vw = window.innerWidth
+      const vh = window.innerHeight
+      setSize(Math.min(780, Math.max(520, Math.min(vw * 0.55, vh * 0.78))))
+    }
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+  if (!size) return null
+  return <EarthSphere size={size} />
+}
 
 const stats = [
   { value: '500+', label: 'Students Placed' },
@@ -22,6 +40,14 @@ export function HeroSection() {
 
       {/* Animated background — all elements live here */}
       <HeroAnimations />
+
+      {/* Earth globe — absolutely positioned right side, hidden on mobile */}
+      <div
+        className="pointer-events-none absolute right-[1%] top-1/2 z-[4] hidden md:block"
+        style={{ transform: 'translateY(-50%)' }}
+      >
+        <EarthSphereResponsive />
+      </div>
 
       {/* Man pointing to ACE — bottom-left; hidden on mobile (overlaps CTA) */}
       <div

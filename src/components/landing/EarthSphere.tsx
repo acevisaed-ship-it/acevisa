@@ -2,14 +2,38 @@
 
 import { useEffect, useRef } from 'react'
 
-interface EarthSphereProps {
-  size: number
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// EarthSphere
+// A clean, self-contained Three.js rotating Earth rendered into a perfectly
+// circular container.
+//
+// How the circle works
+// ────────────────────
+// The wrapper div uses  border-radius: 50% + overflow: hidden.
+// This is the most browser-reliable way to clip WebGL to a circle — the canvas
+// renders at full size and the parent div masks it. No clip-path on the canvas
+// is needed (clip-path on WebGL can bleed anti-aliased pixels outside the arc).
+//
+// Camera FOV is wide enough that the sphere fills ~88 % of the canvas width,
+// leaving a thin band of transparent pixels at every edge. This guarantees
+// no sphere geometry ever touches the canvas border, so the circular mask
+// always bites into clean transparency.
+//
+// Axial tilt
+// ──────────
+// The sphere sits inside a Group rotated 23.5° on Z (Earth's true axial tilt).
+// The Y-axis rotation (daily spin) is applied to the sphere, not the group,
+// so it correctly spins around the tilted axis — exactly like the real Earth.
+//
+// Lighting
+// ────────
+// One strong directional "sun" from upper-right creates a day/night terminator.
+// Low ambient keeps the night side dark-but-visible. A faint blue fill
+// from the opposite side simulates earthshine from the Moon.
+// ─────────────────────────────────────────────────────────────────────────────
 
-/** Camera distance so a unit sphere fills ~102% of the inscribed circle (limb fringe clipped). */
-function fillDistance(fovDeg: number, fill = 1.02): number {
-  const vFov = (fovDeg * Math.PI) / 180
-  return 1 / (Math.tan(vFov / 2) * fill)
+interface EarthSphereProps {
+  size: number   // pixel side-length of the square canvas (and the circle)
 }
 
 export function EarthSphere({ size }: EarthSphereProps) {
@@ -24,59 +48,70 @@ export function EarthSphere({ size }: EarthSphereProps) {
     const init = async () => {
       const THREE = await import('three')
 
-      const FOV = 42
+      // ── Scene + Camera ──────────────────────────────────────────────────
       const scene  = new THREE.Scene()
-      const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 100)
-      camera.position.set(0, 0.08, fillDistance(FOV))
-      camera.lookAt(0, -0.06, 0)
 
+      // FOV 45° keeps the sphere proportionally large without distortion.
+      // z = 2.4 leaves a ~6% gap between the sphere edge and the canvas edge.
+      const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100)
+      camera.position.z = 2.4
+
+      // ── Renderer ────────────────────────────────────────────────────────
       renderer = new THREE.WebGLRenderer({
-        antialias:       true,
-        alpha:           true,
-        premultipliedAlpha: false,
-        powerPreference: 'low-power',
+        antialias:          true,
+        alpha:              true,
+        premultipliedAlpha: false,   // removes dark-fringe composite artefacts
+        powerPreference:    'low-power',
       })
       renderer.setSize(size, size)
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-      renderer.setClearColor(0x000000, 0)
-      renderer.outputColorSpace = THREE.SRGBColorSpace
+      renderer.setClearColor(0x000000, 0)   // fully transparent background
 
-      const canvas = renderer.domElement
-      canvas.style.display = 'block'
-      mountRef.current!.appendChild(canvas)
+      mountRef.current!.appendChild(renderer.domElement)
 
-      const POLE_CAP = 0.36
-      const geometry = new THREE.SphereGeometry(
-        1, 80, 64,
-        0, Math.PI * 2,
-        POLE_CAP, Math.PI - 2 * POLE_CAP,
-      )
+      // ── Earth texture ────────────────────────────────────────────────────
+      const texture = await new THREE.TextureLoader().loadAsync('/Earth2.png')
+      texture.colorSpace = THREE.SRGBColorSpace
+      texture.anisotropy = renderer.capabilities.getMaxAnisotropy()
 
-      let material: import('three').MeshLambertMaterial
+      // ── Geometry + Material ──────────────────────────────────────────────
+      // 64 segments gives smooth edges with no visible polygon faceting.
+      const geometry = new THREE.SphereGeometry(1, 64, 64)
+      const material = new THREE.MeshPhongMaterial({
+        map:       texture,
+        shininess: 18,                         // subtle ocean specular
+        specular:  new THREE.Color(0x1a3a55),  // deep-blue specular tint
+      })
 
-      try {
-        const texture = await new THREE.TextureLoader().loadAsync('/Earth2.png')
-        texture.colorSpace = THREE.SRGBColorSpace
-        texture.anisotropy = renderer.capabilities.getMaxAnisotropy()
-        material = new THREE.MeshLambertMaterial({ map: texture })
-      } catch {
-        material = new THREE.MeshLambertMaterial({
-          color: new THREE.Color('#145e7a'),
-        })
-      }
+      // ── Axial tilt group ─────────────────────────────────────────────────
+      // Group carries the 23.5° tilt; sphere spins inside it on Y.
+      const earthGroup = new THREE.Group()
+      earthGroup.rotation.z = 23.5 * (Math.PI / 180)
+      scene.add(earthGroup)
 
       const sphere = new THREE.Mesh(geometry, material)
-      sphere.rotation.x = -0.85
-      scene.add(sphere)
+      earthGroup.add(sphere)
 
-      scene.add(new THREE.HemisphereLight(0xffffff, 0x778899, 0.9))
-      const sun = new THREE.DirectionalLight(0xfff8e0, 0.45)
-      sun.position.set(4, 3, 5)
+      // ── Lighting ─────────────────────────────────────────────────────────
+      // Sun: upper-right, warm daylight colour
+      const sun = new THREE.DirectionalLight(0xfff5e0, 1.5)
+      sun.position.set(5, 3, 3)
       scene.add(sun)
 
+      // Ambient: dark-blue so the night side stays visible but clearly dark
+      scene.add(new THREE.AmbientLight(0x223355, 0.45))
+
+      // Earthshine: faint cool-blue fill from the opposite side
+      const fill = new THREE.DirectionalLight(0x2244aa, 0.12)
+      fill.position.set(-5, -2, -2)
+      scene.add(fill)
+
+      // ── Animation loop ────────────────────────────────────────────────────
+      // 0.0018 rad/frame ≈ one full rotation every ~58 min at 60 fps —
+      // visually smooth and clearly rotating without being distracting.
       const animate = () => {
         animId = requestAnimationFrame(animate)
-        sphere.rotation.y += 0.0022
+        sphere.rotation.y += 0.0018
         renderer!.render(scene, camera)
       }
       animate()
@@ -91,16 +126,18 @@ export function EarthSphere({ size }: EarthSphereProps) {
     }
   }, [size])
 
+  // border-radius + overflow: hidden is the most reliable circular mask for WebGL.
+  // The canvas inside renders square; the parent clips to circle.
   return (
     <div
       ref={mountRef}
       style={{
         width:        size,
         height:       size,
-        clipPath:     'circle(50% at 50% 50%)',
         borderRadius: '50%',
         overflow:     'hidden',
-        background:   'transparent',
+        isolation:    'isolate',
+        flexShrink:   0,
       }}
     />
   )

@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { motion, useAnimationFrame, useMotionValue } from 'framer-motion'
-import { EarthSphere } from './EarthSphere'
 
 // ─── Asset sources ────────────────────────────────────────────────────────
 const CLOUD_SRCS = [
@@ -585,124 +584,7 @@ function BeeBluePlane({ vw, vh }: { vw: number; vh: number }) {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// 3. EARTH + ORBITING PLANES (exactly 2)
-//    Earth: 100 % opacity, large enough to fill the right column.
-// ════════════════════════════════════════════════════════════════════════════
-
-interface OrbitData {
-  id:       number
-  rx:       number
-  ry:       number
-  tiltDeg:  number
-  startDeg: number
-  speed:    number   // seconds per revolution (20–50 s)
-  size:     number
-  src:      string
-  cw:       boolean
-}
-
-function OrbitPlane({ d }: { d: OrbitData }) {
-  const mx  = useMotionValue(0)
-  const my  = useMotionValue(0)
-  const rot = useMotionValue(0)
-  const t0  = useRef<number | null>(null)
-
-  useAnimationFrame((t) => {
-    if (t0.current === null) t0.current = t
-    const elapsed = (t - t0.current) / 1000
-    const dir     = d.cw ? 1 : -1
-    const angle   = (d.startDeg * Math.PI / 180) + (elapsed / d.speed) * Math.PI * 2 * dir
-    const tRad    = d.tiltDeg  * Math.PI / 180
-
-    const lx = d.rx * Math.cos(angle)
-    const ly = d.ry * Math.sin(angle)
-    const px = lx * Math.cos(tRad) - ly * Math.sin(tRad)
-    const py = lx * Math.sin(tRad) + ly * Math.cos(tRad)
-    mx.set(px); my.set(py)
-
-    const dlx = -d.rx * Math.sin(angle) * dir
-    const dly =  d.ry * Math.cos(angle) * dir
-    const ddx = dlx * Math.cos(tRad) - dly * Math.sin(tRad)
-    const ddy = dlx * Math.sin(tRad) + dly * Math.cos(tRad)
-    rot.set(Math.atan2(ddy, ddx) * 180 / Math.PI)
-  })
-
-  return (
-    <motion.div
-      style={{
-        position: 'absolute', left: '50%', top: '50%',
-        x: mx, y: my, rotate: rot,
-        translateX: '-50%', translateY: '-50%',
-        width: d.size, willChange: 'transform', pointerEvents: 'none',
-      }}
-    >
-      <img src={d.src} alt="" aria-hidden className="h-auto w-full object-contain" />
-    </motion.div>
-  )
-}
-
-function EarthOrbitSystem() {
-  const [orbits, setOrbits]   = useState<OrbitData[]>([])
-  const [earthPx, setEarthPx] = useState(640)
-
-  useEffect(() => {
-    const vw = window.innerWidth
-    const vh = window.innerHeight
-    // Cap by both viewport width AND height so the sphere never clips top/bottom
-    const sz = Math.min(780, Math.max(520, Math.min(vw * 0.55, vh * 0.78)))
-    setEarthPx(sz)
-
-    setOrbits([
-      {
-        id: 0, cw: true,
-        rx: sz * rn(0.52, 0.70), ry: sz * rn(0.20, 0.34),
-        tiltDeg: rn(-30, 30), startDeg: rn(0, 180),
-        speed: rn(20, 40), size: rn(22, 36), src: pick(PAPER_SRCS),
-      },
-      {
-        id: 1, cw: false,
-        rx: sz * rn(0.55, 0.72), ry: sz * rn(0.22, 0.36),
-        tiltDeg: rn(-35, 35), startDeg: rn(180, 360),
-        speed: rn(28, 52), size: rn(18, 30), src: pick(PAPER_SRCS),
-      },
-    ])
-  }, [])
-
-  const half = earthPx / 2
-
-  return (
-    <div
-      className="pointer-events-none absolute right-[1%] top-1/2"
-      style={{ width: earthPx, height: earthPx, transform: 'translateY(-50%)' }}
-    >
-      {/* Orbit trail lines */}
-      <svg aria-hidden style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible' }}>
-        {orbits.map(d => (
-          <ellipse
-            key={d.id}
-            cx={half} cy={half} rx={d.rx} ry={d.ry}
-            transform={`rotate(${d.tiltDeg}, ${half}, ${half})`}
-            fill="none" stroke="#2083B9" strokeWidth="1.2"
-            strokeDasharray="5 9" opacity="0.22"
-          />
-        ))}
-      </svg>
-
-      {/* Planes — below Earth so they pass behind it */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
-        {orbits.map(d => <OrbitPlane key={d.id} d={d} />)}
-      </div>
-
-      {/* Earth — true 3D sphere via Three.js */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'none', filter: 'none' }}>
-        <EarthSphere size={earthPx} />
-      </div>
-    </div>
-  )
-}
-
-// ════════════════════════════════════════════════════════════════════════════
-// 4. LARGE COMMERCIAL PLANES (exactly 2, directed)
+// 3. LARGE COMMERCIAL PLANES (exactly 2, directed)
 //    Plane A: right → toward logo (top-left) → exits left.
 //    Plane B: left  → toward Earth (right-centre) → exits right.
 //    2 s gap between passes. 80–140 s crossing time.
@@ -794,7 +676,7 @@ function AirplaneLayer({ vw, vh }: { vw: number; vh: number }) {
 // ROOT EXPORT
 // Z-stack (bottom → top):
 //   gradient + stars (z-1) → airplanes (z-2) → clouds (z-3)
-//   → Earth + orbit (z-4) → free paper planes (z-5) → UI (z-10)
+//   → decorative SVGs (z-4) → free paper planes (z-5) → UI (z-10)
 // ════════════════════════════════════════════════════════════════════════════
 
 export function HeroAnimations() {
@@ -836,11 +718,6 @@ export function HeroAnimations() {
       {/* z-3 Clouds — upper band only, right-to-left */}
       <div className="absolute inset-0 z-[3]">
         <CloudLayer vw={vw} />
-      </div>
-
-      {/* z-4 Earth + 2 orbiting paper planes */}
-      <div className="absolute inset-0 z-[4]">
-        <EarthOrbitSystem />
       </div>
 
       {/* z-4 Globe on stand — decorative, bottom-left */}
