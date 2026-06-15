@@ -23,7 +23,7 @@ export function AboutSection() {
   }
 
   return (
-    <div className="bg-texture relative flex h-full flex-col items-center justify-center overflow-y-auto bg-bg px-5 py-24 md:px-10">
+    <div className="bg-texture relative flex h-full flex-col items-center justify-center overflow-y-auto bg-bg px-4 py-8 md:px-10 md:py-24">
 
       {/* ── Illustration layer ───────────────────────────────────── */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
@@ -131,71 +131,85 @@ export function AboutSection() {
       {/* ── /Illustration layer ──────────────────────────────────── */}
 
       {/* Content */}
-      <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center gap-8 text-center">
+      <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center gap-5 text-center md:gap-8">
+
+        {/* Headline */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: 'easeInOut' }}
         >
-          <p className="mb-3 text-xs font-medium uppercase tracking-widest text-orange">
+          <p className="mb-2 text-xs font-medium uppercase tracking-widest text-orange md:mb-3">
             who we are
           </p>
-          <h2 className="text-[clamp(2rem,6vw,3.5rem)] font-semibold leading-tight text-blue lowercase">
+          <h2 className="text-[clamp(1.6rem,6vw,3.5rem)] font-semibold leading-tight text-blue lowercase">
             we don&apos;t just
             <br />
             send you abroad
           </h2>
-          <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-text/80 md:text-base">
-            We are a Pakistan-based consultancy that combines real human
-            counselors with AI to make overseas education actually achievable
-            — not just a dream.
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-text/80 md:mt-5 md:text-base">
+            Pakistan-based consultancy combining real counselors with AI
+            to make overseas education achievable — not just a dream.
           </p>
         </motion.div>
 
-        <div className="grid w-full grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
+        {/* Cards — side-by-side on ALL screen sizes */}
+        <div className="grid w-full grid-cols-2 gap-3 md:gap-6">
+
+          {/* Card 1: Ace my future */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease: 'easeInOut' }}
+            className="flex"
           >
             <Card
               variant="dark"
               highlighted={highlightAce}
-              className="flex h-full flex-col items-start gap-4 text-left"
+              className="flex w-full flex-col items-start gap-3 p-4 text-left md:gap-4 md:p-6"
             >
-              <GraduationCap className="h-8 w-8 text-green" strokeWidth={1.5} />
-              <h3 className="text-xl font-semibold lowercase text-bg">
+              <GraduationCap className="h-6 w-6 text-green md:h-8 md:w-8" strokeWidth={1.5} />
+              <h3 className="text-[clamp(0.85rem,2.5vw,1.25rem)] font-semibold lowercase leading-snug text-bg">
                 i want to ace my future
               </h3>
-              <p className="text-sm text-bg/70">
+              <p className="hidden text-sm text-bg/70 sm:block">
                 I&apos;m serious. Let&apos;s build my path.
               </p>
               <Button
                 onClick={handleAce}
-                className="mt-auto border-green bg-green text-text hover:opacity-90"
+                className="mt-auto w-full border-green bg-green py-2 text-xs text-text hover:opacity-90 md:py-3 md:text-sm"
               >
                 let&apos;s go →
               </Button>
             </Card>
           </motion.div>
 
+          {/* Card 2: Dreamer */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease: 'easeInOut' }}
+            className="flex"
           >
-            <Card variant="light" className="flex h-full flex-col items-start gap-4 text-left">
-              <Telescope className="h-8 w-8 text-blue" strokeWidth={1.5} />
-              <h3 className="text-xl font-semibold lowercase text-blue">
+            <Card
+              variant="light"
+              className="flex w-full flex-col items-start gap-3 p-4 text-left md:gap-4 md:p-6"
+            >
+              <Telescope className="h-6 w-6 text-blue md:h-8 md:w-8" strokeWidth={1.5} />
+              <h3 className="text-[clamp(0.85rem,2.5vw,1.25rem)] font-semibold lowercase leading-snug text-blue">
                 i&apos;m just a dreamer for now
               </h3>
-              <p className="text-sm text-text/70">
+              <p className="hidden text-sm text-text/70 sm:block">
                 Show me what&apos;s possible first.
               </p>
-              <Button variant="secondary" onClick={handleDreamer} className="mt-auto">
+              <Button
+                variant="secondary"
+                onClick={handleDreamer}
+                className="mt-auto w-full py-2 text-xs md:py-3 md:text-sm"
+              >
                 explore →
               </Button>
             </Card>

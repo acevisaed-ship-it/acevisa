@@ -84,17 +84,17 @@ export function PerformanceDashboard() {
           <h1 className="text-2xl font-semibold text-blue md:text-3xl">Team Performance</h1>
           <p className="mt-1 text-sm text-text/60">{monthLabel}</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:items-center">
           <input
             type="month"
             value={month}
             onChange={(e) => setMonth(e.target.value)}
-            className="min-h-[44px] rounded-full border border-text/20 bg-white px-4 text-sm text-text outline-none focus:border-blue"
+            className="min-h-[44px] w-full rounded-full border border-text/20 bg-white px-4 text-sm text-text outline-none focus:border-blue sm:w-auto"
           />
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortKey)}
-            className="min-h-[44px] rounded-full border border-text/20 bg-white px-4 text-sm text-text outline-none focus:border-blue"
+            className="min-h-[44px] w-full rounded-full border border-text/20 bg-white px-4 text-sm text-text outline-none focus:border-blue sm:w-auto"
           >
             <option value="conversionRate">Sort: Conversion rate</option>
             <option value="avgResponseTimeSeconds">Sort: Response time</option>

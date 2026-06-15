@@ -66,7 +66,7 @@ export function ServicesSection() {
   }
 
   return (
-    <div className="bg-texture relative flex h-full flex-col justify-center overflow-hidden bg-bg px-5 py-24 md:px-10">
+    <div className="bg-texture relative flex h-full flex-col justify-center overflow-hidden bg-bg px-5 py-10 md:px-10 md:py-24">
 
       {/* ── Journey stages illustration ──────────────────────────── */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
@@ -187,19 +187,20 @@ export function ServicesSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: 'easeInOut' }}
-          className="mb-8 text-center md:mb-10"
+          className="mb-5 text-center md:mb-10"
         >
           <p className="mb-3 text-xs font-medium uppercase tracking-widest text-orange">
             what we do
           </p>
-          <h2 className="text-[clamp(2rem,6vw,3.5rem)] font-semibold leading-tight text-blue lowercase">
+          <h2 className="text-[clamp(1.75rem,6vw,3.5rem)] font-semibold leading-tight text-blue lowercase">
             four ways we
             <br />
             get you there
           </h2>
         </motion.div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+        {/* 2-col on mobile, 2-col on sm+ — cards compact on small screens */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-5">
           {services.map((item, i) => {
             const Icon = item.icon
             return (
@@ -209,24 +210,25 @@ export function ServicesSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.7, delay: i * 0.08, ease: 'easeInOut' }}
+                className="flex"
               >
-                <Card className="flex h-full flex-col gap-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <Icon className="h-7 w-7 shrink-0 text-green" strokeWidth={1.5} />
+                <Card className="flex w-full flex-col gap-3 p-4 md:gap-4 md:p-6">
+                  <div className="flex items-start justify-between gap-2">
+                    <Icon className="h-5 w-5 shrink-0 text-green md:h-7 md:w-7" strokeWidth={1.5} />
                     {item.tag && (
-                      <span className="rounded-full bg-orange/15 px-3 py-1 text-xs font-medium text-orange">
+                      <span className="rounded-full bg-orange/15 px-2 py-0.5 text-[10px] font-medium text-orange md:px-3 md:py-1 md:text-xs">
                         {item.tag}
                       </span>
                     )}
                   </div>
-                  <h3 className="text-lg font-semibold lowercase text-blue">
+                  <h3 className="text-[clamp(0.8rem,2.3vw,1.125rem)] font-semibold lowercase leading-snug text-blue">
                     {item.title}
                   </h3>
-                  <p className="flex-1 text-sm text-text/70">{item.description}</p>
+                  <p className="hidden flex-1 text-sm text-text/70 sm:block">{item.description}</p>
                   <Button
                     variant={i % 2 === 0 ? 'primary' : 'secondary'}
                     onClick={() => handleSelect(item.service)}
-                    className="w-full sm:w-auto"
+                    className="w-full py-2 text-xs md:py-3 md:text-sm"
                   >
                     I need this →
                   </Button>

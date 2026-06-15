@@ -78,7 +78,7 @@ export function AllMeetingsView() {
         </div>
       ) : (
         <div className="mt-6 overflow-x-auto rounded-2xl border border-text/10 bg-white">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[640px] text-sm">
             <thead>
               <tr className="border-b border-text/10 text-left text-xs font-semibold uppercase tracking-wide text-text/50">
                 <th className="px-4 py-3">Client</th>

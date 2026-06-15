@@ -10,7 +10,8 @@ import { useNavigateWithTransition } from './ScrollContainer'
 import { HeroAnimations } from './HeroAnimations'
 import { EarthSphere } from './EarthSphere'
 
-function EarthSphereResponsive() {
+// ── Desktop globe: fills right half of viewport ──────────────────────────────
+function EarthSphereDesktop() {
   const [size, setSize] = useState(0)
   useEffect(() => {
     const update = () => {
@@ -26,30 +27,154 @@ function EarthSphereResponsive() {
   return <EarthSphere size={size} />
 }
 
+// ── Mobile globe: compact, fits in narrow left column ────────────────────────
+function EarthSphereMobile() {
+  const [size, setSize] = useState(0)
+  useEffect(() => {
+    const update = () => {
+      // ~44 % of viewport width, capped between 120 px and 200 px
+      setSize(Math.min(200, Math.max(120, Math.round(window.innerWidth * 0.44))))
+    }
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+  if (!size) return null
+  return <EarthSphere size={size} />
+}
+
 const stats = [
   { value: '500+', label: 'Students Placed' },
   { value: '4',    label: 'Countries' },
-  { value: '9.2 / 10', label: 'Satisfaction' },
+  { value: '9.2/10', label: 'Satisfaction' },
 ]
 
 export function HeroSection() {
   const navigate = useNavigateWithTransition()
 
   return (
-    <div className="bg-texture relative flex h-full flex-col justify-center overflow-hidden bg-bg px-5 pb-8 pt-16 md:px-12 md:pt-24 lg:px-16">
+    <div className="bg-texture relative flex h-full overflow-hidden bg-bg">
 
-      {/* Animated background — all elements live here */}
+      {/* Animated background */}
       <HeroAnimations />
 
-      {/* Earth globe — absolutely positioned right side, hidden on mobile */}
+      {/* ═══════════════════════════════════════════════════════════
+          MOBILE LAYOUT  (< md)
+          Left col:  globe at top, man-pointing pinned to bottom
+          Right col: ACE logo → headline → CTA → stats strip
+      ════════════════════════════════════════════════════════════ */}
+      <div className="relative z-10 flex h-full w-full flex-col md:hidden">
+
+        {/* Top section: 2 columns */}
+        <div className="grid flex-1 grid-cols-[46%_54%] items-start pt-16">
+
+          {/* Left col — globe + man */}
+          <div className="relative flex h-full flex-col items-center">
+            {/* Globe centred in the column */}
+            <div className="mt-4 flex items-center justify-center">
+              <EarthSphereMobile />
+            </div>
+            {/* Man pointing — pinned to bottom of left col */}
+            <div
+              className="pointer-events-none absolute bottom-0 left-0 w-full"
+              aria-hidden="true"
+            >
+              <img
+                src="/man pointing to ace.svg"
+                alt=""
+                className="w-full object-contain object-bottom"
+                style={{ maxHeight: '38vh' }}
+              />
+            </div>
+          </div>
+
+          {/* Right col — ACE + content */}
+          <motion.div
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: 'easeInOut' }}
+            className="flex flex-col gap-3 pb-4 pr-3 pt-4"
+          >
+            {/* ACE logo */}
+            <img
+              src="/Hero Page LOGO.svg"
+              alt="ACE Altius Consulting"
+              className="h-auto w-full max-w-[190px]"
+            />
+
+            <p className="text-[10px] font-bold uppercase tracking-widest text-orange">
+              Pakistan&apos;s First AI Platform
+            </p>
+
+            <h1
+              className="font-semibold leading-[0.92] tracking-tight text-blue"
+              style={{ fontSize: 'clamp(1.35rem, 5.5vw, 2rem)' }}
+            >
+              Ace Your
+              <br />
+              Future Here
+            </h1>
+
+            <p className="text-[11px] leading-snug text-text/70">
+              AI-Powered Guidance.
+              <br />
+              Real Counselors. Real Results.
+            </p>
+
+            <Button
+              onClick={() => navigate(1)}
+              className="w-full py-3 text-sm font-semibold text-white"
+              style={{
+                background: 'linear-gradient(135deg, #E48328 0%, #2083B9 100%)',
+                border: 'none',
+              }}
+            >
+              Start Your Journey →
+            </Button>
+
+            <Link
+              href="/return"
+              className="text-[11px] text-text/60 underline-offset-2 hover:underline"
+            >
+              Already Registered? Return here →
+            </Link>
+          </motion.div>
+        </div>
+
+        {/* Stats strip — full width below both columns */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2, ease: 'easeInOut' }}
+          className="mx-3 mb-3 rounded-2xl border border-text/10 bg-bg/80 px-4 py-3 backdrop-blur-sm"
+        >
+          <div className="flex justify-between">
+            {stats.map((stat) => (
+              <div key={stat.label} className="flex flex-col items-center text-center">
+                <p className="text-base font-semibold text-blue">{stat.value}</p>
+                <p className="mt-0.5 text-[9px] leading-tight text-text/60">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════
+          DESKTOP LAYOUT  (md+)
+          Globe: absolutely positioned right side
+          Man:   absolutely positioned bottom-left
+          Content: centred grid, weighted left
+      ════════════════════════════════════════════════════════════ */}
+
+      {/* Globe — desktop only */}
       <div
         className="pointer-events-none absolute right-[1%] top-1/2 z-[4] hidden md:block"
         style={{ transform: 'translateY(-50%)' }}
       >
-        <EarthSphereResponsive />
+        <EarthSphereDesktop />
       </div>
 
-      {/* Man pointing to ACE — bottom-left; hidden on mobile (overlaps CTA) */}
+      {/* Man pointing — desktop only */}
       <div
         className="pointer-events-none absolute bottom-0 z-[6] hidden md:block"
         aria-hidden="true"
@@ -63,8 +188,8 @@ export function HeroSection() {
         />
       </div>
 
-      {/* UI Content — centred but weighted right; pr keeps it clear of the globe */}
-      <div className="relative z-10 mx-auto grid w-full max-w-5xl grid-cols-1 gap-8 lg:grid-cols-2 lg:items-center lg:gap-10 lg:pr-[8%]">
+      {/* Desktop content grid */}
+      <div className="relative z-10 mx-auto hidden w-full max-w-5xl items-center md:grid md:grid-cols-1 md:gap-8 md:px-12 md:py-24 lg:grid-cols-2 lg:gap-10 lg:px-16 lg:pr-[8%]">
 
         {/* Content column — logo, text, CTA */}
         <motion.div
@@ -73,19 +198,17 @@ export function HeroSection() {
           transition={{ duration: 0.7, ease: 'easeInOut' }}
           className="flex flex-col gap-5"
         >
-          {/* Logo — constrained tighter on mobile */}
           <img
             src="/Hero Page LOGO.svg"
             alt="ACE Altius Consulting"
-            className="w-full max-w-[280px] h-auto md:max-w-[420px]"
+            className="h-auto w-full max-w-[280px] md:max-w-[420px]"
           />
 
           <p className="text-xs font-bold uppercase tracking-widest text-orange md:text-base">
             Pakistan&apos;s First AI Consultancy Platform
           </p>
 
-          {/* H1 — smaller clamp floor so it doesn't overflow on 375px screens */}
-          <h1 className="text-[clamp(2rem,6vw,5rem)] font-semibold leading-[0.95] tracking-tight text-blue pl-3 md:pl-8">
+          <h1 className="pl-3 text-[clamp(2rem,6vw,5rem)] font-semibold leading-[0.95] tracking-tight text-blue md:pl-8">
             Ace Your
             <br />
             Future Here
@@ -96,7 +219,6 @@ export function HeroSection() {
           </p>
 
           <div className="flex flex-col gap-3 sm:block">
-            {/* Full-width CTA on mobile, auto width on sm+ */}
             <Button
               onClick={() => navigate(1)}
               className="mt-2 w-full py-4 text-base font-semibold text-white sm:w-auto sm:px-10 sm:py-5 sm:text-lg"
@@ -121,33 +243,20 @@ export function HeroSection() {
           </div>
         </motion.div>
 
-        {/* Stats card column */}
+        {/* Stats card column — desktop */}
         <motion.div
           initial={{ opacity: 0, y: 32 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.15, ease: 'easeInOut' }}
           className="flex w-full justify-center lg:justify-end"
         >
-          {/* Stats card — horizontal strip on mobile, vertical list on desktop */}
-          <Card variant="glass" className="w-full max-w-sm p-4 sm:space-y-6 sm:p-8">
-            {/* Mobile: single row, 3 columns */}
-            <div className="flex justify-between gap-2 sm:hidden">
-              {stats.map((stat) => (
-                <div key={stat.label} className="flex flex-col items-center text-center">
-                  <p className="text-xl font-semibold text-blue">{stat.value}</p>
-                  <p className="mt-0.5 text-[10px] text-text/60 leading-tight">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-            {/* Desktop: vertical list */}
-            <div className="hidden sm:block sm:space-y-6">
-              {stats.map((stat) => (
-                <div key={stat.label} className="border-b border-text/10 pb-4 last:border-0 last:pb-0">
-                  <p className="text-4xl font-semibold text-blue md:text-5xl">{stat.value}</p>
-                  <p className="mt-1 text-base text-text/70 md:text-lg">{stat.label}</p>
-                </div>
-              ))}
-            </div>
+          <Card variant="glass" className="w-full max-w-sm space-y-6 p-8">
+            {stats.map((stat) => (
+              <div key={stat.label} className="border-b border-text/10 pb-4 last:border-0 last:pb-0">
+                <p className="text-4xl font-semibold text-blue md:text-5xl">{stat.value}</p>
+                <p className="mt-1 text-base text-text/70 md:text-lg">{stat.label}</p>
+              </div>
+            ))}
           </Card>
         </motion.div>
       </div>

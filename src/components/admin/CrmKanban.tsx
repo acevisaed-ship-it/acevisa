@@ -216,11 +216,11 @@ export function CrmKanban({
         </button>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-3">
+      <div className="mt-4 grid grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:items-center">
         <select
           value={counselorFilter}
           onChange={(e) => setCounselorFilter(e.target.value)}
-          className="min-h-[44px] rounded-full border border-text/20 bg-white px-4 text-sm text-text outline-none focus:border-blue"
+          className="min-h-[44px] w-full rounded-full border border-text/20 bg-white px-4 text-sm text-text outline-none focus:border-blue sm:w-auto"
         >
           <option value="">All counselors</option>
           {counselors.map((c) => (
@@ -232,7 +232,7 @@ export function CrmKanban({
         <select
           value={serviceFilter}
           onChange={(e) => setServiceFilter(e.target.value)}
-          className="min-h-[44px] rounded-full border border-text/20 bg-white px-4 text-sm text-text outline-none focus:border-blue"
+          className="min-h-[44px] w-full rounded-full border border-text/20 bg-white px-4 text-sm text-text outline-none focus:border-blue sm:w-auto"
         >
           <option value="">All services</option>
           {DEAL_SERVICE_TYPES.map((s) => (
@@ -246,7 +246,7 @@ export function CrmKanban({
           value={monthFilter}
           onChange={(e) => setMonthFilter(e.target.value)}
           placeholder={currentMonthValue()}
-          className="min-h-[44px] rounded-full border border-text/20 bg-white px-4 text-sm text-text outline-none focus:border-blue"
+          className="min-h-[44px] w-full rounded-full border border-text/20 bg-white px-4 text-sm text-text outline-none focus:border-blue sm:w-auto"
         />
         {(counselorFilter || serviceFilter || monthFilter) && (
           <button
