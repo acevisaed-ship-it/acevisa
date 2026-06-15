@@ -13,15 +13,12 @@ import { LandingDecor } from './LandingDecor'
 
 // ── Layout config — tweak sizes & positions here ──────────────────────────
 const LAYOUT = {
-  figureLeft:  { width: 'clamp(480px, 42vw, 720px)', bottom: '0%',  left: '-4%' },
-  figureRight: { width: 'clamp(480px, 42vw, 720px)', bottom: '0%',  right: '-4%' },
-  gradCap:     { width: 'clamp(100px, 12vw, 180px)', top: '7%',     left: '5%' },
-  earth:       { width: 'clamp(180px, 20vw, 380px)', top: '3%',     right: '3%' },
-  // Flying paper planes — animation drives horizontal movement; top sets lane
-  flyPlane1:   { width: '90px', top: '32%', left: '0' },
-  flyPlane2:   { width: '80px', top: '62%', left: '0' },
-  // Floating accent plane
-  floatPlane:  { width: '80px', top: '18%', left: '44%' },
+  // Graduate girl: 2× larger, pushed right so she overlaps left edge of form
+  figureLeft: { width: 'clamp(600px, 58vw, 920px)', bottom: '0%', left: 'calc(50% - clamp(460px, 45vw, 680px))' },
+  gradCap:    { width: 'clamp(100px, 12vw, 180px)', top: '7%',    left: '5%' },
+  earth:      { width: 'clamp(180px, 20vw, 380px)', top: '3%',    right: '3%' },
+  // Orange paper plane — floats with random-ish bob (no directional fly)
+  orangePlane: { width: '100px', top: '22%', left: '30%' },
 }
 
 const languages = ['Urdu', 'English', 'Punjabi', 'Sindhi', 'Pashto'] as const
@@ -110,7 +107,7 @@ export function RegistrationSection() {
       {/* ── Aspirational illustration layer ─────────────────────── */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
 
-        {/* Left figure — happy graduate girl, large, bleeds beyond form */}
+        {/* Left figure — happy graduate girl, 2× larger, half behind form */}
         <LandingDecor
           src="/happy graduate girl.svg"
           hideBelowLg
@@ -127,25 +124,7 @@ export function RegistrationSection() {
           transition={{ duration: 0.9, ease: 'easeOut', delay: 0.4 }}
         />
 
-        {/* Right figure — corporate man, large */}
-        <LandingDecor
-          src="/corporate man.svg"
-          hideBelowLg
-          opacity={1}
-          style={{
-            width: LAYOUT.figureRight.width,
-            bottom: LAYOUT.figureRight.bottom,
-            right: LAYOUT.figureRight.right,
-            animation: 'float-bob-delayed 8s ease-in-out infinite',
-            animationDelay: '1s',
-          }}
-          initial={{ opacity: 0, x: 30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.9, ease: 'easeOut', delay: 0.6 }}
-        />
-
-        {/* Graduation cap — top-left, larger */}
+        {/* Graduation cap — top-left */}
         <LandingDecor
           src="/Graduation Cap.svg"
           hideBelowMd
@@ -163,7 +142,7 @@ export function RegistrationSection() {
           transition={{ duration: 0.7, delay: 0.5 }}
         />
 
-        {/* Earth globe — top-right, 5× larger */}
+        {/* Earth globe — top-right */}
         <LandingDecor
           src="/Earth.svg"
           hideBelowMd
@@ -180,50 +159,22 @@ export function RegistrationSection() {
           transition={{ duration: 0.7, delay: 0.7 }}
         />
 
-        {/* Flying paper plane 1 — left → right */}
+        {/* Orange plane — random float movement */}
         <LandingDecor
-          src="/paper airplane.svg"
+          src="/Orange plane.svg"
           hideBelowMd
-          opacity={1}
+          opacity={0.9}
           style={{
-            width: LAYOUT.flyPlane1.width,
-            top: LAYOUT.flyPlane1.top,
-            left: LAYOUT.flyPlane1.left,
-            animation: 'plane-fly-r 9s ease-in-out infinite',
+            width: LAYOUT.orangePlane.width,
+            top: LAYOUT.orangePlane.top,
+            left: LAYOUT.orangePlane.left,
+            animation: 'float-bob-delayed 8s ease-in-out infinite',
             animationDelay: '1s',
           }}
-        />
-
-        {/* Flying paper plane 2 — right → left */}
-        <LandingDecor
-          src="/paper airplane.svg"
-          hideBelowMd
-          opacity={1}
-          style={{
-            width: LAYOUT.flyPlane2.width,
-            top: LAYOUT.flyPlane2.top,
-            left: LAYOUT.flyPlane2.left,
-            animation: 'plane-fly-l 11s ease-in-out infinite',
-            animationDelay: '4s',
-          }}
-        />
-
-        {/* Floating accent plane */}
-        <LandingDecor
-          src="/paper airplane.svg"
-          hideBelowMd
-          opacity={1}
-          style={{
-            width: LAYOUT.floatPlane.width,
-            top: LAYOUT.floatPlane.top,
-            left: LAYOUT.floatPlane.left,
-            animation: 'float-bob-delayed 6s ease-in-out infinite',
-            animationDelay: '2s',
-          }}
           initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          whileInView={{ opacity: 0.9 }}
           viewport={{ once: true }}
-          transition={{ delay: 1 }}
+          transition={{ delay: 0.8 }}
         />
 
         {/* Stars */}

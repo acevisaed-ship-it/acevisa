@@ -11,11 +11,14 @@ import { useNavigateWithTransition } from './ScrollContainer'
 // ── Layout config — tweak sizes & positions here without touching JSX ─────
 const LAYOUT = {
   figureLeft:   { width: 'clamp(480px, 40vw, 680px)', bottom: '-2%', left: '0%' },
-  figureRight:  { width: 'clamp(480px, 40vw, 680px)', bottom: '-2%', right: '0%' },
-  thoughtCloud: { width: '140px', bottom: '62%', left: '1%' },
+  // Sad student 2× larger, stays on right
+  figureRight:  { width: 'clamp(700px, 65vw, 1040px)', bottom: '-2%', right: '-2%' },
+  // Thought cloud moved to top-left corner
+  thoughtCloud: { width: '160px', top: '6%', left: '2%' },
   threeLines:   { width: '90px',  bottom: '28%', right: '7%' },
   stackDocs:    { width: '100px', bottom: '4%',  left: '14%' },
-  travelBag:    { width: '400px', bottom: '-4%', right: '1%' },
+  // Travel bag behind sad student — same right anchor, positioned at bottom
+  travelBag:    { width: '360px', bottom: '-4%', right: '4%' },
 }
 
 export function AboutSection() {
@@ -54,14 +57,14 @@ export function AboutSection() {
           transition={{ duration: 0.9, ease: 'easeOut', delay: 0.3 }}
         />
 
-        {/* Thought cloud — near left figure */}
+        {/* Thought cloud — top-left corner */}
         <LandingDecor
           src="/thought cloud with graduation cap.svg"
           hideBelowLg
           opacity={1}
           style={{
             width: LAYOUT.thoughtCloud.width,
-            bottom: LAYOUT.thoughtCloud.bottom,
+            top: LAYOUT.thoughtCloud.top,
             left: LAYOUT.thoughtCloud.left,
             animation: 'float-bob 5s ease-in-out infinite',
             animationDelay: '1s',
@@ -72,7 +75,25 @@ export function AboutSection() {
           transition={{ duration: 0.8, ease: 'easeOut', delay: 0.7 }}
         />
 
-        {/* Right figure: sad student on bench */}
+        {/* Travel bag — rendered BEFORE sad student so it appears behind him */}
+        <LandingDecor
+          src="/travel bag.svg"
+          hideBelowMd
+          opacity={1}
+          style={{
+            width: LAYOUT.travelBag.width,
+            bottom: LAYOUT.travelBag.bottom,
+            right: LAYOUT.travelBag.right,
+            animation: 'float-bob 8s ease-in-out infinite',
+            animationDelay: '0.3s',
+          }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 1.1 }}
+        />
+
+        {/* Right figure: sad student on bench — 2× larger, renders in front of bag */}
         <LandingDecor
           src="/sad student on bench.svg"
           hideBelowLg
@@ -119,24 +140,6 @@ export function AboutSection() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.9 }}
-        />
-
-        {/* Travel bag */}
-        <LandingDecor
-          src="/travel bag.svg"
-          hideBelowMd
-          opacity={1}
-          style={{
-            width: LAYOUT.travelBag.width,
-            bottom: LAYOUT.travelBag.bottom,
-            right: LAYOUT.travelBag.right,
-            animation: 'float-bob 8s ease-in-out infinite',
-            animationDelay: '0.3s',
-          }}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 1.1 }}
         />
 
         <LandingDecor

@@ -93,17 +93,18 @@ export function EventsSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: i * 0.08, ease: 'easeInOut' }}
             >
-              <Card className="flex h-full flex-col gap-3 p-5">
+              <Card
+                variant="dark"
+                className="flex h-full flex-col gap-3 p-5"
+                style={{ background: ev.color }}
+              >
                 <div className="flex items-start justify-between gap-2">
-                  <span
-                    className="rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white"
-                    style={{ background: ev.color }}
-                  >
+                  <span className="rounded-full bg-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white">
                     {ev.type}
                   </span>
                 </div>
-                <h3 className="text-sm font-semibold leading-snug text-blue md:text-base">{ev.title}</h3>
-                <div className="flex flex-col gap-1.5 text-xs text-text/60">
+                <h3 className="text-sm font-semibold leading-snug text-white md:text-base">{ev.title}</h3>
+                <div className="flex flex-col gap-1.5 text-xs text-white/70">
                   <span className="flex items-center gap-1.5">
                     <Calendar className="h-3.5 w-3.5 shrink-0" />
                     {ev.date} · {ev.time}
@@ -117,7 +118,7 @@ export function EventsSection() {
                     {ev.seats}
                   </span>
                 </div>
-                <Button className="mt-auto w-full py-2 text-xs md:text-sm">
+                <Button className="mt-auto w-full border-white/30 bg-white/15 py-2 text-xs text-white hover:bg-white/25 md:text-sm">
                   Register Free →
                 </Button>
               </Card>

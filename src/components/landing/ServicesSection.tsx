@@ -16,15 +16,30 @@ import {
 import { LandingDecor } from './LandingDecor'
 import { useNavigateWithTransition } from './ScrollContainer'
 
-// ── Layout config — tweak sizes & positions here ──────────────────────────
+// ── Layout config ─────────────────────────────────────────────────────────
 const LAYOUT = {
-  // Outer-edge figures — absolutely positioned, one per card (outer corners)
-  svgLeft1:  { width: 'clamp(300px, 28vw, 520px)', top: '26%',  left: '-2%'  }, // [0] Study Visa
-  svgRight1: { width: 'clamp(300px, 28vw, 520px)', top: '22%',  right: '-2%' }, // [1] Find a Job
-  svgLeft2:  { width: 'clamp(300px, 28vw, 520px)', bottom: '0%', left: '-2%'  }, // [2] Visit & Immig
-  svgRight2: { width: 'clamp(300px, 28vw, 520px)', bottom: '0%', right: '-2%' }, // [3] Language Test
+  // Inline SVG height — each figure matches card-row height, bottom-aligned
+  svgMaxH: 'clamp(260px, 38vh, 520px)',
+  // Max width so figures don't crush the cards on mid screens
+  svgMaxW: 'clamp(160px, 18vw, 320px)',
   starOpacity: 0.25,
 }
+
+// Row pairs — left SVG | two cards | right SVG
+const rows = [
+  {
+    leftSvg:  '/student walking.svg',
+    rightSvg: '/doctor element.svg',
+    cardIndices: [0, 1],          // Study Visa, Find a Job
+    animDelay: [0, 0.08] as const,
+  },
+  {
+    leftSvg:  '/corporate man.svg',
+    rightSvg: '/student with files.svg',
+    cardIndices: [2, 3],          // Visit & Immigration, Language Test
+    animDelay: [0.16, 0.24] as const,
+  },
+]
 
 // ── Card theme config ─────────────────────────────────────────────────────
 const cardThemes = [
@@ -112,10 +127,8 @@ export function ServicesSection() {
   return (
     <div className="bg-texture relative flex h-full flex-col justify-center overflow-hidden bg-bg px-5 py-10 md:px-10 md:py-24">
 
-      {/* ── Decorative layer — stars + outer-edge figures ─────────── */}
+      {/* ── Decorative layer — stars only ────────────────────────── */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
-
-        {/* Stars */}
         <LandingDecor
           src="/Orange Star.svg"
           size="star"
@@ -139,80 +152,10 @@ export function ServicesSection() {
           opacity={LAYOUT.starOpacity}
           hideBelowMd
         />
-
-        {/* [0] Study Visa — student walking — outer LEFT top */}
-        <LandingDecor
-          src="/student walking.svg"
-          hideBelowLg
-          opacity={1}
-          style={{
-            width: LAYOUT.svgLeft1.width,
-            top: LAYOUT.svgLeft1.top,
-            left: LAYOUT.svgLeft1.left,
-            animation: 'float-bob 7s ease-in-out infinite',
-          }}
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
-        />
-
-        {/* [1] Find a Job — doctor element — outer RIGHT top */}
-        <LandingDecor
-          src="/doctor element.svg"
-          hideBelowLg
-          opacity={1}
-          style={{
-            width: LAYOUT.svgRight1.width,
-            top: LAYOUT.svgRight1.top,
-            right: LAYOUT.svgRight1.right,
-            animation: 'float-bob-delayed 8s ease-in-out infinite',
-          }}
-          initial={{ opacity: 0, x: 20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
-        />
-
-        {/* [2] Visit & Immigration — corporate man — outer LEFT bottom */}
-        <LandingDecor
-          src="/corporate man.svg"
-          hideBelowLg
-          opacity={1}
-          style={{
-            width: LAYOUT.svgLeft2.width,
-            bottom: LAYOUT.svgLeft2.bottom,
-            left: LAYOUT.svgLeft2.left,
-            animation: 'float-bob 9s ease-in-out infinite',
-            animationDelay: '1s',
-          }}
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: 'easeOut', delay: 0.4 }}
-        />
-
-        {/* [3] Language Test — student with files — outer RIGHT bottom */}
-        <LandingDecor
-          src="/student with files.svg"
-          hideBelowLg
-          opacity={1}
-          style={{
-            width: LAYOUT.svgRight2.width,
-            bottom: LAYOUT.svgRight2.bottom,
-            right: LAYOUT.svgRight2.right,
-            animation: 'float-bob-delayed 7s ease-in-out infinite',
-            animationDelay: '0.5s',
-          }}
-          initial={{ opacity: 0, x: 20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: 'easeOut', delay: 0.5 }}
-        />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 mx-auto w-full max-w-5xl">
+      <div className="relative z-10 mx-auto w-full max-w-6xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -228,46 +171,77 @@ export function ServicesSection() {
           </h2>
         </motion.div>
 
-        {/* Clean 2×2 card grid — figures are in the absolute layer above */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-5">
-          {services.map((item, i) => {
-            const Icon = item.icon
-            const theme = cardThemes[i]
-            return (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.7, delay: i * 0.08, ease: 'easeInOut' }}
-              >
-                <Card
-                  variant="dark"
-                  className="flex h-full flex-col gap-3 p-4 md:gap-4 md:p-6"
-                  style={{ background: theme.cardBg }}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <Icon className={`h-5 w-5 shrink-0 md:h-7 md:w-7 ${theme.iconColor}`} strokeWidth={1.5} />
-                    {item.tag && (
-                      <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-medium text-white md:px-3 md:py-1 md:text-xs">
-                        {item.tag}
-                      </span>
-                    )}
-                  </div>
-                  <h3 className={`text-[clamp(0.8rem,2.3vw,1.125rem)] font-semibold leading-snug ${theme.titleColor}`}>
-                    {item.title}
-                  </h3>
-                  <p className={`hidden flex-1 text-sm sm:block ${theme.descColor}`}>{item.description}</p>
-                  <Button
-                    onClick={() => handleSelect(item.service)}
-                    className={`w-full py-2 text-xs md:py-3 md:text-sm ${theme.btnClass}`}
-                  >
-                    I need this →
-                  </Button>
-                </Card>
-              </motion.div>
-            )
-          })}
+        {/* Two rows: [SVG | card + card | SVG] */}
+        <div className="flex flex-col gap-3 sm:gap-5">
+          {rows.map((row, rowIdx) => (
+            <div key={rowIdx} className="flex items-end gap-2 sm:gap-4">
+
+              {/* Left figure — bottom-aligned, hidden below lg */}
+              <div className="hidden shrink-0 lg:block" style={{ maxWidth: LAYOUT.svgMaxW }}>
+                <img
+                  src={row.leftSvg}
+                  aria-hidden="true"
+                  className="h-auto w-full object-contain object-bottom"
+                  style={{ maxHeight: LAYOUT.svgMaxH }}
+                />
+              </div>
+
+              {/* Two cards side-by-side */}
+              <div className="grid flex-1 grid-cols-2 gap-3 sm:gap-5">
+                {row.cardIndices.map((ci, j) => {
+                  const item = services[ci]
+                  const Icon = item.icon
+                  const theme = cardThemes[ci]
+                  return (
+                    <motion.div
+                      key={item.title}
+                      initial={{ opacity: 0, y: 24 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.7, delay: row.animDelay[j], ease: 'easeInOut' }}
+                      className="h-full"
+                    >
+                      <Card
+                        variant="dark"
+                        className="flex h-full flex-col gap-3 p-4 md:gap-4 md:p-6"
+                        style={{ background: theme.cardBg }}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <Icon className={`h-5 w-5 shrink-0 md:h-7 md:w-7 ${theme.iconColor}`} strokeWidth={1.5} />
+                          {item.tag && (
+                            <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-medium text-white md:px-3 md:py-1 md:text-xs">
+                              {item.tag}
+                            </span>
+                          )}
+                        </div>
+                        <h3 className={`text-[clamp(0.8rem,2.3vw,1.125rem)] font-semibold leading-snug ${theme.titleColor}`}>
+                          {item.title}
+                        </h3>
+                        <p className={`hidden flex-1 text-sm sm:block ${theme.descColor}`}>{item.description}</p>
+                        <Button
+                          onClick={() => handleSelect(item.service)}
+                          className={`w-full py-2 text-xs md:py-3 md:text-sm ${theme.btnClass}`}
+                        >
+                          I need this →
+                        </Button>
+                      </Card>
+                    </motion.div>
+                  )
+                })}
+              </div>
+
+              {/* Right figure — bottom-aligned, hidden below lg */}
+              <div className="hidden shrink-0 lg:block" style={{ maxWidth: LAYOUT.svgMaxW }}>
+                <img
+                  src={row.rightSvg}
+                  aria-hidden="true"
+                  className="h-auto w-full object-contain object-bottom"
+                  style={{ maxHeight: LAYOUT.svgMaxH }}
+                />
+              </div>
+
+            </div>
+          ))}
         </div>
       </div>
     </div>

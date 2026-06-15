@@ -5,39 +5,64 @@ import { LandingDecor } from './LandingDecor'
 
 // ── Layout config ─────────────────────────────────────────────────────────
 const LAYOUT = {
-  starOpacity: 0.25,
+  starOpacity: 0.3,
 }
 
+// 20 countries — no orange cards (bg is orange)
+const CARD_COLORS = [
+  'var(--grad-blue)',
+  'var(--grad-teal)',
+  'var(--grad-green)',
+  'linear-gradient(135deg, #cdd94e 0%, #B7C733 100%)',
+]
+
 const countries = [
-  { flag: '🇬🇧', name: 'United Kingdom',     unis: '130+ Universities',  color: 'var(--grad-blue)' },
-  { flag: '🇨🇦', name: 'Canada',              unis: '100+ Universities',  color: 'var(--grad-teal)' },
-  { flag: '🇮🇪', name: 'Ireland',             unis: '40+ Universities',   color: 'var(--grad-green)' },
-  { flag: '🇦🇺', name: 'Australia',           unis: '90+ Universities',   color: 'var(--grad-orange)' },
-  { flag: '🇩🇪', name: 'Germany',             unis: '60+ Universities',   color: 'var(--grad-blue)' },
-  { flag: '🇳🇱', name: 'Netherlands',         unis: '50+ Universities',   color: 'var(--grad-teal)' },
+  { flag: '🇬🇧', name: 'United Kingdom',  unis: '130+ Universities' },
+  { flag: '🇨🇦', name: 'Canada',           unis: '100+ Universities' },
+  { flag: '🇮🇪', name: 'Ireland',          unis: '40+ Universities'  },
+  { flag: '🇳🇿', name: 'New Zealand',      unis: '25+ Universities'  },
+  { flag: '🇺🇸', name: 'USA',              unis: '200+ Universities' },
+  { flag: '🇦🇺', name: 'Australia',        unis: '90+ Universities'  },
+  { flag: '🇲🇾', name: 'Malaysia',         unis: '30+ Universities'  },
+  { flag: '🇨🇳', name: 'China',            unis: '50+ Universities'  },
+  { flag: '🇧🇾', name: 'Belarus',          unis: '15+ Universities'  },
+  { flag: '🇨🇾', name: 'Cyprus',           unis: '10+ Universities'  },
+  { flag: '🇭🇺', name: 'Hungary',          unis: '20+ Universities'  },
+  { flag: '🇦🇹', name: 'Austria',          unis: '20+ Universities'  },
+  { flag: '🇱🇻', name: 'Latvia',           unis: '12+ Universities'  },
+  { flag: '🇱🇹', name: 'Lithuania',        unis: '12+ Universities'  },
+  { flag: '🇷🇴', name: 'Romania',          unis: '18+ Universities'  },
+  { flag: '🇨🇭', name: 'Switzerland',      unis: '15+ Universities'  },
+  { flag: '🇮🇹', name: 'Italy',            unis: '35+ Universities'  },
+  { flag: '🇧🇪', name: 'Belgium',          unis: '18+ Universities'  },
+  { flag: '🇸🇪', name: 'Sweden',           unis: '22+ Universities'  },
+  { flag: '🇩🇪', name: 'Germany',          unis: '60+ Universities'  },
 ]
 
 export function CountriesSection() {
   return (
-    <div className="bg-texture relative flex h-full flex-col justify-center overflow-hidden bg-bg px-5 py-10 md:px-10 md:py-24">
+    <div
+      className="bg-texture relative flex h-full flex-col justify-center overflow-hidden px-5 py-10 md:px-10 md:py-24"
+      style={{ background: 'var(--grad-orange)' }}
+    >
 
       {/* Decorative layer */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
         <LandingDecor
-          src="/Orange Star.svg" size="star"
+          src="/Blue Star.svg" size="star"
           className="right-[8%] top-[12%]"
           style={{ animation: 'star-pulse 3.5s ease-in-out infinite' }}
           opacity={LAYOUT.starOpacity}
         />
         <LandingDecor
-          src="/Blue Star.svg" size="star"
+          src="/Green star.svg" size="star"
           className="left-[6%] top-[28%]"
           style={{ animation: 'star-pulse 4.8s ease-in-out infinite', animationDelay: '1.2s' }}
           opacity={LAYOUT.starOpacity}
           hideBelowMd
         />
         <LandingDecor
-          src="/Green star.svg" size="star"
+          src="/Blue Star.svg" size="star"
           className="left-[50%] top-[70%]"
           style={{ animation: 'star-pulse 5.5s ease-in-out infinite', animationDelay: '2s' }}
           opacity={LAYOUT.starOpacity}
@@ -46,7 +71,7 @@ export function CountriesSection() {
         <LandingDecor
           src="/Earth.svg"
           hideBelowLg
-          opacity={0.08}
+          opacity={1}
           style={{
             width: 'clamp(220px, 22vw, 420px)',
             bottom: '-5%',
@@ -64,33 +89,36 @@ export function CountriesSection() {
           transition={{ duration: 0.7, ease: 'easeInOut' }}
           className="mb-5 text-center md:mb-10"
         >
-          <p className="mb-3 text-xs font-medium uppercase tracking-widest text-orange">
+          <p className="mb-3 text-xs font-medium uppercase tracking-widest text-white/70">
             explore the world
           </p>
-          <h2 className="text-[clamp(1.75rem,6vw,3.5rem)] font-semibold leading-tight text-blue">
+          <h2 className="text-[clamp(1.75rem,6vw,3.5rem)] font-semibold leading-tight text-white">
             Where Do You Want
             <br />
             To Go?
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-sm text-text/70 md:mt-5 md:text-base">
-            We help Pakistani students reach top universities across 6 countries — from application to visa.
+          <p className="mx-auto mt-3 max-w-xl text-sm text-white/75 md:mt-5 md:text-base">
+            We help Pakistani students reach top universities across 20 countries — from application to visa.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5">
           {countries.map((c, i) => (
             <motion.div
               key={c.name}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.08, ease: 'easeInOut' }}
-              className="group relative overflow-hidden rounded-card p-5 text-center transition-transform duration-300 hover:-translate-y-1 md:p-7"
-              style={{ background: c.color }}
+              transition={{ duration: 0.5, delay: i * 0.04, ease: 'easeInOut' }}
+              className="group relative overflow-hidden rounded-card p-4 text-center transition-transform duration-300 hover:-translate-y-1 md:p-5"
+              style={{ background: CARD_COLORS[i % CARD_COLORS.length] }}
             >
-              <div className="mb-3 text-4xl md:text-5xl">{c.flag}</div>
-              <h3 className="text-sm font-semibold text-white md:text-base">{c.name}</h3>
-              <p className="mt-1 text-xs text-white/70">{c.unis}</p>
+              {/* Circular flag */}
+              <div className="mx-auto mb-2.5 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white/20 text-2xl md:h-12 md:w-12 md:text-3xl">
+                {c.flag}
+              </div>
+              <h3 className="text-xs font-semibold text-white md:text-sm">{c.name}</h3>
+              <p className="mt-0.5 text-[10px] text-white/70 md:text-xs">{c.unis}</p>
             </motion.div>
           ))}
         </div>

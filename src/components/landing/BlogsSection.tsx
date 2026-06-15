@@ -34,7 +34,7 @@ const posts = [
 
 export function BlogsSection() {
   return (
-    <div className="bg-texture relative flex h-full flex-col justify-center overflow-hidden bg-bg px-5 py-10 md:px-10 md:py-24">
+    <div className="bg-texture relative flex h-full flex-col justify-center overflow-hidden px-5 py-10 md:px-10 md:py-24" style={{ background: 'var(--grad-teal)' }}>
 
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
         <LandingDecor
@@ -63,7 +63,7 @@ export function BlogsSection() {
           <p className="mb-3 text-xs font-medium uppercase tracking-widest text-orange">
             stay informed
           </p>
-          <h2 className="text-[clamp(1.75rem,6vw,3.5rem)] font-semibold leading-tight text-blue">
+          <h2 className="text-[clamp(1.75rem,6vw,3.5rem)] font-semibold leading-tight text-white">
             Guides, Tips &
             <br />
             Success Stories
@@ -79,18 +79,22 @@ export function BlogsSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: i * 0.1, ease: 'easeInOut' }}
             >
-              <Card className="flex h-full flex-col gap-3 p-5">
+              <Card
+                variant="dark"
+                className="flex h-full flex-col gap-3 p-5"
+                style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.2)' }}
+              >
                 <span
                   className="w-fit rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white"
                   style={{ background: post.color }}
                 >
                   {post.tag}
                 </span>
-                <h3 className="text-sm font-semibold leading-snug text-blue md:text-base">
+                <h3 className="text-sm font-semibold leading-snug text-white md:text-base">
                   {post.title}
                 </h3>
-                <p className="flex-1 text-sm leading-relaxed text-text/70">{post.excerpt}</p>
-                <div className="flex items-center justify-between text-xs text-text/50">
+                <p className="flex-1 text-sm leading-relaxed text-white/75">{post.excerpt}</p>
+                <div className="flex items-center justify-between text-xs text-white/50">
                   <span>{post.date}</span>
                   <span>{post.readTime}</span>
                 </div>

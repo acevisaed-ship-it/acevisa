@@ -62,7 +62,7 @@ export function ScholarshipsSection() {
         <LandingDecor
           src="/Graduation Cap.svg"
           hideBelowLg
-          opacity={0.06}
+          opacity={1}
           style={{
             width: 'clamp(200px, 20vw, 380px)',
             top: '5%',
@@ -102,23 +102,24 @@ export function ScholarshipsSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: i * 0.09, ease: 'easeInOut' }}
             >
-              <Card className="flex h-full flex-col gap-3 p-5">
+              <Card
+                variant="dark"
+                className="flex h-full flex-col gap-3 p-5"
+                style={{ background: s.color }}
+              >
                 <div className="flex items-start justify-between gap-2">
-                  <span
-                    className="rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white"
-                    style={{ background: s.color }}
-                  >
+                  <span className="rounded-full bg-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white">
                     {s.value}
                   </span>
-                  <span className="text-xs text-text/50">Due {s.deadline}</span>
+                  <span className="text-xs text-white/60">Due {s.deadline}</span>
                 </div>
-                <h3 className="text-sm font-semibold text-blue md:text-base">{s.name}</h3>
-                <div className="flex items-center gap-1.5 text-xs text-text/60">
+                <h3 className="text-sm font-semibold text-white md:text-base">{s.name}</h3>
+                <div className="flex items-center gap-1.5 text-xs text-white/70">
                   <Globe className="h-3.5 w-3.5 shrink-0" />
                   {s.country}
                 </div>
-                <p className="flex-1 text-sm leading-relaxed text-text/70">{s.description}</p>
-                <Button className="mt-auto w-full py-2 text-xs md:text-sm">
+                <p className="flex-1 text-sm leading-relaxed text-white/75">{s.description}</p>
+                <Button className="mt-auto w-full border-white/30 bg-white/15 py-2 text-xs text-white hover:bg-white/25 md:text-sm">
                   Check Eligibility →
                 </Button>
               </Card>

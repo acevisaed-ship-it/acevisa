@@ -216,6 +216,19 @@ function ChatContent() {
         ))}
       </div>
 
+      {/* Suggestion chips */}
+      <div className="flex gap-1.5 overflow-x-auto border-t border-white/10 px-3 py-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {['Study Visa help', 'Best UK unis for me', 'IELTS score tips', 'Scholarship chances'].map((sug) => (
+          <button
+            key={sug}
+            type="button"
+            className="shrink-0 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10.5px] font-medium text-bg/70 transition-colors hover:bg-white/20 hover:text-bg"
+          >
+            {sug}
+          </button>
+        ))}
+      </div>
+
       {/* Input bar */}
       <div className="flex items-center gap-2 border-t border-white/10 bg-white/5 px-3 py-2.5">
         <div className="flex flex-1 items-center gap-2 rounded-full bg-white/10 px-3.5 py-2">
@@ -337,55 +350,10 @@ export function AIChatSection() {
   return (
     <div className="bg-grad-teal relative flex h-full flex-col justify-center overflow-hidden px-4 py-8 md:px-10 md:py-16">
 
-      {/* ── Decorative layer — gradient clouds + colored planes ──── */}
+      {/* ── Decorative layer — colored planes only ───────────────── */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
 
-        {/* Cloud 1 — largest, far left, gradient tinted */}
-        <motion.div
-          className="absolute hidden lg:block"
-          style={{ width: LAYOUT.cloud1.width, top: LAYOUT.cloud1.top, left: LAYOUT.cloud1.left }}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1.2 }}
-        >
-          <div className="relative w-full">
-            <img src="/Big cloud with straight base.svg" alt="" className="w-full" style={{ opacity: 0.18 }} />
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(125,211,200,0.55) 0%, rgba(14,165,233,0.35) 100%)', mixBlendMode: 'screen' }} />
-          </div>
-        </motion.div>
-
-        {/* Cloud 2 — medium, overlaps cloud 1 */}
-        <motion.div
-          className="absolute hidden lg:block"
-          style={{ width: LAYOUT.cloud2.width, top: LAYOUT.cloud2.top, left: LAYOUT.cloud2.left }}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1.2, delay: 0.15 }}
-        >
-          <div className="relative w-full">
-            <img src="/Cloud with many arcs.svg" alt="" className="w-full" style={{ opacity: 0.22 }} />
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(56,189,248,0.5) 0%, rgba(99,102,241,0.25) 100%)', mixBlendMode: 'screen' }} />
-          </div>
-        </motion.div>
-
-        {/* Cloud 3 — smallest, right-most of the trio */}
-        <motion.div
-          className="absolute hidden lg:block"
-          style={{ width: LAYOUT.cloud3.width, top: LAYOUT.cloud3.top, left: LAYOUT.cloud3.left }}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1.2, delay: 0.3 }}
-        >
-          <div className="relative w-full">
-            <img src="/Cloud Long.svg" alt="" className="w-full" style={{ opacity: 0.15 }} />
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(167,243,208,0.5) 0%, rgba(96,165,250,0.35) 100%)', mixBlendMode: 'screen' }} />
-          </div>
-        </motion.div>
-
-        {/* Orange paper plane — flies left → right */}
+        {/* Orange plane — flies left → right (same as hero page) */}
         <div
           className="absolute hidden md:block"
           style={{
@@ -396,21 +364,21 @@ export function AIChatSection() {
             animationDelay: '1.5s',
           }}
         >
-          <img src="/Orange plane.svg" alt="" className="w-full" style={{ opacity: 0.85 }} />
+          <img src="/Orange plane.svg" alt="" className="w-full" style={{ opacity: 0.9 }} />
         </div>
 
-        {/* Blue paper plane — enters from right → left */}
+        {/* Blue plane — enters from right only (plane-fly-l) */}
         <div
           className="absolute hidden md:block"
           style={{
             width: LAYOUT.planeBlue.width,
             top: LAYOUT.planeBlue.top,
-            left: LAYOUT.planeBlue.left,
+            right: '0',
             animation: 'plane-fly-l 13s ease-in-out infinite',
             animationDelay: '4s',
           }}
         >
-          <img src="/Blue plane.svg" alt="" className="w-full" style={{ opacity: 0.85 }} />
+          <img src="/Blue plane.svg" alt="" className="w-full" style={{ opacity: 0.9 }} />
         </div>
       </div>
       {/* ── /Decorative layer ─────────────────────────────────────── */}
