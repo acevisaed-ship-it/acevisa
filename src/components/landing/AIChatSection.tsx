@@ -306,8 +306,8 @@ function PhoneFrame() {
           </div>
         </div>
 
-        {/* Chat content */}
-        <div style={{ height: 400 }}>
+        {/* Chat content — shorter on small phones */}
+        <div style={{ height: 'clamp(300px, 50vh, 400px)' }}>
           <ChatContent />
         </div>
 
@@ -323,7 +323,7 @@ function PhoneFrame() {
 // ─── Section ──────────────────────────────────────────────────────────────
 export function AIChatSection() {
   return (
-    <div className="bg-grad-teal flex h-full flex-col justify-center overflow-y-auto px-5 py-16 md:px-10">
+    <div className="bg-grad-teal flex h-full flex-col justify-center overflow-y-auto px-4 py-8 md:px-10 md:py-16">
       <div className="mx-auto w-full max-w-5xl">
 
         {/* Eyebrow + heading */}
@@ -332,17 +332,17 @@ export function AIChatSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="mb-8 text-center md:mb-10"
+          className="mb-5 text-center md:mb-10"
         >
           <p className="mb-2 text-xs font-medium uppercase tracking-widest text-orange">
             AI-powered guidance
           </p>
-          <h2 className="text-[clamp(1.8rem,5vw,3rem)] font-semibold leading-tight text-bg lowercase">
+          <h2 className="text-[clamp(1.6rem,5vw,3rem)] font-semibold leading-tight text-bg lowercase">
             your counselor
             <br />
             never sleeps
           </h2>
-          <p className="mx-auto mt-4 max-w-md text-sm text-bg/60">
+          <p className="mx-auto mt-3 max-w-md text-xs text-bg/60 md:mt-4 md:text-sm">
             Get instant answers, track every stage of your application, and chat in Urdu or English — any time.
           </p>
         </motion.div>

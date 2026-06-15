@@ -18,14 +18,14 @@ export function HeroSection() {
   const navigate = useNavigateWithTransition()
 
   return (
-    <div className="bg-texture relative flex h-full flex-col justify-center overflow-hidden bg-bg px-5 pb-8 pt-24 md:px-12 lg:px-16">
+    <div className="bg-texture relative flex h-full flex-col justify-center overflow-hidden bg-bg px-5 pb-8 pt-16 md:px-12 md:pt-24 lg:px-16">
 
       {/* Animated background — all elements live here */}
       <HeroAnimations />
 
-      {/* Man pointing to ACE — bottom-left, fills the blue box area */}
+      {/* Man pointing to ACE — bottom-left; hidden on mobile (overlaps CTA) */}
       <div
-        className="pointer-events-none absolute bottom-0 z-[6]"
+        className="pointer-events-none absolute bottom-0 z-[6] hidden md:block"
         aria-hidden="true"
         style={{ left: '-4%' }}
       >
@@ -47,30 +47,33 @@ export function HeroSection() {
           transition={{ duration: 0.7, ease: 'easeInOut' }}
           className="flex flex-col gap-5"
         >
+          {/* Logo — constrained tighter on mobile */}
           <img
             src="/Hero Page LOGO.svg"
             alt="ACE Altius Consulting"
-            className="w-full max-w-[420px] h-auto"
+            className="w-full max-w-[280px] h-auto md:max-w-[420px]"
           />
 
-          <p className="text-sm font-bold uppercase tracking-widest text-orange md:text-base">
+          <p className="text-xs font-bold uppercase tracking-widest text-orange md:text-base">
             Pakistan&apos;s First AI Consultancy Platform
           </p>
 
-          <h1 className="text-[clamp(2.8rem,6vw,5rem)] font-semibold leading-[0.95] tracking-tight text-blue pl-4 md:pl-8">
+          {/* H1 — smaller clamp floor so it doesn't overflow on 375px screens */}
+          <h1 className="text-[clamp(2rem,6vw,5rem)] font-semibold leading-[0.95] tracking-tight text-blue pl-3 md:pl-8">
             Ace Your
             <br />
             Future Here
           </h1>
 
-          <p className="max-w-sm text-base text-text/70 md:text-lg">
+          <p className="max-w-sm text-sm text-text/70 md:text-base md:text-lg">
             AI-Powered Guidance. Real Counselors. Real Results.
           </p>
 
-          <div>
+          <div className="flex flex-col gap-3 sm:block">
+            {/* Full-width CTA on mobile, auto width on sm+ */}
             <Button
               onClick={() => navigate(1)}
-              className="mt-2 px-10 py-5 text-lg font-semibold text-white"
+              className="mt-2 w-full py-4 text-base font-semibold text-white sm:w-auto sm:px-10 sm:py-5 sm:text-lg"
               style={{
                 background: 'linear-gradient(135deg, #E48328 0%, #2083B9 100%)',
                 border: 'none',
@@ -99,17 +102,26 @@ export function HeroSection() {
           transition={{ duration: 0.8, delay: 0.15, ease: 'easeInOut' }}
           className="flex w-full justify-center lg:justify-end"
         >
-          <Card variant="glass" className="w-full max-w-sm space-y-6 p-6 sm:p-8">
-            {stats.map((stat) => (
-              <div key={stat.label} className="border-b border-text/10 pb-4 last:border-0 last:pb-0">
-                <p className="text-4xl font-semibold text-blue md:text-5xl">
-                  {stat.value}
-                </p>
-                <p className="mt-1 text-base text-text/70 md:text-lg">
-                  {stat.label}
-                </p>
-              </div>
-            ))}
+          {/* Stats card — horizontal strip on mobile, vertical list on desktop */}
+          <Card variant="glass" className="w-full max-w-sm p-4 sm:space-y-6 sm:p-8">
+            {/* Mobile: single row, 3 columns */}
+            <div className="flex justify-between gap-2 sm:hidden">
+              {stats.map((stat) => (
+                <div key={stat.label} className="flex flex-col items-center text-center">
+                  <p className="text-xl font-semibold text-blue">{stat.value}</p>
+                  <p className="mt-0.5 text-[10px] text-text/60 leading-tight">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+            {/* Desktop: vertical list */}
+            <div className="hidden sm:block sm:space-y-6">
+              {stats.map((stat) => (
+                <div key={stat.label} className="border-b border-text/10 pb-4 last:border-0 last:pb-0">
+                  <p className="text-4xl font-semibold text-blue md:text-5xl">{stat.value}</p>
+                  <p className="mt-1 text-base text-text/70 md:text-lg">{stat.label}</p>
+                </div>
+              ))}
+            </div>
           </Card>
         </motion.div>
       </div>

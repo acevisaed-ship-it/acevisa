@@ -92,7 +92,7 @@ export function RegistrationSection() {
   }
 
   return (
-    <div className="bg-texture relative flex h-full flex-col items-center justify-center overflow-y-auto bg-bg px-5 py-24 md:px-10">
+    <div className="bg-texture relative flex h-full flex-col items-center justify-start overflow-y-auto bg-bg px-4 py-10 md:justify-center md:px-10 md:py-24">
 
       {/* ── Aspirational illustration layer ─────────────────────── */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
@@ -212,21 +212,21 @@ export function RegistrationSection() {
           transition={{ duration: 0.7, ease: 'easeInOut' }}
           className="mb-8 text-center"
         >
-          <p className="mb-3 text-xs font-medium uppercase tracking-widest text-orange">
+          <p className="mb-2 text-xs font-medium uppercase tracking-widest text-orange">
             let&apos;s begin
           </p>
-          <h2 className="text-[clamp(2rem,6vw,3.5rem)] font-semibold leading-tight text-blue lowercase">
+          <h2 className="text-[clamp(1.7rem,6vw,3.5rem)] font-semibold leading-tight text-blue lowercase">
             60 seconds to
             <br />
             your counselor
           </h2>
-          <p className="mx-auto mt-4 max-w-sm text-sm text-text/70">
+          <p className="mx-auto mt-3 max-w-sm text-xs text-text/70 md:mt-4 md:text-sm">
             No spam. No calls without your permission. Just a conversation.
           </p>
         </motion.div>
 
-        <Card>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <Card className="p-4 md:p-6">
+          <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
             {error && (
               <p className="rounded-card border border-text/20 bg-bg px-4 py-3 text-sm text-text">
                 {error}
@@ -336,13 +336,16 @@ export function RegistrationSection() {
 
             <input type="hidden" name="ad_source" value={adSource} />
 
-            <Button
-              type="submit"
-              disabled={loading}
-              className="mt-2 w-full py-4 text-base"
-            >
-              {loading ? 'submitting…' : 'meet my AI counselor →'}
-            </Button>
+            {/* Sticky submit on mobile so CTA stays reachable while scrolling fields */}
+            <div className="sticky bottom-0 -mx-4 border-t border-text/10 bg-bg/95 px-4 pb-[env(safe-area-inset-bottom,0px)] pt-3 backdrop-blur-sm md:static md:mx-0 md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full py-4 text-base"
+              >
+                {loading ? 'submitting…' : 'meet my AI counselor →'}
+              </Button>
+            </div>
           </form>
         </Card>
 

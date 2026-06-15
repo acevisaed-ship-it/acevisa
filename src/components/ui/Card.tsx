@@ -22,7 +22,9 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={cn(
-          'rounded-card p-6 transition-all duration-200 ease-out hover:scale-[1.025] hover:-translate-y-1 hover:shadow-xl',
+          // Touch-safe interaction: active press feedback on all devices;
+          // scale-up hover only on pointer devices (sm:hover won't trigger on touch)
+          'rounded-card p-6 transition-all duration-200 ease-out active:scale-[0.98] sm:hover:scale-[1.025] sm:hover:-translate-y-1 sm:hover:shadow-xl',
           variants[variant],
           highlighted && 'ring-2 ring-orange ring-offset-2 ring-offset-bg',
           className

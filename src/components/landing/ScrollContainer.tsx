@@ -137,6 +137,31 @@ export function ScrollContainer({ children }: ScrollContainerProps) {
             </motion.section>
           )
         })}
+
+        {/* ── Scroll-position indicator dots (right edge) ──────────────
+             Visible always; gives mobile users a "where am I" signal
+             since there is no scroll-bar in full-page-snap UX.      */}
+        <div
+          className="pointer-events-none absolute right-3 top-1/2 z-50 flex -translate-y-1/2 flex-col gap-2"
+          aria-hidden="true"
+        >
+          {children.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              aria-label={`Go to section ${i + 1}`}
+              onClick={() => goToSection(i)}
+              className="pointer-events-auto h-2 w-2 rounded-full transition-all duration-300"
+              style={{
+                background:
+                  i === currentSection
+                    ? 'var(--orange)'
+                    : 'rgba(10, 63, 58, 0.25)',
+                transform: i === currentSection ? 'scale(1.4)' : 'scale(1)',
+              }}
+            />
+          ))}
+        </div>
       </div>
     </>
   )

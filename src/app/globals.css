@@ -94,6 +94,27 @@ body {
   max-width: 100vw;
 }
 
+/* ── iPhone safe-area: prevent content sliding under home bar / notch ── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ── Touch-device hover suppression ─────────────────────────────────────
+   On touch screens, :hover states can "stick" after a tap.
+   Wrap hover-only utilities in this query so they fire only on
+   devices that have a real pointer (mouse, trackpad).               */
+@media (hover: none) {
+  .sm\:hover\:scale-\[1\.025\]:hover,
+  .hover\:scale-105:hover,
+  .hover\:shadow-lg:hover,
+  .hover\:shadow-xl:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
 body {
   background: var(--bg);
   color: var(--text);
