@@ -37,10 +37,10 @@ export function HeroSection() {
         />
       </div>
 
-      {/* UI Content — always above everything (z-10) */}
-      <div className="relative z-10 mx-auto grid w-full max-w-6xl grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
+      {/* UI Content — right-aligned, text block close to stats card */}
+      <div className="relative z-10 ml-auto grid w-full max-w-4xl grid-cols-1 gap-8 lg:grid-cols-2 lg:items-center lg:gap-10">
 
-        {/* Left column — text + CTA */}
+        {/* Content column — logo, text, CTA */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -50,20 +50,20 @@ export function HeroSection() {
           <img
             src="/Hero Page LOGO.svg"
             alt="ACE Altius Consulting"
-            className="w-full max-w-[520px] h-auto"
+            className="w-full max-w-[420px] h-auto"
           />
 
           <p className="text-sm font-bold uppercase tracking-widest text-orange md:text-base">
             Pakistan&apos;s First AI Consultancy Platform
           </p>
 
-          <h1 className="text-[clamp(3.5rem,8vw,6rem)] font-semibold leading-[0.95] tracking-tight text-blue">
+          <h1 className="text-[clamp(2.8rem,6vw,5rem)] font-semibold leading-[0.95] tracking-tight text-blue">
             Ace Your
             <br />
             Future Here
           </h1>
 
-          <p className="max-w-md text-base text-text/70 md:text-lg">
+          <p className="max-w-sm text-base text-text/70 md:text-lg">
             AI-Powered Guidance. Real Counselors. Real Results.
           </p>
 
@@ -92,7 +92,7 @@ export function HeroSection() {
           </div>
         </motion.div>
 
-        {/* Right column — stats card (Globe renders behind this via z-index) */}
+        {/* Stats card column */}
         <motion.div
           initial={{ opacity: 0, y: 32 }}
           animate={{ opacity: 1, y: 0 }}
