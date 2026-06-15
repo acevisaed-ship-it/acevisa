@@ -62,7 +62,7 @@ export function ServicesSection() {
   const setSelectedService = useScrollStore((s) => s.setSelectedService)
 
   const handleSelect = (service: ServiceOption) => {
-    navigate(3, () => setSelectedService(service))
+    navigate(4, () => setSelectedService(service))
   }
 
   return (

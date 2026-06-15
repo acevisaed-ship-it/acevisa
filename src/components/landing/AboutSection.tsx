@@ -19,7 +19,7 @@ export function AboutSection() {
   }
 
   const handleDreamer = () => {
-    navigate(4)
+    navigate(5)
   }
 
   return (

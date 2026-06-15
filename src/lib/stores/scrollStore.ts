@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export const SECTION_COUNT = 5
+export const SECTION_COUNT = 6
 
 export type ServiceOption =
   | 'Study Visa'
