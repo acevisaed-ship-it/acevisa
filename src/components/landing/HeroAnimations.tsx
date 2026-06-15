@@ -305,7 +305,7 @@ function DirPaperPlane({ p }: { p: DirPlaneData }) {
         willChange: 'transform',
       }}
       initial={{ x: p.startX, y: p.startY, opacity: 0 }}
-      animate={{ x: p.endX,   y: p.endY,   opacity: [0, 0.65, 0.65, 0] }}
+      animate={{ x: p.endX,   y: p.endY,   opacity: [0, 1, 1, 0] }}
       transition={{
         x:       { duration: p.dur, ease: 'linear' },
         y:       { duration: p.dur, ease: 'linear' },
@@ -672,7 +672,7 @@ function EarthOrbitSystem() {
 
   return (
     <div
-      className="pointer-events-none absolute right-[-6%] top-1/2"
+      className="pointer-events-none absolute right-[1%] top-1/2"
       style={{ width: earthPx, height: earthPx, transform: 'translateY(-50%)' }}
     >
       {/* Orbit trail lines */}
@@ -776,13 +776,13 @@ function AirplaneLayer({ vw, vh }: { vw: number; vh: number }) {
         id: 0, startX: aStartX, startY: aStartY, endX: aEndX, endY: aEndY,
         angle: planeAngle(aDx, aDy, true), flipX: true,
         speed: rn(80, 140), delay: 0,
-        size: rn(100, 170), src: PLANE_SRCS[0], opacity: rn(0.60, 0.85), // always Orange
+        size: rn(100, 170), src: PLANE_SRCS[0], opacity: 1, // always Orange
       },
       {
         id: 1, startX: bStartX, startY: bStartY, endX: bEndX, endY: bEndY,
         angle: planeAngle(bDx, bDy, false), flipX: false,
         speed: rn(90, 150), delay: rn(10, 30),
-        size: rn(100, 170), src: PLANE_SRCS[1], opacity: rn(0.60, 0.85), // always Blue
+        size: rn(100, 170), src: PLANE_SRCS[1], opacity: 1, // always Blue
       },
     ])
   }, [vw, vh])

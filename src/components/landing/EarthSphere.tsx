@@ -66,7 +66,7 @@ export function EarthSphere({ size }: EarthSphereProps) {
       }
 
       const sphere = new THREE.Mesh(geometry, material)
-      sphere.rotation.x = -0.72
+      sphere.rotation.x = -0.85
       scene.add(sphere)
 
       scene.add(new THREE.HemisphereLight(0xffffff, 0x778899, 0.9))
