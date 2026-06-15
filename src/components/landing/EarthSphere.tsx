@@ -107,7 +107,7 @@ export function EarthSphere({ size }: EarthSphereProps) {
   return (
     <div
       ref={mountRef}
-      style={{ width: size, height: size, borderRadius: '50%', overflow: 'hidden' }}
+      style={{ width: size, height: size, borderRadius: '50%', overflow: 'hidden', boxShadow: 'none', filter: 'none' }}
     />
   )
 }

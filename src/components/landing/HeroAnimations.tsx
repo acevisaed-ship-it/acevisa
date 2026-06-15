@@ -556,7 +556,7 @@ function EarthOrbitSystem() {
       </div>
 
       {/* Earth — true 3D sphere via Three.js */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ position: 'absolute', inset: 0, zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'none', filter: 'none' }}>
         <EarthSphere size={earthPx} />
       </div>
     </div>
