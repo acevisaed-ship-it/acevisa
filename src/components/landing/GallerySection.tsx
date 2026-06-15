@@ -82,7 +82,7 @@ export function GallerySection() {
   }
 
   return (
-    <div className="bg-texture flex h-full flex-col justify-center overflow-y-auto bg-bg px-4 py-8 md:px-10 md:py-24">
+    <div className="bg-texture flex h-full flex-col justify-center overflow-y-auto px-4 py-8 md:px-10 md:py-24" style={{ background: 'var(--grad-blue)' }}>
       <div className="mx-auto w-full max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -94,7 +94,15 @@ export function GallerySection() {
           <p className="mb-3 text-xs font-medium uppercase tracking-widest text-orange">
             dream bigger
           </p>
-          <h2 className="text-[clamp(2rem,6vw,3.5rem)] font-semibold leading-tight text-blue lowercase">
+          <h2
+            className="text-[clamp(2rem,6vw,3.5rem)] font-semibold leading-tight lowercase"
+            style={{
+              background: 'var(--grad-teal)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
             students who
             <br />
             made it happen
@@ -156,9 +164,9 @@ export function GallerySection() {
           ))}
         </div>
 
-        <div className="mt-5 border-t border-text/10 pt-5 text-center md:mt-10 md:pt-10">
-          <h3 className="mb-3 text-base font-semibold lowercase text-blue md:mb-5 md:text-2xl">
-            ready to write your story?
+        <div className="mt-5 border-t border-white/20 pt-5 text-center md:mt-10 md:pt-10">
+          <h3 className="mb-3 text-base font-semibold text-white md:mb-5 md:text-2xl">
+            Ready to Write Your Story?
           </h3>
           {/* Full-width CTA on mobile */}
           <Button onClick={handleReady} className="w-full py-4 text-base sm:w-auto sm:px-8">

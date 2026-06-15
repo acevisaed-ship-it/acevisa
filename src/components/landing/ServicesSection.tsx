@@ -16,15 +16,13 @@ import {
 import { LandingDecor } from './LandingDecor'
 import { useNavigateWithTransition } from './ScrollContainer'
 
-// ── Layout config — tweak SVG sizes & positions here ─────────────────────
+// ── Layout config — tweak sizes & positions here ──────────────────────────
 const LAYOUT = {
-  // Per-card SVG max-heights (tweak scale here)
-  svgHeights: [
-    'clamp(420px, 48vh, 630px)',  // [0] Study Visa       — 1.5× base
-    'clamp(420px, 48vh, 630px)',  // [1] Find a Job       — larger
-    'clamp(420px, 48vh, 630px)',  // [2] Visit & Immig    — larger
-    'clamp(490px, 56vh, 735px)',  // [3] Language Test    — 1.75× base
-  ],
+  // Outer-edge figures — absolutely positioned, one per card (outer corners)
+  svgLeft1:  { width: 'clamp(300px, 28vw, 520px)', top: '26%',  left: '-2%'  }, // [0] Study Visa
+  svgRight1: { width: 'clamp(300px, 28vw, 520px)', top: '22%',  right: '-2%' }, // [1] Find a Job
+  svgLeft2:  { width: 'clamp(300px, 28vw, 520px)', bottom: '0%', left: '-2%'  }, // [2] Visit & Immig
+  svgRight2: { width: 'clamp(300px, 28vw, 520px)', bottom: '0%', right: '-2%' }, // [3] Language Test
   starOpacity: 0.25,
 }
 
@@ -71,7 +69,6 @@ const services: {
   tag?: string
   service: ServiceOption
   svg: string
-  svgHeight?: string
 }[] = [
   {
     icon: GraduationCap,
@@ -115,8 +112,10 @@ export function ServicesSection() {
   return (
     <div className="bg-texture relative flex h-full flex-col justify-center overflow-hidden bg-bg px-5 py-10 md:px-10 md:py-24">
 
-      {/* ── Background stars only ────────────────────────────────── */}
+      {/* ── Decorative layer — stars + outer-edge figures ─────────── */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+
+        {/* Stars */}
         <LandingDecor
           src="/Orange Star.svg"
           size="star"
@@ -140,6 +139,76 @@ export function ServicesSection() {
           opacity={LAYOUT.starOpacity}
           hideBelowMd
         />
+
+        {/* [0] Study Visa — student walking — outer LEFT top */}
+        <LandingDecor
+          src="/student walking.svg"
+          hideBelowLg
+          opacity={1}
+          style={{
+            width: LAYOUT.svgLeft1.width,
+            top: LAYOUT.svgLeft1.top,
+            left: LAYOUT.svgLeft1.left,
+            animation: 'float-bob 7s ease-in-out infinite',
+          }}
+          initial={{ opacity: 0, x: -20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
+        />
+
+        {/* [1] Find a Job — doctor element — outer RIGHT top */}
+        <LandingDecor
+          src="/doctor element.svg"
+          hideBelowLg
+          opacity={1}
+          style={{
+            width: LAYOUT.svgRight1.width,
+            top: LAYOUT.svgRight1.top,
+            right: LAYOUT.svgRight1.right,
+            animation: 'float-bob-delayed 8s ease-in-out infinite',
+          }}
+          initial={{ opacity: 0, x: 20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
+        />
+
+        {/* [2] Visit & Immigration — corporate man — outer LEFT bottom */}
+        <LandingDecor
+          src="/corporate man.svg"
+          hideBelowLg
+          opacity={1}
+          style={{
+            width: LAYOUT.svgLeft2.width,
+            bottom: LAYOUT.svgLeft2.bottom,
+            left: LAYOUT.svgLeft2.left,
+            animation: 'float-bob 9s ease-in-out infinite',
+            animationDelay: '1s',
+          }}
+          initial={{ opacity: 0, x: -20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: 'easeOut', delay: 0.4 }}
+        />
+
+        {/* [3] Language Test — student with files — outer RIGHT bottom */}
+        <LandingDecor
+          src="/student with files.svg"
+          hideBelowLg
+          opacity={1}
+          style={{
+            width: LAYOUT.svgRight2.width,
+            bottom: LAYOUT.svgRight2.bottom,
+            right: LAYOUT.svgRight2.right,
+            animation: 'float-bob-delayed 7s ease-in-out infinite',
+            animationDelay: '0.5s',
+          }}
+          initial={{ opacity: 0, x: 20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: 'easeOut', delay: 0.5 }}
+        />
       </div>
 
       {/* Content */}
@@ -159,7 +228,7 @@ export function ServicesSection() {
           </h2>
         </motion.div>
 
-        {/* 2-col grid — each cell: [SVG beside Card] */}
+        {/* Clean 2×2 card grid — figures are in the absolute layer above */}
         <div className="grid grid-cols-2 gap-3 sm:gap-5">
           {services.map((item, i) => {
             const Icon = item.icon
@@ -171,21 +240,10 @@ export function ServicesSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.7, delay: i * 0.08, ease: 'easeInOut' }}
-                className={`flex items-stretch gap-2 lg:gap-3 ${i % 2 === 1 ? 'flex-row-reverse' : ''}`}
               >
-                {/* SVG figure — same height as card, outer side only */}
-                <img
-                  src={item.svg}
-                  alt=""
-                  aria-hidden="true"
-                  className="hidden shrink-0 w-auto object-contain object-bottom lg:block"
-                  style={{ maxHeight: LAYOUT.svgHeights[i], alignSelf: 'stretch', height: '100%' }}
-                />
-
-                {/* Card */}
                 <Card
                   variant="dark"
-                  className="flex flex-1 flex-col gap-3 p-4 md:gap-4 md:p-6"
+                  className="flex h-full flex-col gap-3 p-4 md:gap-4 md:p-6"
                   style={{ background: theme.cardBg }}
                 >
                   <div className="flex items-start justify-between gap-2">
