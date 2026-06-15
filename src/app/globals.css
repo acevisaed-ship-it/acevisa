@@ -8,7 +8,66 @@
   --text: #0A3F3A;
   --blue: #2083B9;
   --black: #000000;
+
+  /* ── Per-color gradients (same hue, lighter → base → darker) ── */
+  --grad-orange: linear-gradient(145deg, #f5a24e 0%, #E48328 55%, #ca7220 100%);
+  --grad-blue:   linear-gradient(145deg, #35a5e0 0%, #2083B9 55%, #176fa0 100%);
+  --grad-green:  linear-gradient(145deg, #ccd94a 0%, #B7C733 55%, #96a726 100%);
+  --grad-teal:   linear-gradient(145deg, #0e5551 0%, #0A3F3A 55%, #052825 100%);
+  --grad-bg:     linear-gradient(145deg, #eeeeed 0%, #E6E8E7 55%, #dcdede 100%);
+  --grad-hero:   linear-gradient(135deg, #E48328 0%, #2083B9 100%);  /* CTA / accent */
+
+  /* ── Crisp outline — inset box-shadow so it never shifts layout ── */
+  /* Use on dark/coloured surfaces  */
+  --crisp-light: inset 0 0 0 0.75px rgba(255, 255, 255, 0.18);
+  /* Use on light/white surfaces    */
+  --crisp-dark:  inset 0 0 0 0.75px rgba(10, 63, 58, 0.09);
 }
+
+/* ── Gradient text utilities ──────────────────────────────────────── */
+.text-grad-orange {
+  background: var(--grad-orange);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-grad-blue {
+  background: var(--grad-blue);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-grad-green {
+  background: var(--grad-green);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-grad-teal {
+  background: var(--grad-teal);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-grad-hero {
+  background: var(--grad-hero);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Gradient background utilities ───────────────────────────────── */
+.bg-grad-orange { background: var(--grad-orange); }
+.bg-grad-blue   { background: var(--grad-blue);   }
+.bg-grad-green  { background: var(--grad-green);  }
+.bg-grad-teal   { background: var(--grad-teal);   }
+.bg-grad-bg     { background: var(--grad-bg);     }
+.bg-grad-hero   { background: var(--grad-hero);   }
+
+/* ── Crisp outline utility ────────────────────────────────────────── */
+/* Drop onto any element to get the barely-there definition line      */
+.crisp           { box-shadow: var(--crisp-dark);  }
+.crisp-on-dark   { box-shadow: var(--crisp-light); }
 
 @theme inline {
   --color-bg: var(--bg);

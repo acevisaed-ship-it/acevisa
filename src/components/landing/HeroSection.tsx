@@ -37,8 +37,8 @@ export function HeroSection() {
         />
       </div>
 
-      {/* UI Content — right-aligned, text block close to stats card */}
-      <div className="relative z-10 ml-auto grid w-full max-w-4xl grid-cols-1 gap-8 lg:grid-cols-2 lg:items-center lg:gap-10">
+      {/* UI Content — centred but weighted right; pr keeps it clear of the globe */}
+      <div className="relative z-10 mx-auto grid w-full max-w-5xl grid-cols-1 gap-8 lg:grid-cols-2 lg:items-center lg:gap-10 lg:pr-[8%]">
 
         {/* Content column — logo, text, CTA */}
         <motion.div

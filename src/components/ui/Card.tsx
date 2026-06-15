@@ -11,9 +11,9 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const variants: Record<CardVariant, string> = {
-  dark: 'bg-text text-bg border border-text/20',
-  light: 'bg-bg text-text border border-text/[0.12]',
-  glass: 'bg-bg/80 backdrop-blur-xl text-text border border-text/[0.12] shadow-lg shadow-text/5',
+  dark:  'bg-grad-teal text-bg crisp-on-dark',
+  light: 'bg-grad-bg   text-text crisp',
+  glass: 'bg-bg/80 backdrop-blur-xl text-text crisp shadow-sm shadow-text/[0.04]',
 }
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
