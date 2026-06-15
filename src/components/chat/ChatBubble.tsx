@@ -67,7 +67,7 @@ export function ChatBubble({ message }: Props) {
       {hasAttachment && (
         <div
           className={`max-w-[85%] rounded-2xl px-3 py-2 ${
-            isAi ? 'bg-[#2083B9] text-white' : 'bg-[#B7C733] text-[#0A3F3A]'
+            isAi ? 'bg-grad-blue crisp-on-dark text-white' : 'bg-grad-green crisp-on-dark text-text'
           }`}
         >
           <AttachmentPreview
@@ -81,7 +81,7 @@ export function ChatBubble({ message }: Props) {
       {!isFilePlaceholder && (
         <div
           className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm font-bold leading-relaxed ${
-            isAi ? 'bg-[#2083B9] text-white' : 'bg-[#B7C733] text-[#0A3F3A]'
+            isAi ? 'bg-grad-blue crisp-on-dark text-white' : 'bg-grad-green crisp-on-dark text-text'
           }`}
         >
           {message.message_text}

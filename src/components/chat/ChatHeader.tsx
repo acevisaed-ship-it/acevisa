@@ -24,10 +24,7 @@ function CounselorAvatar({
   }
 
   return (
-    <span
-      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold"
-      style={{ backgroundColor: '#B7C733', color: '#0A3F3A' }}
-    >
+    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-grad-green crisp-on-dark text-sm font-bold text-text">
       {initial}
     </span>
   )
@@ -45,7 +42,7 @@ export function ChatHeader({ clientName, counselorAvatarUrl, counselorName }: Pr
         )}
       </div>
       <h1 className="text-sm font-semibold text-blue">Ace Assistant</h1>
-      <span className="max-w-[100px] truncate rounded-full bg-[#E48328] px-3 py-1 text-xs font-medium text-[#0A3F3A]">
+      <span className="max-w-[100px] truncate rounded-full bg-grad-orange crisp-on-dark px-3 py-1 text-xs font-medium text-white">
         {clientName}
       </span>
     </header>

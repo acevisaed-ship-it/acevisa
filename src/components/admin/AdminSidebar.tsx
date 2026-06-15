@@ -103,7 +103,7 @@ function SidebarContent({
               className={cn(
                 'flex min-h-[48px] items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
                 active
-                  ? 'bg-green text-text'
+                  ? 'bg-grad-green crisp-on-dark text-text'
                   : 'text-bg hover:bg-[rgba(183,199,51,0.15)]'
               )}
             >
@@ -149,7 +149,7 @@ export function AdminSidebar({
 }: Props) {
   return (
     <>
-      <aside className="hidden w-60 shrink-0 flex-col bg-text text-bg lg:flex">
+      <aside className="hidden w-60 shrink-0 flex-col bg-grad-teal crisp-on-dark text-bg lg:flex">
         <SidebarContent
           adminId={adminId}
           adminName={adminName}
@@ -168,7 +168,7 @@ export function AdminSidebar({
 
       <aside
         className={cn(
-          'fixed left-0 top-0 z-50 flex h-full w-[280px] flex-col bg-text transition-transform duration-300 lg:hidden',
+          'fixed left-0 top-0 z-50 flex h-full w-[280px] flex-col bg-grad-teal crisp-on-dark transition-transform duration-300 lg:hidden',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >

@@ -39,7 +39,7 @@ export function ComplaintRow({ id, clientName, subject, createdAt }: Props) {
   if (acknowledged) return null
 
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-text/10 bg-bg px-4 py-3">
+    <div className="flex items-start gap-3 rounded-xl bg-grad-bg crisp px-4 py-3">
       <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
       <div className="min-w-0 flex-1">
         <p className="font-medium text-text">{clientName}</p>
@@ -50,7 +50,7 @@ export function ComplaintRow({ id, clientName, subject, createdAt }: Props) {
         type="button"
         onClick={handleAcknowledge}
         disabled={loading}
-        className="shrink-0 rounded-full bg-blue px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+        className="shrink-0 rounded-full bg-grad-blue crisp-on-dark px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
       >
         {loading ? 'Saving…' : 'Acknowledge'}
       </button>

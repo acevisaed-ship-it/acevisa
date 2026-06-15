@@ -204,7 +204,7 @@ export function ChatInput({
           onChange={(e) => onChange(e.target.value)}
           placeholder={recording ? 'Listening…' : pendingFile ? 'Add a caption (optional)' : 'Type your message…'}
           disabled={disabled || uploading || recording}
-          className="min-h-[48px] min-w-0 flex-1 rounded-full border border-text bg-bg px-4 py-2.5 text-sm text-text placeholder:text-text/40 outline-none focus:border-blue disabled:opacity-50"
+          className="min-h-[48px] min-w-0 flex-1 rounded-full bg-grad-bg crisp px-4 py-2.5 text-sm text-text placeholder:text-text/40 outline-none focus:ring-1 focus:ring-blue/40 disabled:opacity-50"
         />
 
         {/* Mic button */}
@@ -223,7 +223,7 @@ export function ChatInput({
           type="submit"
           disabled={disabled || uploading || (!pendingFile && !value.trim())}
           aria-label={pendingFile ? (uploading ? 'Uploading…' : 'Send file') : 'Send message'}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-green text-text transition-opacity disabled:opacity-40"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-grad-green crisp-on-dark text-text transition-all hover:brightness-110 disabled:opacity-40"
         >
           {uploading ? (
             <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
