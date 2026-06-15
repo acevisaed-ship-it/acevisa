@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { motion, useAnimationFrame, useMotionValue } from 'framer-motion'
+import { EarthSphere } from './EarthSphere'
 
 // ─── Asset sources ────────────────────────────────────────────────────────
 const CLOUD_SRCS = [
@@ -554,18 +555,9 @@ function EarthOrbitSystem() {
         {orbits.map(d => <OrbitPlane key={d.id} d={d} />)}
       </div>
 
-      {/* Earth — 100 % opaque; covers planes on back arc */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 2, perspective: '900px' }}>
-        <img
-          src="/Earth.svg" alt="" aria-hidden
-          style={{
-            width: '100%', height: '100%', objectFit: 'contain',
-            opacity: 1,
-            animation: 'globe-spin-y 28s linear infinite',
-            transformOrigin: 'center center',
-            willChange: 'transform',
-          }}
-        />
+      {/* Earth — true 3D sphere via Three.js */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <EarthSphere size={earthPx} />
       </div>
     </div>
   )

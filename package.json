@@ -13,6 +13,7 @@
     "@anthropic-ai/sdk": "^0.102.0",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.107.0",
+    "@types/three": "^0.184.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "framer-motion": "^12.40.0",
@@ -24,6 +25,7 @@
     "react-hot-toast": "^2.6.0",
     "resend": "^6.12.4",
     "tailwind-merge": "^3.6.0",
+    "three": "^0.184.0",
     "twilio": "^6.0.2",
     "xlsx": "^0.18.5",
     "zustand": "^5.0.14"

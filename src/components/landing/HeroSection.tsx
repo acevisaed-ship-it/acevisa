@@ -33,7 +33,7 @@ export function HeroSection() {
           src="/man pointing to ace.svg"
           alt=""
           className="w-auto"
-          style={{ height: 'clamp(480px, 74vh, 820px)' }}
+          style={{ height: 'clamp(360px, 56vh, 640px)' }}
         />
       </div>
 
