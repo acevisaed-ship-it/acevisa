@@ -18,19 +18,19 @@ import { useNavigateWithTransition } from './ScrollContainer'
 
 // ── Layout config — tweak SVG sizes & positions here ─────────────────────
 const LAYOUT = {
-  svgHeight: 'clamp(140px, 16vh, 210px)', // height of each card SVG
+  svgHeight: 'clamp(280px, 32vh, 420px)', // height of each card SVG
   starOpacity: 0.25,
 }
 
 // ── Card theme config ─────────────────────────────────────────────────────
 const cardThemes = [
   {
-    // Study Visa — green
-    cardBg:    'var(--grad-green)',
-    iconColor: 'text-white',
-    titleColor:'text-white',
-    descColor: 'text-white/70',
-    btnClass:  'border-white/30 bg-white/20 text-white hover:bg-white/35',
+    // Study Visa — teal
+    cardBg:    'var(--grad-teal)',
+    iconColor: 'text-green',
+    titleColor:'text-bg',
+    descColor: 'text-bg/70',
+    btnClass:  'border-green bg-green text-text hover:opacity-90',
   },
   {
     // Find a Job — orange
@@ -164,15 +164,15 @@ export function ServicesSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.7, delay: i * 0.08, ease: 'easeInOut' }}
-                className="flex items-end gap-2 lg:gap-3"
+                className={`flex items-stretch gap-2 lg:gap-3 ${i % 2 === 1 ? 'flex-row-reverse' : ''}`}
               >
-                {/* SVG figure beside card — desktop only */}
+                {/* SVG figure — same height as card, outer side only */}
                 <img
                   src={item.svg}
                   alt=""
                   aria-hidden="true"
                   className="hidden shrink-0 w-auto object-contain object-bottom lg:block"
-                  style={{ height: LAYOUT.svgHeight }}
+                  style={{ maxHeight: LAYOUT.svgHeight, alignSelf: 'stretch', height: '100%' }}
                 />
 
                 {/* Card */}

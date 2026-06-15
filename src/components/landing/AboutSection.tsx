@@ -10,8 +10,8 @@ import { useNavigateWithTransition } from './ScrollContainer'
 
 // ── Layout config — tweak sizes & positions here without touching JSX ─────
 const LAYOUT = {
-  figureLeft:   { width: 'clamp(240px, 20vw, 340px)', bottom: '-2%', left: '0%' },
-  figureRight:  { width: 'clamp(240px, 20vw, 340px)', bottom: '-2%', right: '0%' },
+  figureLeft:   { width: 'clamp(480px, 40vw, 680px)', bottom: '-2%', left: '0%' },
+  figureRight:  { width: 'clamp(480px, 40vw, 680px)', bottom: '-2%', right: '0%' },
   thoughtCloud: { width: '140px', bottom: '38%', left: '6%' },
   threeLines:   { width: '90px',  bottom: '28%', right: '7%' },
   stackDocs:    { width: '100px', bottom: '4%',  left: '14%' },
