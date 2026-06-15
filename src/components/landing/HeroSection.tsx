@@ -27,7 +27,7 @@ export function HeroSection() {
       <div
         className="pointer-events-none absolute bottom-0 z-[6]"
         aria-hidden="true"
-        style={{ left: '-1%' }}
+        style={{ left: '-4%' }}
       >
         <img
           src="/man pointing to ace.svg"

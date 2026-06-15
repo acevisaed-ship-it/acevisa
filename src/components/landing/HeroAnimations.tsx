@@ -241,7 +241,7 @@ function CloudLayer({ vw }: { vw: number }) {
         const { dots, cW, cH } = buildFormation(formation, count)
         return {
           id: i, formation, dots, cW, cH,
-          topPct:      rn(5, 48),
+          topPct:      rn(1, 16),
           speed:       rn(90, 180),
           delay:       rn(0, 40),
           repeatDelay: rn(5, 18),
