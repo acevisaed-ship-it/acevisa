@@ -11,6 +11,19 @@ import {
 import { triggerTransition } from '@/lib/stores/transitionStore'
 import { LandingDecor } from './LandingDecor'
 
+// ── Layout config — tweak sizes & positions here ──────────────────────────
+const LAYOUT = {
+  figureLeft:  { width: 'clamp(480px, 42vw, 720px)', bottom: '0%',  left: '-4%' },
+  figureRight: { width: 'clamp(480px, 42vw, 720px)', bottom: '0%',  right: '-4%' },
+  gradCap:     { width: 'clamp(100px, 12vw, 180px)', top: '7%',     left: '5%' },
+  earth:       { width: 'clamp(180px, 20vw, 380px)', top: '3%',     right: '3%' },
+  // Flying paper planes — animation drives horizontal movement; top sets lane
+  flyPlane1:   { width: '90px', top: '32%', left: '0' },
+  flyPlane2:   { width: '80px', top: '62%', left: '0' },
+  // Floating accent plane
+  floatPlane:  { width: '80px', top: '18%', left: '44%' },
+}
+
 const languages = ['Urdu', 'English', 'Punjabi', 'Sindhi', 'Pashto'] as const
 const services: ServiceOption[] = [
   'Study Visa',
@@ -97,109 +110,161 @@ export function RegistrationSection() {
       {/* ── Aspirational illustration layer ─────────────────────── */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
 
+        {/* Left figure — happy graduate girl, large, bleeds beyond form */}
         <LandingDecor
           src="/happy graduate girl.svg"
-          size="figure"
           hideBelowLg
-          className="bottom-[4%] left-0"
-          style={{ animation: 'float-bob 7s ease-in-out infinite' }}
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 0.2, x: 0 }}
+          opacity={1}
+          style={{
+            width: LAYOUT.figureLeft.width,
+            bottom: LAYOUT.figureLeft.bottom,
+            left: LAYOUT.figureLeft.left,
+            animation: 'float-bob 7s ease-in-out infinite',
+          }}
+          initial={{ opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.9, ease: 'easeOut', delay: 0.4 }}
         />
 
+        {/* Right figure — corporate man, large */}
         <LandingDecor
           src="/corporate man.svg"
-          size="figure"
           hideBelowLg
-          className="bottom-[4%] right-0"
-          style={{ animation: 'float-bob-delayed 8s ease-in-out infinite', animationDelay: '1s' }}
-          initial={{ opacity: 0, x: 20 }}
-          whileInView={{ opacity: 0.2, x: 0 }}
+          opacity={1}
+          style={{
+            width: LAYOUT.figureRight.width,
+            bottom: LAYOUT.figureRight.bottom,
+            right: LAYOUT.figureRight.right,
+            animation: 'float-bob-delayed 8s ease-in-out infinite',
+            animationDelay: '1s',
+          }}
+          initial={{ opacity: 0, x: 30 }}
+          whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.9, ease: 'easeOut', delay: 0.6 }}
         />
 
+        {/* Graduation cap — top-left, larger */}
         <LandingDecor
           src="/Graduation Cap.svg"
-          size="accent"
           hideBelowMd
-          className="left-[8%] top-[10%]"
-          style={{ animation: 'float-bob 5s ease-in-out infinite', animationDelay: '0.5s' }}
+          opacity={1}
+          style={{
+            width: LAYOUT.gradCap.width,
+            top: LAYOUT.gradCap.top,
+            left: LAYOUT.gradCap.left,
+            animation: 'float-bob 5s ease-in-out infinite',
+            animationDelay: '0.5s',
+          }}
           initial={{ opacity: 0, y: -10 }}
-          whileInView={{ opacity: 0.2, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, delay: 0.5 }}
         />
 
+        {/* Earth globe — top-right, 5× larger */}
         <LandingDecor
           src="/Earth.svg"
-          size="globe-sm"
           hideBelowMd
-          className="right-[6%] top-[8%]"
-          style={{ animation: 'globe-spin 22s linear infinite' }}
-          opacity={0.15}
+          opacity={1}
+          style={{
+            width: LAYOUT.earth.width,
+            top: LAYOUT.earth.top,
+            right: LAYOUT.earth.right,
+            animation: 'globe-spin 22s linear infinite',
+          }}
           initial={{ opacity: 0, y: -10 }}
-          whileInView={{ opacity: 0.15, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, delay: 0.7 }}
         />
 
+        {/* Flying paper plane 1 — left → right */}
+        <LandingDecor
+          src="/paper airplane.svg"
+          hideBelowMd
+          opacity={1}
+          style={{
+            width: LAYOUT.flyPlane1.width,
+            top: LAYOUT.flyPlane1.top,
+            left: LAYOUT.flyPlane1.left,
+            animation: 'plane-fly-r 9s ease-in-out infinite',
+            animationDelay: '1s',
+          }}
+        />
+
+        {/* Flying paper plane 2 — right → left */}
+        <LandingDecor
+          src="/paper airplane.svg"
+          hideBelowMd
+          opacity={1}
+          style={{
+            width: LAYOUT.flyPlane2.width,
+            top: LAYOUT.flyPlane2.top,
+            left: LAYOUT.flyPlane2.left,
+            animation: 'plane-fly-l 11s ease-in-out infinite',
+            animationDelay: '4s',
+          }}
+        />
+
+        {/* Floating accent plane */}
+        <LandingDecor
+          src="/paper airplane.svg"
+          hideBelowMd
+          opacity={1}
+          style={{
+            width: LAYOUT.floatPlane.width,
+            top: LAYOUT.floatPlane.top,
+            left: LAYOUT.floatPlane.left,
+            animation: 'float-bob-delayed 6s ease-in-out infinite',
+            animationDelay: '2s',
+          }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 1 }}
+        />
+
+        {/* Stars */}
         <LandingDecor
           src="/Orange Star.svg"
           size="star"
           className="left-[18%] top-[18%]"
           style={{ animation: 'star-pulse 3.2s ease-in-out infinite' }}
-          opacity={0.3}
+          opacity={1}
         />
-
         <LandingDecor
           src="/Blue Star.svg"
           size="star"
           className="right-[22%] top-[25%]"
           style={{ animation: 'star-pulse 4.5s ease-in-out infinite', animationDelay: '1s' }}
-          opacity={0.3}
+          opacity={1}
           hideBelowMd
         />
-
         <LandingDecor
           src="/Green star.svg"
           size="star"
           className="left-[12%] top-[55%]"
           style={{ animation: 'star-pulse 5.1s ease-in-out infinite', animationDelay: '2s' }}
-          opacity={0.25}
+          opacity={1}
           hideBelowMd
         />
-
         <LandingDecor
           src="/Orange Star.svg"
           size="star"
           className="right-[10%] top-[60%]"
           style={{ animation: 'star-pulse 3.8s ease-in-out infinite', animationDelay: '0.7s' }}
-          opacity={0.25}
+          opacity={1}
           hideBelowMd
         />
-
         <LandingDecor
           src="/Blue Star.svg"
           size="star"
           className="left-[35%] top-[40%]"
           style={{ animation: 'star-pulse 4.2s ease-in-out infinite', animationDelay: '1.8s' }}
-          opacity={0.2}
+          opacity={1}
           hideBelowMd
-        />
-
-        <LandingDecor
-          src="/paper airplane.svg"
-          size="accent"
-          hideBelowMd
-          className="left-[48%] top-[15%]"
-          style={{ animation: 'float-bob-delayed 6s ease-in-out infinite', animationDelay: '2s' }}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 0.2 }}
-          viewport={{ once: true }}
-          transition={{ delay: 1 }}
         />
       </div>
       {/* ── /Aspirational illustration layer ────────────────────── */}
