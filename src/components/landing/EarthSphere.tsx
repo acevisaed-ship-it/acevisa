@@ -32,13 +32,13 @@ export function EarthSphere({ size }: EarthSphereProps) {
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
       renderer.setClearColor(0x000000, 0)   // fully transparent background
 
-      // Style the canvas directly so no browser default styles bleed through
+      // Style the canvas — clip-path is more reliable than border-radius for WebGL
       const canvas = renderer.domElement
-      canvas.style.display      = 'block'
-      canvas.style.borderRadius = '50%'     // clip canvas to circle
-      canvas.style.boxShadow    = 'none'
-      canvas.style.filter       = 'none'
-      canvas.style.outline      = 'none'
+      canvas.style.display    = 'block'
+      canvas.style.clipPath   = 'circle(50% at 50% 50%)'
+      canvas.style.boxShadow  = 'none'
+      canvas.style.filter     = 'none'
+      canvas.style.outline    = 'none'
       mountRef.current!.appendChild(canvas)
 
       // ── Earth sphere ─────────────────────────────────────────────────
@@ -113,14 +113,13 @@ export function EarthSphere({ size }: EarthSphereProps) {
     <div
       ref={mountRef}
       style={{
-        width:        size,
-        height:       size,
-        borderRadius: '50%',
-        overflow:     'hidden',
-        boxShadow:    'none',
-        filter:       'none',
-        isolation:    'isolate',   // new stacking context — prevents shadow bleed
-        background:   'transparent',
+        width:      size,
+        height:     size,
+        clipPath:   'circle(50% at 50% 50%)',  // bulletproof circle clip for WebGL
+        boxShadow:  'none',
+        filter:     'none',
+        isolation:  'isolate',
+        background: 'transparent',
       }}
     />
   )

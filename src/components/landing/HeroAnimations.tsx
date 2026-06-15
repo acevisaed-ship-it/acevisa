@@ -511,7 +511,9 @@ function EarthOrbitSystem() {
 
   useEffect(() => {
     const vw = window.innerWidth
-    const sz = Math.min(780, Math.max(520, vw * 0.55))
+    const vh = window.innerHeight
+    // Cap by both viewport width AND height so the sphere never clips top/bottom
+    const sz = Math.min(780, Math.max(520, Math.min(vw * 0.55, vh * 0.78)))
     setEarthPx(sz)
 
     setOrbits([

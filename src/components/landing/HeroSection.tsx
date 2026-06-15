@@ -57,7 +57,7 @@ export function HeroSection() {
             Pakistan&apos;s First AI Consultancy Platform
           </p>
 
-          <h1 className="text-[clamp(2.8rem,6vw,5rem)] font-semibold leading-[0.95] tracking-tight text-blue">
+          <h1 className="text-[clamp(2.8rem,6vw,5rem)] font-semibold leading-[0.95] tracking-tight text-blue pl-4 md:pl-8">
             Ace Your
             <br />
             Future Here
