@@ -68,6 +68,9 @@ export function EarthSphere({ size }: EarthSphereProps) {
       }
 
       const sphere = new THREE.Mesh(geometry, material)
+      // Tilt slightly so neither pole points directly at camera —
+      // eliminates the equirectangular south-pole distortion blob at bottom
+      sphere.rotation.x = -0.28
       scene.add(sphere)
 
       // ── Atmosphere halo ───────────────────────────────────────────────
@@ -76,7 +79,7 @@ export function EarthSphere({ size }: EarthSphereProps) {
         new THREE.MeshPhongMaterial({
           color:       new THREE.Color('#2083B9'),
           transparent: true,
-          opacity:     0.07,
+          opacity:     0.04,   // reduced — was darkening south-pole edge
           side:        THREE.BackSide,
           depthWrite:  false,
         })
@@ -113,13 +116,15 @@ export function EarthSphere({ size }: EarthSphereProps) {
     <div
       ref={mountRef}
       style={{
-        width:      size,
-        height:     size,
-        clipPath:   'circle(50% at 50% 50%)',  // bulletproof circle clip for WebGL
-        boxShadow:  'none',
-        filter:     'none',
-        isolation:  'isolate',
-        background: 'transparent',
+        width:        size,
+        height:       size,
+        clipPath:     'circle(50% at 50% 50%)',  // bulletproof circle clip for WebGL
+        borderRadius: '50%',                     // belt-and-suspenders
+        overflow:     'hidden',
+        boxShadow:    'none',
+        filter:       'none',
+        isolation:    'isolate',
+        background:   'transparent',
       }}
     />
   )

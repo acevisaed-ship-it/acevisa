@@ -15,6 +15,7 @@
   --grad-green:  linear-gradient(145deg, #ccd94a 0%, #B7C733 55%, #96a726 100%);
   --grad-teal:   linear-gradient(145deg, #0e5551 0%, #0A3F3A 55%, #052825 100%);
   --grad-bg:     linear-gradient(145deg, #eeeeed 0%, #E6E8E7 55%, #dcdede 100%);
+  --grad-card:   linear-gradient(145deg, #d8dad9 0%, #d0d2d1 55%, #c8cac9 100%);  /* portal cards */
   --grad-hero:   linear-gradient(135deg, #E48328 0%, #2083B9 100%);  /* CTA / accent */
 
   /* ── Crisp outline — inset box-shadow so it never shifts layout ── */
@@ -62,7 +63,14 @@
 .bg-grad-green  { background: var(--grad-green);  }
 .bg-grad-teal   { background: var(--grad-teal);   }
 .bg-grad-bg     { background: var(--grad-bg);     }
+.bg-grad-card   { background: var(--grad-card);   }
 .bg-grad-hero   { background: var(--grad-hero);   }
+
+/* ── Portal card normalisation ────────────────────────────────────
+   All bg-white elements become the darker card gradient.
+   bg-white/XX opacity variants are separate Tailwind classes
+   and are NOT affected by this rule.                              */
+.bg-white { background: var(--grad-card) !important; }
 
 /* ── Crisp outline utility ────────────────────────────────────────── */
 /* Drop onto any element to get the barely-there definition line      */
