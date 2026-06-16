@@ -6,7 +6,7 @@ export type ClientLanguage = 'urdu' | 'english' | 'punjabi' | 'sindhi' | 'pashto
 
 export type ConversationSender = 'ai' | 'student'
 
-export type ChatAttachmentType = 'image' | 'pdf' | 'document' | 'archive'
+export type ChatAttachmentType = 'image' | 'pdf' | 'document' | 'archive' | 'audio'
 
 export type ChatMessage = {
   id: string

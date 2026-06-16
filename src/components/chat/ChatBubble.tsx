@@ -1,4 +1,4 @@
-import { FileText, FileArchive, File, ExternalLink } from 'lucide-react'
+import { FileText, FileArchive, File, ExternalLink, Mic } from 'lucide-react'
 import type { ChatMessage, ChatAttachmentType } from '@/types'
 
 type Props = {
@@ -12,8 +12,25 @@ function AttachmentPreview({
 }: {
   url: string
   name: string
-  type: ChatAttachmentType
+  type: ChatAttachmentType | 'audio'
 }) {
+  if (type === 'audio') {
+    return (
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-center gap-2 text-xs opacity-70">
+          <Mic className="h-3.5 w-3.5" />
+          <span>Voice note</span>
+        </div>
+        <audio
+          controls
+          src={url}
+          className="h-8 w-full max-w-[220px]"
+          style={{ colorScheme: 'dark' }}
+        />
+      </div>
+    )
+  }
+
   if (type === 'image') {
     return (
       <a href={url} target="_blank" rel="noopener noreferrer" className="block">
