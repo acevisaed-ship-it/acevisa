@@ -42,7 +42,6 @@ function formatDateTime(iso: string) {
 
 const glassPanel = {
   background: 'rgba(238,238,237,0.08)',
-  border: '1px solid rgba(255,255,255,0.12)',
   backdropFilter: 'blur(12px)',
   WebkitBackdropFilter: 'blur(12px)',
 } as React.CSSProperties
@@ -54,7 +53,7 @@ export function MeetingsPanel({ clientId, client, counselorName, meetings, onReq
   const past = meetings.filter((m) => m.status !== 'scheduled')
 
   return (
-    <div className="flex h-full flex-col gap-3 overflow-y-auto p-3">
+    <div className="flex flex-col gap-3">
 
       {/* ── Meetings card ── */}
       <div className="rounded-2xl p-3" style={glassPanel}>
@@ -138,7 +137,7 @@ export function MeetingsPanel({ clientId, client, counselorName, meetings, onReq
             <Button
               onClick={onRequestMeeting}
               className="mt-1 flex w-full items-center justify-center gap-1.5 py-2 text-xs"
-              style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', color: 'white' }}
+              style={{ background: 'rgba(255,255,255,0.1)', color: 'white' }}
             >
               <Plus className="h-3.5 w-3.5" />
               Request a Meeting

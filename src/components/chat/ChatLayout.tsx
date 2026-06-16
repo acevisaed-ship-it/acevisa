@@ -10,6 +10,9 @@ import { ProgressStrip } from './ProgressStrip'
 import { TypingIndicator } from './TypingIndicator'
 import { UpdatesFeed } from './UpdatesFeed'
 import { MeetingRequestModal } from './MeetingRequestModal'
+import { DocumentsCard } from './DocumentsCard'
+import { ApplicationCard } from './ApplicationCard'
+import { ComplaintCard } from './ComplaintCard'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type Meeting = {
@@ -41,7 +44,6 @@ type Props = {
 // ── Glass panel style ──────────────────────────────────────────────────────
 const glassPanel: React.CSSProperties = {
   background: 'rgba(238,238,237,0.12)',
-  border: '1px solid rgba(255,255,255,0.14)',
   backdropFilter: 'blur(16px)',
   WebkitBackdropFilter: 'blur(16px)',
 }
@@ -175,7 +177,7 @@ export function ChatLayout({
       <ProgressStrip currentStage={stage} />
 
       {/* Messages */}
-      <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4">
+      <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4" style={{ overscrollBehavior: 'contain' }}>
         {messages.length === 0 && !isLoading && (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
             <MessageCircle className="h-10 w-10 text-white/20" />
@@ -205,19 +207,23 @@ export function ChatLayout({
     <div className="hidden h-full lg:grid lg:grid-cols-[280px_1fr_260px]">
 
       {/* Left panel */}
-      <aside className="flex min-h-0 flex-col overflow-hidden" style={{ borderRight: '1px solid rgba(255,255,255,0.1)' }}>
-        <div className="flex items-center gap-3 border-b px-4 py-3" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+      <aside className="flex min-h-0 flex-col overflow-hidden">
+        <div className="flex items-center gap-3 px-4 py-3">
           <img src="/logo.png" alt="ACE" className="h-7 w-auto" />
           <span className="text-sm font-bold text-white/80">ACE Altius</span>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <MeetingsPanel
-            clientId={clientId}
-            client={initialClient}
-            counselorName={counselorName}
-            meetings={initialMeetings}
-            onRequestMeeting={() => setShowMeetingModal(true)}
-          />
+        <div className="min-h-0 flex-1 overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
+          <div className="flex flex-col gap-3 p-3">
+            <MeetingsPanel
+              clientId={clientId}
+              client={initialClient}
+              counselorName={counselorName}
+              meetings={initialMeetings}
+              onRequestMeeting={() => setShowMeetingModal(true)}
+            />
+            <DocumentsCard clientId={clientId} />
+            <ComplaintCard clientId={clientId} />
+          </div>
         </div>
       </aside>
 
@@ -226,7 +232,7 @@ export function ChatLayout({
         {/* Header */}
         <div
           className="flex shrink-0 items-center gap-3 px-5 py-3"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', ...glassPanel }}
+          style={glassPanel}
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
             <MessageCircle className="h-4 w-4 text-white/70" />
@@ -240,16 +246,16 @@ export function ChatLayout({
       </main>
 
       {/* Right panel */}
-      <aside
-        className="flex min-h-0 flex-col overflow-hidden"
-        style={{ borderLeft: '1px solid rgba(255,255,255,0.1)' }}
-      >
-        <div className="flex items-center gap-2 border-b px-4 py-3" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+      <aside className="flex min-h-0 flex-col overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-3">
           <Bell className="h-4 w-4 text-white/60" />
           <span className="text-sm font-semibold text-white">Updates</span>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <UpdatesFeed clientId={clientId} />
+        <div className="min-h-0 flex-1 overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
+          <div className="flex flex-col gap-3 p-3">
+            <ApplicationCard currentStage={stage} />
+            <UpdatesFeed clientId={clientId} />
+          </div>
         </div>
       </aside>
     </div>
@@ -261,7 +267,7 @@ export function ChatLayout({
       {/* Mobile header */}
       <div
         className="flex shrink-0 items-center gap-3 px-4 py-3"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(238,238,237,0.08)' }}
+        style={{ background: 'rgba(238,238,237,0.08)' }}
       >
         <img src="/logo.png" alt="ACE" className="h-6 w-auto" />
         <div className="flex-1">
@@ -280,7 +286,7 @@ export function ChatLayout({
         {mobileTab === 'chat' && chatThread}
 
         {mobileTab === 'progress' && (
-          <div className="h-full overflow-y-auto p-4">
+          <div className="h-full overflow-y-auto p-4" style={{ overscrollBehavior: 'contain' }}>
             <div className="flex flex-col gap-4">
               {[
                 { stage: 1, label: 'Initial Consultation', desc: 'First contact and eligibility check' },
@@ -314,28 +320,35 @@ export function ChatLayout({
         )}
 
         {mobileTab === 'updates' && (
-          <div className="h-full overflow-y-auto">
-            <UpdatesFeed clientId={clientId} />
+          <div className="h-full overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
+            <div className="flex flex-col gap-3 p-3">
+              <ApplicationCard currentStage={stage} />
+              <UpdatesFeed clientId={clientId} />
+            </div>
           </div>
         )}
 
         {mobileTab === 'profile' && (
-          <div className="h-full overflow-y-auto">
-            <MeetingsPanel
-              clientId={clientId}
-              client={initialClient}
-              counselorName={counselorName}
-              meetings={initialMeetings}
-              onRequestMeeting={() => setShowMeetingModal(true)}
-            />
+          <div className="h-full overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
+            <div className="flex flex-col gap-3 p-3">
+              <MeetingsPanel
+                clientId={clientId}
+                client={initialClient}
+                counselorName={counselorName}
+                meetings={initialMeetings}
+                onRequestMeeting={() => setShowMeetingModal(true)}
+              />
+              <DocumentsCard clientId={clientId} />
+              <ComplaintCard clientId={clientId} />
+            </div>
           </div>
         )}
       </div>
 
       {/* Bottom tab bar */}
       <nav
-        className="grid shrink-0 grid-cols-4 border-t pb-[env(safe-area-inset-bottom,0px)]"
-        style={{ borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(10,63,58,0.95)', backdropFilter: 'blur(12px)' }}
+        className="grid shrink-0 grid-cols-4 pb-[env(safe-area-inset-bottom,0px)]"
+        style={{ background: 'rgba(4,80,71,0.95)', backdropFilter: 'blur(12px)' }}
       >
         {([
           { id: 'chat',     Icon: MessageCircle, label: 'Chat' },
@@ -362,7 +375,7 @@ export function ChatLayout({
   return (
     <div
       className="h-dvh overflow-hidden"
-      style={{ background: 'var(--grad-blue)' }}
+      style={{ background: 'var(--grad-teal)' }}
     >
       {desktopLayout}
       {mobileLayout}

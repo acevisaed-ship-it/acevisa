@@ -76,36 +76,48 @@ export function ChatBubble({ message }: Props) {
   const hasAttachment =
     message.attachment_url && message.attachment_name && message.attachment_type
 
-  // If the message is ONLY a file (text is "[File: ...]") hide the text bubble
   const isFilePlaceholder = /^\[File: .+\]$/.test(message.message_text)
+
+  // ── Card style per sender ─────────────────────────────────────────
+  const cardStyle: React.CSSProperties = isAi
+    ? {
+        background: 'rgba(255,255,255,0.12)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
+      }
+    : {
+        background: 'rgba(183,199,51,0.92)',  /* --green at high opacity */
+        boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+      }
 
   return (
     <div className={`flex flex-col gap-0.5 ${isAi ? 'items-start' : 'items-end'}`}>
       {hasAttachment && (
         <div
-          className={`max-w-[85%] rounded-2xl px-3 py-2 ${
-            isAi ? 'bg-grad-blue crisp-on-dark text-white' : 'bg-grad-green crisp-on-dark text-text'
-          }`}
+          className={`max-w-[80%] rounded-2xl px-3 py-2.5 ${isAi ? 'text-white' : 'text-[#0A3F3A]'}`}
+          style={cardStyle}
         >
           <AttachmentPreview
             url={message.attachment_url!}
             name={message.attachment_name!}
-            type={message.attachment_type!}
+            type={message.attachment_type as ChatAttachmentType | 'audio'}
           />
         </div>
       )}
 
       {!isFilePlaceholder && (
         <div
-          className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm font-bold leading-relaxed ${
-            isAi ? 'bg-grad-blue crisp-on-dark text-white' : 'bg-grad-green crisp-on-dark text-text'
+          className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+            isAi ? 'text-white' : 'font-semibold text-[#0A3F3A]'
           }`}
+          style={cardStyle}
         >
           {message.message_text}
         </div>
       )}
 
-      <span className="px-1 text-[10px] text-text/40">{time}</span>
+      <span className={`px-1 text-[10px] text-white/40`}>{time}</span>
     </div>
   )
 }
