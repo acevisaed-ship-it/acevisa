@@ -196,6 +196,12 @@ export function RegistrationSection() {
         {/* Orange paper plane — 60fps bee physics */}
         <SectionBeeOrangePlane />
 
+        {/* Graduation hat blue — floating top-right, desktop */}
+        <LandingDecor src="/graduation hat blue.svg" opacity={0.8} hideBelowMd
+          style={{ width: 80, top: '12%', left: '38%', animation: 'float-bob 8s ease-in-out infinite', animationDelay: '1s' }}
+          initial={{ opacity: 0, y: -12 }} whileInView={{ opacity: 0.8, y: 0 }} viewport={{ once: true }}
+          transition={{ duration: 0.9, delay: 0.5 }} />
+
         {/* Stars */}
         <LandingDecor src="/Orange Star.svg" size="star" className="left-[18%] top-[18%]"
           style={{ animation: 'star-pulse 3.2s ease-in-out infinite' }} opacity={1} />

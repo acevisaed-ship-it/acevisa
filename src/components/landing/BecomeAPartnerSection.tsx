@@ -57,6 +57,12 @@ export function BecomeAPartnerSection() {
           opacity={0.25}
           hideBelowMd
         />
+        {/* Student watch — floating mid-left */}
+        <LandingDecor src="/student watch.svg" opacity={0.8} hideBelowMd
+          style={{ width: 58, bottom: '38%', left: '4%', animation: 'float-bob 9s ease-in-out infinite', animationDelay: '1.3s' }}
+          initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: 0.8, x: 0 }} viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.6 }} />
+
         {/* Orange paper plane — 60fps bee physics (same as Hero BeeOrangePlane) */}
         <SectionBeeOrangePlane />
 

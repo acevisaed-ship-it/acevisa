@@ -142,6 +142,24 @@ export function AboutSection() {
           transition={{ duration: 0.6, delay: 0.9 }}
         />
 
+        {/* Glasses — floating above sad student's area */}
+        <LandingDecor src="/Glasses.svg" opacity={0.85} hideBelowLg
+          style={{ width: 72, bottom: '52%', right: '8%', animation: 'float-bob 6s ease-in-out infinite', animationDelay: '0.8s' }}
+          initial={{ opacity: 0, y: -8 }} whileInView={{ opacity: 0.85, y: 0 }} viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.6 }} />
+
+        {/* Bench — lower left, desktop */}
+        <LandingDecor src="/bench.svg" opacity={0.7} hideBelowLg
+          style={{ width: 110, bottom: '6%', left: '32%', animation: 'float-bob 10s ease-in-out infinite', animationDelay: '2s' }}
+          initial={{ opacity: 0 }} whileInView={{ opacity: 0.7 }} viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.9 }} />
+
+        {/* Mobile phone — mid right */}
+        <LandingDecor src="/mobile phone.svg" opacity={0.75} hideBelowMd
+          style={{ width: 48, top: '28%', right: '4%', animation: 'float-bob 8s ease-in-out infinite', animationDelay: '1.2s' }}
+          initial={{ opacity: 0, x: 10 }} whileInView={{ opacity: 0.75, x: 0 }} viewport={{ once: true }}
+          transition={{ duration: 0.7, delay: 0.5 }} />
+
         <LandingDecor
           src="/Orange Star.svg"
           size="star"
