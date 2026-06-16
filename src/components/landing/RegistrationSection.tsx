@@ -10,14 +10,13 @@ import {
 } from '@/lib/stores/scrollStore'
 import { triggerTransition } from '@/lib/stores/transitionStore'
 import { LandingDecor } from './LandingDecor'
+import { SectionBeeOrangePlane } from './HeroAnimations'
 
 // ── Layout config — tweak sizes & positions here ──────────────────────────
 const LAYOUT = {
   // Graduate girl — size confirmed good; moved right to hug form's left border
   figureLeft:  { width: 'clamp(600px, 58vw, 920px)', bottom: '0%', left: 'calc(50% - clamp(300px, 30vw, 460px))' },
   earth:       { width: 'clamp(180px, 20vw, 380px)', top: '3%',    right: '3%' },
-  // Orange paper plane — floats with random-ish bob (no directional fly)
-  orangePlane: { width: '100px', top: '22%', left: '30%' },
 }
 
 const languages = ['Urdu', 'English', 'Punjabi', 'Sindhi', 'Pashto'] as const
@@ -140,23 +139,8 @@ export function RegistrationSection() {
           transition={{ duration: 0.7, delay: 0.7 }}
         />
 
-        {/* Orange plane — random float movement */}
-        <LandingDecor
-          src="/Orange plane.svg"
-          hideBelowMd
-          opacity={0.9}
-          style={{
-            width: LAYOUT.orangePlane.width,
-            top: LAYOUT.orangePlane.top,
-            left: LAYOUT.orangePlane.left,
-            animation: 'float-bob-delayed 8s ease-in-out infinite',
-            animationDelay: '1s',
-          }}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 0.9 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.8 }}
-        />
+        {/* Orange paper plane — 60fps bee physics (same as Hero BeeOrangePlane) */}
+        <SectionBeeOrangePlane />
 
         {/* Stars */}
         <LandingDecor

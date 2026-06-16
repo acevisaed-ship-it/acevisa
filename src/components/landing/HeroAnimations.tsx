@@ -673,6 +673,85 @@ function AirplaneLayer({ vw, vh }: { vw: number; vh: number }) {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+// SECTION-LEVEL EXPORTS
+// Self-contained drop-in components for other landing sections.
+// Each measures its own viewport so no vw/vh prop is needed from the parent.
+// ════════════════════════════════════════════════════════════════════════════
+
+function useViewport() {
+  const [vw, setVw] = useState(0)
+  const [vh, setVh] = useState(0)
+  useEffect(() => {
+    const up = () => { setVw(window.innerWidth); setVh(window.innerHeight) }
+    up()
+    window.addEventListener('resize', up)
+    return () => window.removeEventListener('resize', up)
+  }, [])
+  return { vw, vh }
+}
+
+/** Orange paper-plane bee: same 60fps physics as the Hero page. */
+export function SectionBeeOrangePlane() {
+  const { vw, vh } = useViewport()
+  if (!vw) return null
+  return <BeeOrangePlane vw={vw} vh={vh} />
+}
+
+/** Orange commercial plane flying right → left toward the ACE logo (top-left).
+ *  Framer Motion directed flight — matches Hero AirplaneLayer Plane A. */
+export function SectionOrangePlaneToLogo() {
+  const { vw, vh } = useViewport()
+  if (!vw || !vh) return null
+
+  const LOGO_X = 120, LOGO_Y = 60
+  const startX = vw + 130
+  const startY = vh * 0.30
+  const ratio  = (startX + 160) / (startX - LOGO_X)
+  const endX   = -160
+  const endY   = startY - (startY - LOGO_Y) * ratio
+  const angle  = planeAngle(endX - startX, endY - startY, true)
+
+  return (
+    <motion.div
+      className="pointer-events-none absolute hidden md:block"
+      style={{ left: 0, top: 0, width: 120, rotate: angle, scaleX: -1, opacity: 0.9, willChange: 'transform' }}
+      initial={{ x: startX, y: startY }}
+      animate={{ x: endX,   y: endY }}
+      transition={{ duration: 90, repeat: Infinity, repeatDelay: 5, ease: 'linear' }}
+    >
+      <img src="/Orange plane.svg" alt="" aria-hidden className="h-auto w-full object-contain" />
+    </motion.div>
+  )
+}
+
+/** Green commercial plane flying right → left toward the ACE logo (top-left).
+ *  Framer Motion directed flight — matches Hero AirplaneLayer but green. */
+export function SectionGreenPlaneToLogo() {
+  const { vw, vh } = useViewport()
+  if (!vw || !vh) return null
+
+  const LOGO_X = 120, LOGO_Y = 60
+  const startX = vw + 130
+  const startY = vh * 0.18
+  const ratio  = (startX + 160) / (startX - LOGO_X)
+  const endX   = -160
+  const endY   = startY - (startY - LOGO_Y) * ratio
+  const angle  = planeAngle(endX - startX, endY - startY, true)
+
+  return (
+    <motion.div
+      className="pointer-events-none absolute hidden md:block"
+      style={{ left: 0, top: 0, width: 100, rotate: angle, scaleX: -1, opacity: 0.9, willChange: 'transform' }}
+      initial={{ x: startX, y: startY }}
+      animate={{ x: endX,   y: endY }}
+      transition={{ duration: 110, repeat: Infinity, repeatDelay: 8, ease: 'linear', delay: 2 }}
+    >
+      <img src="/Green Plane.svg" alt="" aria-hidden className="h-auto w-full object-contain" />
+    </motion.div>
+  )
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 // ROOT EXPORT
 // Z-stack (bottom → top):
 //   gradient + stars (z-1) → airplanes (z-2) → clouds (z-3)

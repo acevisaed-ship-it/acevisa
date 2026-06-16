@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { BadgeCheck, TrendingUp, Users, Zap } from 'lucide-react'
 import { LandingDecor } from './LandingDecor'
+import { SectionBeeOrangePlane, SectionGreenPlaneToLogo } from './HeroAnimations'
 
 const benefits = [
   {
@@ -56,37 +57,11 @@ export function BecomeAPartnerSection() {
           opacity={0.25}
           hideBelowMd
         />
-        {/* Orange paper plane — bee-wander movement (left side) */}
-        <div
-          className="absolute hidden md:block"
-          style={{
-            width: '88px',
-            top: '50%',
-            left: '6%',
-            animation: 'plane-bee 9s ease-in-out infinite',
-            animationDelay: '0.8s',
-          }}
-          aria-hidden="true"
-        >
-          <img src="/paper plane Orange 2.svg" alt="" className="w-full" style={{ opacity: 0.9 }} />
-        </div>
+        {/* Orange paper plane — 60fps bee physics (same as Hero BeeOrangePlane) */}
+        <SectionBeeOrangePlane />
 
-        {/* Green plane — flies right → left towards ACE logo (top-left).
-            scaleX(-1) flips it to face the direction of travel. */}
-        <div
-          className="absolute hidden md:block"
-          style={{
-            width: '84px',
-            top: '14%',
-            left: 0,
-            animation: 'plane-fly-l 11s ease-in-out infinite',
-            animationDelay: '2s',
-            transform: 'scaleX(-1)',
-          }}
-          aria-hidden="true"
-        >
-          <img src="/Green Plane.svg" alt="" className="w-full" style={{ opacity: 0.9 }} />
-        </div>
+        {/* Green plane — Framer Motion directed right→left toward ACE logo */}
+        <SectionGreenPlaneToLogo />
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-5xl">

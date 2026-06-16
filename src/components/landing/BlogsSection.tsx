@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { LandingDecor } from './LandingDecor'
+import { SectionBeeOrangePlane } from './HeroAnimations'
 
 const posts = [
   {
@@ -50,20 +51,8 @@ export function BlogsSection() {
           opacity={0.3}
           hideBelowMd
         />
-        {/* Orange paper plane — bee-wander movement (erratic wandering, not directional) */}
-        <div
-          className="absolute hidden md:block"
-          style={{
-            width: '88px',
-            top: '18%',
-            left: '6%',
-            animation: 'plane-bee 9s ease-in-out infinite',
-            animationDelay: '0.5s',
-          }}
-          aria-hidden="true"
-        >
-          <img src="/paper plane Orange 2.svg" alt="" className="w-full" style={{ opacity: 0.9 }} />
-        </div>
+        {/* Orange paper plane — 60fps bee physics (same as Hero BeeOrangePlane) */}
+        <SectionBeeOrangePlane />
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-5xl">

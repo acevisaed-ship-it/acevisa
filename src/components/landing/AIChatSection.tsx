@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { Check, Bot, Sparkles } from 'lucide-react'
+import { SectionOrangePlaneToLogo } from './HeroAnimations'
 
 // ── Layout config ─────────────────────────────────────────────────────────
 const LAYOUT = {
@@ -345,25 +346,9 @@ export function AIChatSection() {
   return (
     <div className="bg-grad-teal relative flex h-full flex-col justify-center overflow-hidden px-4 py-8 md:px-10 md:py-16">
 
-      {/* ── Decorative layer — single orange plane, right → left towards ACE logo ── */}
+      {/* ── Decorative layer — orange plane (same physics as Hero AirplaneLayer Plane A) ── */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
-
-        {/* Orange plane — flies right → left towards the ACE logo in top-left.
-            scaleX(-1) flips the SVG so it faces the direction of travel.
-            Speed & keyframe (plane-fly-l) taken from landing page globals.css. */}
-        <div
-          className="absolute hidden md:block"
-          style={{
-            width: LAYOUT.planeOrange.width,
-            top: LAYOUT.planeOrange.top,
-            left: 0,
-            animation: 'plane-fly-l 10s ease-in-out infinite',
-            animationDelay: '1s',
-            transform: 'scaleX(-1)',
-          }}
-        >
-          <img src="/Orange plane.svg" alt="" className="w-full" style={{ opacity: 0.9 }} />
-        </div>
+        <SectionOrangePlaneToLogo />
       </div>
       {/* ── /Decorative layer ─────────────────────────────────────── */}
 
