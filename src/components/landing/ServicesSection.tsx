@@ -153,11 +153,6 @@ export function ServicesSection() {
           hideBelowMd
         />
 
-        {/* Helmet — floating top-left, desktop */}
-        <LandingDecor src="/helmet orange.svg" opacity={0.8} hideBelowMd
-          style={{ width: 68, top: '18%', left: '3%', animation: 'float-bob 7s ease-in-out infinite', animationDelay: '0.7s' }}
-          initial={{ opacity: 0, y: -10 }} whileInView={{ opacity: 0.8, y: 0 }} viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.4 }} />
       </div>
 
       {/* ══════════════════════════════════════════════════════════

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { useScrollStore } from '@/lib/stores/scrollStore'
 import { useNavigateWithTransition } from './ScrollContainer'
+import { LandingDecor } from './LandingDecor'
 
 const stories = [
   {
@@ -82,8 +83,45 @@ export function GallerySection() {
   }
 
   return (
-    <div className="bg-texture flex h-full flex-col justify-center overflow-y-auto px-4 py-8 md:px-10 md:py-24" style={{ background: 'var(--grad-blue)' }}>
-      <div className="mx-auto w-full max-w-5xl">
+    <div className="bg-texture relative flex h-full flex-col justify-center overflow-y-auto px-4 py-8 md:px-10 md:py-24" style={{ background: 'var(--grad-blue)' }}>
+
+      {/* ── Scattered SVG decor ───────────────────────────────────── */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+        <LandingDecor src="/Glasses.svg" opacity={1}
+          style={{ width: 70, top: '12%', left: '3%', animation: 'float-bob 8s ease-in-out infinite' }}
+          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.2 }} />
+        <LandingDecor src="/helmet orange.svg" opacity={1}
+          style={{ width: 65, top: '8%', right: '5%', animation: 'float-bob 9s ease-in-out infinite', animationDelay: '1s' }}
+          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.3 }} />
+        <LandingDecor src="/student bacpack.svg" opacity={1}
+          style={{ width: 60, bottom: '18%', left: '2%', animation: 'float-bob 10s ease-in-out infinite', animationDelay: '0.5s' }}
+          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.4 }} />
+        <LandingDecor src="/graduation hat blue.svg" opacity={1}
+          style={{ width: 75, top: '20%', right: '2%', animation: 'float-bob 7s ease-in-out infinite', animationDelay: '1.5s' }}
+          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.25 }} hideBelowMd />
+        <LandingDecor src="/student watch.svg" opacity={1}
+          style={{ width: 52, bottom: '30%', right: '3%', animation: 'float-bob 11s ease-in-out infinite', animationDelay: '2s' }}
+          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.5 }} hideBelowMd />
+        <LandingDecor src="/bench.svg" opacity={1}
+          style={{ width: 100, bottom: '5%', left: '5%', animation: 'float-bob 13s ease-in-out infinite', animationDelay: '0.8s' }}
+          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.6 }} hideBelowMd />
+        <LandingDecor src="/headphones.svg" opacity={1}
+          style={{ width: 55, top: '55%', left: '2%', animation: 'float-bob 8s ease-in-out infinite', animationDelay: '1.2s' }}
+          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.35 }} hideBelowMd />
+        <LandingDecor src="/mobile phone.svg" opacity={1}
+          style={{ width: 45, bottom: '12%', right: '4%', animation: 'float-bob 9s ease-in-out infinite', animationDelay: '0.6s' }}
+          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.45 }} hideBelowMd />
+      </div>
+
+      <div className="relative z-10 mx-auto w-full max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

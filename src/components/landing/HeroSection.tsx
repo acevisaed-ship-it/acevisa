@@ -9,7 +9,6 @@ import { PWAInstallButton } from '@/components/PWAInstallButton'
 import { useNavigateWithTransition } from './ScrollContainer'
 import { HeroAnimations } from './HeroAnimations'
 import { EarthSphere } from './EarthSphere'
-import { LandingDecor } from './LandingDecor'
 
 // ── Desktop globe: fills right half of viewport ──────────────────────────────
 function EarthSphereDesktop() {
@@ -58,36 +57,6 @@ export function HeroSection() {
 
       {/* Animated background */}
       <HeroAnimations />
-
-      {/* ── Static decor: clouds near logo + accessories ─────────── */}
-      <div className="pointer-events-none absolute inset-0 z-[3] overflow-hidden" aria-hidden="true">
-
-        {/* Clouds — top-left, near the ACE logo, gentle bob only */}
-        <LandingDecor src="/cloud.svg" opacity={0.55}
-          style={{ width: 90, top: '7%', left: '1%', animation: 'float-bob 9s ease-in-out infinite' }}
-          initial={{ opacity: 0 }} whileInView={{ opacity: 0.55 }} viewport={{ once: true }}
-          transition={{ duration: 1, delay: 0.3 }} />
-        <LandingDecor src="/Cloud Long.svg" opacity={0.45}
-          style={{ width: 120, top: '13%', left: '5%', animation: 'float-bob 12s ease-in-out infinite', animationDelay: '2s' }}
-          initial={{ opacity: 0 }} whileInView={{ opacity: 0.45 }} viewport={{ once: true }}
-          transition={{ duration: 1, delay: 0.6 }} />
-        <LandingDecor src="/Big cloud with straight base.svg" opacity={0.35}
-          style={{ width: 75, top: '5%', left: '16%', animation: 'float-bob 10s ease-in-out infinite', animationDelay: '1s' }}
-          initial={{ opacity: 0 }} whileInView={{ opacity: 0.35 }} viewport={{ once: true }}
-          transition={{ duration: 1, delay: 0.9 }} hideBelowMd />
-
-        {/* Backpack — floating mid-left desktop */}
-        <LandingDecor src="/student bacpack.svg" opacity={0.8}
-          style={{ width: 64, bottom: '35%', left: '7%', animation: 'float-bob 7s ease-in-out infinite', animationDelay: '0.5s' }}
-          initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 0.8, x: 0 }} viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.4 }} hideBelowMd />
-
-        {/* Headphones — floating top-right area */}
-        <LandingDecor src="/headphones.svg" opacity={0.75}
-          style={{ width: 55, top: '22%', right: '6%', animation: 'float-bob 8s ease-in-out infinite', animationDelay: '1.5s' }}
-          initial={{ opacity: 0, x: 10 }} whileInView={{ opacity: 0.75, x: 0 }} viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.5 }} hideBelowMd />
-      </div>
 
       {/* ═══════════════════════════════════════════════════════════
           MOBILE LAYOUT  (< md)
