@@ -74,7 +74,7 @@ export async function POST(request: Request) {
 
   if (error) {
     console.error('Registration error:', error)
-    return NextResponse.json({ error: 'Registration failed' }, { status: 500 })
+    return NextResponse.json({ error: `Registration failed: ${error.message} (${error.code})` }, { status: 500 })
   }
 
   // Create Supabase Auth user and send portal setup invite (non-fatal)

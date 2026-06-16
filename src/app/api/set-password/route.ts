@@ -22,7 +22,10 @@ export async function POST(request: Request) {
     .single()
 
   if (fetchErr || !client) {
-    return NextResponse.json({ error: 'Client not found' }, { status: 404 })
+    const msg = fetchErr
+      ? `${fetchErr.message} (${fetchErr.code})`
+      : 'Client not found'
+    return NextResponse.json({ error: msg }, { status: fetchErr ? 500 : 404 })
   }
 
   let authUserId: string | null = client.auth_user_id ?? null
@@ -32,7 +35,10 @@ export async function POST(request: Request) {
     const { error } = await supabase.auth.admin.updateUserById(authUserId, { password })
     if (error) {
       console.error('[set-password] updateUserById error:', error)
-      return NextResponse.json({ error: 'Failed to set password' }, { status: 500 })
+      return NextResponse.json(
+        { error: `Failed to set password: ${error.message} (${error.code})` },
+        { status: 500 }
+      )
     }
   } else if (client.email) {
     // No auth user yet — create one with a confirmed email + password
@@ -44,16 +50,39 @@ export async function POST(request: Request) {
     })
     if (error || !created?.user) {
       console.error('[set-password] createUser error:', error)
-      return NextResponse.json({ error: 'Failed to create account' }, { status: 500 })
+      const msg = error
+        ? `${error.message} (${error.code})`
+        : 'No user returned from createUser'
+      return NextResponse.json({ error: `Failed to create account: ${msg}` }, { status: 500 })
     }
     authUserId = created.user.id
-    await supabase.from('clients').update({ auth_user_id: authUserId }).eq('id', clientId)
+    const { error: linkErr } = await supabase
+      .from('clients')
+      .update({ auth_user_id: authUserId })
+      .eq('id', clientId)
+    if (linkErr) {
+      console.error('[set-password] auth_user_id link error:', linkErr)
+      return NextResponse.json(
+        { error: `Failed to link account: ${linkErr.message} (${linkErr.code})` },
+        { status: 500 }
+      )
+    }
   } else {
     return NextResponse.json({ error: 'No email on record — cannot create login' }, { status: 400 })
   }
 
-  // Mark password as set
-  await supabase.from('clients').update({ portal_password_set: true }).eq('id', clientId)
+  const { error: pwFlagErr } = await supabase
+    .from('clients')
+    .update({ portal_password_set: true })
+    .eq('id', clientId)
+
+  if (pwFlagErr) {
+    console.error('[set-password] portal_password_set update error:', pwFlagErr)
+    return NextResponse.json(
+      { error: `Password set but failed to update record: ${pwFlagErr.message} (${pwFlagErr.code})` },
+      { status: 500 }
+    )
+  }
 
   return NextResponse.json({ success: true })
 }
