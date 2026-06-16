@@ -43,8 +43,10 @@ interface FormData {
   ad_source:      string
 }
 
+// Desktop inputs: full height. Mobile inputs: compact.
 const inputClass =
-  'min-h-[48px] w-full rounded-card border border-text/20 bg-bg px-4 py-3.5 text-base text-text placeholder:text-text/40 outline-none transition-colors duration-700 focus:border-blue'
+  'w-full rounded-card border border-text/20 bg-bg px-3 py-2 text-sm text-text placeholder:text-text/40 outline-none transition-colors duration-700 focus:border-blue min-h-[36px] md:min-h-[48px] md:px-4 md:py-3.5 md:text-base'
+const labelClass = 'mb-1 block text-xs font-medium text-text md:mb-1.5 md:text-sm'
 
 export function RegistrationSection() {
   const selectedService = useScrollStore((s) => s.selectedService)
@@ -152,7 +154,7 @@ export function RegistrationSection() {
   }
 
   return (
-    <div className="bg-texture relative flex h-full flex-col items-center justify-start overflow-y-auto bg-bg px-4 py-10 md:justify-center md:px-10 md:py-24">
+    <div className="bg-texture relative flex h-full flex-col items-center justify-center overflow-hidden bg-bg px-4 py-4 md:px-10 md:py-24">
 
       {/* ── Aspirational illustration layer ─────────────────────── */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
@@ -224,71 +226,77 @@ export function RegistrationSection() {
               exit={{ opacity: 0, y: -16 }}
               transition={{ duration: 0.5, ease: 'easeInOut' }}
             >
-              <div className="mb-8 text-center">
-                <p className="mb-2 text-xs font-medium uppercase tracking-widest text-orange">
+              {/* Heading — compact on mobile */}
+              <div className="mb-2 text-center md:mb-8">
+                <p className="mb-1 text-[10px] font-medium uppercase tracking-widest text-orange md:mb-2 md:text-xs">
                   let&apos;s begin
                 </p>
-                <h2 className="text-[clamp(1.7rem,6vw,3.5rem)] font-semibold leading-tight text-blue lowercase">
-                  60 seconds to
-                  <br />
-                  your counselor
+                <h2 className="text-xl font-semibold leading-tight text-blue lowercase md:text-[clamp(1.7rem,6vw,3.5rem)]">
+                  60 seconds to your counselor
                 </h2>
-                <p className="mx-auto mt-3 max-w-sm text-xs text-text/70 md:mt-4 md:text-sm">
+                <p className="mt-1 hidden text-xs text-text/70 md:mt-4 md:block md:text-sm">
                   No spam. No calls without your permission. Just a conversation.
                 </p>
               </div>
 
-              <Card className="p-4 md:p-6">
-                <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
+              <Card className="p-3 md:p-6">
+                <form onSubmit={handleSubmit} className="space-y-2 md:space-y-4">
                   {error && (
-                    <p className="rounded-card border border-text/20 bg-bg px-4 py-3 text-sm text-text">
+                    <p className="rounded-card border border-text/20 bg-bg px-3 py-2 text-xs text-text md:px-4 md:py-3 md:text-sm">
                       {error}
                     </p>
                   )}
 
+                  {/* Full name — full width */}
                   <div>
-                    <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-text">Full name</label>
+                    <label htmlFor="name" className={labelClass}>Full name</label>
                     <input id="name" type="text" required className={inputClass}
                       value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
                   </div>
 
-                  <div>
-                    <label htmlFor="phone" className="mb-1.5 block text-sm font-medium text-text">Phone number</label>
-                    <input id="phone" type="tel" required placeholder="03XX XXXXXXX" className={inputClass}
-                      value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                  {/* Phone + City — 2-col on mobile */}
+                  <div className="grid grid-cols-2 gap-2 md:contents">
+                    <div>
+                      <label htmlFor="phone" className={labelClass}>Phone</label>
+                      <input id="phone" type="tel" required placeholder="03XX XXXXXXX" className={inputClass}
+                        value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                    </div>
+                    <div>
+                      <label htmlFor="city" className={labelClass}>City</label>
+                      <input id="city" type="text" required className={inputClass}
+                        value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+                    </div>
                   </div>
 
+                  {/* Email — full width */}
                   <div>
-                    <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-text">Email address</label>
+                    <label htmlFor="email" className={labelClass}>Email</label>
                     <input id="email" type="email" required placeholder="yourname@email.com" className={inputClass}
                       value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
                   </div>
 
-                  <div>
-                    <label htmlFor="city" className="mb-1.5 block text-sm font-medium text-text">City</label>
-                    <input id="city" type="text" required className={inputClass}
-                      value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+                  {/* Language + Interested in — 2-col on mobile */}
+                  <div className="grid grid-cols-2 gap-2 md:contents">
+                    <div>
+                      <label htmlFor="language" className={labelClass}>Language</label>
+                      <select id="language" required className={inputClass}
+                        value={form.language} onChange={(e) => setForm({ ...form, language: e.target.value })}>
+                        {languages.map((lang) => <option key={lang} value={lang}>{lang}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="interested_in" className={labelClass}>Interested in</label>
+                      <select id="interested_in" required className={inputClass}
+                        value={form.interested_in}
+                        onChange={(e) => setForm({ ...form, interested_in: e.target.value as ServiceOption })}>
+                        {services.map((svc) => <option key={svc} value={svc}>{svc}</option>)}
+                      </select>
+                    </div>
                   </div>
 
+                  {/* Target country — full width */}
                   <div>
-                    <label htmlFor="language" className="mb-1.5 block text-sm font-medium text-text">Preferred language</label>
-                    <select id="language" required className={inputClass}
-                      value={form.language} onChange={(e) => setForm({ ...form, language: e.target.value })}>
-                      {languages.map((lang) => <option key={lang} value={lang}>{lang}</option>)}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label htmlFor="interested_in" className="mb-1.5 block text-sm font-medium text-text">Interested in</label>
-                    <select id="interested_in" required className={inputClass}
-                      value={form.interested_in}
-                      onChange={(e) => setForm({ ...form, interested_in: e.target.value as ServiceOption })}>
-                      {services.map((svc) => <option key={svc} value={svc}>{svc}</option>)}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label htmlFor="target_country" className="mb-1.5 block text-sm font-medium text-text">Target country</label>
+                    <label htmlFor="target_country" className={labelClass}>Target country</label>
                     <select id="target_country" required className={inputClass}
                       value={form.target_country}
                       onChange={(e) => setForm({ ...form, target_country: e.target.value })}>
@@ -298,16 +306,13 @@ export function RegistrationSection() {
 
                   <input type="hidden" name="ad_source" value={adSource} />
 
-                  {/* Sticky submit on mobile */}
-                  <div className="sticky bottom-0 -mx-4 border-t border-text/10 bg-bg/95 px-4 pb-[env(safe-area-inset-bottom,0px)] pt-3 backdrop-blur-sm md:static md:mx-0 md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
-                    <Button type="submit" disabled={loading} className="w-full py-4 text-base">
-                      {loading ? 'submitting…' : 'meet my AI counselor →'}
-                    </Button>
-                  </div>
+                  <Button type="submit" disabled={loading} className="w-full py-2.5 text-sm md:py-4 md:text-base">
+                    {loading ? 'submitting…' : 'meet my AI counselor →'}
+                  </Button>
                 </form>
               </Card>
 
-              <p className="mt-5 text-center text-xs text-text/50">
+              <p className="mt-2 hidden text-center text-xs text-text/50 md:mt-5 md:block">
                 Your data is private. We never share it. Ever.
               </p>
             </motion.div>
