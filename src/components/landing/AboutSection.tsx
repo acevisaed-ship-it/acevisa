@@ -16,7 +16,7 @@ const LAYOUT = {
   // Thought cloud — above the standing student's head
   thoughtCloud: { width: '140px', bottom: '66%', left: '20%' },
   threeLines:   { width: '90px',  bottom: '28%', right: '7%' },
-  stackDocs:    { width: '100px', bottom: '4%',  left: '14%' },
+  stackDocs:    { width: '100px', bottom: '62%', right: '22%' },
   // Travel bag — moved behind sad student (rendered before him in DOM)
   travelBag:    { width: '360px', bottom: '-4%', right: '4%' },
 }
@@ -36,7 +36,7 @@ export function AboutSection() {
   }
 
   return (
-    <div className="bg-texture relative flex h-full flex-col items-center overflow-y-auto bg-bg px-4 py-8 md:justify-center md:px-10 md:py-24">
+    <div className="bg-texture relative flex h-full flex-col items-center overflow-y-auto px-4 py-8 md:justify-center md:px-10 md:py-24" style={{ background: 'var(--grad-blue)' }}>
 
       {/* ── Illustration layer ───────────────────────────────────── */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
@@ -126,7 +126,7 @@ export function AboutSection() {
           transition={{ duration: 0.6, delay: 1 }}
         />
 
-        {/* Stack of documents */}
+        {/* Stack of documents — above sad student's head */}
         <LandingDecor
           src="/stack of documents.svg"
           hideBelowMd
@@ -134,7 +134,7 @@ export function AboutSection() {
           style={{
             width: LAYOUT.stackDocs.width,
             bottom: LAYOUT.stackDocs.bottom,
-            left: LAYOUT.stackDocs.left,
+            right: LAYOUT.stackDocs.right,
           }}
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -184,7 +184,7 @@ export function AboutSection() {
           className="px-4 pb-2 pt-4 text-center"
         >
           <p className="text-[10px] font-medium uppercase tracking-widest text-orange">Who we are</p>
-          <h2 className="text-2xl font-semibold leading-tight text-blue">
+          <h2 className="text-2xl font-semibold leading-tight text-white">
             We don&apos;t just send you abroad
           </h2>
         </motion.div>
@@ -277,12 +277,12 @@ export function AboutSection() {
           <p className="mb-2 text-xs font-medium uppercase tracking-widest text-orange md:mb-3">
             Who we are
           </p>
-          <h2 className="text-[clamp(1.6rem,6vw,3.5rem)] font-semibold leading-tight text-blue">
+          <h2 className="text-[clamp(1.6rem,6vw,3.5rem)] font-semibold leading-tight text-white">
             We don&apos;t just
             <br />
             send you abroad
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-text/80 md:mt-5 md:text-base">
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-white/70 md:mt-5 md:text-base">
             Pakistan based Education Consultant combining real counselors with AI
             to make overseas education achievable — not just a dream.
           </p>
