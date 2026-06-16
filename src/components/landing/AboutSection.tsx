@@ -36,7 +36,7 @@ export function AboutSection() {
   }
 
   return (
-    <div className="bg-texture relative flex h-full flex-col items-center justify-center overflow-y-auto bg-bg px-4 py-8 md:px-10 md:py-24">
+    <div className="bg-texture relative flex h-full flex-col items-center overflow-y-auto bg-bg px-4 py-8 md:justify-center md:px-10 md:py-24">
 
       {/* ── Illustration layer ───────────────────────────────────── */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
@@ -169,8 +169,103 @@ export function AboutSection() {
       </div>
       {/* ── /Illustration layer ──────────────────────────────────── */}
 
-      {/* Content */}
-      <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center gap-5 text-center md:gap-8">
+      {/* ══════════════════════════════════════════════
+          MOBILE LAYOUT — heading + two tall vertical cards
+          each card contains the SVG, title, button.
+      ═════════════════════════════════════════════ */}
+      <div className="relative z-10 flex h-full w-full flex-col md:hidden">
+
+        {/* Compact heading */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: 'easeInOut' }}
+          className="px-4 pb-2 pt-4 text-center"
+        >
+          <p className="text-[10px] font-medium uppercase tracking-widest text-orange">Who we are</p>
+          <h2 className="text-2xl font-semibold leading-tight text-blue">
+            We don&apos;t just send you abroad
+          </h2>
+        </motion.div>
+
+        {/* Two vertical cards filling remaining height */}
+        <div className="flex flex-1 gap-2 px-3 pb-3">
+
+          {/* Card 1 — Ace My Future */}
+          <motion.div
+            initial={{ opacity: 0, x: -16 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: 'easeInOut' }}
+            className="flex flex-1"
+          >
+            <Card
+              variant="dark"
+              highlighted={highlightAce}
+              className="flex w-full flex-col items-center gap-2 p-3 text-center"
+            >
+              {/* SVG fills available vertical space */}
+              <div className="flex flex-1 items-end justify-center overflow-hidden">
+                <img
+                  src="/student with files.svg"
+                  alt=""
+                  aria-hidden
+                  className="h-full max-h-[45vh] w-auto object-contain object-bottom"
+                />
+              </div>
+              <h3 className="text-sm font-semibold leading-snug text-bg">
+                I Want to Ace My Future
+              </h3>
+              <Button
+                onClick={handleAce}
+                className="w-full border-green bg-green py-2 text-xs text-text hover:opacity-90"
+              >
+                let&apos;s go →
+              </Button>
+            </Card>
+          </motion.div>
+
+          {/* Card 2 — Dreamer */}
+          <motion.div
+            initial={{ opacity: 0, x: 16 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.08, ease: 'easeInOut' }}
+            className="flex flex-1"
+          >
+            <Card
+              variant="dark"
+              className="flex w-full flex-col items-center gap-2 p-3 text-center"
+              style={{ background: 'var(--grad-orange)' }}
+            >
+              {/* SVG fills available vertical space */}
+              <div className="flex flex-1 items-end justify-center overflow-hidden">
+                <img
+                  src="/sad student on bench.svg"
+                  alt=""
+                  aria-hidden
+                  className="h-full max-h-[45vh] w-auto object-contain object-bottom"
+                />
+              </div>
+              <h3 className="text-sm font-semibold leading-snug text-white">
+                I&apos;m just a dreamer for now
+              </h3>
+              <Button
+                onClick={handleDreamer}
+                className="w-full border-white/30 bg-white/15 py-2 text-xs text-white hover:bg-white/25"
+              >
+                explore →
+              </Button>
+            </Card>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════
+          DESKTOP LAYOUT
+      ═════════════════════════════════════════════ */}
+      <div className="relative z-10 mx-auto hidden w-full max-w-4xl flex-col items-center gap-5 text-center md:flex md:gap-8">
 
         {/* Headline */}
         <motion.div
@@ -193,10 +288,9 @@ export function AboutSection() {
           </p>
         </motion.div>
 
-        {/* Cards — side-by-side on ALL screen sizes */}
-        <div className="grid w-full grid-cols-2 gap-3 md:gap-6">
+        {/* Cards — side-by-side */}
+        <div className="grid w-full grid-cols-2 gap-6">
 
-          {/* Card 1: Ace my future — dark teal / green button */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -207,25 +301,22 @@ export function AboutSection() {
             <Card
               variant="dark"
               highlighted={highlightAce}
-              className="flex w-full flex-col items-start gap-3 p-4 text-left md:gap-4 md:p-6"
+              className="flex w-full flex-col items-start gap-4 p-6 text-left"
             >
-              <GraduationCap className="h-6 w-6 text-green md:h-8 md:w-8" strokeWidth={1.5} />
+              <GraduationCap className="h-8 w-8 text-green" strokeWidth={1.5} />
               <h3 className="text-[clamp(0.85rem,2.5vw,1.25rem)] font-semibold leading-snug text-bg">
                 I Want to Ace My Future
               </h3>
-              <p className="hidden text-sm text-bg/70 sm:block">
-                I&apos;m serious. Let&apos;s build my path.
-              </p>
+              <p className="text-sm text-bg/70">I&apos;m serious. Let&apos;s build my path.</p>
               <Button
                 onClick={handleAce}
-                className="mt-auto w-full border-green bg-green py-2 text-xs text-text hover:opacity-90 md:py-3 md:text-sm"
+                className="mt-auto w-full border-green bg-green py-3 text-sm text-text hover:opacity-90"
               >
                 let&apos;s go →
               </Button>
             </Card>
           </motion.div>
 
-          {/* Card 2: Dreamer — orange */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -235,55 +326,21 @@ export function AboutSection() {
           >
             <Card
               variant="dark"
-              className="flex w-full flex-col items-start gap-3 p-4 text-left md:gap-4 md:p-6"
+              className="flex w-full flex-col items-start gap-4 p-6 text-left"
               style={{ background: 'var(--grad-orange)' }}
             >
-              <Telescope className="h-6 w-6 text-white md:h-8 md:w-8" strokeWidth={1.5} />
+              <Telescope className="h-8 w-8 text-white" strokeWidth={1.5} />
               <h3 className="text-[clamp(0.85rem,2.5vw,1.25rem)] font-semibold leading-snug text-white">
                 I&apos;m just a dreamer for now
               </h3>
-              <p className="hidden text-sm text-white/70 sm:block">
-                Show me what&apos;s possible first.
-              </p>
+              <p className="text-sm text-white/70">Show me what&apos;s possible first.</p>
               <Button
                 onClick={handleDreamer}
-                className="mt-auto w-full border-white/30 bg-white/15 py-2 text-xs text-white hover:bg-white/25 md:py-3 md:text-sm"
+                className="mt-auto w-full border-white/30 bg-white/15 py-3 text-sm text-white hover:bg-white/25"
               >
                 explore →
               </Button>
             </Card>
-          </motion.div>
-        </div>
-
-        {/* Mobile-only: student figures below cards */}
-        <div className="grid w-full grid-cols-2 gap-3 md:hidden">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.15, ease: 'easeOut' }}
-            className="flex items-end justify-center"
-          >
-            <img
-              src="/student with files.svg"
-              alt=""
-              aria-hidden
-              className="h-auto w-full max-w-[180px] object-contain object-bottom"
-            />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.25, ease: 'easeOut' }}
-            className="flex items-end justify-center"
-          >
-            <img
-              src="/sad student on bench.svg"
-              alt=""
-              aria-hidden
-              className="h-auto w-full max-w-[180px] object-contain object-bottom"
-            />
           </motion.div>
         </div>
       </div>

@@ -47,7 +47,7 @@ const events = [
 
 export function EventsSection() {
   return (
-    <div className="bg-texture relative flex h-full flex-col justify-center overflow-hidden bg-bg px-5 py-10 md:px-10 md:py-24">
+    <div className="bg-texture relative flex h-full flex-col justify-center overflow-hidden bg-bg px-5 py-[20vh] md:px-10 md:py-24">
 
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
         <LandingDecor
@@ -84,7 +84,41 @@ export function EventsSection() {
           </p>
         </motion.div>
 
-        <div className="grid gap-3 sm:grid-cols-2 sm:gap-5">
+        {/* Mobile: compact single-column cards */}
+        <div className="flex flex-col gap-2 md:hidden">
+          {events.map((ev, i) => (
+            <motion.div
+              key={ev.title}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.45, delay: i * 0.06, ease: 'easeOut' }}
+            >
+              <Card
+                variant="dark"
+                className="flex flex-row items-center gap-3 p-3"
+                style={{ background: ev.color }}
+              >
+                <div className="flex min-w-0 flex-1 flex-col gap-1">
+                  <span className="w-fit rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white">
+                    {ev.type}
+                  </span>
+                  <p className="text-xs font-semibold leading-snug text-white">{ev.title}</p>
+                  <p className="flex items-center gap-1 text-[10px] text-white/60">
+                    <Calendar className="h-3 w-3 shrink-0" />
+                    {ev.date} · {ev.time}
+                  </p>
+                </div>
+                <Button className="shrink-0 border-white/30 bg-white/15 px-3 py-1.5 text-[10px] text-white hover:bg-white/25">
+                  Register →
+                </Button>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Desktop: 2-column grid */}
+        <div className="hidden gap-5 sm:grid sm:grid-cols-2">
           {events.map((ev, i) => (
             <motion.div
               key={ev.title}
@@ -103,7 +137,7 @@ export function EventsSection() {
                     {ev.type}
                   </span>
                 </div>
-                <h3 className="text-sm font-semibold leading-snug text-white md:text-base">{ev.title}</h3>
+                <h3 className="text-base font-semibold leading-snug text-white">{ev.title}</h3>
                 <div className="flex flex-col gap-1.5 text-xs text-white/70">
                   <span className="flex items-center gap-1.5">
                     <Calendar className="h-3.5 w-3.5 shrink-0" />
@@ -118,7 +152,7 @@ export function EventsSection() {
                     {ev.seats}
                   </span>
                 </div>
-                <Button className="mt-auto w-full border-white/30 bg-white/15 py-2 text-xs text-white hover:bg-white/25 md:text-sm">
+                <Button className="mt-auto w-full border-white/30 bg-white/15 py-2 text-sm text-white hover:bg-white/25">
                   Register Free →
                 </Button>
               </Card>

@@ -109,9 +109,50 @@ export function GallerySection() {
           </h2>
         </motion.div>
 
+        {/* ── Mobile: stacked deck layout ─────────────────────────── */}
+        <div className="md:hidden">
+          <div className="flex flex-col gap-2">
+            {stories.map((story, i) => (
+              <motion.div
+                key={story.name}
+                data-gallery-card
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.07, ease: 'easeOut' }}
+              >
+                <Card className="flex flex-row items-center gap-3 p-3">
+                  {/* Compact photo thumbnail */}
+                  <div className="h-16 w-20 shrink-0 overflow-hidden rounded-xl">
+                    <img
+                      src={story.image}
+                      alt={`${story.name} from ${story.city}`}
+                      className="h-full w-full object-cover object-center"
+                    />
+                  </div>
+                  {/* Text */}
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-base" aria-hidden="true">{story.flag}</span>
+                      <p className="truncate text-xs font-semibold text-blue lowercase">
+                        {story.name}, {story.city}
+                      </p>
+                    </div>
+                    <p className="text-[10px] text-text/50 lowercase">{story.destination}</p>
+                    <p className="line-clamp-2 text-xs leading-relaxed text-text/75">
+                      &ldquo;{story.quote}&rdquo;
+                    </p>
+                  </div>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Desktop: 3-column grid ───────────────────────────────── */}
         <div
           ref={stripRef}
-          className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory md:grid md:grid-cols-3 md:overflow-visible md:pb-0"
+          className="hidden gap-5 md:grid md:grid-cols-3"
         >
           {stories.map((story, i) => (
             <motion.div
@@ -121,20 +162,17 @@ export function GallerySection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: i * 0.1, ease: 'easeInOut' }}
-              className="w-[min(82vw,300px)] shrink-0 snap-center md:w-auto"
             >
               <Card className="flex h-full flex-col gap-4">
                 <div className="aspect-[4/3] w-full overflow-hidden rounded-[12px]">
                   <img
                     src={story.image}
                     alt={`${story.name} from ${story.city}`}
-                    className="h-full w-full object-cover object-center transition-transform duration-500 sm:hover:scale-105"
+                    className="h-full w-full object-cover object-center transition-transform duration-500 hover:scale-105"
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xl" aria-hidden="true">
-                    {story.flag}
-                  </span>
+                  <span className="text-xl" aria-hidden="true">{story.flag}</span>
                   <p className="text-sm font-medium text-blue lowercase">
                     {story.name}, {story.city} → {story.destination}
                   </p>
@@ -144,23 +182,6 @@ export function GallerySection() {
                 </p>
               </Card>
             </motion.div>
-          ))}
-        </div>
-
-        {/* Snap-dot indicators — mobile horizontal strip only */}
-        <div className="mt-3 flex justify-center gap-2 md:hidden" aria-hidden="true">
-          {stories.map((story, i) => (
-            <button
-              key={story.name}
-              type="button"
-              aria-label={`View ${story.name}'s story`}
-              onClick={() => scrollToStory(i)}
-              className="h-2 w-2 rounded-full transition-all duration-300"
-              style={{
-                background: i === activeStory ? 'var(--orange)' : 'rgba(10, 63, 58, 0.25)',
-                transform: i === activeStory ? 'scale(1.4)' : 'scale(1)',
-              }}
-            />
           ))}
         </div>
 

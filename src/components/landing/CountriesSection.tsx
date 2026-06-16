@@ -102,7 +102,28 @@ export function CountriesSection() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5">
+        {/* Mobile: 5-col compact grid, 60% opacity — all 20 fit on one screen */}
+        <div className="grid grid-cols-5 gap-1.5 md:hidden">
+          {countries.map((c, i) => (
+            <motion.div
+              key={c.name}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.35, delay: i * 0.02, ease: 'easeOut' }}
+              className="overflow-hidden rounded-xl p-2 text-center"
+              style={{ background: CARD_COLORS[i % CARD_COLORS.length], opacity: 0.6 }}
+            >
+              <div className="mx-auto mb-1 flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-white/25 text-lg">
+                {c.flag}
+              </div>
+              <h3 className="text-[9px] font-semibold leading-tight text-white">{c.name}</h3>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Desktop: 4-col / 5-col grid */}
+        <div className="hidden gap-4 md:grid md:grid-cols-4 lg:grid-cols-5">
           {countries.map((c, i) => (
             <motion.div
               key={c.name}
@@ -110,15 +131,14 @@ export function CountriesSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.04, ease: 'easeInOut' }}
-              className="group relative overflow-hidden rounded-card p-4 text-center transition-transform duration-300 hover:-translate-y-1 md:p-5"
+              className="group relative overflow-hidden rounded-card p-5 text-center transition-transform duration-300 hover:-translate-y-1"
               style={{ background: CARD_COLORS[i % CARD_COLORS.length] }}
             >
-              {/* Circular flag */}
-              <div className="mx-auto mb-2.5 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white/20 text-2xl md:h-12 md:w-12 md:text-3xl">
+              <div className="mx-auto mb-2.5 flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-white/20 text-3xl">
                 {c.flag}
               </div>
-              <h3 className="text-xs font-semibold text-white md:text-sm">{c.name}</h3>
-              <p className="mt-0.5 text-[10px] text-white/70 md:text-xs">{c.unis}</p>
+              <h3 className="text-sm font-semibold text-white">{c.name}</h3>
+              <p className="mt-0.5 text-xs text-white/70">{c.unis}</p>
             </motion.div>
           ))}
         </div>

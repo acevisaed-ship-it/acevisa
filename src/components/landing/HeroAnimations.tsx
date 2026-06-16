@@ -90,25 +90,27 @@ function Star({ s }: { s: StarData }) {
   )
 }
 
-function StarField() {
+function StarField({ isMobile }: { isMobile?: boolean }) {
   const [stars, setStars] = useState<StarData[]>([])
 
   useEffect(() => {
     const CYCLE = 14   // visible (~12 s) + dark (2 s)
+    const count = isMobile ? 4 : 8
     setStars(
-      Array.from({ length: 8 }, (_, i) => ({
+      Array.from({ length: count }, (_, i) => ({
         id:         i,
         xPct:       rn(4, 94),
-        yPct:       rn(4, 94),
-        size:       rn(8, 28),
+        // On mobile: only top 45% of screen gets stars (lower half stays clean)
+        yPct:       rn(4, isMobile ? 45 : 94),
+        size:       rn(8, isMobile ? 18 : 28),
         src:        pick(STAR_SRCS),
         maxOpacity: rn(0.45, 0.75),
         visibleDur: rn(10, 14),
         pulseDur:   rn(7.5, 20),
-        delay:      (i / 8) * CYCLE,  // evenly staggered → ~5–7 visible at once
+        delay:      (i / count) * CYCLE,
       }))
     )
-  }, [])
+  }, [isMobile])
 
   return <>{stars.map(s => <Star key={s.id} s={s} />)}</>
 }
@@ -319,7 +321,7 @@ function DirPaperPlane({ p }: { p: DirPlaneData }) {
   )
 }
 
-function FreeRoamingPaperPlanes({ vw, vh }: { vw: number; vh: number }) {
+function FreeRoamingPaperPlanes({ vw, vh, isMobile }: { vw: number; vh: number; isMobile?: boolean }) {
   const [planes, setPlanes] = useState<DirPlaneData[]>([])
 
   useEffect(() => {
@@ -364,7 +366,7 @@ function FreeRoamingPaperPlanes({ vw, vh }: { vw: number; vh: number }) {
         flipX:  fromRight,
         dur:    rn(30, 70),
         delay:  i * rn(5, 12),
-        size:   rn(28, 55),
+        size:   isMobile ? rn(16, 28) : rn(28, 55),
         src:    pick(PAPER_SRCS),
       })
     }
@@ -382,7 +384,7 @@ function FreeRoamingPaperPlanes({ vw, vh }: { vw: number; vh: number }) {
 //     Loops continuously; randomises path on each crossing.
 // ════════════════════════════════════════════════════════════════════════════
 
-function BeeOrangePlane({ vw, vh }: { vw: number; vh: number }) {
+function BeeOrangePlane({ vw, vh, isMobile }: { vw: number; vh: number; isMobile?: boolean }) {
   const mx  = useMotionValue(-80)
   const my  = useMotionValue(0)
   const rot = useMotionValue(0)
@@ -454,7 +456,7 @@ function BeeOrangePlane({ vw, vh }: { vw: number; vh: number }) {
       className="pointer-events-none absolute"
       style={{
         left: 0, top: 0,
-        width: 46,
+        width: isMobile ? 28 : 46,
         x: mx, y: my, rotate: rot,
         translateX: '-50%', translateY: '-50%',
         willChange: 'transform',
@@ -471,7 +473,7 @@ function BeeOrangePlane({ vw, vh }: { vw: number; vh: number }) {
 //     and gravity coupling: faster when going down on Y, slower going up.
 // ════════════════════════════════════════════════════════════════════════════
 
-function BeeBluePlane({ vw, vh }: { vw: number; vh: number }) {
+function BeeBluePlane({ vw, vh, isMobile }: { vw: number; vh: number; isMobile?: boolean }) {
   const mx  = useMotionValue(-80)
   const my  = useMotionValue(0)
   const rot = useMotionValue(0)
@@ -572,7 +574,7 @@ function BeeBluePlane({ vw, vh }: { vw: number; vh: number }) {
       className="pointer-events-none absolute"
       style={{
         left: 0, top: 0,
-        width: 42,
+        width: isMobile ? 26 : 42,
         x: mx, y: my, rotate: rot,
         translateX: '-50%', translateY: '-50%',
         willChange: 'transform',
@@ -626,7 +628,7 @@ function LargeAirplane({ p }: { p: APlaneData }) {
   )
 }
 
-function AirplaneLayer({ vw, vh }: { vw: number; vh: number }) {
+function AirplaneLayer({ vw, vh, isMobile }: { vw: number; vh: number; isMobile?: boolean }) {
   const [planes, setPlanes] = useState<APlaneData[]>([])
 
   useEffect(() => {
@@ -658,13 +660,13 @@ function AirplaneLayer({ vw, vh }: { vw: number; vh: number }) {
         id: 0, startX: aStartX, startY: aStartY, endX: aEndX, endY: aEndY,
         angle: planeAngle(aDx, aDy, true), flipX: true,
         speed: rn(80, 140), delay: 0,
-        size: rn(100, 170), src: PLANE_SRCS[0], opacity: 1, // always Orange
+        size: isMobile ? rn(55, 85) : rn(100, 170), src: PLANE_SRCS[0], opacity: isMobile ? 0.7 : 1,
       },
       {
         id: 1, startX: bStartX, startY: bStartY, endX: bEndX, endY: bEndY,
         angle: planeAngle(bDx, bDy, false), flipX: false,
         speed: rn(90, 150), delay: rn(10, 30),
-        size: rn(100, 170), src: PLANE_SRCS[1], opacity: 1, // always Blue
+        size: isMobile ? rn(55, 85) : rn(100, 170), src: PLANE_SRCS[1], opacity: isMobile ? 0.7 : 1,
       },
     ])
   }, [vw, vh])
@@ -771,6 +773,8 @@ export function HeroAnimations() {
 
   if (!vw) return null
 
+  const isMobile = vw < 768
+
   return (
     <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
 
@@ -784,14 +788,14 @@ export function HeroAnimations() {
         }}
       />
 
-      {/* z-1 Stars — behind every other element */}
+      {/* z-1 Stars — behind every other element; mobile: top 45% only */}
       <div className="absolute inset-0 z-[1]">
-        <StarField />
+        <StarField isMobile={isMobile} />
       </div>
 
-      {/* z-2 Large commercial planes */}
+      {/* z-2 Large commercial planes — smaller on mobile */}
       <div className="absolute inset-0 z-[2]">
-        <AirplaneLayer vw={vw} vh={vh} />
+        <AirplaneLayer vw={vw} vh={vh} isMobile={isMobile} />
       </div>
 
       {/* z-3 Clouds — upper band only, right-to-left */}
@@ -808,11 +812,11 @@ export function HeroAnimations() {
              className="landing-decor-globe-sm" style={{ opacity: 0.13 }} />
       </div>
 
-      {/* z-5 Free-roaming directed paper planes */}
+      {/* z-5 Free-roaming directed paper planes — smaller on mobile */}
       <div className="absolute inset-0 z-[5]">
-        <FreeRoamingPaperPlanes vw={vw} vh={vh} />
-        <BeeOrangePlane vw={vw} vh={vh} />
-        <BeeBluePlane vw={vw} vh={vh} />
+        <FreeRoamingPaperPlanes vw={vw} vh={vh} isMobile={isMobile} />
+        <BeeOrangePlane vw={vw} vh={vh} isMobile={isMobile} />
+        <BeeBluePlane vw={vw} vh={vh} isMobile={isMobile} />
       </div>
     </div>
   )

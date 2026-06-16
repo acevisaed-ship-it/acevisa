@@ -33,7 +33,7 @@ const benefits = [
 export function BecomeAPartnerSection() {
   return (
     <div
-      className="bg-texture relative flex h-full flex-col justify-center overflow-hidden px-5 py-10 md:px-10 md:py-24"
+      className="bg-texture relative flex h-full flex-col justify-center overflow-hidden px-5 py-[20vh] md:px-10 md:py-24"
       style={{ background: 'var(--grad-blue)' }}
     >
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
@@ -85,8 +85,8 @@ export function BecomeAPartnerSection() {
           </p>
         </motion.div>
 
-        {/* Benefits grid */}
-        <div className="mb-6 grid gap-3 sm:grid-cols-2 sm:gap-5 md:mb-10">
+        {/* Benefits grid — compact on mobile */}
+        <div className="mb-4 grid gap-2 sm:grid-cols-2 sm:gap-5 md:mb-10">
           {benefits.map((b, i) => {
             const Icon = b.icon
             return (
@@ -99,12 +99,15 @@ export function BecomeAPartnerSection() {
               >
                 <Card
                   variant="dark"
-                  className="flex h-full flex-col gap-3 p-5"
+                  className="flex h-full flex-row items-center gap-3 p-3 sm:flex-col sm:p-5"
                   style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.2)' }}
                 >
-                  <Icon className="h-6 w-6 text-orange" strokeWidth={1.5} />
-                  <h3 className="text-sm font-semibold text-white md:text-base">{b.title}</h3>
-                  <p className="text-sm leading-relaxed text-white/70">{b.description}</p>
+                  <Icon className="h-5 w-5 shrink-0 text-orange sm:h-6 sm:w-6" strokeWidth={1.5} />
+                  <div className="min-w-0 flex-1 sm:flex-none">
+                    <h3 className="text-xs font-semibold text-white sm:mb-1 sm:text-base">{b.title}</h3>
+                    <p className="hidden text-sm leading-relaxed text-white/70 sm:block">{b.description}</p>
+                    <p className="text-[10px] leading-snug text-white/60 sm:hidden">{b.description}</p>
+                  </div>
                 </Card>
               </motion.div>
             )
