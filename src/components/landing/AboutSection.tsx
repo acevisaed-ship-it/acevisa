@@ -13,8 +13,8 @@ const LAYOUT = {
   figureLeft:   { width: 'clamp(480px, 40vw, 680px)', bottom: '-2%', left: '0%' },
   // Sad student — reverted to original size
   figureRight:  { width: 'clamp(480px, 40vw, 680px)', bottom: '-2%', right: '0%' },
-  // Thought cloud — original position (near left figure's upper body)
-  thoughtCloud: { width: '140px', bottom: '62%', left: '1%' },
+  // Thought cloud — above the standing student's head
+  thoughtCloud: { width: '140px', bottom: '66%', left: '20%' },
   threeLines:   { width: '90px',  bottom: '28%', right: '7%' },
   stackDocs:    { width: '100px', bottom: '4%',  left: '14%' },
   // Travel bag — moved behind sad student (rendered before him in DOM)
@@ -252,6 +252,38 @@ export function AboutSection() {
                 explore →
               </Button>
             </Card>
+          </motion.div>
+        </div>
+
+        {/* Mobile-only: student figures below cards */}
+        <div className="grid w-full grid-cols-2 gap-3 md:hidden">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: 0.15, ease: 'easeOut' }}
+            className="flex items-end justify-center"
+          >
+            <img
+              src="/student with files.svg"
+              alt=""
+              aria-hidden
+              className="h-auto w-full max-w-[180px] object-contain object-bottom"
+            />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: 0.25, ease: 'easeOut' }}
+            className="flex items-end justify-center"
+          >
+            <img
+              src="/sad student on bench.svg"
+              alt=""
+              aria-hidden
+              className="h-auto w-full max-w-[180px] object-contain object-bottom"
+            />
           </motion.div>
         </div>
       </div>

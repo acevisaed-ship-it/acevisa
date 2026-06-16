@@ -65,83 +65,83 @@ export function HeroSection() {
       ════════════════════════════════════════════════════════════ */}
       <div className="relative z-10 flex h-full w-full flex-col md:hidden">
 
-        {/* Top section: 2 columns */}
-        <div className="grid flex-1 grid-cols-[46%_54%] items-start pt-16">
+        {/* Top area — ACE logo (left) + globe + man (right), fills available space */}
+        <div className="grid flex-1 grid-cols-[54%_46%] items-start pt-16">
 
-          {/* Left col — globe + man */}
+          {/* Left col — ACE logo + tagline */}
+          <motion.div
+            initial={{ opacity: 0, x: -16 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: 'easeInOut' }}
+            className="flex flex-col gap-2 pl-3 pt-4"
+          >
+            <img
+              src="/Hero Page LOGO.svg"
+              alt="ACE Altius Consulting"
+              className="h-auto w-full max-w-[190px]"
+            />
+            <p className="text-[10px] font-bold uppercase tracking-widest text-orange">
+              Pakistan&apos;s First AI Platform
+            </p>
+          </motion.div>
+
+          {/* Right col — globe + man (flipped so he faces left toward logo) */}
           <div className="relative flex h-full flex-col items-center">
-            {/* Globe centred in the column */}
             <div className="mt-4 flex items-center justify-center">
               <EarthSphereMobile />
             </div>
-            {/* Man pointing — pinned to bottom of left col */}
+            {/* Man pointing — scaleX(-1) so he faces left toward the ACE logo */}
             <div
-              className="pointer-events-none absolute bottom-0 left-0 w-full"
+              className="pointer-events-none absolute bottom-0 right-0 w-full"
               aria-hidden="true"
             >
               <img
                 src="/man pointing to ace.svg"
                 alt=""
                 className="w-full object-contain object-bottom"
-                style={{ maxHeight: '38vh' }}
+                style={{ maxHeight: '57vh', transform: 'scaleX(-1)' }}
               />
             </div>
           </div>
-
-          {/* Right col — ACE + content */}
-          <motion.div
-            initial={{ opacity: 0, x: 16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: 'easeInOut' }}
-            className="flex flex-col gap-3 pb-4 pr-3 pt-4"
-          >
-            {/* ACE logo */}
-            <img
-              src="/Hero Page LOGO.svg"
-              alt="ACE Altius Consulting"
-              className="h-auto w-full max-w-[190px]"
-            />
-
-            <p className="text-[10px] font-bold uppercase tracking-widest text-orange">
-              Pakistan&apos;s First AI Platform
-            </p>
-
-            <h1
-              className="font-semibold leading-[0.92] tracking-tight text-blue"
-              style={{ fontSize: 'clamp(1.35rem, 5.5vw, 2rem)' }}
-            >
-              Ace Your
-              <br />
-              Future Here
-            </h1>
-
-            <p className="text-[11px] leading-snug text-text/70">
-              AI-Powered Guidance.
-              <br />
-              Real Counselors. Real Results.
-            </p>
-
-            <Button
-              onClick={() => navigate(1)}
-              className="w-full py-3 text-sm font-semibold text-white"
-              style={{
-                background: 'linear-gradient(135deg, #E48328 0%, #2083B9 100%)',
-                border: 'none',
-              }}
-            >
-              Start Your Journey →
-            </Button>
-
-            <Link
-              href="/return"
-              className="text-[11px] text-text/60 underline-offset-2 hover:underline"
-            >
-              Already Registered? Return here →
-            </Link>
-          </motion.div>
         </div>
 
-        {/* Stats strip — full width below both columns */}
+        {/* Heading + CTA — above stats bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1, ease: 'easeInOut' }}
+          className="px-4 pb-3"
+        >
+          <h1
+            className="font-semibold leading-[0.92] tracking-tight text-blue"
+            style={{ fontSize: 'clamp(1.5rem, 6vw, 2.2rem)' }}
+          >
+            Ace Your
+            <br />
+            Future Here
+          </h1>
+          <p className="mt-1.5 text-[11px] leading-snug text-text/70">
+            AI-Powered Guidance. Real Counselors. Real Results.
+          </p>
+          <Button
+            onClick={() => navigate(1)}
+            className="mt-3 w-full py-3 text-sm font-semibold text-white"
+            style={{
+              background: 'linear-gradient(135deg, #E48328 0%, #2083B9 100%)',
+              border: 'none',
+            }}
+          >
+            Start Your Journey →
+          </Button>
+          <Link
+            href="/return"
+            className="mt-2 block text-[11px] text-text/60 underline-offset-2 hover:underline"
+          >
+            Already Registered? Return here →
+          </Link>
+        </motion.div>
+
+        {/* Stats strip — very bottom */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}

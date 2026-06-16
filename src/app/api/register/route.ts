@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
   const body = await request.json()
-  const { name, phone, email, city, language, ad_source } = body
+  const { name, phone, email, city, language, interested_in, target_country, ad_source } = body
 
   if (!name || !phone || !language) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -61,6 +61,8 @@ export async function POST(request: Request) {
       email: emailLower,
       city: city || null,
       language: String(language).toLowerCase(),
+      interested_in: interested_in || null,
+      target_country: target_country || null,
       ad_source: adSource,
       counselor_id: assignedCounselorId,
       pipeline_stage: 1,

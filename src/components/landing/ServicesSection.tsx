@@ -125,7 +125,7 @@ export function ServicesSection() {
   }
 
   return (
-    <div className="bg-texture relative flex h-full flex-col justify-center overflow-hidden bg-bg px-5 py-10 md:px-10 md:py-24">
+    <div className="bg-texture relative flex h-full flex-col overflow-hidden bg-bg">
 
       {/* ── Decorative layer — stars only ────────────────────────── */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
@@ -154,8 +154,91 @@ export function ServicesSection() {
         />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 mx-auto w-full max-w-6xl">
+      {/* ══════════════════════════════════════════════════════════
+          MOBILE LAYOUT  (< md)
+          Heading compact at top, then 4 cards filling remaining
+          height equally, each with its SVG overlapping the right.
+      ═════════════════════════════════════════════════════════ */}
+      <div className="relative z-10 flex h-full flex-col md:hidden">
+
+        {/* Heading — compact, pinned to top */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: 'easeInOut' }}
+          className="px-5 pb-2 pt-4 text-center"
+        >
+          <p className="text-[10px] font-medium uppercase tracking-widest text-orange">
+            what we do
+          </p>
+          <h2 className="text-2xl font-semibold leading-tight text-blue">
+            Four Ways To Ace
+          </h2>
+        </motion.div>
+
+        {/* 4 cards — each flex-1 fills equal remaining height */}
+        <div className="flex flex-1 flex-col gap-2 px-3 pb-3">
+          {services.map((item, i) => {
+            const Icon = item.icon
+            const theme = cardThemes[i]
+            return (
+              <motion.div
+                key={item.title}
+                className="relative flex-1"
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.07, ease: 'easeOut' }}
+              >
+                {/* Card — content constrained to left 62% to leave room for SVG */}
+                <Card
+                  variant="dark"
+                  className="absolute inset-0 flex flex-col justify-between p-3"
+                  style={{ background: theme.cardBg, paddingRight: '38%' }}
+                >
+                  <div className="flex items-center gap-2">
+                    <Icon className={`h-5 w-5 shrink-0 ${theme.iconColor}`} strokeWidth={1.5} />
+                    {item.tag && (
+                      <span className="rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-medium text-white">
+                        {item.tag}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className={`text-sm font-semibold leading-snug ${theme.titleColor}`}>
+                    {item.title}
+                  </h3>
+                  <Button
+                    onClick={() => handleSelect(item.service)}
+                    className={`w-full py-1.5 text-[11px] ${theme.btnClass}`}
+                  >
+                    I need this →
+                  </Button>
+                </Card>
+
+                {/* SVG — overlapping right side of card, bottom-anchored */}
+                <div
+                  className="pointer-events-none absolute bottom-0 right-0 top-0"
+                  style={{ width: '42%' }}
+                  aria-hidden="true"
+                >
+                  <img
+                    src={item.svg}
+                    alt=""
+                    className="h-full w-full object-contain object-bottom"
+                  />
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════
+          DESKTOP LAYOUT  (md+)
+          Two rows of [SVG | card + card | SVG]
+      ═════════════════════════════════════════════════════════ */}
+      <div className="relative z-10 mx-auto hidden h-full w-full max-w-6xl flex-col justify-center px-5 py-10 md:flex md:px-10 md:py-24">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
