@@ -239,7 +239,7 @@ export function RegistrationSection() {
                 </p>
               </div>
 
-              <Card className="p-3 opacity-50 md:p-6">
+              <Card className="p-3 opacity-75 md:p-6">
                 <form onSubmit={handleSubmit} className="space-y-2 md:space-y-4">
                   {error && (
                     <p className="rounded-card border border-text/20 bg-bg px-3 py-2 text-xs text-text md:px-4 md:py-3 md:text-sm">

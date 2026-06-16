@@ -121,7 +121,7 @@ export function GallerySection() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.07, ease: 'easeOut' }}
               >
-                <Card className="flex flex-row items-center gap-3 p-3 opacity-[0.35]">
+                <Card className="flex flex-row items-center gap-3 p-3" style={{ background: 'rgba(238,238,237,0.85)', border: '1px solid rgba(200,200,200,0.5)' }}>
                   {/* Compact photo thumbnail */}
                   <div className="h-16 w-20 shrink-0 overflow-hidden rounded-xl">
                     <img
@@ -163,7 +163,7 @@ export function GallerySection() {
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: i * 0.1, ease: 'easeInOut' }}
             >
-              <Card className="flex h-full flex-col gap-4 opacity-[0.35]">
+              <Card className="flex h-full flex-col gap-4" style={{ background: 'rgba(238,238,237,0.85)', border: '1px solid rgba(200,200,200,0.5)' }}>
                 <div className="aspect-[4/3] w-full overflow-hidden rounded-[12px]">
                   <img
                     src={story.image}
