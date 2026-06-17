@@ -1,15 +1,13 @@
-import { notFound } from 'next/navigation'
-import { BriefShell } from '@/components/brief/BriefShell'
-import { resolveAiProfile } from '@/lib/brief'
-import { logActivity } from '@/lib/activityLog'
-import { formatPKTRegistrationDate } from '@/lib/pkt'
+import { notFound, redirect } from 'next/navigation'
 import { createAdminClient, getAuthenticatedCounselor } from '@/lib/supabase/server'
-import type { Client, Conversation, Document } from '@/types'
 
 type Props = {
   params: Promise<{ meetingId: string }>
 }
 
+// Brief page now redirects to the unified client record page.
+// Everything that was on the brief (psychological analysis, strategy assistant,
+// documents, talking points) is now on /dashboard/clients/[clientId].
 export default async function BriefPage({ params }: Props) {
   const { meetingId } = await params
   const counselor = await getAuthenticatedCounselor()
@@ -19,68 +17,11 @@ export default async function BriefPage({ params }: Props) {
 
   const { data: meeting } = await supabase
     .from('meetings')
-    .select('id, client_id, counselor_id, scheduled_time')
+    .select('client_id')
     .eq('id', meetingId)
     .single()
 
   if (!meeting) notFound()
 
-  const isAdmin = counselor.role === 'admin'
-  if (!isAdmin && meeting.counselor_id !== counselor.id) notFound()
-
-  const [
-    { data: client },
-    { data: aiProfile },
-    { data: conversations },
-    { data: documents },
-    { data: counselorStatus },
-  ] = await Promise.all([
-    supabase.from('clients').select('*').eq('id', meeting.client_id).single(),
-    supabase
-      .from('ai_profiles')
-      .select(
-        'profile_json, stage, qualification_score, detected_language, detected_region, detected_fears, detected_behaviour_type, service_match'
-      )
-      .eq('client_id', meeting.client_id)
-      .maybeSingle(),
-    supabase
-      .from('conversations')
-      .select('*')
-      .eq('client_id', meeting.client_id)
-      .order('timestamp', { ascending: true }),
-    supabase.from('documents').select('*').eq('client_id', meeting.client_id),
-    supabase
-      .from('counselor_status')
-      .select('is_online, auto_reply_enabled')
-      .eq('counselor_id', counselor.id)
-      .maybeSingle(),
-  ])
-
-  if (!client) notFound()
-
-  logActivity({
-    clientId: client.id,
-    counselorId: counselor.id,
-    actionType: 'brief_viewed',
-    description: `Counselor viewed client brief before meeting on ${formatPKTRegistrationDate(meeting.scheduled_time)}`,
-    metadata: { meetingId },
-  }).catch(() => {})
-
-  const { profile, isPartial: profilePartial } = resolveAiProfile(aiProfile)
-
-  return (
-    <BriefShell
-      meetingTime={meeting.scheduled_time}
-      counselorId={counselor.id}
-      counselorName={counselor.name}
-      counselorAvatarUrl={counselor.avatar_url}
-      initialOnline={counselorStatus?.is_online ?? false}
-      initialAutoReply={counselorStatus?.auto_reply_enabled ?? false}
-      client={client as Client}
-      profile={profile}
-      profilePartial={profilePartial}
-      conversations={(conversations ?? []) as Conversation[]}
-      documents={(documents ?? []) as Document[]}
-    />
-  )
+  redirect(`/dashboard/clients/${meeting.client_id}`)
 }

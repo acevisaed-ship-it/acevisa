@@ -1,15 +1,19 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ActivityHistorySection } from '@/components/brief/ActivityHistorySection'
+import { BehavioralNotesSection } from '@/components/brief/BehavioralNotesSection'
+import { BriefCard } from '@/components/brief/BriefCard'
 import { ConversationDigestSection } from '@/components/brief/ConversationDigestSection'
 import { DocumentsChecklistSection } from '@/components/brief/DocumentsChecklistSection'
+import { MeetingsHistorySection } from '@/components/brief/MeetingsHistorySection'
+import { OnlineStatusToggle } from '@/components/brief/OnlineStatusToggle'
 import {
   ClientProfileHeader,
   ProfileSummarySection,
 } from '@/components/brief/ProfileSummarySection'
-import { MeetingsHistorySection } from '@/components/brief/MeetingsHistorySection'
 import { PsychologicalReadSection } from '@/components/brief/PsychologicalReadSection'
 import { ServicePathwaySection } from '@/components/brief/ServicePathwaySection'
+import { StrategyChat } from '@/components/brief/StrategyChat'
 import { TalkingPointsSection } from '@/components/brief/TalkingPointsSection'
 import { resolveAiProfile } from '@/lib/brief'
 import { createAdminClient, getAuthenticatedCounselor } from '@/lib/supabase/server'
@@ -47,6 +51,7 @@ export default async function ClientRecordPage({ params }: Props) {
     { data: meetings },
     { data: activityLog },
     { data: pendingUpdates },
+    { data: counselorStatus },
   ] = await Promise.all([
     supabase
       .from('ai_profiles')
@@ -78,6 +83,11 @@ export default async function ClientRecordPage({ params }: Props) {
       .eq('client_id', clientId)
       .eq('status', 'pending')
       .order('created_at', { ascending: false }),
+    supabase
+      .from('counselor_status')
+      .select('is_online, auto_reply_enabled')
+      .eq('counselor_id', counselor.id)
+      .maybeSingle(),
   ])
 
   const { profile, isPartial: profilePartial } = resolveAiProfile(aiProfile)
@@ -86,14 +96,20 @@ export default async function ClientRecordPage({ params }: Props) {
   return (
     <main className="flex-1 bg-bg p-4 md:p-8">
       <div className="mx-auto max-w-[900px]">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        {/* Top bar */}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/dashboard"
             className="inline-flex items-center text-sm text-blue hover:underline"
           >
             ← Back to dashboard
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <OnlineStatusToggle
+              counselorId={counselor.id}
+              initialOnline={counselorStatus?.is_online ?? false}
+              initialAutoReply={counselorStatus?.auto_reply_enabled ?? false}
+            />
             <Link
               href={`/dashboard/clients/${clientId}/chat`}
               className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
@@ -135,13 +151,18 @@ export default async function ClientRecordPage({ params }: Props) {
         />
         <ServicePathwaySection profile={profile} />
         <PsychologicalReadSection profile={profile} />
+        <BehavioralNotesSection clientId={clientId} />
         <TalkingPointsSection profile={profile} />
         <DocumentsChecklistSection documents={(documents ?? []) as Document[]} clientId={clientId} />
-        <MeetingsHistorySection
-          clientId={clientId}
-          meetings={meetings ?? []}
-        />
+        <MeetingsHistorySection clientId={clientId} meetings={meetings ?? []} />
         <ActivityHistorySection entries={activityLog ?? []} />
+
+        {/* Strategy Assistant — formerly only on brief page */}
+        <BriefCard>
+          <div className="flex min-h-[50vh] flex-col lg:min-h-0">
+            <StrategyChat clientId={clientId} clientName={typedClient.name} />
+          </div>
+        </BriefCard>
       </div>
     </main>
   )

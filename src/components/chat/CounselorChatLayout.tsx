@@ -57,9 +57,12 @@ export function CounselorChatLayout({
         const data = await res.json()
         if (!data.messages?.length) return
         setMessages((prev) => {
-          const existingIds = new Set(prev.map((m) => m.id))
-          const incoming = data.messages.filter((m: ChatMessage) => !existingIds.has(m.id))
-          return incoming.length ? [...prev, ...incoming] : prev
+          const historyIds = new Set(data.messages.map((m: ChatMessage) => m.id))
+          const lastHistoryTime = data.messages[data.messages.length - 1]?.timestamp ?? '0'
+          const pending = prev.filter(
+            (m) => !historyIds.has(m.id) && m.timestamp > lastHistoryTime
+          )
+          return [...data.messages, ...pending]
         })
       } catch {
         // Non-fatal

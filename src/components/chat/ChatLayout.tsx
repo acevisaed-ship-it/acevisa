@@ -132,7 +132,9 @@ export function ChatLayout({
   }, [clientId])
 
   // ── Poll for counselor messages every 5s ──────────────────────────────
-  // Picks up messages inserted by the counselor's direct chat view
+  // History is the source of truth. We replace with the full history but
+  // preserve any optimistic messages newer than the last history timestamp
+  // (e.g. a student message sent but not yet stored in DB).
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
@@ -140,11 +142,13 @@ export function ChatLayout({
         const data = await res.json()
         if (!data.messages?.length) return
         setMessages((prev) => {
-          // Only add genuinely new messages (by id)
-          const existingIds = new Set(prev.map((m) => m.id))
-          const incoming = data.messages.filter((m: ChatMessage) => !existingIds.has(m.id))
-          if (!incoming.length) return prev
-          return [...prev, ...incoming]
+          const historyIds = new Set(data.messages.map((m: ChatMessage) => m.id))
+          const lastHistoryTime = data.messages[data.messages.length - 1]?.timestamp ?? '0'
+          // Keep purely optimistic messages that are newer than history (not yet in DB)
+          const pending = prev.filter(
+            (m) => !historyIds.has(m.id) && m.timestamp > lastHistoryTime
+          )
+          return [...data.messages, ...pending]
         })
       } catch {
         // Polling failure is non-fatal
