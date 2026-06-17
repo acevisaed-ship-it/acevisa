@@ -16,13 +16,7 @@ type Props = {
 
 export function ProgressStrip({ currentStage }: Props) {
   return (
-    <div
-      className="flex items-center gap-0 border-b px-4 py-2.5"
-      style={{
-        background: 'rgba(238,238,237,0.08)',
-        borderColor: 'rgba(255,255,255,0.12)',
-      }}
-    >
+    <div className="flex items-center gap-0 px-4 py-2.5">
       {STAGES.map((s, i) => {
         const done = s.stage < currentStage
         const active = s.stage === currentStage

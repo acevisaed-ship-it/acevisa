@@ -90,10 +90,15 @@
 
 html,
 body {
-  overflow-x: hidden;
-  max-width: 100vw;
   /* Prevent pull-to-refresh on mobile */
   overscroll-behavior: none;
+}
+
+/* Clip horizontal overflow without creating a scroll container.
+   overflow-x: hidden on html/body locks vertical scroll on iOS Safari — use
+   overflow-x: clip instead, which clamps overflow without side-effects. */
+body {
+  overflow-x: clip;
 }
 
 /* ── Hide all scrollbars globally (web + mobile) ──────────────────── */

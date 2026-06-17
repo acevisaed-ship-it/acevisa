@@ -200,7 +200,7 @@ export function ChatLayout({
   // ── Chat thread ────────────────────────────────────────────────────────
   const chatThread = (
     <div className="flex h-full min-h-0 flex-1 flex-col">
-      {/* Progress strip */}
+      {/* Progress strip — no card, just dots + line */}
       <ProgressStrip currentStage={stage} />
 
       {/* Messages */}
@@ -239,7 +239,7 @@ export function ChatLayout({
 
   // ── DESKTOP layout (lg+) ───────────────────────────────────────────────
   const desktopLayout = (
-    <div className="hidden h-full lg:grid lg:grid-cols-[280px_1fr_260px]">
+    <div className="hidden h-full lg:grid lg:grid-cols-[25%_50%_25%]">
 
       {/* Left panel */}
       <aside className="flex min-h-0 flex-col overflow-hidden">
