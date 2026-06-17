@@ -72,8 +72,7 @@ export function UpdatesFeed({ clientId }: Props) {
   }, [clientId])
 
   return (
-    <div className="flex h-full flex-col gap-3 overflow-y-auto p-3">
-      <div className="rounded-2xl p-3" style={glassPanel}>
+    <div className="rounded-2xl p-3" style={glassPanel}>
         <div className="mb-3 flex items-center gap-2">
           <AlertCircle className="h-4 w-4 text-white/60" />
           <span className="text-sm font-semibold text-white">Updates</span>
@@ -118,7 +117,6 @@ export function UpdatesFeed({ clientId }: Props) {
             })}
           </div>
         )}
-      </div>
     </div>
   )
 }

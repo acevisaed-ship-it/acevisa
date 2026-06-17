@@ -81,9 +81,7 @@ export function ChatBubble({ message }: Props) {
   // ── Card style per sender ─────────────────────────────────────────
   const cardStyle: React.CSSProperties = isAi
     ? {
-        background: 'rgba(10,63,58,0.80)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
+        background: 'linear-gradient(145deg, #35a5e0 0%, #2083B9 55%, #176fa0 100%)',
         boxShadow: '0 2px 12px rgba(0,0,0,0.25)',
       }
     : {

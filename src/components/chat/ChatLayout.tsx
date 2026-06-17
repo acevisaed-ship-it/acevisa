@@ -172,12 +172,20 @@ export function ChatLayout({
 
   // ── Chat thread ────────────────────────────────────────────────────────
   const chatThread = (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex h-full min-h-0 flex-1 flex-col">
       {/* Progress strip */}
       <ProgressStrip currentStage={stage} />
 
       {/* Messages */}
-      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-4" style={{ overscrollBehavior: 'contain', touchAction: 'pan-y' }}>
+      <div
+        className="flex min-h-0 flex-1 flex-col gap-3 px-4 py-4"
+        style={{
+          overflowY: 'scroll',
+          overscrollBehavior: 'contain',
+          touchAction: 'pan-y',
+          WebkitOverflowScrolling: 'touch',
+        } as React.CSSProperties}
+      >
         {messages.length === 0 && !isLoading && (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
             <MessageCircle className="h-10 w-10 text-white/20" />
@@ -231,7 +239,7 @@ export function ChatLayout({
       <main className="flex min-h-0 flex-col overflow-hidden">
         {/* Header */}
         <div
-          className="flex shrink-0 items-center gap-3 px-5 py-3"
+          className="mx-3 mt-3 flex shrink-0 items-center gap-3 rounded-2xl px-5 py-3"
           style={glassPanel}
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
@@ -253,9 +261,7 @@ export function ChatLayout({
         </div>
         <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3" style={{ overscrollBehavior: 'contain' }}>
           <ApplicationCard currentStage={stage} />
-          <div className="min-h-0 flex-1">
-            <UpdatesFeed clientId={clientId} />
-          </div>
+          <UpdatesFeed clientId={clientId} />
         </div>
       </aside>
     </div>
