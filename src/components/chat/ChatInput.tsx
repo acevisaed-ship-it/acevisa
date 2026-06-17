@@ -127,21 +127,35 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       audioChunksRef.current = []
-      const mr = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' })
+
+      // Pick the best supported mimeType for this browser/device
+      // Safari (iOS/macOS) only supports audio/mp4 — webm is Chrome/Firefox only
+      const mimeType = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/ogg;codecs=opus',
+        'audio/mp4',
+      ].find((t) => MediaRecorder.isTypeSupported(t)) ?? ''
+
+      const mr = new MediaRecorder(stream, mimeType ? { mimeType } : undefined)
       mediaRecorderRef.current = mr
 
       mr.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data) }
       mr.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop())
         if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
-        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm;codecs=opus' })
+
+        const actualMime = mr.mimeType || mimeType || 'audio/webm'
+        const ext = actualMime.includes('mp4') ? 'mp4' : actualMime.includes('ogg') ? 'ogg' : 'webm'
+        const blob = new Blob(audioChunksRef.current, { type: actualMime })
         if (blob.size < 1000) { setRecording(false); setRecordSeconds(0); return }
 
         setVoiceUploading(true); setRecording(false); setRecordSeconds(0)
         try {
           const fd = new FormData()
           fd.append('clientId', clientId)
-          fd.append('audio', blob, `voice-${Date.now()}.webm`)
+          fd.append('mimeType', actualMime)
+          fd.append('audio', blob, `voice-${Date.now()}.${ext}`)
           const res  = await fetch('/api/chat/voice', { method: 'POST', body: fd })
           const data = await res.json()
           if (!res.ok) throw new Error(data.error || 'Upload failed')
@@ -154,7 +168,7 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
       mr.start(250); setRecording(true); setRecordSeconds(0)
       timerRef.current = setInterval(() => setRecordSeconds((s) => s + 1), 1000)
     } catch {
-      alert('Microphone access denied.')
+      alert('Microphone access denied. Please allow microphone permission and try again.')
     }
   }, [clientId, onAttachmentSent])
 

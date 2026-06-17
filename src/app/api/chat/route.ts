@@ -2,9 +2,11 @@ import { runBehavioralAnalysis } from '@/lib/behavioralAnalysis'
 import { logActivity } from '@/lib/activityLog'
 import {
   ACE_MASTER_SYSTEM_PROMPT,
+  ACE_CONVERSATION_STYLE_RULES,
   POST_CONVERSATION_PROFILE_PROMPT,
   SPECIALIST_PROMPTS,
 } from '@/lib/acePrompts'
+import { ACE_KNOWLEDGE_BASE } from '@/lib/aceKnowledge'
 import { anthropic, PROMPT_CACHE_BETA } from '@/lib/anthropic'
 import {
   countFearSignals,
@@ -560,24 +562,11 @@ Use this context to make your opening message highly relevant to their specific 
     .eq('client_id', clientId)
     .maybeSingle()
 
-  const [
-    { data: knowledgeBase },
-    { data: activeObjectives },
-  ] = await Promise.all([
-    supabase.from('knowledge_base').select('category, topic, answer').eq('is_active', true),
-    supabase
-      .from('counselor_objectives')
-      .select('objective_text, plan_text')
-      .eq('client_id', clientId)
-      .eq('status', 'active'),
-  ])
-
-  const kbContext =
-    knowledgeBase && knowledgeBase.length > 0
-      ? knowledgeBase
-          .map((kb) => `[${kb.category}] ${kb.topic}: ${kb.answer}`)
-          .join('\n')
-      : 'Knowledge base is currently empty.'
+  const { data: activeObjectives } = await supabase
+    .from('counselor_objectives')
+    .select('objective_text, plan_text')
+    .eq('client_id', clientId)
+    .eq('status', 'active')
 
   const objectivesContext =
     activeObjectives && activeObjectives.length > 0
@@ -606,17 +595,27 @@ Use this context to make your opening message highly relevant to their specific 
       max_tokens: 1024,
       system: [
         {
+          // Block 1 — cached: master identity, psychology, compliance rules
           type: 'text',
           text: ACE_MASTER_SYSTEM_PROMPT,
           cache_control: { type: 'ephemeral' },
         },
         {
+          // Block 2 — cached: conversation style rules
           type: 'text',
-          text: `KNOWLEDGE BASE:\n${kbContext}${objectivesContext}`,
+          text: ACE_CONVERSATION_STYLE_RULES,
+          cache_control: { type: 'ephemeral' },
         },
         {
+          // Block 3 — cached: knowledge base (products, countries, universities, fees)
           type: 'text',
-          text: clientContext,
+          text: ACE_KNOWLEDGE_BASE,
+          cache_control: { type: 'ephemeral' },
+        },
+        {
+          // Block 4 — NOT cached: per-client dynamic context
+          type: 'text',
+          text: `${objectivesContext ? objectivesContext + '\n' : ''}${clientContext}`,
         },
       ],
       messages: conversationMessages,

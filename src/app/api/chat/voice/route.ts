@@ -22,14 +22,18 @@ export async function POST(request: Request) {
     .single()
   if (!client) return NextResponse.json({ error: 'Client not found' }, { status: 404 })
 
+  // Use the actual mimeType sent by the client (varies by browser/device)
+  const mimeType = (formData.get('mimeType') as string | null) || audio.type || 'audio/webm'
+  const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('ogg') ? 'ogg' : 'webm'
+
   // Upload audio blob to Supabase storage
   const timestamp = Date.now()
-  const storagePath = `${clientId}/voice-${timestamp}.webm`
+  const storagePath = `${clientId}/voice-${timestamp}.${ext}`
   const bytes = await audio.arrayBuffer()
 
   const { error: uploadError } = await supabase.storage
     .from('chat-attachments')
-    .upload(storagePath, bytes, { contentType: 'audio/webm', upsert: false })
+    .upload(storagePath, bytes, { contentType: mimeType, upsert: false })
 
   if (uploadError) {
     console.error('[chat/voice] storage error:', uploadError)
@@ -52,7 +56,7 @@ export async function POST(request: Request) {
       sender: 'student',
       stage_tag: 'voice_note',
       attachment_url: audioUrl,
-      attachment_name: `voice-${timestamp}.webm`,
+      attachment_name: `voice-${timestamp}.${ext}`,
       attachment_type: 'audio',
     })
     .select('id, message_text, sender, timestamp, attachment_url, attachment_name, attachment_type')
