@@ -4,13 +4,14 @@ export type PipelineStage = 1 | 2 | 3 | 4 | 5 | 6 | 7
 
 export type ClientLanguage = 'urdu' | 'english' | 'punjabi' | 'sindhi' | 'pashto'
 
-export type ConversationSender = 'ai' | 'student'
+export type ConversationSender = 'ai' | 'student' | 'counselor'
 
 export type ChatAttachmentType = 'image' | 'pdf' | 'document' | 'archive' | 'audio'
 
 export type ChatMessage = {
   id: string
-  sender: 'ai' | 'student'
+  sender: 'ai' | 'student' | 'counselor'
+  counselor_name?: string | null
   message_text: string
   timestamp: string
   stage_tag?: string
@@ -78,6 +79,7 @@ export type Conversation = {
   client_id: string
   message_text: string
   sender: ConversationSender
+  counselor_name?: string | null
   timestamp: string
   stage_tag: string | null
   attachment_url?: string | null

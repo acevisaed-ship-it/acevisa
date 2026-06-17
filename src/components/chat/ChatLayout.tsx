@@ -131,6 +131,28 @@ export function ChatLayout({
     loadHistory()
   }, [clientId])
 
+  // ── Poll for counselor messages every 5s ──────────────────────────────
+  // Picks up messages inserted by the counselor's direct chat view
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/chat/history?clientId=${clientId}`)
+        const data = await res.json()
+        if (!data.messages?.length) return
+        setMessages((prev) => {
+          // Only add genuinely new messages (by id)
+          const existingIds = new Set(prev.map((m) => m.id))
+          const incoming = data.messages.filter((m: ChatMessage) => !existingIds.has(m.id))
+          if (!incoming.length) return prev
+          return [...prev, ...incoming]
+        })
+      } catch {
+        // Polling failure is non-fatal
+      }
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [clientId])
+
   // ── Auto-scroll to bottom ──────────────────────────────────────────────
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -219,7 +241,7 @@ export function ChatLayout({
             <p className="text-sm text-white/40">Starting your session…</p>
           </div>
         )}
-        {messages.map((msg) => <ChatBubble key={msg.id} message={msg} />)}
+        {messages.map((msg) => <ChatBubble key={msg.id} message={msg} counselorName={counselorName} />)}
         {isLoading && <TypingIndicator />}
         <div ref={bottomRef} />
       </div>
@@ -243,9 +265,10 @@ export function ChatLayout({
 
       {/* Left panel */}
       <aside className="flex min-h-0 flex-col overflow-hidden">
-        <div className="flex items-center gap-3 px-4 py-3">
-          <img src="/logo.png" alt="ACE" className="h-7 w-auto" />
-          <span className="text-sm font-bold text-white/80">ACE Altius</span>
+        <div className="flex items-center px-4 py-3">
+          <div className="flex items-center justify-center rounded-xl bg-white px-2 py-1">
+            <img src="/logo.png" alt="ACE" className="h-7 w-auto" />
+          </div>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
           <div className="flex flex-col gap-3 p-3">
@@ -269,8 +292,8 @@ export function ChatLayout({
           className="mx-3 mt-3 flex shrink-0 items-center gap-3 rounded-2xl px-5 py-3"
           style={glassPanel}
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
-            <MessageCircle className="h-4 w-4 text-white/70" />
+          <div className="flex items-center justify-center rounded-xl bg-white px-2 py-1">
+            <img src="/logo.png" alt="ACE" className="h-7 w-auto" />
           </div>
           <div>
             <p className="text-sm font-semibold text-white">ACE AI Counselor</p>

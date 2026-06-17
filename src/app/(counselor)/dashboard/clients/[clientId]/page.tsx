@@ -93,7 +93,16 @@ export default async function ClientRecordPage({ params }: Props) {
           >
             ← Back to dashboard
           </Link>
-          <CopyPortalLink clientId={clientId} />
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/dashboard/clients/${clientId}/chat`}
+              className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ background: 'linear-gradient(145deg, #f5a24e 0%, #E48328 55%, #ca7220 100%)' }}
+            >
+              💬 Chat with Student
+            </Link>
+            <CopyPortalLink clientId={clientId} />
+          </div>
         </div>
 
         <ClientProfileHeader client={typedClient} score={score} />

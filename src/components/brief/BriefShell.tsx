@@ -94,7 +94,7 @@ export function BriefShell({
 
           <BriefCard>
             <div className="flex min-h-[50vh] flex-col lg:min-h-0">
-              <StrategyChat clientId={client.id} />
+              <StrategyChat clientId={client.id} clientName={client.name} />
             </div>
           </BriefCard>
         </div>

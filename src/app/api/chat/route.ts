@@ -318,13 +318,18 @@ export async function POST(request: Request) {
   const { data: client } = await supabase
     .from('clients')
     .select(
-      'name, language, city, qualification_score, counselor_id, ad_source, pipeline_stage'
+      'name, language, city, qualification_score, counselor_id, ad_source, pipeline_stage, counselor_active'
     )
     .eq('id', clientId)
     .single()
 
   if (!client) {
     return NextResponse.json({ error: 'Client not found' }, { status: 404 })
+  }
+
+  // ── If counselor is live in chat, AI stays silent ──────────────────────
+  if (!isInit && client.counselor_active) {
+    return NextResponse.json({ type: 'counselor_active', content: null, message: null })
   }
 
   let campaignContext = ''
@@ -555,10 +560,17 @@ Use this context to make your opening message highly relevant to their specific 
     .eq('client_id', clientId)
     .maybeSingle()
 
-  const { data: knowledgeBase } = await supabase
-    .from('knowledge_base')
-    .select('category, topic, answer')
-    .eq('is_active', true)
+  const [
+    { data: knowledgeBase },
+    { data: activeObjectives },
+  ] = await Promise.all([
+    supabase.from('knowledge_base').select('category, topic, answer').eq('is_active', true),
+    supabase
+      .from('counselor_objectives')
+      .select('objective_text, plan_text')
+      .eq('client_id', clientId)
+      .eq('status', 'active'),
+  ])
 
   const kbContext =
     knowledgeBase && knowledgeBase.length > 0
@@ -566,6 +578,11 @@ Use this context to make your opening message highly relevant to their specific 
           .map((kb) => `[${kb.category}] ${kb.topic}: ${kb.answer}`)
           .join('\n')
       : 'Knowledge base is currently empty.'
+
+  const objectivesContext =
+    activeObjectives && activeObjectives.length > 0
+      ? `\nACTIVE COUNSELOR OBJECTIVES — pursue these naturally through conversation without ever stating them explicitly:\n${activeObjectives.map((o, i) => `${i + 1}. ${o.objective_text}${o.plan_text ? `\n   Strategy: ${o.plan_text}` : ''}`).join('\n')}`
+      : ''
 
   const conversationMessages = isInit
     ? [{ role: 'user' as const, content: 'The student has just joined the chat.' }]
@@ -595,7 +612,7 @@ Use this context to make your opening message highly relevant to their specific 
         },
         {
           type: 'text',
-          text: `KNOWLEDGE BASE:\n${kbContext}`,
+          text: `KNOWLEDGE BASE:\n${kbContext}${objectivesContext}`,
         },
         {
           type: 'text',

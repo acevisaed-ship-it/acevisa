@@ -3,6 +3,7 @@ import type { ChatMessage, ChatAttachmentType } from '@/types'
 
 type Props = {
   message: ChatMessage
+  counselorName?: string | null
 }
 
 function AttachmentPreview({
@@ -66,8 +67,26 @@ function AttachmentPreview({
   )
 }
 
-export function ChatBubble({ message }: Props) {
+const AI_STYLE: React.CSSProperties = {
+  background: 'linear-gradient(145deg, #35a5e0 0%, #2083B9 55%, #176fa0 100%)',
+  boxShadow: '0 2px 12px rgba(0,0,0,0.25)',
+}
+
+const STUDENT_STYLE: React.CSSProperties = {
+  background: 'rgba(183,199,51,0.92)',
+  boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+}
+
+const COUNSELOR_STYLE: React.CSSProperties = {
+  background: 'linear-gradient(145deg, #f5a24e 0%, #E48328 55%, #ca7220 100%)',
+  boxShadow: '0 2px 12px rgba(0,0,0,0.25)',
+}
+
+export function ChatBubble({ message, counselorName }: Props) {
   const isAi = message.sender === 'ai'
+  const isCounselor = message.sender === 'counselor'
+  const isStudent = message.sender === 'student'
+
   const time = new Date(message.timestamp).toLocaleTimeString('en-PK', {
     hour: '2-digit',
     minute: '2-digit',
@@ -78,22 +97,33 @@ export function ChatBubble({ message }: Props) {
 
   const isFilePlaceholder = /^\[File: .+\]$/.test(message.message_text)
 
-  // ── Card style per sender ─────────────────────────────────────────
-  const cardStyle: React.CSSProperties = isAi
-    ? {
-        background: 'linear-gradient(145deg, #35a5e0 0%, #2083B9 55%, #176fa0 100%)',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.25)',
-      }
-    : {
-        background: 'rgba(183,199,51,0.92)',  /* --green at high opacity */
-        boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
-      }
+  const cardStyle = isAi
+    ? AI_STYLE
+    : isCounselor
+    ? COUNSELOR_STYLE
+    : STUDENT_STYLE
+
+  // counselor + ai align left; student aligns right
+  const alignLeft = isAi || isCounselor
+
+  // text colour
+  const textColor = isStudent ? 'font-semibold text-[#0A3F3A]' : 'text-white'
+
+  // counselor name to display (from message record or prop fallback)
+  const displayName = message.counselor_name ?? counselorName ?? 'Your Counselor'
 
   return (
-    <div className={`flex flex-col gap-0.5 ${isAi ? 'items-start' : 'items-end'}`}>
+    <div className={`flex flex-col gap-0.5 ${alignLeft ? 'items-start' : 'items-end'}`}>
+      {/* Counselor name label */}
+      {isCounselor && (
+        <span className="px-1 text-[10px] font-semibold" style={{ color: '#f5a24e' }}>
+          {displayName}
+        </span>
+      )}
+
       {hasAttachment && (
         <div
-          className={`max-w-[80%] overflow-hidden rounded-2xl px-3 py-2.5 ${isAi ? 'text-white' : 'text-[#0A3F3A]'}`}
+          className={`max-w-[80%] overflow-hidden rounded-2xl px-3 py-2.5 ${textColor}`}
           style={cardStyle}
         >
           <AttachmentPreview
@@ -106,16 +136,14 @@ export function ChatBubble({ message }: Props) {
 
       {!isFilePlaceholder && (
         <div
-          className={`max-w-[80%] overflow-hidden rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-            isAi ? 'text-white' : 'font-semibold text-[#0A3F3A]'
-          }`}
+          className={`max-w-[80%] overflow-hidden rounded-2xl px-4 py-3 text-sm leading-relaxed ${textColor}`}
           style={cardStyle}
         >
           {message.message_text}
         </div>
       )}
 
-      <span className={`px-1 text-[10px] text-white/40`}>{time}</span>
+      <span className="px-1 text-[10px] text-white/40">{time}</span>
     </div>
   )
 }
