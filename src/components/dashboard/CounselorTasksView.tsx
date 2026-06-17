@@ -41,7 +41,7 @@ export function CounselorTasksView({ tasksApiUrl, readOnly = false }: Props) {
   return (
     <>
       {loading ? (
-        <p className="text-text/60">Loading tasks…</p>
+        <p className="text-white/50">Loading tasks…</p>
       ) : (
         <TaskPanel tasks={tasks} onTaskClick={setSelectedTask} />
       )}

@@ -115,27 +115,24 @@ export function CounselorChatLayout({
   }
 
   return (
-    <div className="flex h-screen flex-col bg-bg">
+    <div className="flex h-screen flex-col">
       {/* Header */}
-      <div
-        className="flex shrink-0 items-center gap-3 border-b border-text/10 px-4 py-3"
-        style={{ background: 'rgba(0,0,0,0.04)' }}
-      >
+      <div className="flex shrink-0 items-center gap-3 border-b border-white/10 bg-white/5 px-4 py-3">
         <Link
           href={`/dashboard/clients/${clientId}`}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-text/10 transition-colors hover:border-text/30"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-white/15 transition-colors hover:border-white/30"
         >
-          <ArrowLeft className="h-4 w-4 text-text" />
+          <ArrowLeft className="h-4 w-4 text-white/70" />
         </Link>
         <div
           className="flex h-8 w-8 items-center justify-center rounded-full"
-          style={{ background: 'rgba(245,162,78,0.15)' }}
+          style={{ background: 'rgba(245,162,78,0.20)' }}
         >
           <User className="h-4 w-4" style={{ color: '#f5a24e' }} />
         </div>
         <div>
-          <p className="text-sm font-semibold text-text">{clientName}</p>
-          <p className="text-[10px] text-text/50">Chatting as {counselorName}</p>
+          <p className="text-sm font-semibold text-white">{clientName}</p>
+          <p className="text-[10px] text-white/50">Chatting as {counselorName}</p>
         </div>
         <div className="ml-auto flex items-center gap-1.5 rounded-full px-2.5 py-1" style={{ background: 'rgba(245,162,78,0.12)', border: '1px solid rgba(245,162,78,0.25)' }}>
           <span className="h-1.5 w-1.5 rounded-full bg-orange-400" />
@@ -150,8 +147,8 @@ export function CounselorChatLayout({
       >
         {messages.length === 0 && (
           <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
-            <User className="h-10 w-10 text-text/20" />
-            <p className="text-sm text-text/40">No messages yet. Say hello to {clientName}.</p>
+            <User className="h-10 w-10 text-white/20" />
+            <p className="text-sm text-white/40">No messages yet. Say hello to {clientName}.</p>
           </div>
         )}
         {messages.map((msg) => (
@@ -161,10 +158,7 @@ export function CounselorChatLayout({
       </div>
 
       {/* Input */}
-      <div
-        className="flex shrink-0 items-center gap-3 border-t border-text/10 px-4 py-3"
-        style={{ background: 'rgba(0,0,0,0.04)' }}
-      >
+      <div className="flex shrink-0 items-center gap-3 border-t border-white/10 bg-white/5 px-4 py-3">
         <input
           ref={inputRef}
           type="text"
@@ -173,7 +167,7 @@ export function CounselorChatLayout({
           onKeyDown={handleKeyDown}
           placeholder={`Message ${clientName}…`}
           disabled={isSending}
-          className="min-h-[44px] min-w-0 flex-1 rounded-full border border-text/20 bg-bg px-4 py-2.5 text-sm text-text placeholder:text-text/40 outline-none focus:border-text/40 disabled:opacity-50"
+          className="min-h-[44px] min-w-0 flex-1 rounded-full px-4 py-2.5 text-sm outline-none glass-input placeholder:text-white/30 disabled:opacity-50"
         />
         <button
           type="button"

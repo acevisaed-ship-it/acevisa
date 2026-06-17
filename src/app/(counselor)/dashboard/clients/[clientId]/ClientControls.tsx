@@ -66,12 +66,12 @@ export function ClientControls({ clientId, initialStage, initialNotes }: Props) 
   }
 
   return (
-    <div className="space-y-4 border-t border-text/10 pt-4">
+    <div className="space-y-4 border-t border-white/10 pt-4">
       {/* Pipeline stage */}
       <div>
         <label
           htmlFor="pipeline-stage"
-          className="mb-1 block text-sm font-medium text-text"
+          className="mb-1 block text-sm font-medium text-white/70"
         >
           Pipeline stage
         </label>
@@ -80,7 +80,7 @@ export function ClientControls({ clientId, initialStage, initialNotes }: Props) 
           value={stage}
           disabled={isPending || saving === 'stage'}
           onChange={(e) => handleStageChange(Number(e.target.value))}
-          className="min-h-[48px] w-full rounded-xl border border-text/20 bg-white px-3 py-2 text-sm text-text focus:border-blue focus:outline-none disabled:opacity-50"
+          className="min-h-[48px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input disabled:opacity-50"
         >
           {Object.entries(PIPELINE_STAGES).map(([value, label]) => (
             <option key={value} value={value}>
@@ -94,7 +94,7 @@ export function ClientControls({ clientId, initialStage, initialNotes }: Props) 
       <div>
         <label
           htmlFor="client-notes"
-          className="mb-1 block text-sm font-medium text-text"
+          className="mb-1 block text-sm font-medium text-white/70"
         >
           Internal notes
         </label>
@@ -103,27 +103,27 @@ export function ClientControls({ clientId, initialStage, initialNotes }: Props) 
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={4}
-          className="w-full resize-y rounded-xl border border-text/20 bg-white px-3 py-2 text-sm text-text focus:border-blue focus:outline-none"
+          className="w-full resize-y rounded-xl px-3 py-2 text-sm outline-none glass-input"
           placeholder="Add counselor notes…"
         />
         <button
           type="button"
           disabled={isPending || saving === 'notes'}
           onClick={handleSaveNotes}
-          className="mt-2 min-h-[44px] w-full rounded-full bg-blue px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 sm:w-auto"
+          className="mt-2 min-h-[44px] w-full rounded-full bg-grad-blue crisp-on-dark px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 sm:w-auto"
         >
           {saving === 'notes' ? 'Saving…' : 'Save internal notes'}
         </button>
       </div>
 
       {/* Add update / note with visibility toggle */}
-      <div className="rounded-xl border border-text/10 bg-white p-4">
-        <p className="mb-2 text-sm font-medium text-text">Add update or note</p>
+      <div className="rounded-xl border border-white/10 glass-card p-4">
+        <p className="mb-2 text-sm font-medium text-white/70">Add update or note</p>
         <textarea
           value={updateText}
           onChange={(e) => setUpdateText(e.target.value)}
           rows={3}
-          className="w-full resize-y rounded-xl border border-text/20 bg-bg px-3 py-2 text-sm text-text focus:border-blue focus:outline-none"
+          className="w-full resize-y rounded-xl px-3 py-2 text-sm outline-none glass-input"
           placeholder="Write an update or note…"
         />
 
@@ -134,8 +134,8 @@ export function ClientControls({ clientId, initialStage, initialNotes }: Props) 
             onClick={() => setUpdateVisibility('internal')}
             className={`flex-1 rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
               updateVisibility === 'internal'
-                ? 'border-text/40 bg-text text-white'
-                : 'border-text/20 bg-white text-text hover:bg-text/5'
+                ? 'border-white/20 bg-white/20 text-white'
+                : 'border-white/20 glass-card text-white/50 hover:text-white'
             }`}
           >
             🔒 Internal only
@@ -145,8 +145,8 @@ export function ClientControls({ clientId, initialStage, initialNotes }: Props) 
             onClick={() => setUpdateVisibility('shared')}
             className={`flex-1 rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
               updateVisibility === 'shared'
-                ? 'border-green bg-green text-white'
-                : 'border-text/20 bg-white text-text hover:bg-text/5'
+                ? 'border-green bg-green text-[#0A3F3A]'
+                : 'border-white/20 glass-card text-white/50 hover:text-white'
             }`}
           >
             👁 Share with client

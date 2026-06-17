@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   const supabase = createAdminClient()
   const { data } = await supabase
     .from('conversations')
-    .select('id, message_text, sender, timestamp, attachment_url, attachment_name, attachment_type')
+    .select('id, message_text, sender, counselor_name, timestamp, attachment_url, attachment_name, attachment_type')
     .eq('client_id', clientId)
     .order('timestamp', { ascending: true })
 

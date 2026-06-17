@@ -200,7 +200,7 @@ export function PipelineView({
 
                 <div className="flex flex-col gap-3">
                   {clients.length === 0 ? (
-                    <p className="rounded-2xl border border-dashed border-text/10 px-4 py-6 text-center text-sm text-text/40">
+                    <p className="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-center text-sm text-white/30">
                       No clients
                     </p>
                   ) : (

@@ -41,9 +41,9 @@ export function PendingProfileUpdates({ updates }: Props) {
   }
 
   return (
-    <section className="mb-6 rounded-2xl border-l-4 border-[#E48328] bg-[#E48328]/20 p-5">
-      <h2 className="mb-1 text-lg font-bold text-text">Pending Updates</h2>
-      <p className="mb-4 text-sm text-text/80">
+    <section className="mb-6 rounded-2xl border-l-4 border-orange bg-orange/10 p-5">
+      <h2 className="mb-1 text-lg font-bold text-white">Pending Updates</h2>
+      <p className="mb-4 text-sm text-white/70">
         This student shared new information in chat. Review and approve or reject below.
       </p>
 
@@ -58,9 +58,9 @@ export function PendingProfileUpdates({ updates }: Props) {
           return (
             <div
               key={request.id}
-              className="rounded-xl border border-[#E48328]/30 bg-white/60 p-4"
+              className="rounded-xl border border-orange/20 glass-card p-4"
             >
-              <p className="mb-3 text-xs text-text/60">
+              <p className="mb-3 text-xs text-white/50">
                 From chat: &ldquo;{request.triggered_by_message.substring(0, 120)}
                 {request.triggered_by_message.length > 120 ? '…' : ''}&rdquo;
               </p>
@@ -70,20 +70,20 @@ export function PendingProfileUpdates({ updates }: Props) {
                   return (
                     <li
                       key={field}
-                      className="flex flex-col gap-3 rounded-lg bg-bg px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                      className="flex flex-col gap-3 rounded-lg glass-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-text">
+                        <p className="text-sm font-medium text-white/80">
                           {PROFILE_FIELD_LABELS[field] ?? field}
                         </p>
-                        <p className="text-sm text-text/70">&ldquo;{rawMatch}&rdquo;</p>
+                        <p className="text-sm text-white/60">&ldquo;{rawMatch}&rdquo;</p>
                       </div>
                       <div className="flex shrink-0 gap-2">
                         <button
                           type="button"
                           disabled={busy}
                           onClick={() => handleReview(request.id, field, 'approved')}
-                          className="min-h-[36px] rounded-full bg-blue px-4 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                          className="min-h-[36px] rounded-full bg-grad-blue crisp-on-dark px-4 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
                         >
                           {processing === `${request.id}:${field}:approved`
                             ? '…'
@@ -93,7 +93,7 @@ export function PendingProfileUpdates({ updates }: Props) {
                           type="button"
                           disabled={busy}
                           onClick={() => handleReview(request.id, field, 'rejected')}
-                          className="min-h-[36px] rounded-full border border-text/20 bg-white px-4 py-1.5 text-xs font-medium text-text transition-colors hover:border-text/40 disabled:opacity-50"
+                          className="min-h-[36px] rounded-full border border-white/20 glass-card px-4 py-1.5 text-xs font-medium text-white/60 transition-colors hover:text-white disabled:opacity-50"
                         >
                           {processing === `${request.id}:${field}:rejected`
                             ? '…'

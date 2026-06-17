@@ -3,7 +3,7 @@ import { formatPKTDateLong, getPKTGreeting } from '@/lib/pkt'
 import type { CounselorDashboardData } from '@/lib/dashboard/getCounselorDashboardData'
 import { MeetingCard } from '@/components/dashboard/MeetingCard'
 import { StatCard } from '@/components/dashboard/StatCard'
-import { TaskRow } from '@/components/dashboard/TaskRow'
+import { CollapsableTasksCard } from '@/components/dashboard/CollapsableTasksCard'
 import { ComplaintRow } from '@/components/dashboard/ComplaintRow'
 
 type MeetingRow = CounselorDashboardData['todayMeetings'][number]
@@ -93,23 +93,7 @@ export function DashboardHome({
         )}
       </section>
 
-      <section className="mb-10">
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <h2 className="text-lg font-bold text-text">Open tasks</h2>
-          <Link href={tasksHref} className="text-sm text-white/60 hover:text-white hover:underline">
-            View all
-          </Link>
-        </div>
-        {data.tasks.length === 0 ? (
-          <p className="text-white/50">All clear — no pending tasks.</p>
-        ) : (
-          <div className="space-y-3">
-            {data.tasks.slice(0, 5).map((task) => (
-              <TaskRow key={task.id} taskText={task.task_text} dueDate={task.due_date} />
-            ))}
-          </div>
-        )}
-      </section>
+      <CollapsableTasksCard tasks={data.tasks} tasksHref={tasksHref} />
 
       <section>
         <h2 className="mb-4 text-lg font-bold text-white">Complaints</h2>

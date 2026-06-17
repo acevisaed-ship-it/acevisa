@@ -59,7 +59,7 @@ export function DashboardShell({
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="flex min-h-screen flex-1 flex-col pt-14 lg:pt-0">
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col pt-14 lg:pt-0">
         {/* Desktop top bar */}
         <header className="hidden shrink-0 items-center justify-end gap-3 border-b border-white/10 glass-card px-6 py-3 lg:flex">
           {headerActions}
