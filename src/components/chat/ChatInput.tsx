@@ -5,7 +5,7 @@ import {
 } from 'react'
 import {
   Paperclip, Mic, Square, X,
-  FileText, FileImage, FileArchive, File, Camera, Music,
+  FileText, FileImage, FileArchive, File, Camera, Music, Smile,
 } from 'lucide-react'
 import type { ChatAttachmentType } from '@/types'
 
@@ -32,7 +32,7 @@ function AttachIconSmall({ type }: { type: ChatAttachmentType }) {
   return <File className={cls} />
 }
 
-// ── Attachment bottom sheet ─────────────────────────────────────────────────
+// ── Attachment options ──────────────────────────────────────────────────────
 type SheetOption = {
   label: string
   icon: React.ReactNode
@@ -41,34 +41,51 @@ type SheetOption = {
 }
 
 const SHEET_OPTIONS: SheetOption[] = [
+  { label: 'Camera',   icon: <Camera    className="h-7 w-7" />, accept: 'image/*', capture: 'environment' },
+  { label: 'Gallery',  icon: <FileImage className="h-7 w-7" />, accept: ACCEPT_GALLERY },
+  { label: 'Document', icon: <FileText  className="h-7 w-7" />, accept: ACCEPT_DOCUMENT },
+  { label: 'Audio',    icon: <Music     className="h-7 w-7" />, accept: ACCEPT_AUDIO },
+  { label: 'File',     icon: <File      className="h-7 w-7" />, accept: ACCEPT_ANY },
+]
+
+// ── Emoji data ──────────────────────────────────────────────────────────────
+const EMOJI_CATEGORIES = [
   {
-    label: 'Camera',
-    icon: <Camera className="h-6 w-6" />,
-    accept: 'image/*',
-    capture: 'environment',
+    label: '😊',
+    name: 'Smileys',
+    emojis: ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','😉','😍','🥰','😘','😋','😎','🤩','🥳','😏','😒','😔','😢','😭','😤','😠','🤯','😳','😱','🤗','🤔','🤫','😶','😐','😬','🙄','😴','🥱','😷','🤧'],
   },
   {
-    label: 'Gallery',
-    icon: <FileImage className="h-6 w-6" />,
-    accept: ACCEPT_GALLERY,
+    label: '👋',
+    name: 'Hands',
+    emojis: ['👋','🤚','🖐','✋','🖖','👌','🤌','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','👍','👎','✊','👊','🤛','🤜','👏','🙌','🤝','🙏','💪','✍️','💅'],
   },
   {
-    label: 'Document',
-    icon: <FileText className="h-6 w-6" />,
-    accept: ACCEPT_DOCUMENT,
+    label: '❤️',
+    name: 'Hearts',
+    emojis: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','❤️‍🔥','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟'],
   },
   {
-    label: 'Audio',
-    icon: <Music className="h-6 w-6" />,
-    accept: ACCEPT_AUDIO,
+    label: '🎉',
+    name: 'Fun',
+    emojis: ['🎉','🎊','🥳','🎈','🎁','🎀','🏆','🥇','🎯','🎮','🎲','🎭','🎨','🎬','🎤','🎧','🎸','🎹','🥁','🎷','✨','💫','⭐','🌟','🔥','💥','🎆','🎇','🪄','🎩'],
   },
   {
-    label: 'File',
-    icon: <File className="h-6 w-6" />,
-    accept: ACCEPT_ANY,
+    label: '🌸',
+    name: 'Nature',
+    emojis: ['🌸','🌺','🌻','🌹','🌷','🌼','💐','🍀','🌿','🌱','🌊','🌈','☀️','🌙','⭐','❄️','☃️','🌬️','🔥','💧','🍎','🍊','🍋','🍇','🍓','🍕','🍔','🍟','☕','🍵'],
   },
 ]
 
+// ── Shared panel shell ──────────────────────────────────────────────────────
+const ORANGE = 'linear-gradient(145deg, #f5a24e 0%, #E48328 55%, #ca7220 100%)'
+const PANEL_BG: React.CSSProperties = {
+  background: 'rgba(4,22,20,0.97)',
+  backdropFilter: 'blur(24px)',
+  WebkitBackdropFilter: 'blur(24px)',
+}
+
+// ── Props ───────────────────────────────────────────────────────────────────
 type Props = {
   clientId: string
   value: string
@@ -82,16 +99,18 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
   { clientId, value, onChange, onSend, onAttachmentSent, disabled = false },
   ref,
 ) {
-  // ── Attachment sheet state ──────────────────────────────────────────────
-  const [sheetOpen, setSheetOpen]   = useState(false)
-  const [pendingFile, setPendingFile] = useState<File | null>(null)
-  const [uploading, setUploading]   = useState(false)
-  const [uploadError, setUploadError] = useState<string | null>(null)
+  // ── Panel state ─────────────────────────────────────────────────────────
+  const [sheetOpen, setSheetOpen]     = useState(false)
+  const [emojiOpen, setEmojiOpen]     = useState(false)
+  const [emojiTab, setEmojiTab]       = useState(0)
 
-  // One hidden file input per sheet option
+  // ── File / upload state ─────────────────────────────────────────────────
+  const [pendingFile, setPendingFile]   = useState<File | null>(null)
+  const [uploading, setUploading]       = useState(false)
+  const [uploadError, setUploadError]   = useState<string | null>(null)
   const fileRefs = useRef<(HTMLInputElement | null)[]>([])
 
-  // ── Voice recording ─────────────────────────────────────────────────────
+  // ── Voice state ─────────────────────────────────────────────────────────
   const [recording, setRecording]         = useState(false)
   const [recordSeconds, setRecordSeconds] = useState(0)
   const [voiceUploading, setVoiceUploading] = useState(false)
@@ -101,6 +120,9 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
 
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current) }, [])
 
+  const closeAll = () => { setSheetOpen(false); setEmojiOpen(false) }
+
+  // ── Voice recording ──────────────────────────────────────────────────────
   const startRecording = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -108,77 +130,64 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
       const mr = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' })
       mediaRecorderRef.current = mr
 
-      mr.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunksRef.current.push(e.data)
-      }
-
+      mr.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data) }
       mr.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop())
         if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
         const blob = new Blob(audioChunksRef.current, { type: 'audio/webm;codecs=opus' })
         if (blob.size < 1000) { setRecording(false); setRecordSeconds(0); return }
 
-        setVoiceUploading(true)
-        setRecording(false)
-        setRecordSeconds(0)
+        setVoiceUploading(true); setRecording(false); setRecordSeconds(0)
         try {
           const fd = new FormData()
           fd.append('clientId', clientId)
           fd.append('audio', blob, `voice-${Date.now()}.webm`)
-          const res = await fetch('/api/chat/voice', { method: 'POST', body: fd })
+          const res  = await fetch('/api/chat/voice', { method: 'POST', body: fd })
           const data = await res.json()
           if (!res.ok) throw new Error(data.error || 'Upload failed')
           onAttachmentSent?.(data.studentMessage, data.aiMessage)
         } catch (err) {
           setUploadError(err instanceof Error ? err.message : 'Voice upload failed')
-        } finally {
-          setVoiceUploading(false)
-        }
+        } finally { setVoiceUploading(false) }
       }
 
-      mr.start(250)
-      setRecording(true)
-      setRecordSeconds(0)
+      mr.start(250); setRecording(true); setRecordSeconds(0)
       timerRef.current = setInterval(() => setRecordSeconds((s) => s + 1), 1000)
     } catch {
-      alert('Microphone access denied. Please allow microphone access to send voice notes.')
+      alert('Microphone access denied.')
     }
   }, [clientId, onAttachmentSent])
 
-  const stopRecording = useCallback(() => {
-    mediaRecorderRef.current?.stop()
-  }, [])
+  const stopRecording = useCallback(() => { mediaRecorderRef.current?.stop() }, [])
 
-  // ── File selection from sheet ──────────────────────────────────────────
+  // ── File selection ───────────────────────────────────────────────────────
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     if (file.size > 10 * 1024 * 1024) { setUploadError('File must be 10 MB or less'); return }
-    setUploadError(null)
-    setPendingFile(file)
-    setSheetOpen(false)
-    e.target.value = ''
+    setUploadError(null); setPendingFile(file); closeAll(); e.target.value = ''
   }
 
-  // ── Upload pending file ─────────────────────────────────────────────────
   const handleUpload = async () => {
     if (!pendingFile) return
-    setUploading(true)
-    setUploadError(null)
+    setUploading(true); setUploadError(null)
     try {
       const fd = new FormData()
-      fd.append('clientId', clientId)
-      fd.append('file', pendingFile)
-      const res = await fetch('/api/chat/upload', { method: 'POST', body: fd })
+      fd.append('clientId', clientId); fd.append('file', pendingFile)
+      const res  = await fetch('/api/chat/upload', { method: 'POST', body: fd })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Upload failed')
       onAttachmentSent?.(data.studentMessage, data.aiMessage)
       setPendingFile(null)
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Upload failed')
-    } finally {
-      setUploading(false)
-    }
+    } finally { setUploading(false) }
+  }
+
+  // ── Emoji insert ────────────────────────────────────────────────────────
+  const insertEmoji = (emoji: string) => {
+    onChange(value + emoji)
+    ;(ref as React.RefObject<HTMLInputElement>)?.current?.focus()
   }
 
   const handleSubmit = (e: FormEvent) => {
@@ -191,44 +200,52 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
 
   const formatSeconds = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
   const busy = disabled || uploading || voiceUploading
+  const anyPanelOpen = sheetOpen || emojiOpen
 
   return (
     <>
-      {/* ── Attachment bottom sheet ───────────────────────────────────── */}
+      {/* ── Shared backdrop ───────────────────────────────────────────── */}
+      {anyPanelOpen && (
+        <div className="fixed inset-0 z-40" onClick={closeAll} aria-hidden="true" />
+      )}
+
+      {/* ── Attachment panel ──────────────────────────────────────────── */}
       {sheetOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setSheetOpen(false)}
-            aria-hidden="true"
-          />
-          {/* Sheet */}
-          <div
-            className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-4"
-            style={{ background: 'rgba(6,50,46,0.96)', backdropFilter: 'blur(20px)' }}
-          >
-            {/* Drag handle */}
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/20" />
-            <p className="mb-4 text-center text-xs font-semibold uppercase tracking-widest text-white/40">
-              Attach
-            </p>
-            <div className="grid grid-cols-5 gap-3">
-              {SHEET_OPTIONS.map((opt, i) => (
-                <button
-                  key={opt.label}
-                  type="button"
-                  onClick={() => fileRefs.current[i]?.click()}
-                  className="flex flex-col items-center gap-2 rounded-xl px-1 py-3 text-white/70 transition-colors hover:bg-white/10 active:bg-white/15"
-                >
-                  {opt.icon}
-                  <span className="text-[10px] font-medium leading-none">{opt.label}</span>
-                </button>
-              ))}
-            </div>
+        <div
+          className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl"
+          style={PANEL_BG}
+        >
+          {/* Drag handle */}
+          <div className="mx-auto mt-3 h-1 w-12 rounded-full bg-white/20" />
+
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 pb-2 pt-4">
+            <span className="text-xs font-bold uppercase tracking-widest text-white/40">Attach</span>
+            <button type="button" onClick={() => setSheetOpen(false)} className="text-white/30 hover:text-white/70">
+              <X className="h-4 w-4" />
+            </button>
           </div>
 
-          {/* Hidden file inputs — one per option */}
+          {/* Option cards */}
+          <div className="grid grid-cols-5 gap-2.5 px-4 pb-4">
+            {SHEET_OPTIONS.map((opt, i) => (
+              <button
+                key={opt.label}
+                type="button"
+                onClick={() => fileRefs.current[i]?.click()}
+                className="flex flex-col items-center gap-2 rounded-2xl py-4 transition-opacity active:opacity-80"
+                style={{ background: ORANGE }}
+              >
+                <span className="text-white">{opt.icon}</span>
+                <span className="text-[10px] font-bold uppercase tracking-wide text-white">{opt.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Safe area */}
+          <div style={{ height: 'env(safe-area-inset-bottom, 0px)' }} />
+
+          {/* Hidden file inputs */}
           {SHEET_OPTIONS.map((opt, i) => (
             <input
               key={opt.label}
@@ -240,7 +257,66 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
               onChange={handleFileChange}
             />
           ))}
-        </>
+        </div>
+      )}
+
+      {/* ── Emoji picker panel ────────────────────────────────────────── */}
+      {emojiOpen && (
+        <div
+          className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl"
+          style={PANEL_BG}
+        >
+          {/* Drag handle */}
+          <div className="mx-auto mt-3 h-1 w-12 rounded-full bg-white/20" />
+
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 pb-2 pt-4">
+            <span className="text-xs font-bold uppercase tracking-widest text-white/40">Emoji</span>
+            <button type="button" onClick={() => setEmojiOpen(false)} className="text-white/30 hover:text-white/70">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Category tabs */}
+          <div className="flex gap-2 overflow-x-auto px-4 pb-3" style={{ scrollbarWidth: 'none' }}>
+            {EMOJI_CATEGORIES.map((cat, i) => (
+              <button
+                key={cat.name}
+                type="button"
+                onClick={() => setEmojiTab(i)}
+                className="flex shrink-0 items-center gap-1.5 rounded-2xl px-3 py-2 text-xs font-bold transition-opacity active:opacity-80"
+                style={
+                  emojiTab === i
+                    ? { background: ORANGE, color: 'white' }
+                    : { background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.5)' }
+                }
+              >
+                <span>{cat.label}</span>
+                <span className="hidden sm:inline">{cat.name}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Emoji grid */}
+          <div
+            className="grid grid-cols-8 gap-1 overflow-y-auto px-4 pb-2"
+            style={{ maxHeight: '200px', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+          >
+            {EMOJI_CATEGORIES[emojiTab].emojis.map((emoji) => (
+              <button
+                key={emoji}
+                type="button"
+                onClick={() => insertEmoji(emoji)}
+                className="flex items-center justify-center rounded-xl py-2 text-2xl transition-colors hover:bg-white/10 active:bg-white/20"
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+
+          {/* Safe area */}
+          <div style={{ height: 'env(safe-area-inset-bottom, 0px)' }} />
+        </div>
       )}
 
       {/* ── Input bar ─────────────────────────────────────────────────── */}
@@ -251,9 +327,7 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
         {/* Pending file preview */}
         {pendingFile && (
           <div className="flex items-center gap-2 px-4 py-2">
-            <span className="text-white/50">
-              <AttachIconSmall type={getAttachType(pendingFile.type)} />
-            </span>
+            <span className="text-white/50"><AttachIconSmall type={getAttachType(pendingFile.type)} /></span>
             <span className="min-w-0 flex-1 truncate text-xs text-white/70">{pendingFile.name}</span>
             <button
               type="button"
@@ -267,9 +341,7 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
         )}
 
         {/* Error */}
-        {uploadError && (
-          <p className="px-4 pb-1 text-xs text-orange">{uploadError}</p>
-        )}
+        {uploadError && <p className="px-4 pb-1 text-xs text-orange">{uploadError}</p>}
 
         {/* Recording indicator */}
         {recording && (
@@ -280,7 +352,7 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
           </div>
         )}
 
-        {/* Voice uploading indicator */}
+        {/* Voice uploading */}
         {voiceUploading && (
           <div className="flex items-center gap-2 px-4 py-1.5">
             <svg className="h-3 w-3 animate-spin text-white/50" viewBox="0 0 24 24" fill="none">
@@ -291,18 +363,27 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex items-center gap-2.5 px-4 py-3">
-          {/* Attachment trigger */}
+        <form onSubmit={handleSubmit} className="flex items-center gap-2 px-3 py-3">
+          {/* Attach */}
           <button
             type="button"
-            onClick={() => setSheetOpen((v) => !v)}
+            onClick={() => { setEmojiOpen(false); setSheetOpen((v) => !v) }}
             disabled={busy || recording}
             aria-label="Attach file"
-            className={`shrink-0 transition-colors disabled:opacity-20 ${
-              sheetOpen ? 'text-white' : 'text-white/30 hover:text-white/70'
-            }`}
+            className={`shrink-0 transition-colors disabled:opacity-20 ${sheetOpen ? 'text-orange' : 'text-white/30 hover:text-white/70'}`}
           >
             <Paperclip className="h-5 w-5" />
+          </button>
+
+          {/* Emoji */}
+          <button
+            type="button"
+            onClick={() => { setSheetOpen(false); setEmojiOpen((v) => !v) }}
+            disabled={busy || recording}
+            aria-label="Emoji picker"
+            className={`shrink-0 transition-colors disabled:opacity-20 ${emojiOpen ? 'text-orange' : 'text-white/30 hover:text-white/70'}`}
+          >
+            <Smile className="h-5 w-5" />
           </button>
 
           {/* Text input */}
@@ -312,9 +393,9 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={
-              recording      ? 'Recording…'
+              recording       ? 'Recording…'
               : voiceUploading ? 'Sending voice note…'
-              : pendingFile   ? 'Add a caption (optional)'
+              : pendingFile    ? 'Add a caption (optional)'
               : 'Type your message…'
             }
             disabled={busy || recording}
@@ -324,7 +405,7 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
             style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.10)' }}
           />
 
-          {/* Mic — hold to record */}
+          {/* Mic */}
           <button
             type="button"
             onMouseDown={startRecording}
@@ -333,13 +414,9 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
             onTouchEnd={(e) => { e.preventDefault(); stopRecording() }}
             disabled={busy || !!pendingFile}
             aria-label={recording ? 'Stop recording' : 'Hold to record voice note'}
-            className={`shrink-0 transition-all disabled:opacity-20 ${
-              recording ? 'scale-110 text-red-400' : 'text-white/30 hover:text-white/70'
-            }`}
+            className={`shrink-0 transition-all disabled:opacity-20 ${recording ? 'scale-110 text-red-400' : 'text-white/30 hover:text-white/70'}`}
           >
-            {recording
-              ? <Square className="h-5 w-5 fill-current" />
-              : <Mic    className="h-5 w-5" />}
+            {recording ? <Square className="h-5 w-5 fill-current" /> : <Mic className="h-5 w-5" />}
           </button>
 
           {/* Send */}
