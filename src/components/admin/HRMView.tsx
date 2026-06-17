@@ -51,52 +51,52 @@ export function HRMView() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-blue md:text-3xl">HRM — Payroll</h1>
-          <p className="mt-1 text-sm text-text/60">Salary and commission summary</p>
+          <h1 className="text-2xl font-semibold text-white md:text-3xl">HRM — Payroll</h1>
+          <p className="mt-1 text-sm text-white/60">Salary and commission summary</p>
         </div>
         <input
           type="month"
           value={month}
           onChange={(e) => setMonth(e.target.value)}
-          className="rounded-xl border border-text/20 bg-white px-3 py-2 text-sm text-text"
+          className="rounded-xl px-3 py-2 text-sm outline-none glass-input"
         />
       </div>
 
       {loading ? (
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-          {[1, 2, 3].map((i) => <div key={i} className="h-24 animate-pulse rounded-2xl bg-text/5" />)}
+          {[1, 2, 3].map((i) => <div key={i} className="h-24 animate-pulse rounded-2xl glass-card" />)}
         </div>
       ) : (
         <>
           <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-text/10 bg-white p-5">
+            <div className="rounded-2xl border border-white/10 glass-card crisp-on-dark p-5">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-text/60">Base Salaries</p>
-                <Users className="h-5 w-5 text-blue" />
+                <p className="text-sm text-white/60">Base Salaries</p>
+                <Users className="h-5 w-5 text-white/40" />
               </div>
-              <p className="mt-2 text-2xl font-bold text-text">{formatPKR(totalSalaries)}</p>
+              <p className="mt-2 text-2xl font-bold text-white">{formatPKR(totalSalaries)}</p>
             </div>
-            <div className="rounded-2xl border border-text/10 bg-white p-5">
+            <div className="rounded-2xl border border-white/10 glass-card crisp-on-dark p-5">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-text/60">Commissions</p>
+                <p className="text-sm text-white/60">Commissions</p>
                 <TrendingUp className="h-5 w-5 text-green" />
               </div>
-              <p className="mt-2 text-2xl font-bold text-text">{formatPKR(totalCommissions)}</p>
+              <p className="mt-2 text-2xl font-bold text-white">{formatPKR(totalCommissions)}</p>
             </div>
-            <div className="rounded-2xl border border-text/10 bg-white p-5">
+            <div className="rounded-2xl border border-white/10 glass-card crisp-on-dark p-5">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-text/60">Total Payroll</p>
+                <p className="text-sm text-white/60">Total Payroll</p>
                 <DollarSign className="h-5 w-5 text-orange" />
               </div>
               <p className="mt-2 text-2xl font-bold text-orange">{formatPKR(totalPayroll)}</p>
             </div>
           </div>
 
-          <h2 className="mt-8 text-lg font-semibold text-text">Per Counselor</h2>
-          <div className="mt-3 overflow-x-auto rounded-2xl border border-text/10 bg-white">
+          <h2 className="mt-8 text-lg font-semibold text-white">Per Counselor</h2>
+          <div className="mt-3 overflow-x-auto rounded-2xl border border-white/10 glass-card crisp-on-dark">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-text/10 text-left text-xs font-semibold uppercase tracking-wide text-text/50">
+                <tr className="border-b border-white/10 text-left text-xs font-semibold uppercase tracking-wide text-white/40">
                   <th className="px-4 py-3">Counselor</th>
                   <th className="px-4 py-3">Commission Rate</th>
                   <th className="px-4 py-3">Deals Closed</th>
@@ -104,20 +104,20 @@ export function HRMView() {
                   <th className="px-4 py-3">Commission Earned</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-text/6">
+              <tbody className="divide-y divide-white/8">
                 {(data?.commissions ?? []).length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-4 py-6 text-center text-text/40">
+                    <td colSpan={5} className="px-4 py-6 text-center text-white/40">
                       No commission data for this month
                     </td>
                   </tr>
                 ) : (
                   (data?.commissions ?? []).map((c) => (
-                    <tr key={c.counselorId} className="hover:bg-bg/40">
-                      <td className="px-4 py-3 font-medium text-text">{c.counselorName}</td>
-                      <td className="px-4 py-3 text-text/70">{c.commissionRate}%</td>
-                      <td className="px-4 py-3 text-text/70">{c.dealsClosed}</td>
-                      <td className="px-4 py-3 text-text/70">{formatPKR(c.totalDealValue)}</td>
+                    <tr key={c.counselorId} className="hover:bg-white/5">
+                      <td className="px-4 py-3 font-medium text-white/80">{c.counselorName}</td>
+                      <td className="px-4 py-3 text-white/60">{c.commissionRate}%</td>
+                      <td className="px-4 py-3 text-white/60">{c.dealsClosed}</td>
+                      <td className="px-4 py-3 text-white/60">{formatPKR(c.totalDealValue)}</td>
                       <td className="px-4 py-3 font-semibold text-green">{formatPKR(c.commissionAmount)}</td>
                     </tr>
                   ))

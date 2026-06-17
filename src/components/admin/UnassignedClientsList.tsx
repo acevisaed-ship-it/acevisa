@@ -65,9 +65,9 @@ export function UnassignedClientsList({ initialClients, counselors }: Props) {
 
   if (clients.length === 0) {
     return (
-      <div className="rounded-2xl border border-text/10 bg-white/60 px-6 py-12 text-center">
-        <p className="text-lg font-medium text-text">All caught up!</p>
-        <p className="mt-1 text-sm text-text/60">No unassigned clients right now.</p>
+      <div className="rounded-2xl border border-white/10 glass-card px-6 py-12 text-center">
+        <p className="text-lg font-medium text-white">All caught up!</p>
+        <p className="mt-1 text-sm text-white/50">No unassigned clients right now.</p>
       </div>
     )
   }
@@ -85,19 +85,19 @@ export function UnassignedClientsList({ initialClients, counselors }: Props) {
         return (
           <article
             key={client.id}
-            className="flex flex-col gap-4 rounded-2xl border border-[rgba(10,63,58,0.12)] bg-white/80 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"
+            className="flex flex-col gap-4 rounded-2xl border border-white/10 glass-card crisp-on-dark p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"
           >
             <div className="min-w-0 flex-1 space-y-2">
-              <h2 className="truncate text-lg font-bold text-text">{client.name}</h2>
-              <p className="text-sm text-text/60">{client.phone}</p>
+              <h2 className="truncate text-lg font-bold text-white">{client.name}</h2>
+              <p className="text-sm text-white/60">{client.phone}</p>
 
               <div className="flex flex-wrap gap-2">
                 {client.city && (
-                  <span className="rounded-full bg-bg px-2.5 py-0.5 text-xs text-text">
+                  <span className="rounded-full glass-card-md px-2.5 py-0.5 text-xs text-white/70">
                     {client.city}
                   </span>
                 )}
-                <span className="rounded-full bg-bg px-2.5 py-0.5 text-xs capitalize text-text">
+                <span className="rounded-full glass-card-md px-2.5 py-0.5 text-xs capitalize text-white/70">
                   {client.language}
                 </span>
                 <span className="rounded-full bg-orange px-2.5 py-0.5 text-xs font-medium text-white">
@@ -105,7 +105,7 @@ export function UnassignedClientsList({ initialClients, counselors }: Props) {
                 </span>
               </div>
 
-              <p className={cn('text-xs', isStale ? 'font-medium text-red-600' : 'text-text/50')}>
+              <p className={cn('text-xs', isStale ? 'font-medium text-red-400' : 'text-white/40')}>
                 {label}
               </p>
             </div>
@@ -116,7 +116,7 @@ export function UnassignedClientsList({ initialClients, counselors }: Props) {
                 onChange={(e) =>
                   setSelections((prev) => ({ ...prev, [client.id]: e.target.value }))
                 }
-                className="min-h-[44px] w-full rounded-full border border-text/20 bg-bg px-4 text-sm text-text outline-none focus:border-blue"
+                className="min-h-[44px] w-full rounded-full px-4 text-sm outline-none glass-input"
               >
                 <option value="">Assign to...</option>
                 {counselors.map((c) => (

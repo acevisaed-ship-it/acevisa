@@ -22,9 +22,9 @@ export function ProfileSummarySection({
 
   return (
     <BriefCard>
-      <h2 className="mb-4 text-lg font-bold text-text">Profile Summary</h2>
+      <h2 className="mb-4 text-lg font-bold text-white">Profile Summary</h2>
       <div className="grid gap-6 md:grid-cols-2">
-        <div className="space-y-2 text-sm text-text">
+        <div className="space-y-2 text-sm text-white/80">
           <p>
             <span className="font-bold">Name:</span> {client.name}
           </p>
@@ -40,7 +40,7 @@ export function ProfileSummarySection({
           {client.ad_source ? (
             <p>
               <span className="font-bold">Ad Source:</span>{' '}
-              <span className="inline-block rounded-full bg-orange px-3 py-0.5 text-xs font-bold text-text">
+              <span className="inline-block rounded-full bg-orange px-3 py-0.5 text-xs font-bold text-white/80">
                 {client.ad_source}
               </span>
             </p>
@@ -71,33 +71,33 @@ export function ProfileSummarySection({
             <>
               {score !== null && score > 0 && (
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wide text-text/60">
+                  <p className="text-xs font-bold uppercase tracking-wide text-white/50">
                     Qualification Score
                   </p>
-                  <p className="text-4xl font-bold text-blue">{score}</p>
+                  <p className="text-4xl font-bold text-white">{score}</p>
                 </div>
               )}
-              <p className="text-sm italic text-text">
+              <p className="text-sm italic text-white/80">
                 {profile.score_rationale || '—'}
               </p>
-              <p className="text-sm text-text">
+              <p className="text-sm text-white/80">
                 <span className="font-bold">Recommended pathway:</span>{' '}
                 {profile.recommended_service_pathway || '—'}
               </p>
               {profilePartial && (
-                <p className="text-sm italic text-text/60">
+                <p className="text-sm italic text-white/50">
                   Partial profile — full summary generates after conversation completes.
                 </p>
               )}
             </>
           ) : (
             <>
-              <p className="text-4xl font-bold text-text/30">—</p>
-              <p className="text-sm italic text-text/60">—</p>
-              <p className="text-sm text-text">
+              <p className="text-4xl font-bold text-white/80/30">—</p>
+              <p className="text-sm italic text-white/50">—</p>
+              <p className="text-sm text-white/80">
                 <span className="font-bold">Recommended pathway:</span> —
               </p>
-              <p className="text-sm italic text-text/60">AI profile not yet generated</p>
+              <p className="text-sm italic text-white/50">AI profile not yet generated</p>
             </>
           )}
         </div>
@@ -119,16 +119,16 @@ export function ClientProfileHeader({
 
   return (
     <div className="mb-8 flex flex-wrap items-center gap-3">
-      <h1 className="text-2xl font-bold text-blue sm:text-3xl">{client.name}</h1>
+      <h1 className="text-2xl font-bold text-white sm:text-3xl">{client.name}</h1>
       {score !== null && score > 0 && scoreColor && (
         <span
-          className="flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold text-text"
+          className="flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold text-white/80"
           style={{ backgroundColor: scoreColor }}
         >
           {score}
         </span>
       )}
-      <span className="rounded-full border border-text/15 bg-white px-3 py-1 text-xs font-medium text-text">
+      <span className="rounded-full border border-white/20 glass-card px-3 py-1 text-xs font-medium text-white/70">
         Stage {client.pipeline_stage} — {getPipelineStageLabel(client.pipeline_stage)}
       </span>
     </div>

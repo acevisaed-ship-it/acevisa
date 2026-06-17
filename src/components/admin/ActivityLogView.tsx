@@ -18,15 +18,15 @@ type LogEntry = {
 
 const ACTION_COLORS: Record<string, string> = {
   complaint_received: 'bg-orange/15 text-orange',
-  complaint_acknowledged: 'bg-green/20 text-text',
-  task_completed: 'bg-green/20 text-text',
+  complaint_acknowledged: 'bg-green/20 text-white',
+  task_completed: 'bg-green/20 text-white',
   task_overdue: 'bg-orange/15 text-orange',
-  document_uploaded: 'bg-blue/15 text-blue',
-  meeting_scheduled: 'bg-blue/15 text-blue',
-  meeting_completed: 'bg-green/20 text-text',
-  profile_updated: 'bg-blue/15 text-blue',
-  client_assigned: 'bg-blue/15 text-blue',
-  pipeline_stage_changed: 'bg-blue/15 text-blue',
+  document_uploaded: 'bg-blue/20 text-white',
+  meeting_scheduled: 'bg-blue/20 text-white',
+  meeting_completed: 'bg-green/20 text-white',
+  profile_updated: 'bg-blue/20 text-white',
+  client_assigned: 'bg-blue/20 text-white',
+  pipeline_stage_changed: 'bg-blue/20 text-white',
 }
 
 function formatTime(iso: string) {
@@ -37,7 +37,7 @@ function formatTime(iso: string) {
 }
 
 function ActionBadge({ type }: { type: string }) {
-  const color = ACTION_COLORS[type] ?? 'bg-text/10 text-text/60'
+  const color = ACTION_COLORS[type] ?? 'glass-card text-white/50'
   const label = type.replace(/_/g, ' ')
   return (
     <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${color}`}>
@@ -78,19 +78,19 @@ export function ActivityLogView() {
     setLoadingMore(false)
   }
 
-  if (loading) return <p className="text-sm text-text/50">Loading activity log...</p>
+  if (loading) return <p className="text-sm text-white/50">Loading activity log...</p>
 
   return (
     <div>
       <div>
-        <h1 className="text-2xl font-semibold text-blue md:text-3xl">Activity Log</h1>
-        <p className="mt-1 text-sm text-text/60">{total} events recorded</p>
+        <h1 className="text-2xl font-semibold text-white md:text-3xl">Activity Log</h1>
+        <p className="mt-1 text-sm text-white/60">{total} events recorded</p>
       </div>
 
       {logs.length === 0 ? (
         <div className="mt-12 flex flex-col items-center gap-2 text-center">
-          <Activity className="h-10 w-10 text-text/20" />
-          <p className="text-text/50">No activity recorded yet</p>
+          <Activity className="h-10 w-10 text-white/20" />
+          <p className="text-white/50">No activity recorded yet</p>
         </div>
       ) : (
         <>
@@ -98,26 +98,26 @@ export function ActivityLogView() {
             {logs.map((log) => (
               <div
                 key={log.id}
-                className="flex flex-wrap items-start gap-3 rounded-xl border border-text/8 bg-white px-4 py-3"
+                className="flex flex-wrap items-start gap-3 rounded-xl border border-white/10 glass-card crisp-on-dark px-4 py-3"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <ActionBadge type={log.actionType} />
                     {log.counselorName && (
-                      <span className="text-xs font-medium text-text">{log.counselorName}</span>
+                      <span className="text-xs font-medium text-white/80">{log.counselorName}</span>
                     )}
                     {log.clientName && log.clientId && (
                       <Link
                         href={`/admin/clients/${log.clientId}`}
-                        className="text-xs text-blue hover:underline"
+                        className="text-xs text-white/60 hover:text-white hover:underline"
                       >
                         {log.clientName}
                       </Link>
                     )}
                   </div>
-                  <p className="mt-1 text-sm text-text/70">{log.description}</p>
+                  <p className="mt-1 text-sm text-white/60">{log.description}</p>
                 </div>
-                <span className="shrink-0 text-xs text-text/40">{formatTime(log.createdAt)}</span>
+                <span className="shrink-0 text-xs text-white/40">{formatTime(log.createdAt)}</span>
               </div>
             ))}
           </div>
@@ -127,7 +127,7 @@ export function ActivityLogView() {
               <button
                 onClick={loadMore}
                 disabled={loadingMore}
-                className="flex items-center gap-2 rounded-full border border-text/20 px-5 py-2.5 text-sm font-medium text-text hover:bg-text/5 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-full border border-white/20 glass-card px-5 py-2.5 text-sm font-medium text-white/60 hover:text-white disabled:opacity-50"
               >
                 <ChevronDown className="h-4 w-4" />
                 {loadingMore ? 'Loading...' : `Load more (${total - logs.length} remaining)`}

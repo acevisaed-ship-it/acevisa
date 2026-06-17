@@ -37,10 +37,10 @@ export function DashboardHome({
   return (
     <main className="flex-1 p-4 md:p-8">
       <header className="mb-8">
-        <h1 className="text-2xl font-semibold text-blue md:text-3xl">
+        <h1 className="text-2xl font-semibold text-white md:text-3xl">
           {getPKTGreeting()}, {data.counselorName}
         </h1>
-        <p className="mt-1 text-sm text-text">{formatPKTDateLong()}</p>
+        <p className="mt-1 text-sm text-white/60">{formatPKTDateLong()}</p>
       </header>
 
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -55,9 +55,9 @@ export function DashboardHome({
       </div>
 
       <section className="mb-10">
-        <h2 className="mb-4 text-lg font-bold text-text">Today&apos;s meetings</h2>
+        <h2 className="mb-4 text-lg font-bold text-white">Today&apos;s meetings</h2>
         {data.todayMeetings.length === 0 ? (
-          <p className="text-text/60">No meetings today. Enjoy the quiet.</p>
+          <p className="text-white/50">No meetings today. Enjoy the quiet.</p>
         ) : (
           <div className="space-y-3">
             {data.todayMeetings.map((meeting) => (
@@ -74,9 +74,9 @@ export function DashboardHome({
       </section>
 
       <section className="mb-10">
-        <h2 className="mb-4 text-lg font-bold text-text">Upcoming meetings</h2>
+        <h2 className="mb-4 text-lg font-bold text-white">Upcoming meetings</h2>
         {data.upcomingMeetings.length === 0 ? (
-          <p className="text-text/60">No upcoming meetings in the next 7 days.</p>
+          <p className="text-white/50">No upcoming meetings in the next 7 days.</p>
         ) : (
           <div className="space-y-3">
             {data.upcomingMeetings.map((meeting) => (
@@ -96,12 +96,12 @@ export function DashboardHome({
       <section className="mb-10">
         <div className="mb-4 flex items-center justify-between gap-4">
           <h2 className="text-lg font-bold text-text">Open tasks</h2>
-          <Link href={tasksHref} className="text-sm text-blue hover:underline">
+          <Link href={tasksHref} className="text-sm text-white/60 hover:text-white hover:underline">
             View all
           </Link>
         </div>
         {data.tasks.length === 0 ? (
-          <p className="text-text/60">All clear — no pending tasks.</p>
+          <p className="text-white/50">All clear — no pending tasks.</p>
         ) : (
           <div className="space-y-3">
             {data.tasks.slice(0, 5).map((task) => (
@@ -112,9 +112,9 @@ export function DashboardHome({
       </section>
 
       <section>
-        <h2 className="mb-4 text-lg font-bold text-text">Complaints</h2>
+        <h2 className="mb-4 text-lg font-bold text-white">Complaints</h2>
         {data.complaints.length === 0 ? (
-          <p className="text-text/60">No open complaints.</p>
+          <p className="text-white/50">No open complaints.</p>
         ) : (
           <div className="space-y-3">
             {data.complaints.map((complaint) => (

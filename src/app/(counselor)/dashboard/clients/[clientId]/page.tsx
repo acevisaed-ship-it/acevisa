@@ -94,13 +94,13 @@ export default async function ClientRecordPage({ params }: Props) {
   const score = typedClient.qualification_score ?? profile?.qualification_score ?? null
 
   return (
-    <main className="flex-1 bg-bg p-4 md:p-8">
+    <main className="flex-1 p-4 md:p-8">
       <div className="mx-auto max-w-[900px]">
         {/* Top bar */}
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/dashboard"
-            className="inline-flex items-center text-sm text-blue hover:underline"
+            className="inline-flex items-center text-sm text-white/60 hover:text-white"
           >
             ← Back to dashboard
           </Link>

@@ -55,8 +55,8 @@ export function TaskPanel({ tasks, onTaskClick }: Props) {
             onClick={() => setActiveTab(tab.id)}
             className={`min-h-[44px] rounded-full px-2 py-2 text-sm font-medium transition-colors ${
               activeTab === tab.id
-                ? 'bg-text text-white'
-                : 'bg-white text-text/70 hover:text-text'
+                ? 'tab-btn-active'
+                : 'tab-btn-inactive'
             }`}
           >
             {tab.label}
@@ -65,7 +65,7 @@ export function TaskPanel({ tasks, onTaskClick }: Props) {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-text/60">No {activeTab.replace('_', ' ')} tasks.</p>
+        <p className="text-white/50">No {activeTab.replace('_', ' ')} tasks.</p>
       ) : (
         <div className="space-y-3">
           {filtered.map((task) => {
@@ -85,8 +85,8 @@ export function TaskPanel({ tasks, onTaskClick }: Props) {
                     onTaskClick(task)
                   }
                 }}
-                className={`flex cursor-pointer overflow-hidden rounded-2xl bg-bg transition-opacity hover:opacity-90 ${
-                  task.negligence_flagged ? 'border-l-4 border-red-500' : ''
+                className={`flex cursor-pointer overflow-hidden rounded-2xl glass-card crisp-on-dark transition-opacity hover:opacity-90 ${
+                  task.negligence_flagged ? 'border-l-4 border-red-400' : ''
                 }`}
               >
                 <div
@@ -96,9 +96,9 @@ export function TaskPanel({ tasks, onTaskClick }: Props) {
                 <div className="flex flex-1 items-center gap-3 p-4">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start gap-2">
-                      <p className="font-bold text-text">{task.task_text}</p>
+                      <p className="font-bold text-white">{task.task_text}</p>
                       {(task.notes_count ?? 0) > 0 && (
-                        <span className="shrink-0 rounded-full bg-[#E6E8E7] px-2 py-0.5 text-xs font-semibold text-[#0A3F3A]/70">
+                        <span className="shrink-0 rounded-full glass-card px-2 py-0.5 text-xs font-semibold text-white/50">
                           💬 {task.notes_count}
                         </span>
                       )}
@@ -107,7 +107,7 @@ export function TaskPanel({ tasks, onTaskClick }: Props) {
                     {dueLabel && (
                       <p
                         className={`mt-1 text-sm ${
-                          overdue ? 'text-red-600' : 'text-text/60'
+                          overdue ? 'text-red-400' : 'text-white/50'
                         }`}
                       >
                         Due {dueLabel}
@@ -115,7 +115,7 @@ export function TaskPanel({ tasks, onTaskClick }: Props) {
                       </p>
                     )}
                   </div>
-                  <ChevronRight className="h-5 w-5 shrink-0 text-text/40" />
+                  <ChevronRight className="h-5 w-5 shrink-0 text-white/30" />
                 </div>
               </div>
             )

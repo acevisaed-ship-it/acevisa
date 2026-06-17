@@ -55,7 +55,7 @@ const emptyForm: DealForm = {
 }
 
 const inputClass =
-  'min-h-[48px] w-full rounded-full border border-text bg-bg px-4 py-2.5 text-sm text-text outline-none focus:border-blue'
+  'min-h-[48px] w-full rounded-full px-4 py-2.5 text-sm outline-none glass-input'
 
 function currentMonthValue() {
   const now = new Date()
@@ -197,8 +197,8 @@ export function CrmKanban({
     <>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-blue md:text-3xl">CRM Pipeline</h1>
-          <p className="mt-1 text-sm text-text/60">
+          <h1 className="text-2xl font-semibold text-white md:text-3xl">CRM Pipeline</h1>
+          <p className="mt-1 text-sm text-white/60">
             {deals.length} deal{deals.length === 1 ? '' : 's'} across pipeline
           </p>
         </div>
@@ -220,7 +220,7 @@ export function CrmKanban({
         <select
           value={counselorFilter}
           onChange={(e) => setCounselorFilter(e.target.value)}
-          className="min-h-[44px] w-full rounded-full border border-text/20 bg-white px-4 text-sm text-text outline-none focus:border-blue sm:w-auto"
+          className="min-h-[44px] w-full rounded-full px-4 text-sm outline-none glass-input sm:w-auto"
         >
           <option value="">All counselors</option>
           {counselors.map((c) => (
@@ -232,7 +232,7 @@ export function CrmKanban({
         <select
           value={serviceFilter}
           onChange={(e) => setServiceFilter(e.target.value)}
-          className="min-h-[44px] w-full rounded-full border border-text/20 bg-white px-4 text-sm text-text outline-none focus:border-blue sm:w-auto"
+          className="min-h-[44px] w-full rounded-full px-4 text-sm outline-none glass-input sm:w-auto"
         >
           <option value="">All services</option>
           {DEAL_SERVICE_TYPES.map((s) => (
@@ -246,7 +246,7 @@ export function CrmKanban({
           value={monthFilter}
           onChange={(e) => setMonthFilter(e.target.value)}
           placeholder={currentMonthValue()}
-          className="min-h-[44px] w-full rounded-full border border-text/20 bg-white px-4 text-sm text-text outline-none focus:border-blue sm:w-auto"
+          className="min-h-[44px] w-full rounded-full px-4 text-sm outline-none glass-input sm:w-auto"
         />
         {(counselorFilter || serviceFilter || monthFilter) && (
           <button
@@ -256,7 +256,7 @@ export function CrmKanban({
               setServiceFilter('')
               setMonthFilter('')
             }}
-            className="text-sm text-blue hover:underline"
+            className="text-sm text-white/50 hover:text-white"
           >
             Clear filters
           </button>
@@ -264,7 +264,7 @@ export function CrmKanban({
       </div>
 
       {loading ? (
-        <p className="mt-8 text-text/60">Loading deals…</p>
+        <p className="mt-8 text-white/50">Loading deals…</p>
       ) : (
         <div className="mt-6 flex gap-4 overflow-x-auto pb-4">
           {DEAL_STAGES.map((stage) => {
@@ -273,13 +273,13 @@ export function CrmKanban({
             return (
               <div
                 key={stage}
-                className="flex w-72 shrink-0 flex-col rounded-2xl border border-text/10 bg-white/50"
+                className="flex w-72 shrink-0 flex-col rounded-2xl border border-white/10 glass-card"
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, stage)}
               >
-                <div className="border-b border-text/10 p-4">
-                  <h2 className="font-semibold text-text">{DEAL_STAGE_LABELS[stage]}</h2>
-                  <p className="mt-1 text-xs text-text/60">
+                <div className="border-b border-white/10 p-4">
+                  <h2 className="font-semibold text-white">{DEAL_STAGE_LABELS[stage]}</h2>
+                  <p className="mt-1 text-xs text-white/50">
                     {columnDeals.length} deal{columnDeals.length === 1 ? '' : 's'} ·{' '}
                     {formatPkr(totalValue)}
                   </p>
@@ -293,20 +293,20 @@ export function CrmKanban({
                       onDragStart={(e) => handleDragStart(e, deal.id)}
                       onClick={() => setSelectedDeal(deal)}
                       className={cn(
-                        'rounded-2xl border border-text/[0.12] bg-white p-4 text-left transition-shadow hover:shadow-md',
+                        'rounded-2xl border border-white/10 glass-card-md p-4 text-left transition-opacity hover:brightness-125',
                         draggingId === deal.id && 'opacity-50'
                       )}
                     >
-                      <p className="font-medium text-text">{deal.client_name ?? 'Unknown'}</p>
-                      <p className="mt-1 text-xs text-text/60">
+                      <p className="font-medium text-white">{deal.client_name ?? 'Unknown'}</p>
+                      <p className="mt-1 text-xs text-white/50">
                         {deal.counselor_name ?? 'Unassigned'}
                       </p>
-                      <p className="mt-2 text-xs text-text/70">
+                      <p className="mt-2 text-xs text-white/60">
                         {DEAL_SERVICE_LABELS[deal.service_type as DealServiceType] ??
                           deal.service_type}
                         {deal.target_country ? ` · ${deal.target_country}` : ''}
                       </p>
-                      <p className="mt-2 text-sm font-semibold text-blue">
+                      <p className="mt-2 text-sm font-semibold text-green">
                         {formatPkr(deal.deal_value)}
                       </p>
                     </button>
@@ -325,14 +325,14 @@ export function CrmKanban({
           role="presentation"
         >
           <div
-            className="flex h-full w-full max-w-md flex-col overflow-y-auto bg-bg p-6 shadow-xl"
+            className="flex h-full w-full max-w-md flex-col overflow-y-auto dark-modal p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
           >
             <div className="mb-4 flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-lg font-bold text-blue">{selectedDeal.client_name}</h2>
-                <p className="text-sm text-text/60">{formatPkr(selectedDeal.deal_value)}</p>
+                <h2 className="text-lg font-bold text-white">{selectedDeal.client_name}</h2>
+                <p className="text-sm text-white/60">{formatPkr(selectedDeal.deal_value)}</p>
               </div>
               <button
                 type="button"
@@ -346,7 +346,7 @@ export function CrmKanban({
 
             <div className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-sm text-text">Stage</label>
+                <label className="mb-1.5 block text-sm text-white/70">Stage</label>
                 <select
                   value={selectedDeal.stage}
                   onChange={(e) =>
@@ -364,15 +364,15 @@ export function CrmKanban({
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-text">Counselor</label>
-                <p className="text-sm text-text/70">
+                <label className="mb-1.5 block text-sm text-white/70">Counselor</label>
+                <p className="text-sm text-white/60">
                   {selectedDeal.counselor_name ?? 'Unassigned'}
                 </p>
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-text">Service</label>
-                <p className="text-sm text-text/70">
+                <label className="mb-1.5 block text-sm text-white/70">Service</label>
+                <p className="text-sm text-white/60">
                   {DEAL_SERVICE_LABELS[selectedDeal.service_type as DealServiceType] ??
                     selectedDeal.service_type}
                   {selectedDeal.target_country ? ` · ${selectedDeal.target_country}` : ''}
@@ -381,15 +381,15 @@ export function CrmKanban({
 
               {selectedDeal.expected_close_date && (
                 <div>
-                  <label className="mb-1.5 block text-sm text-text">Expected close</label>
-                  <p className="text-sm text-text/70">
+                  <label className="mb-1.5 block text-sm text-white/70">Expected close</label>
+                  <p className="text-sm text-white/60">
                     {new Date(selectedDeal.expected_close_date).toLocaleDateString('en-PK')}
                   </p>
                 </div>
               )}
 
               <div>
-                <label className="mb-1.5 block text-sm text-text">Notes</label>
+                <label className="mb-1.5 block text-sm text-white/70">Notes</label>
                 <textarea
                   defaultValue={selectedDeal.stage_notes ?? ''}
                   onBlur={(e) => {
@@ -398,7 +398,7 @@ export function CrmKanban({
                     }
                   }}
                   rows={3}
-                  className="w-full resize-none rounded-2xl border border-text bg-bg px-4 py-2.5 text-sm text-text outline-none focus:border-blue"
+                  className="w-full resize-none rounded-2xl px-4 py-2.5 text-sm outline-none glass-input"
                 />
               </div>
             </div>
@@ -413,12 +413,12 @@ export function CrmKanban({
           role="presentation"
         >
           <div
-            className="flex h-full w-full flex-col overflow-y-auto bg-bg p-6 sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-[20px]"
+            className="flex h-full w-full flex-col overflow-y-auto dark-modal p-6 sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-[20px]"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
           >
             <div className="mb-4 flex items-start justify-between gap-4">
-              <h2 className="text-lg font-bold text-blue">New Deal</h2>
+              <h2 className="text-lg font-bold text-white">New Deal</h2>
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
@@ -431,7 +431,7 @@ export function CrmKanban({
 
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-sm text-text">Client</label>
+                <label className="mb-1.5 block text-sm text-white/70">Client</label>
                 <select
                   value={form.client_id}
                   onChange={(e) => setForm((f) => ({ ...f, client_id: e.target.value }))}
@@ -448,7 +448,7 @@ export function CrmKanban({
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-text">Counselor</label>
+                <label className="mb-1.5 block text-sm text-white/70">Counselor</label>
                 <select
                   value={form.counselor_id}
                   onChange={(e) => setForm((f) => ({ ...f, counselor_id: e.target.value }))}
@@ -464,7 +464,7 @@ export function CrmKanban({
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-text">Service type</label>
+                <label className="mb-1.5 block text-sm text-white/70">Service type</label>
                 <select
                   value={form.service_type}
                   onChange={(e) =>
@@ -485,7 +485,7 @@ export function CrmKanban({
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-text">Target country</label>
+                <label className="mb-1.5 block text-sm text-white/70">Target country</label>
                 <input
                   value={form.target_country}
                   onChange={(e) => setForm((f) => ({ ...f, target_country: e.target.value }))}
@@ -494,7 +494,7 @@ export function CrmKanban({
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-text">Deal value (PKR)</label>
+                <label className="mb-1.5 block text-sm text-white/70">Deal value (PKR)</label>
                 <input
                   type="number"
                   min="0"
@@ -506,7 +506,7 @@ export function CrmKanban({
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-text">Expected close date</label>
+                <label className="mb-1.5 block text-sm text-white/70">Expected close date</label>
                 <input
                   type="date"
                   value={form.expected_close_date}

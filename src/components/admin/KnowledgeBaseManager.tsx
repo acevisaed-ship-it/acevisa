@@ -29,7 +29,7 @@ const emptyForm: FormState = {
 }
 
 const inputClass =
-  'min-h-[48px] w-full rounded-full border border-text bg-bg px-4 py-2.5 text-sm text-text outline-none focus:border-blue'
+  'min-h-[48px] w-full rounded-full px-4 py-2.5 text-sm outline-none glass-input'
 
 function truncate(text: string, max: number) {
   if (text.length <= max) return text
@@ -39,15 +39,15 @@ function truncate(text: string, max: number) {
 function categoryColor(category: string) {
   switch (category) {
     case 'Study Visa':
-      return 'bg-blue/10 text-blue'
+      return 'bg-blue/20 text-white'
     case 'Work Abroad':
-      return 'bg-green/20 text-text'
+      return 'bg-green/20 text-white'
     case 'Visit & Immigration':
-      return 'bg-orange/10 text-orange'
+      return 'bg-orange/20 text-orange'
     case 'Language & IELTS':
-      return 'bg-text/10 text-text'
+      return 'glass-card text-white/70'
     default:
-      return 'bg-text/5 text-text/70'
+      return 'glass-card text-white/50'
   }
 }
 
@@ -174,8 +174,8 @@ export function KnowledgeBaseManager() {
     <>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-blue md:text-3xl">Knowledge Base</h1>
-          <p className="mt-1 text-sm text-text/60">
+          <h1 className="text-2xl font-semibold text-white md:text-3xl">Knowledge Base</h1>
+          <p className="mt-1 text-sm text-white/60">
             {entries.filter((e) => e.is_active).length} active entries for AI chat
           </p>
         </div>
@@ -193,7 +193,7 @@ export function KnowledgeBaseManager() {
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="min-h-[44px] rounded-full border border-text/20 bg-white px-4 text-sm text-text outline-none focus:border-blue"
+          className="min-h-[44px] rounded-full px-4 text-sm outline-none glass-input"
         >
           <option value="all">All categories</option>
           {KB_CATEGORIES.map((cat) => (
@@ -202,26 +202,26 @@ export function KnowledgeBaseManager() {
             </option>
           ))}
         </select>
-        <label className="flex items-center gap-2 text-sm text-text/70">
+        <label className="flex items-center gap-2 text-sm text-white/60">
           <input
             type="checkbox"
             checked={showInactive}
             onChange={(e) => setShowInactive(e.target.checked)}
-            className="h-4 w-4 rounded border-text/30"
+            className="h-4 w-4 rounded border-white/30"
           />
           Show inactive
         </label>
       </div>
 
       {loading ? (
-        <p className="mt-8 text-text/60">Loading entries…</p>
+        <p className="mt-8 text-white/50">Loading entries…</p>
       ) : filtered.length === 0 ? (
-        <p className="mt-8 text-text/60">No knowledge base entries yet.</p>
+        <p className="mt-8 text-white/50">No knowledge base entries yet.</p>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-2xl border border-text/10 bg-white">
+        <div className="mt-6 overflow-x-auto rounded-2xl border border-white/10 glass-card crisp-on-dark">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead>
-              <tr className="border-b border-text/10 text-text/60">
+              <tr className="border-b border-white/10 text-white/40">
                 <th className="px-4 py-3 font-medium">Category</th>
                 <th className="px-4 py-3 font-medium">Topic</th>
                 <th className="px-4 py-3 font-medium">Answer</th>
@@ -234,7 +234,7 @@ export function KnowledgeBaseManager() {
                 <tr
                   key={entry.id}
                   className={cn(
-                    'border-b border-text/5 last:border-0',
+                    'border-b border-white/5 last:border-0',
                     !entry.is_active && 'opacity-50'
                   )}
                 >
@@ -248,8 +248,8 @@ export function KnowledgeBaseManager() {
                       {entry.category}
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-bold text-text">{entry.topic}</td>
-                  <td className="max-w-xs px-4 py-3 text-text/70">
+                  <td className="px-4 py-3 font-bold text-white/80">{entry.topic}</td>
+                  <td className="max-w-xs px-4 py-3 text-white/60">
                     {truncate(entry.answer, 100)}
                   </td>
                   <td className="px-4 py-3">
@@ -275,7 +275,7 @@ export function KnowledgeBaseManager() {
                       <button
                         type="button"
                         onClick={() => openEdit(entry)}
-                        className="flex min-h-[44px] min-w-[44px] items-center justify-center text-blue"
+                        className="flex min-h-[44px] min-w-[44px] items-center justify-center text-white/60"
                         aria-label="Edit"
                       >
                         <Pencil className="h-4 w-4" />
@@ -304,12 +304,12 @@ export function KnowledgeBaseManager() {
           role="presentation"
         >
           <div
-            className="flex h-full w-full flex-col overflow-y-auto bg-bg p-6 sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-[20px]"
+            className="flex h-full w-full flex-col overflow-y-auto dark-modal p-6 sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-[20px]"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
           >
             <div className="mb-4 flex items-start justify-between gap-4">
-              <h2 className="text-lg font-bold text-blue">
+              <h2 className="text-lg font-bold text-white">
                 {editing ? 'Edit Entry' : 'Add Entry'}
               </h2>
               <button
@@ -324,7 +324,7 @@ export function KnowledgeBaseManager() {
 
             <form onSubmit={handleSave} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-sm text-text">Category</label>
+                <label className="mb-1.5 block text-sm text-white/70">Category</label>
                 <select
                   value={form.category}
                   onChange={(e) =>
@@ -341,7 +341,7 @@ export function KnowledgeBaseManager() {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-text">Topic</label>
+                <label className="mb-1.5 block text-sm text-white/70">Topic</label>
                 <input
                   value={form.topic}
                   onChange={(e) => setForm((f) => ({ ...f, topic: e.target.value }))}
@@ -352,17 +352,17 @@ export function KnowledgeBaseManager() {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-text">Answer</label>
+                <label className="mb-1.5 block text-sm text-white/70">Answer</label>
                 <textarea
                   value={form.answer}
                   onChange={(e) => setForm((f) => ({ ...f, answer: e.target.value }))}
                   rows={5}
-                  className="w-full resize-none rounded-2xl border border-text bg-bg px-4 py-2.5 text-sm text-text outline-none focus:border-blue"
+                  className="w-full resize-none rounded-2xl px-4 py-2.5 text-sm outline-none glass-input"
                   required
                 />
               </div>
 
-              <label className="flex items-center gap-2 text-sm text-text">
+              <label className="flex items-center gap-2 text-sm text-white/70">
                 <input
                   type="checkbox"
                   checked={form.is_active}

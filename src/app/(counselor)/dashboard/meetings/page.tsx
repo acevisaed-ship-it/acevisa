@@ -30,12 +30,12 @@ export default async function CounselorMeetingsPage() {
 
   return (
     <main className="flex-1 p-6 md:p-8">
-      <h1 className="text-2xl font-semibold text-blue md:text-3xl">Meetings</h1>
-      <p className="mt-1 text-sm text-text/60">{formatPKTDateLong()}</p>
+      <h1 className="text-2xl font-semibold text-white md:text-3xl">Meetings</h1>
+      <p className="mt-1 text-sm text-white/50">{formatPKTDateLong()}</p>
 
       <div className="mt-6 space-y-3">
         {rows.length === 0 ? (
-          <p className="text-sm text-text/60">No meetings scheduled yet.</p>
+          <p className="text-sm text-white/50">No meetings scheduled yet.</p>
         ) : (
           rows.map((meeting) => (
             <MeetingCard

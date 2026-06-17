@@ -28,7 +28,7 @@ export default async function ClientsPage() {
   return (
     <main className="flex-1 bg-bg p-4 md:p-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-blue md:text-3xl">Clients</h1>
+        <h1 className="text-2xl font-semibold text-white md:text-3xl">Clients</h1>
         <p className="mt-1 text-sm text-text/60">
           {rows.length} client{rows.length === 1 ? '' : 's'}
         </p>

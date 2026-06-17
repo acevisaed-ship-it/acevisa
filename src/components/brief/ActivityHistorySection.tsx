@@ -16,19 +16,19 @@ type Props = {
 export function ActivityHistorySection({ entries }: Props) {
   return (
     <BriefCard>
-      <h2 className="text-lg font-bold text-text">Activity History</h2>
-      <p className="mb-4 text-xs italic text-text/60">
+      <h2 className="text-lg font-bold text-white">Activity History</h2>
+      <p className="mb-4 text-xs italic text-white/50">
         All entries are permanent and cannot be modified.
       </p>
       {entries.length === 0 ? (
-        <p className="text-sm text-text/60">No activity recorded yet.</p>
+        <p className="text-sm text-white/50">No activity recorded yet.</p>
       ) : (
         <ul className="space-y-0">
           {entries.map((entry, index) => (
             <li
               key={entry.id}
               className={`relative ml-2 flex gap-4 pb-6 pl-6 ${
-                index < entries.length - 1 ? 'border-l border-text/15' : ''
+                index < entries.length - 1 ? 'border-l border-white/15' : ''
               }`}
             >
               <span
@@ -37,7 +37,7 @@ export function ActivityHistorySection({ entries }: Props) {
               />
               <div className="min-w-0 flex-1">
                 <div className="mb-1 flex flex-wrap items-center gap-2">
-                  <time className="text-xs text-text/60">
+                  <time className="text-xs text-white/50">
                     {formatPKTRegistrationDate(entry.created_at)}
                   </time>
                   <span
@@ -49,7 +49,7 @@ export function ActivityHistorySection({ entries }: Props) {
                     {entry.action_type.replace(/_/g, ' ')}
                   </span>
                 </div>
-                <p className="text-sm text-text">{entry.description}</p>
+                <p className="text-sm text-white/80">{entry.description}</p>
               </div>
             </li>
           ))}

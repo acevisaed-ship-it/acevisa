@@ -10,7 +10,7 @@ export default async function PipelinePage() {
 
   return (
     <main className="flex-1 p-4 md:p-8">
-      <h1 className="mb-6 text-2xl font-semibold text-blue md:text-3xl">Pipeline</h1>
+      <h1 className="mb-6 text-2xl font-semibold text-white md:text-3xl">Pipeline</h1>
 
       <PipelineView
         stages={PIPELINE_STAGES}

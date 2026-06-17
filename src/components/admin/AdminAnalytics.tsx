@@ -21,40 +21,40 @@ function ShareAppCard() {
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=8&data=${encodeURIComponent(APP_INSTALL_URL)}`
 
   return (
-    <div className="col-span-2 md:col-span-3 xl:col-span-4 rounded-2xl border border-blue/20 bg-blue/5 p-5">
+    <div className="col-span-2 md:col-span-3 xl:col-span-4 rounded-2xl border border-white/10 glass-card crisp-on-dark p-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
         {/* QR code */}
         <div className="flex shrink-0 flex-col items-center gap-2">
           <img
             src={qrUrl}
             alt="QR code to install ACE Portal app"
-            className="h-[120px] w-[120px] rounded-xl border border-blue/20 bg-white"
+            className="h-[120px] w-[120px] rounded-xl border border-white/20 bg-white"
           />
-          <p className="text-[10px] text-text/40">Scan to install</p>
+          <p className="text-[10px] text-white/40">Scan to install</p>
         </div>
 
         {/* Text + actions */}
         <div className="flex flex-1 flex-col justify-between gap-3">
           <div className="flex items-start gap-3">
-            <div className="rounded-xl bg-blue/10 p-2">
-              <Smartphone className="h-5 w-5 text-blue" />
+            <div className="rounded-xl bg-white/10 p-2">
+              <Smartphone className="h-5 w-5 text-white/70" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-text">Share App with Clients</p>
-              <p className="mt-0.5 text-xs text-text/60">
+              <p className="text-sm font-semibold text-white">Share App with Clients</p>
+              <p className="mt-0.5 text-xs text-white/60">
                 Send this link or show the QR code to clients — they can install the ACE Portal directly on their phone without the App Store.
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <code className="flex-1 truncate rounded-lg bg-white border border-text/10 px-3 py-2 text-xs text-text/70 select-all">
+            <code className="flex-1 truncate rounded-lg glass-card border border-white/10 px-3 py-2 text-xs text-white/60 select-all">
               {APP_INSTALL_URL}
             </code>
             <button
               type="button"
               onClick={copyLink}
-              className="flex items-center gap-1.5 rounded-lg bg-blue px-3 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+              className="flex items-center gap-1.5 rounded-lg bg-grad-blue crisp-on-dark px-3 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
             >
               {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
               {copied ? 'Copied!' : 'Copy Link'}
@@ -63,7 +63,7 @@ function ShareAppCard() {
               href={APP_INSTALL_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 rounded-lg border border-blue/30 px-3 py-2 text-xs font-semibold text-blue transition-colors hover:bg-blue/10"
+              className="flex items-center gap-1.5 rounded-lg border border-white/20 px-3 py-2 text-xs font-semibold text-white/70 transition-colors hover:text-white"
             >
               Open Page
             </a>
@@ -99,15 +99,15 @@ function KPICard({
   warn?: boolean
 }) {
   const content = (
-    <div className={`rounded-2xl border p-5 bg-white transition-shadow hover:shadow-md ${warn ? 'border-orange/40' : 'border-text/10'}`}>
+    <div className={`rounded-2xl border p-5 glass-card crisp-on-dark transition-opacity hover:opacity-90 ${warn ? 'border-orange/40' : 'border-white/10'}`}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium text-text/60">{label}</p>
-          <p className={`mt-1 text-3xl font-bold ${warn ? 'text-orange' : 'text-text'}`}>{value}</p>
-          {sub && <p className="mt-1 text-xs text-text/40">{sub}</p>}
+          <p className="text-sm font-medium text-white/60">{label}</p>
+          <p className={`mt-1 text-3xl font-bold ${warn ? 'text-orange' : 'text-white'}`}>{value}</p>
+          {sub && <p className="mt-1 text-xs text-white/40">{sub}</p>}
         </div>
-        <div className={`rounded-xl p-2.5 ${warn ? 'bg-orange/10' : 'bg-blue/10'}`}>
-          <Icon className={`h-5 w-5 ${warn ? 'text-orange' : 'text-blue'}`} />
+        <div className={`rounded-xl p-2.5 ${warn ? 'bg-orange/20' : 'bg-white/10'}`}>
+          <Icon className={`h-5 w-5 ${warn ? 'text-orange' : 'text-white/70'}`} />
         </div>
       </div>
     </div>
@@ -137,13 +137,13 @@ export function AdminAnalytics() {
     return (
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="h-28 animate-pulse rounded-2xl bg-text/5" />
+          <div key={i} className="h-28 animate-pulse rounded-2xl glass-card" />
         ))}
       </div>
     )
   }
 
-  if (!data) return <p className="text-sm text-text/50">Failed to load analytics.</p>
+  if (!data) return <p className="text-sm text-white/50">Failed to load analytics.</p>
 
   const meetingCompletion = data.meetingsThisMonth > 0
     ? Math.round((data.completedMeetings / data.meetingsThisMonth) * 100)
@@ -152,8 +152,8 @@ export function AdminAnalytics() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-blue md:text-3xl">Analytics Overview</h1>
-        <p className="mt-1 text-sm text-text/60">Live snapshot of your business</p>
+        <h1 className="text-2xl font-semibold text-white md:text-3xl">Analytics Overview</h1>
+        <p className="mt-1 text-sm text-white/60">Live snapshot of your business</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
@@ -221,9 +221,9 @@ export function AdminAnalytics() {
       </div>
 
       {data.overdueTasks > 0 && (
-        <div className="mt-6 flex items-center gap-3 rounded-xl border border-orange/30 bg-orange/8 px-4 py-3">
+        <div className="mt-6 flex items-center gap-3 rounded-xl border border-orange/30 glass-card px-4 py-3">
           <AlertTriangle className="h-5 w-5 shrink-0 text-orange" />
-          <p className="text-sm text-text">
+          <p className="text-sm text-white/80">
             <span className="font-semibold">{data.overdueTasks} tasks flagged as overdue.</span>{' '}
             <Link href="/admin/counselors" className="text-orange underline">
               Review counselor tasks

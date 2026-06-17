@@ -34,7 +34,7 @@ function StatusBadge({ status }: { status: string }) {
     )
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-green/20 px-2.5 py-0.5 text-xs font-semibold text-text">
+    <span className="inline-flex items-center gap-1 rounded-full bg-green/20 px-2.5 py-0.5 text-xs font-semibold text-white">
       <CheckCircle className="h-3 w-3" /> Acknowledged
     </span>
   )
@@ -73,15 +73,15 @@ export function ComplaintsManager() {
   const openCount = complaints.filter((c) => c.status === 'open').length
 
   if (loading) {
-    return <p className="text-sm text-text/50">Loading complaints...</p>
+    return <p className="text-sm text-white/50">Loading complaints...</p>
   }
 
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-blue md:text-3xl">Complaints</h1>
-          <p className="mt-1 text-sm text-text/60">
+          <h1 className="text-2xl font-semibold text-white md:text-3xl">Complaints</h1>
+          <p className="mt-1 text-sm text-white/60">
             {openCount} open · {complaints.length} total
           </p>
         </div>
@@ -92,8 +92,8 @@ export function ComplaintsManager() {
               onClick={() => setFilter(f)}
               className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize transition-colors ${
                 filter === f
-                  ? 'bg-text text-bg'
-                  : 'bg-text/10 text-text hover:bg-text/20'
+                  ? 'tab-btn-active'
+                  : 'tab-btn-inactive'
               }`}
             >
               {f}
@@ -105,8 +105,8 @@ export function ComplaintsManager() {
       {filtered.length === 0 ? (
         <div className="mt-12 flex flex-col items-center gap-2 text-center">
           <CheckCircle className="h-10 w-10 text-green" />
-          <p className="font-semibold text-text">No complaints</p>
-          <p className="text-sm text-text/50">
+          <p className="font-semibold text-white">No complaints</p>
+          <p className="text-sm text-white/50">
             {filter === 'open' ? 'No open complaints right now.' : 'Nothing to show.'}
           </p>
         </div>
@@ -115,22 +115,22 @@ export function ComplaintsManager() {
           {filtered.map((complaint) => (
             <div
               key={complaint.id}
-              className="rounded-2xl border border-text/10 bg-white p-5"
+              className="rounded-2xl border border-white/10 glass-card crisp-on-dark p-5"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <StatusBadge status={complaint.status} />
-                    <span className="text-xs text-text/40">{timeAgo(complaint.submittedAt)}</span>
+                    <span className="text-xs text-white/40">{timeAgo(complaint.submittedAt)}</span>
                   </div>
-                  <p className="mt-2 font-semibold text-text">{complaint.subject}</p>
-                  <p className="mt-0.5 text-sm text-text/60">
+                  <p className="mt-2 font-semibold text-white">{complaint.subject}</p>
+                  <p className="mt-0.5 text-sm text-white/60">
                     {complaint.clientName}
                     {complaint.clientPhone && (
-                      <span className="ml-2 text-text/40">{complaint.clientPhone}</span>
+                      <span className="ml-2 text-white/40">{complaint.clientPhone}</span>
                     )}
                     {complaint.counselorName && (
-                      <span className="ml-2 text-text/40">· {complaint.counselorName}</span>
+                      <span className="ml-2 text-white/40">· {complaint.counselorName}</span>
                     )}
                   </p>
                 </div>
@@ -147,7 +147,7 @@ export function ComplaintsManager() {
                   )}
                   <button
                     onClick={() => setExpanded(expanded === complaint.id ? null : complaint.id)}
-                    className="flex min-h-[36px] min-w-[36px] items-center justify-center rounded-full bg-text/8 text-text/60 hover:bg-text/15"
+                    className="flex min-h-[36px] min-w-[36px] items-center justify-center rounded-full glass-card text-white/50 hover:text-white"
                     aria-label={expanded === complaint.id ? 'Collapse' : 'Expand'}
                   >
                     {expanded === complaint.id ? (
@@ -160,13 +160,13 @@ export function ComplaintsManager() {
               </div>
 
               {expanded === complaint.id && (
-                <div className="mt-4 rounded-xl bg-bg p-4 text-sm text-text/80 whitespace-pre-wrap">
+                <div className="mt-4 rounded-xl glass-card p-4 text-sm text-white/70 whitespace-pre-wrap">
                   {complaint.body}
                 </div>
               )}
 
               {complaint.acknowledgedAt && (
-                <p className="mt-3 text-xs text-text/40">
+                <p className="mt-3 text-xs text-white/40">
                   Acknowledged {timeAgo(complaint.acknowledgedAt)}
                 </p>
               )}

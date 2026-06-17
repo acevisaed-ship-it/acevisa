@@ -11,12 +11,12 @@ export function TaskRow({ taskText, dueDate }: Props) {
   const dueLabel = formatPKTDueDate(dueDate)
 
   return (
-    <div className="flex items-start gap-3 rounded-xl bg-grad-bg crisp px-4 py-3">
+    <div className="flex items-start gap-3 rounded-xl glass-card crisp-on-dark px-4 py-3">
       <SquareCheck className="mt-0.5 h-5 w-5 shrink-0 text-green" />
       <div className="min-w-0 flex-1">
-        <p className="text-text">{taskText}</p>
+        <p className="text-white">{taskText}</p>
         {dueLabel && (
-          <p className={`mt-1 text-sm ${overdue ? 'text-orange' : 'text-text/60'}`}>
+          <p className={`mt-1 text-sm ${overdue ? 'text-orange' : 'text-white/50'}`}>
             Due {dueLabel}
             {overdue ? ' · overdue' : ''}
           </p>

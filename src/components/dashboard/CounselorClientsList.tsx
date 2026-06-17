@@ -44,15 +44,15 @@ export function CounselorClientsList({ clients, basePath = '/dashboard' }: Props
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by name, email or phone…"
-          className="min-h-[44px] w-full max-w-sm rounded-full border border-text/20 bg-white/80 px-4 py-2.5 text-sm text-text placeholder:text-text/40 outline-none focus:border-blue"
+          className="min-h-[44px] w-full max-w-sm rounded-full px-4 py-2.5 text-sm outline-none glass-input"
         />
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-2xl border border-[rgba(10,63,58,0.12)] bg-white/80">
+      <div className="overflow-x-auto rounded-2xl border border-white/10 glass-card crisp-on-dark">
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead>
-            <tr className="border-b border-text/10 text-xs uppercase tracking-wide text-text/50">
+            <tr className="border-b border-white/10 text-xs uppercase tracking-wide text-white/40">
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Phone</th>
               <th className="px-4 py-3 font-medium">City</th>
@@ -65,7 +65,7 @@ export function CounselorClientsList({ clients, basePath = '/dashboard' }: Props
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-sm text-text/40">
+                <td colSpan={7} className="px-4 py-10 text-center text-sm text-white/40">
                   {search ? 'No clients match your search.' : 'No clients yet.'}
                 </td>
               </tr>
@@ -74,16 +74,16 @@ export function CounselorClientsList({ clients, basePath = '/dashboard' }: Props
                 const score = client.qualification_score
                 const scoreColor = score !== null && score > 0 ? getScoreBadgeColor(score) : null
                 return (
-                  <tr key={client.id} className="border-b border-text/5 last:border-0 hover:bg-bg/40 transition-colors">
+                  <tr key={client.id} className="border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
                     <td className="px-4 py-3">
-                      <p className="font-semibold text-text">{client.name}</p>
+                      <p className="font-semibold text-white/80">{client.name}</p>
                       {client.email && (
-                        <p className="text-xs text-text/50">{client.email}</p>
+                        <p className="text-xs text-white/40">{client.email}</p>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-text/70">{client.phone}</td>
-                    <td className="px-4 py-3 text-text/70">{client.city || '—'}</td>
-                    <td className="px-4 py-3 text-text/70">
+                    <td className="px-4 py-3 text-white/60">{client.phone}</td>
+                    <td className="px-4 py-3 text-white/60">{client.city || '—'}</td>
+                    <td className="px-4 py-3 text-white/60">
                       {getPipelineStageLabel(client.pipeline_stage)}
                     </td>
                     <td className="px-4 py-3">
@@ -95,16 +95,16 @@ export function CounselorClientsList({ clients, basePath = '/dashboard' }: Props
                           {score}
                         </span>
                       ) : (
-                        <span className="text-text/40">—</span>
+                        <span className="text-white/30">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-xs text-text/50">
+                    <td className="px-4 py-3 text-xs text-white/40">
                       {formatPKTRegistrationDate(client.registration_date)}
                     </td>
                     <td className="px-4 py-3">
                       <Link
                         href={`${basePath}/clients/${client.id}`}
-                        className="rounded-full border border-blue/30 px-3 py-1.5 text-xs font-medium text-blue transition-colors hover:border-blue/50"
+                        className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-medium text-white/60 transition-colors hover:text-white"
                       >
                         View →
                       </Link>

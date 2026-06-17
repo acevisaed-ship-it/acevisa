@@ -16,9 +16,9 @@ type Meeting = {
 }
 
 function statusColor(status: string) {
-  if (status === 'completed') return 'bg-green/20 text-text'
+  if (status === 'completed') return 'bg-green/20 text-white'
   if (status === 'cancelled') return 'bg-orange/15 text-orange'
-  return 'bg-blue/15 text-blue'
+  return 'bg-white/10 text-white/70'
 }
 
 function formatDate(iso: string) {
@@ -47,14 +47,14 @@ export function AllMeetingsView() {
 
   const filtered = meetings.filter((m) => filter === 'all' || m.status === filter)
 
-  if (loading) return <p className="text-sm text-text/50">Loading meetings...</p>
+  if (loading) return <p className="text-sm text-white/50">Loading meetings...</p>
 
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-blue md:text-3xl">All Meetings</h1>
-          <p className="mt-1 text-sm text-text/60">{filtered.length} meetings</p>
+          <h1 className="text-2xl font-semibold text-white md:text-3xl">All Meetings</h1>
+          <p className="mt-1 text-sm text-white/60">{filtered.length} meetings</p>
         </div>
         <div className="flex gap-2">
           {(['all', 'scheduled', 'completed', 'cancelled'] as const).map((f) => (
@@ -62,7 +62,7 @@ export function AllMeetingsView() {
               key={f}
               onClick={() => setFilter(f)}
               className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize transition-colors ${
-                filter === f ? 'bg-text text-bg' : 'bg-text/10 text-text hover:bg-text/20'
+                filter === f ? 'tab-btn-active' : 'tab-btn-inactive'
               }`}
             >
               {f}
@@ -73,14 +73,14 @@ export function AllMeetingsView() {
 
       {filtered.length === 0 ? (
         <div className="mt-12 text-center">
-          <Calendar className="mx-auto h-10 w-10 text-text/20" />
-          <p className="mt-3 text-text/50">No meetings found</p>
+          <Calendar className="mx-auto h-10 w-10 text-white/20" />
+          <p className="mt-3 text-white/50">No meetings found</p>
         </div>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-2xl border border-text/10 bg-white">
+        <div className="mt-6 overflow-x-auto rounded-2xl border border-white/10 glass-card crisp-on-dark">
           <table className="w-full min-w-[640px] text-sm">
             <thead>
-              <tr className="border-b border-text/10 text-left text-xs font-semibold uppercase tracking-wide text-text/50">
+              <tr className="border-b border-white/10 text-left text-xs font-semibold uppercase tracking-wide text-white/40">
                 <th className="px-4 py-3">Client</th>
                 <th className="px-4 py-3">Counselor</th>
                 <th className="px-4 py-3">Date</th>
@@ -89,32 +89,32 @@ export function AllMeetingsView() {
                 <th className="px-4 py-3">Notes</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-text/6">
+            <tbody className="divide-y divide-white/8">
               {filtered.map((m) => (
-                <tr key={m.id} className="hover:bg-bg/40 transition-colors">
+                <tr key={m.id} className="hover:bg-white/5 transition-colors">
                   <td className="px-4 py-3">
                     <Link
                       href={`/admin/clients/${m.clientId}`}
-                      className="font-medium text-text hover:text-blue hover:underline"
+                      className="font-medium text-white/80 hover:text-white hover:underline"
                     >
                       {m.clientName}
                     </Link>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-1.5 text-text/70">
-                      <User className="h-3.5 w-3.5 shrink-0 text-blue" />
+                    <div className="flex items-center gap-1.5 text-white/60">
+                      <User className="h-3.5 w-3.5 shrink-0 text-white/40" />
                       {m.counselorName}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-text/70">
+                  <td className="px-4 py-3 text-white/60">
                     <div className="flex items-center gap-1.5">
-                      <Calendar className="h-3.5 w-3.5 shrink-0 text-text/40" />
+                      <Calendar className="h-3.5 w-3.5 shrink-0 text-white/30" />
                       {formatDate(m.scheduledTime)}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-text/70">
+                  <td className="px-4 py-3 text-white/60">
                     <div className="flex items-center gap-1.5">
-                      <Clock className="h-3.5 w-3.5 shrink-0 text-text/40" />
+                      <Clock className="h-3.5 w-3.5 shrink-0 text-white/30" />
                       {formatTime(m.scheduledTime)}
                     </div>
                   </td>
@@ -124,7 +124,7 @@ export function AllMeetingsView() {
                     </span>
                   </td>
                   <td className="px-4 py-3 max-w-[200px]">
-                    <p className="truncate text-text/50">{m.notes ?? '—'}</p>
+                    <p className="truncate text-white/50">{m.notes ?? '—'}</p>
                   </td>
                 </tr>
               ))}

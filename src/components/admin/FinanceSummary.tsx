@@ -87,13 +87,13 @@ function ItemRow({ label, amount, timestamp, indent = 0 }: {
 }) {
   return (
     <div className={cn(
-      'flex items-start justify-between gap-4 py-2.5 border-b border-text/5 last:border-0',
+      'flex items-start justify-between gap-4 py-2.5 border-b border-white/5 last:border-0',
       indent === 1 && 'pl-4',
       indent === 2 && 'pl-8',
     )}>
       <div className="min-w-0">
-        <p className="text-sm text-text truncate">{label}</p>
-        <p className="text-[11px] text-text/40 mt-0.5">{formatPKT(timestamp)}</p>
+        <p className="text-sm text-white/80 truncate">{label}</p>
+        <p className="text-[11px] text-white/40 mt-0.5">{formatPKT(timestamp)}</p>
       </div>
       <p className={cn('text-sm font-semibold shrink-0', amount >= 0 ? 'text-orange' : 'text-green')}>
         {formatPkr(amount)}
@@ -107,16 +107,16 @@ function CategoryBlock({ group }: { group: ExpenseCategoryGroup }) {
   const hasSubcats = Object.keys(group.subcategories).length > 0
 
   return (
-    <div className="rounded-xl border border-text/10 overflow-hidden">
+    <div className="rounded-xl border border-white/10 overflow-hidden">
       {/* Category header */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-text/3 hover:bg-text/5 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 glass-card hover:brightness-125 transition-all"
       >
         <div className="flex items-center gap-2">
-          {open ? <ChevronDown className="h-4 w-4 text-text/40" /> : <ChevronRight className="h-4 w-4 text-text/40" />}
-          <span className="text-sm font-semibold text-text">{group.label}</span>
-          <span className="text-xs text-text/40">
+          {open ? <ChevronDown className="h-4 w-4 text-white/40" /> : <ChevronRight className="h-4 w-4 text-white/40" />}
+          <span className="text-sm font-semibold text-white/80">{group.label}</span>
+          <span className="text-xs text-white/40">
             ({group.items.length + Object.values(group.subcategories).reduce((s, sc) => s + sc.items.length, 0)} entries)
           </span>
         </div>
@@ -143,15 +143,15 @@ function CategoryBlock({ group }: { group: ExpenseCategoryGroup }) {
 function SubcategoryBlock({ sub }: { sub: SubcategoryGroup }) {
   const [open, setOpen] = useState(true)
   return (
-    <div className="mt-2 rounded-lg border border-text/8 overflow-hidden">
+    <div className="mt-2 rounded-lg border border-white/8 overflow-hidden">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-3 py-2 bg-text/2 hover:bg-text/5 transition-colors"
+        className="w-full flex items-center justify-between px-3 py-2 glass-card hover:brightness-125 transition-all"
       >
         <div className="flex items-center gap-1.5">
-          {open ? <ChevronDown className="h-3.5 w-3.5 text-text/30" /> : <ChevronRight className="h-3.5 w-3.5 text-text/30" />}
-          <span className="text-xs font-semibold text-text/70">{sub.label}</span>
-          <span className="text-[10px] text-text/30">({sub.items.length})</span>
+          {open ? <ChevronDown className="h-3.5 w-3.5 text-white/30" /> : <ChevronRight className="h-3.5 w-3.5 text-white/30" />}
+          <span className="text-xs font-semibold text-white/60">{sub.label}</span>
+          <span className="text-[10px] text-white/30">({sub.items.length})</span>
         </div>
         <span className="text-xs font-semibold text-orange">{formatPkr(sub.total)}</span>
       </button>
@@ -210,8 +210,8 @@ export function FinanceSummary() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-blue md:text-3xl">P&amp;L Summary</h1>
-          <p className="mt-1 text-sm text-text/60">{data?.period.label ?? '…'}</p>
+          <h1 className="text-2xl font-semibold text-white md:text-3xl">P&amp;L Summary</h1>
+          <p className="mt-1 text-sm text-white/60">{data?.period.label ?? '…'}</p>
         </div>
 
         {/* Export buttons */}
@@ -225,7 +225,7 @@ export function FinanceSummary() {
             <button
               key={type}
               onClick={() => downloadExport(type, exportMonth)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-text/20 bg-white px-3 py-1.5 text-xs font-medium text-text/70 hover:border-blue hover:text-blue transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/20 glass-card px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white transition-colors"
             >
               <Download className="h-3 w-3" />
               {label}
@@ -242,7 +242,7 @@ export function FinanceSummary() {
             onClick={() => setMode(tab.id)}
             className={cn(
               'rounded-full px-4 py-2 text-sm font-semibold transition-colors',
-              mode === tab.id ? 'bg-text text-bg' : 'bg-white border border-text/20 text-text/60 hover:text-text hover:border-text/40'
+              mode === tab.id ? 'tab-btn-active' : 'tab-btn-inactive border border-white/15'
             )}
           >
             {tab.label}
@@ -256,22 +256,22 @@ export function FinanceSummary() {
               value={customFrom}
               max={customTo}
               onChange={(e) => setCustomFrom(e.target.value)}
-              className="min-h-[38px] rounded-xl border border-text/20 bg-white px-3 text-sm text-text outline-none focus:border-blue"
+              className="min-h-[38px] rounded-xl px-3 text-sm outline-none glass-input"
             />
-            <span className="text-sm text-text/40">→</span>
+            <span className="text-sm text-white/40">→</span>
             <input
               type="date"
               value={customTo}
               min={customFrom}
               onChange={(e) => setCustomTo(e.target.value)}
-              className="min-h-[38px] rounded-xl border border-text/20 bg-white px-3 text-sm text-text outline-none focus:border-blue"
+              className="min-h-[38px] rounded-xl px-3 text-sm outline-none glass-input"
             />
           </div>
         )}
       </div>
 
       {loading ? (
-        <p className="mt-10 text-sm text-text/50">Loading…</p>
+        <p className="mt-10 text-sm text-white/50">Loading…</p>
       ) : (
         <>
           {/* KPI cards */}
@@ -280,11 +280,11 @@ export function FinanceSummary() {
               { label: 'Income Collected', value: summary?.totalCollected ?? 0, sub: `${summary?.transactionCount ?? 0} invoices`, color: 'text-green', icon: TrendingUp },
               { label: 'Total Expenses', value: summary?.totalExpenses ?? 0, sub: `${summary?.expenseCount ?? 0} entries`, color: 'text-orange', icon: TrendingDown },
               { label: 'Net P&L', value: net, sub: net >= 0 ? 'Profit' : 'Loss', color: net >= 0 ? 'text-green' : 'text-orange', icon: net >= 0 ? TrendingUp : TrendingDown },
-              { label: 'Margin', value: null, sub: summary?.totalCollected ? `${Math.round((net / summary.totalCollected) * 100)}%` : '—', color: 'text-blue', icon: Minus },
+              { label: 'Margin', value: null, sub: summary?.totalCollected ? `${Math.round((net / summary.totalCollected) * 100)}%` : '—', color: 'text-white', icon: Minus },
             ].map((card) => (
-              <div key={card.label} className="rounded-2xl border border-text/10 bg-white p-5">
+              <div key={card.label} className="rounded-2xl border border-white/10 glass-card crisp-on-dark p-5">
                 <div className="flex items-center justify-between">
-                  <p className="text-xs font-medium text-text/50 uppercase tracking-wide">{card.label}</p>
+                  <p className="text-xs font-medium text-white/50 uppercase tracking-wide">{card.label}</p>
                   <card.icon className={cn('h-4 w-4', card.color)} />
                 </div>
                 {card.value !== null ? (
@@ -293,46 +293,46 @@ export function FinanceSummary() {
                   <p className={cn('mt-2 text-3xl font-bold', card.color)}>{card.sub}</p>
                 )}
                 {card.value !== null && (
-                  <p className="mt-1 text-xs text-text/40">{card.sub}</p>
+                  <p className="mt-1 text-xs text-white/40">{card.sub}</p>
                 )}
               </div>
             ))}
           </div>
 
           {/* Income section */}
-          <section className="mt-8 rounded-2xl border border-text/10 bg-white p-5">
+          <section className="mt-8 rounded-2xl border border-white/10 glass-card crisp-on-dark p-5">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="font-semibold text-text">Income — Payments Received</h2>
-                <p className="text-xs text-text/40 mt-0.5">{data?.incomeItems.length ?? 0} invoices in this period</p>
+                <h2 className="font-semibold text-white">Income — Payments Received</h2>
+                <p className="text-xs text-white/40 mt-0.5">{data?.incomeItems.length ?? 0} invoices in this period</p>
               </div>
               <span className="text-base font-bold text-green">{formatPkr(summary?.totalCollected ?? 0)}</span>
             </div>
 
             {(data?.incomeItems.length ?? 0) === 0 ? (
-              <p className="text-sm text-text/50 py-4">No payments collected in this period.</p>
+              <p className="text-sm text-white/50 py-4">No payments collected in this period.</p>
             ) : (
               <div>
                 {/* Table header */}
-                <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 text-[10px] font-semibold uppercase tracking-wider text-text/40 px-2 pb-2 border-b border-text/10">
+                <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 text-[10px] font-semibold uppercase tracking-wider text-white/40 px-2 pb-2 border-b border-white/10">
                   <span>Client / Invoice</span>
                   <span className="text-right">Date & Time (PKT)</span>
                   <span className="text-right">Amount</span>
                 </div>
-                <div className="divide-y divide-text/5">
+                <div className="divide-y divide-white/5">
                   {data?.incomeItems.map((item) => (
                     <div key={item.id} className="grid grid-cols-[1fr_auto_auto] gap-x-4 items-center px-2 py-3">
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-text truncate">{item.clientName}</p>
-                        <p className="text-[11px] text-text/40">{item.invoiceNumber}</p>
+                        <p className="text-sm font-medium text-white/80 truncate">{item.clientName}</p>
+                        <p className="text-[11px] text-white/40">{item.invoiceNumber}</p>
                       </div>
-                      <p className="text-xs text-text/50 whitespace-nowrap">{formatPKT(item.paidAt)}</p>
+                      <p className="text-xs text-white/50 whitespace-nowrap">{formatPKT(item.paidAt)}</p>
                       <p className="text-sm font-semibold text-green whitespace-nowrap">{formatPkr(item.amount)}</p>
                     </div>
                   ))}
                 </div>
                 {/* Income total */}
-                <div className="flex justify-end pt-3 border-t border-text/10 mt-2">
+                <div className="flex justify-end pt-3 border-t border-white/10 mt-2">
                   <p className="text-sm font-bold text-green">Total: {formatPkr(summary?.totalCollected ?? 0)}</p>
                 </div>
               </div>
@@ -340,11 +340,11 @@ export function FinanceSummary() {
           </section>
 
           {/* Expenses section */}
-          <section className="mt-6 rounded-2xl border border-text/10 bg-white p-5">
+          <section className="mt-6 rounded-2xl border border-white/10 glass-card crisp-on-dark p-5">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="font-semibold text-text">Expenses by Category</h2>
-                <p className="text-xs text-text/40 mt-0.5">
+                <h2 className="font-semibold text-white">Expenses by Category</h2>
+                <p className="text-xs text-white/40 mt-0.5">
                   {data?.expenseCategories.length ?? 0} categories · {summary?.expenseCount ?? 0} entries
                 </p>
               </div>
@@ -352,14 +352,14 @@ export function FinanceSummary() {
             </div>
 
             {(data?.expenseCategories.length ?? 0) === 0 ? (
-              <p className="text-sm text-text/50 py-4">No expenses recorded in this period.</p>
+              <p className="text-sm text-white/50 py-4">No expenses recorded in this period.</p>
             ) : (
               <div className="space-y-3">
                 {data?.expenseCategories.map((group) => (
                   <CategoryBlock key={group.category} group={group} />
                 ))}
                 {/* Expenses total */}
-                <div className="flex justify-end pt-2 border-t border-text/10">
+                <div className="flex justify-end pt-2 border-t border-white/10">
                   <p className="text-sm font-bold text-orange">Total: {formatPkr(summary?.totalExpenses ?? 0)}</p>
                 </div>
               </div>
@@ -368,15 +368,15 @@ export function FinanceSummary() {
 
           {/* Commissions */}
           {(data?.commissions.length ?? 0) > 0 && (
-            <section className="mt-6 rounded-2xl border border-text/10 bg-white p-5">
-              <h2 className="font-semibold text-text">Counselor Commissions</h2>
-              <p className="mt-1 text-xs text-text/50">
+            <section className="mt-6 rounded-2xl border border-white/10 glass-card crisp-on-dark p-5">
+              <h2 className="font-semibold text-white">Counselor Commissions</h2>
+              <p className="mt-1 text-xs text-white/50">
                 Based on deals closed in this period (agreement signed or completed)
               </p>
               <div className="mt-4 overflow-x-auto">
                 <table className="w-full min-w-[520px] text-left text-sm">
                   <thead>
-                    <tr className="border-b border-text/10 text-text/50 text-xs uppercase tracking-wide">
+                    <tr className="border-b border-white/10 text-white/40 text-xs uppercase tracking-wide">
                       <th className="px-2 py-2 font-medium">Counselor</th>
                       <th className="px-2 py-2 font-medium">Deals closed</th>
                       <th className="px-2 py-2 font-medium">Deal value</th>
@@ -386,12 +386,12 @@ export function FinanceSummary() {
                   </thead>
                   <tbody>
                     {data?.commissions.filter(r => r.dealsClosed > 0).map((row) => (
-                      <tr key={row.counselorId} className="border-b border-text/5 last:border-0">
-                        <td className="px-2 py-3 font-medium text-text">{row.counselorName}</td>
-                        <td className="px-2 py-3 text-text/60">{row.dealsClosed}</td>
-                        <td className="px-2 py-3 text-text/60">{formatPkr(row.totalDealValue)}</td>
-                        <td className="px-2 py-3 text-text/60">{row.commissionRate}%</td>
-                        <td className="px-2 py-3 font-semibold text-blue">{formatPkr(row.commissionAmount)}</td>
+                      <tr key={row.counselorId} className="border-b border-white/5 last:border-0">
+                        <td className="px-2 py-3 font-medium text-white/80">{row.counselorName}</td>
+                        <td className="px-2 py-3 text-white/60">{row.dealsClosed}</td>
+                        <td className="px-2 py-3 text-white/60">{formatPkr(row.totalDealValue)}</td>
+                        <td className="px-2 py-3 text-white/60">{row.commissionRate}%</td>
+                        <td className="px-2 py-3 font-semibold text-green">{formatPkr(row.commissionAmount)}</td>
                       </tr>
                     ))}
                   </tbody>

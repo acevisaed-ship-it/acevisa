@@ -88,12 +88,12 @@ export default async function AdminClientProfilePage({ params }: Props) {
   const counselorName = assignedCounselor?.name ?? 'Unassigned'
 
   return (
-    <main className="flex-1 bg-bg p-4 md:p-8">
+    <main className="flex-1 p-4 md:p-8">
       <div className="mx-auto max-w-[900px]">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <Link
             href="/admin/clients"
-            className="inline-flex items-center text-sm text-blue hover:underline"
+            className="inline-flex items-center text-sm text-white/60 hover:text-white"
           >
             ← Back to all clients
           </Link>

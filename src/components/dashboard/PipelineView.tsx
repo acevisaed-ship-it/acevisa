@@ -86,10 +86,10 @@ export function PipelineView({
     return (
       <div
         key={client.id}
-        className="w-full rounded-2xl border border-text/[0.12] bg-white p-4"
+        className="w-full rounded-2xl border border-white/10 glass-card crisp-on-dark p-4"
       >
         <div className="mb-2 flex items-start justify-between gap-2">
-          <p className="font-bold text-text">{client.name}</p>
+          <p className="font-bold text-white">{client.name}</p>
           {scoreColor !== null && score !== null && (
             <span
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
@@ -100,7 +100,7 @@ export function PipelineView({
           )}
         </div>
 
-        <p className="mb-2 text-xs text-text/60">
+        <p className="mb-2 text-xs text-white/50">
           {[client.city, client.language].filter(Boolean).join(' · ')}
         </p>
 
@@ -113,7 +113,7 @@ export function PipelineView({
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <Link
             href={`${clientBasePath}/${client.id}`}
-            className="inline-flex min-h-[44px] items-center rounded-full border border-blue/30 px-3 py-1.5 text-xs font-medium text-blue transition-colors hover:border-blue/50"
+            className="inline-flex min-h-[44px] items-center rounded-full border border-white/20 px-3 py-1.5 text-xs font-medium text-white/70 transition-colors hover:text-white"
           >
             View Client →
           </Link>
@@ -121,7 +121,7 @@ export function PipelineView({
             <button
               type="button"
               onClick={() => setTransferClient(client)}
-              className="inline-flex min-h-[44px] items-center rounded-full border border-orange/40 px-3 py-1.5 text-xs font-medium text-orange transition-colors hover:border-orange/60"
+              className="inline-flex min-h-[44px] items-center rounded-full border border-orange/40 px-3 py-1.5 text-xs font-medium text-orange transition-colors hover:border-orange/70"
             >
               Transfer →
             </button>
@@ -129,7 +129,7 @@ export function PipelineView({
         </div>
 
         {client.registration_date && (
-          <p className="mt-3 text-xs text-text/40">
+          <p className="mt-3 text-xs text-white/30">
             Registered {formatPKTRegistrationDate(client.registration_date)}
           </p>
         )}
@@ -146,7 +146,7 @@ export function PipelineView({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by name, email or phone…"
-          className="min-h-[44px] w-full max-w-sm rounded-full border border-text/20 bg-white/80 px-4 py-2.5 text-sm text-text placeholder:text-text/40 outline-none focus:border-blue"
+          className="min-h-[44px] w-full max-w-sm rounded-full px-4 py-2.5 text-sm outline-none glass-input"
         />
       </div>
 
@@ -161,7 +161,7 @@ export function PipelineView({
               type="button"
               onClick={() => setActiveStage(stage)}
               className={`shrink-0 rounded-full px-3 py-2 text-sm font-bold transition-colors ${
-                isActive ? 'bg-green text-text' : 'bg-bg text-text'
+                isActive ? 'tab-btn-active' : 'tab-btn-inactive'
               }`}
             >
               {label} ({count})
@@ -173,7 +173,7 @@ export function PipelineView({
       {/* Mobile: vertical client list */}
       <div className="flex flex-col gap-3 lg:hidden">
         {stageClients.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-text/10 px-4 py-6 text-center text-sm text-text/40">
+          <p className="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-center text-sm text-white/30">
             No clients in this stage
           </p>
         ) : (
@@ -192,8 +192,8 @@ export function PipelineView({
                 className="flex w-[280px] shrink-0 snap-start flex-col sm:w-[300px]"
               >
                 <div className="mb-3 flex items-center gap-2">
-                  <h2 className="text-sm font-bold text-text">{label}</h2>
-                  <span className="rounded-full bg-green px-2 py-0.5 text-xs font-semibold text-text">
+                  <h2 className="text-sm font-bold text-white">{label}</h2>
+                  <span className="rounded-full bg-green px-2 py-0.5 text-xs font-semibold text-[#0A3F3A]">
                     {clients.length}
                   </span>
                 </div>

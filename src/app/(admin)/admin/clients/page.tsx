@@ -35,7 +35,7 @@ export default async function AllClientsPage() {
 
   return (
     <main className="flex-1 p-4 md:p-8">
-      <h1 className="text-2xl font-semibold text-blue md:text-3xl">All Clients</h1>
+      <h1 className="text-2xl font-semibold text-white md:text-3xl">All Clients</h1>
       <p className="mt-1 text-sm text-text/60">
         {rows.length} client{rows.length === 1 ? '' : 's'} across all counselors
       </p>

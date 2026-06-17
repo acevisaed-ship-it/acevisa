@@ -62,8 +62,7 @@ type Expense = {
   created_at: string
 }
 
-const inputClass =
-  'min-h-[48px] w-full rounded-full border border-text bg-bg px-4 py-2.5 text-sm text-text outline-none focus:border-blue'
+const inputClass = 'min-h-[48px] w-full rounded-full px-4 py-2.5 text-sm outline-none glass-input'
 
 function downloadExport(type: string) {
   const month = new Date().toISOString().slice(0, 7)
@@ -80,15 +79,15 @@ const STATUS_TABS = ['all', ...INVOICE_STATUSES] as const
 function statusBadgeClass(status: string) {
   switch (status) {
     case 'paid':
-      return 'bg-green/20 text-text'
+      return 'bg-green/20 text-white'
     case 'sent':
-      return 'bg-blue/10 text-blue'
+      return 'bg-blue/20 text-white'
     case 'overdue':
       return 'bg-orange/20 text-orange'
     case 'cancelled':
-      return 'bg-text/10 text-text/50'
+      return 'glass-card text-white/40'
     default:
-      return 'bg-text/10 text-text/70'
+      return 'glass-card text-white/50'
   }
 }
 
@@ -193,16 +192,16 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
     <>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <span className="rounded-full bg-green/15 px-3 py-1 text-xs font-bold text-[#0A3F3A]">
+          <span className="rounded-full bg-green/20 px-3 py-1 text-xs font-bold text-white">
             ↑ INCOMING CASH
           </span>
-          <p className="text-sm text-text/60">{invoices.length} invoice{invoices.length !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-white/50">{invoices.length} invoice{invoices.length !== 1 ? 's' : ''}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => downloadExport('invoices')}
-            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-text/20 bg-white px-4 py-2 text-sm font-medium text-text/70 hover:border-blue hover:text-blue transition-colors"
+            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-white/20 glass-card px-4 py-2 text-sm font-medium text-white/60 hover:text-white transition-colors"
           >
             <FileSpreadsheet className="h-4 w-4" />
             Export Excel
@@ -222,21 +221,21 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
         {STATUS_TABS.map((tab) => (
           <button key={tab} type="button" onClick={() => setStatusTab(tab)}
             className={cn('min-h-[40px] rounded-full px-4 text-sm font-medium transition-colors',
-              statusTab === tab ? 'bg-green text-text' : 'bg-white text-text/70 hover:bg-text/5')}>
+              statusTab === tab ? 'bg-green text-[#0A3F3A]' : 'glass-card text-white/50 hover:text-white')}>
             {tab === 'all' ? 'All' : INVOICE_STATUS_LABELS[tab as InvoiceStatus]}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <p className="mt-8 text-text/60">Loading invoices…</p>
+        <p className="mt-8 text-white/50">Loading invoices…</p>
       ) : filtered.length === 0 ? (
-        <p className="mt-8 text-text/60">No invoices found.</p>
+        <p className="mt-8 text-white/50">No invoices found.</p>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-2xl border border-text/10 bg-white">
+        <div className="mt-6 overflow-x-auto rounded-2xl border border-white/10 glass-card crisp-on-dark">
           <table className="w-full min-w-[800px] text-left text-sm">
             <thead>
-              <tr className="border-b border-text/10 text-text/60">
+              <tr className="border-b border-white/10 text-white/40">
                 <th className="px-4 py-3 font-medium">Type</th>
                 <th className="px-4 py-3 font-medium">Invoice #</th>
                 <th className="px-4 py-3 font-medium">Client</th>
@@ -249,34 +248,34 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
             </thead>
             <tbody>
               {filtered.map((invoice) => (
-                <tr key={invoice.id} className="border-b border-text/5 last:border-0">
+                <tr key={invoice.id} className="border-b border-white/5 last:border-0">
                   <td className="px-4 py-3">
-                    <span className="rounded-full bg-green/15 px-2.5 py-0.5 text-[11px] font-bold text-[#0A3F3A]">
+                    <span className="rounded-full bg-green/20 px-2.5 py-0.5 text-[11px] font-bold text-white">
                       ↑ IN
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-mono text-xs text-text">{invoice.invoice_number}</td>
-                  <td className="px-4 py-3 text-text">{invoice.client_name ?? '—'}</td>
-                  <td className="px-4 py-3 text-text/70">{invoice.counselor_name ?? '—'}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-white/70">{invoice.invoice_number}</td>
+                  <td className="px-4 py-3 text-white/80">{invoice.client_name ?? '—'}</td>
+                  <td className="px-4 py-3 text-white/60">{invoice.counselor_name ?? '—'}</td>
                   <td className="px-4 py-3 font-semibold text-green">{formatPkr(invoice.total)}</td>
                   <td className="px-4 py-3">
                     <span className={cn('rounded-full px-3 py-1 text-xs font-medium', statusBadgeClass(invoice.status))}>
                       {INVOICE_STATUS_LABELS[invoice.status as InvoiceStatus] ?? invoice.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-text/70">
+                  <td className="px-4 py-3 text-white/60">
                     {invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-PK') : '—'}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">
                       <button type="button" onClick={() => downloadInvoicePdf(invoice)}
-                        className="inline-flex items-center gap-1 rounded-full bg-blue/10 px-3 py-1 text-xs font-medium text-blue">
+                        className="inline-flex items-center gap-1 rounded-full bg-blue/20 px-3 py-1 text-xs font-medium text-white">
                         <Download className="h-3 w-3" />Download
                       </button>
                       {(invoice.status === 'sent' || invoice.status === 'overdue') && (
                         <button type="button"
                           onClick={() => { setPaymentMethod('bank_transfer'); setReferenceNumber(''); setPaidAt(new Date().toISOString().slice(0, 10)); setError(''); setPaymentModal(invoice) }}
-                          className="rounded-full bg-green/20 px-3 py-1 text-xs font-medium text-text">
+                          className="rounded-full bg-green/20 px-3 py-1 text-xs font-medium text-white">
                           Mark Paid
                         </button>
                       )}
@@ -293,21 +292,21 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:px-4"
           onClick={() => setModalOpen(false)} role="presentation">
-          <div className="flex h-full w-full flex-col overflow-y-auto bg-bg p-6 sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-[20px]"
+          <div className="flex h-full w-full flex-col overflow-y-auto dark-modal p-6 sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-[20px]"
             onClick={(e) => e.stopPropagation()} role="dialog">
             <div className="mb-4 flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-lg font-bold text-blue">New Client Invoice</h2>
+                <h2 className="text-lg font-bold text-white">New Client Invoice</h2>
                 <p className="text-xs text-green font-medium mt-0.5">↑ Incoming cash from client</p>
               </div>
-              <button type="button" onClick={() => setModalOpen(false)} className="flex min-h-[44px] min-w-[44px] items-center justify-center" aria-label="Close">
+              <button type="button" onClick={() => setModalOpen(false)} className="flex min-h-[44px] min-w-[44px] items-center justify-center text-white/60 hover:text-white" aria-label="Close">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <form className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-sm text-text">Client</label>
+                <label className="mb-1.5 block text-sm text-white/70">Client</label>
                 <select value={clientId} onChange={(e) => { setClientId(e.target.value); setDealId('') }} className={inputClass} required>
                   <option value="">Select client</option>
                   {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -316,7 +315,7 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
 
               {clientId && clientDeals.length > 0 && (
                 <div>
-                  <label className="mb-1.5 block text-sm text-text">Link to deal (optional)</label>
+                  <label className="mb-1.5 block text-sm text-white/70">Link to deal (optional)</label>
                   <select value={dealId} onChange={(e) => setDealId(e.target.value)} className={inputClass}>
                     <option value="">No deal</option>
                     {clientDeals.map((d) => <option key={d.id} value={d.id}>{d.service_type} — {formatPkr(d.deal_value)}</option>)}
@@ -325,18 +324,18 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
               )}
 
               <div>
-                <label className="mb-1.5 block text-sm text-text">Line items</label>
+                <label className="mb-1.5 block text-sm text-white/70">Line items</label>
                 <div className="space-y-2">
                   {lineItems.map((item, idx) => (
                     <div key={idx} className="flex gap-2">
                       <input value={item.description}
                         onChange={(e) => { const n = [...lineItems]; n[idx] = { ...n[idx], description: e.target.value }; setLineItems(n) }}
                         placeholder="Description"
-                        className="min-h-[44px] flex-1 rounded-full border border-text bg-bg px-4 text-sm outline-none focus:border-blue" />
+                        className="min-h-[44px] flex-1 rounded-full px-4 text-sm outline-none glass-input" />
                       <input type="number" min="0" value={item.amount}
                         onChange={(e) => { const n = [...lineItems]; n[idx] = { ...n[idx], amount: e.target.value }; setLineItems(n) }}
                         placeholder="Amount"
-                        className="min-h-[44px] w-28 rounded-full border border-text bg-bg px-4 text-sm outline-none focus:border-blue" />
+                        className="min-h-[44px] w-28 rounded-full px-4 text-sm outline-none glass-input" />
                       {lineItems.length > 1 && (
                         <button type="button" onClick={() => setLineItems(lineItems.filter((_, i) => i !== idx))}
                           className="flex min-h-[44px] min-w-[44px] items-center justify-center text-orange">
@@ -347,32 +346,32 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
                   ))}
                 </div>
                 <button type="button" onClick={() => setLineItems([...lineItems, { description: '', amount: '' }])}
-                  className="mt-2 text-sm text-blue hover:underline">
+                  className="mt-2 text-sm text-white/50 hover:text-white hover:underline">
                   + Add line item
                 </button>
               </div>
 
-              <div className="rounded-2xl border border-text/10 bg-white p-4">
-                <p className="text-sm text-text/60">Subtotal</p>
+              <div className="rounded-2xl border border-white/10 glass-card p-4">
+                <p className="text-sm text-white/50">Subtotal</p>
                 <p className="text-lg font-semibold text-green">{formatPkr(subtotal)}</p>
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-text">Due date</label>
+                <label className="mb-1.5 block text-sm text-white/70">Due date</label>
                 <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className={inputClass} />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-text">Notes</label>
+                <label className="mb-1.5 block text-sm text-white/70">Notes</label>
                 <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2}
-                  className="w-full resize-none rounded-2xl border border-text bg-bg px-4 py-2.5 text-sm outline-none focus:border-blue" />
+                  className="w-full resize-none rounded-2xl px-4 py-2.5 text-sm outline-none glass-input" />
               </div>
 
               {error && <p className="text-sm text-orange">{error}</p>}
 
               <div className="flex gap-3">
                 <button type="button" disabled={saving} onClick={(e) => handleCreate(e, false)}
-                  className="min-h-[52px] flex-1 rounded-full border border-text/20 bg-white py-3 text-sm font-bold text-text disabled:opacity-50">
+                  className="min-h-[52px] flex-1 rounded-full border border-white/20 glass-card py-3 text-sm font-bold text-white/70 disabled:opacity-50">
                   Save Draft
                 </button>
                 <button type="button" disabled={saving} onClick={(e) => handleCreate(e, true)}
@@ -389,35 +388,35 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
       {paymentModal && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:px-4"
           onClick={() => setPaymentModal(null)} role="presentation">
-          <div className="flex w-full flex-col bg-bg p-6 sm:max-w-md sm:rounded-[20px]"
+          <div className="flex w-full flex-col dark-modal p-6 sm:max-w-md sm:rounded-[20px]"
             onClick={(e) => e.stopPropagation()} role="dialog">
             <div className="mb-4 flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-lg font-bold text-blue">Record Payment</h2>
-                <p className="text-sm text-text/60">{paymentModal.invoice_number}</p>
+                <h2 className="text-lg font-bold text-white">Record Payment</h2>
+                <p className="text-sm text-white/60">{paymentModal.invoice_number}</p>
               </div>
-              <button type="button" onClick={() => setPaymentModal(null)} className="flex min-h-[44px] min-w-[44px] items-center justify-center" aria-label="Close">
+              <button type="button" onClick={() => setPaymentModal(null)} className="flex min-h-[44px] min-w-[44px] items-center justify-center text-white/60 hover:text-white" aria-label="Close">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <form onSubmit={handleMarkPaid} className="space-y-4">
-              <p className="text-sm text-text">Amount: <strong className="text-green">{formatPkr(paymentModal.total)}</strong></p>
+              <p className="text-sm text-white/80">Amount: <strong className="text-green">{formatPkr(paymentModal.total)}</strong></p>
               <div>
-                <label className="mb-1.5 block text-sm text-text">Payment method</label>
+                <label className="mb-1.5 block text-sm text-white/70">Payment method</label>
                 <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)} className={inputClass}>
                   {PAYMENT_METHODS.map((m) => <option key={m} value={m}>{PAYMENT_METHOD_LABELS[m]}</option>)}
                 </select>
               </div>
               <div>
-                <label className="mb-1.5 block text-sm text-text">Reference number</label>
+                <label className="mb-1.5 block text-sm text-white/70">Reference number</label>
                 <input value={referenceNumber} onChange={(e) => setReferenceNumber(e.target.value)} className={inputClass} />
               </div>
               <div>
-                <label className="mb-1.5 block text-sm text-text">Date paid</label>
+                <label className="mb-1.5 block text-sm text-white/70">Date paid</label>
                 <input type="date" value={paidAt} onChange={(e) => setPaidAt(e.target.value)} className={inputClass} required />
               </div>
               <div>
-                <label className="mb-1.5 block text-sm text-text">Receipt (optional)</label>
+                <label className="mb-1.5 block text-sm text-white/70">Receipt (optional)</label>
                 <input
                   ref={paymentReceiptRef}
                   type="file"
@@ -431,8 +430,8 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
                   className={cn(
                     'flex min-h-[48px] w-full items-center gap-2 rounded-full border px-4 text-sm transition-colors',
                     paymentReceiptFile
-                      ? 'border-blue bg-blue/5 text-blue'
-                      : 'border-text/20 text-text/60 hover:border-text/40'
+                      ? 'border-blue bg-blue/10 text-white'
+                      : 'border-white/20 text-white/50 hover:text-white'
                   )}
                 >
                   <Paperclip className="h-4 w-4 shrink-0" />
@@ -541,13 +540,13 @@ function ExpensesTab() {
           <span className="rounded-full bg-orange/15 px-3 py-1 text-xs font-bold text-orange">
             ↓ OUTGOING EXPENSES
           </span>
-          <p className="text-sm text-text/60">{filtered.length} record{filtered.length !== 1 ? 's' : ''} · {formatPkr(totalAmount)}</p>
+          <p className="text-sm text-white/50">{filtered.length} record{filtered.length !== 1 ? 's' : ''} · {formatPkr(totalAmount)}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => downloadExport('expenses')}
-            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-text/20 bg-white px-4 py-2 text-sm font-medium text-text/70 hover:border-orange hover:text-orange transition-colors"
+            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-white/20 glass-card px-4 py-2 text-sm font-medium text-white/60 hover:text-white transition-colors"
           >
             <FileSpreadsheet className="h-4 w-4" />
             Export Excel
@@ -564,21 +563,21 @@ function ExpensesTab() {
         {CATEGORY_TABS.map((tab) => (
           <button key={tab} type="button" onClick={() => setCategoryFilter(tab)}
             className={cn('min-h-[40px] rounded-full px-4 text-sm font-medium transition-colors',
-              categoryFilter === tab ? 'bg-orange text-white' : 'bg-white text-text/70 hover:bg-text/5')}>
+              categoryFilter === tab ? 'bg-orange text-white' : 'glass-card text-white/50 hover:text-white')}>
             {tab === 'all' ? 'All categories' : EXPENSE_CATEGORY_LABELS[tab as ExpenseCategory]}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <p className="mt-8 text-text/60">Loading expenses…</p>
+        <p className="mt-8 text-white/50">Loading expenses…</p>
       ) : filtered.length === 0 ? (
-        <p className="mt-8 text-text/60">No expenses recorded.</p>
+        <p className="mt-8 text-white/50">No expenses recorded.</p>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-2xl border border-text/10 bg-white">
+        <div className="mt-6 overflow-x-auto rounded-2xl border border-white/10 glass-card crisp-on-dark">
           <table className="w-full min-w-[680px] text-left text-sm">
             <thead>
-              <tr className="border-b border-text/10 text-text/60">
+              <tr className="border-b border-white/10 text-white/40">
                 <th className="px-4 py-3 font-medium">Type</th>
                 <th className="px-4 py-3 font-medium">Date</th>
                 <th className="px-4 py-3 font-medium">Category</th>
@@ -591,30 +590,30 @@ function ExpensesTab() {
             </thead>
             <tbody>
               {filtered.map((exp) => (
-                <tr key={exp.id} className="border-b border-text/5 last:border-0">
+                <tr key={exp.id} className="border-b border-white/5 last:border-0">
                   <td className="px-4 py-3">
                     <span className="rounded-full bg-orange/15 px-2.5 py-0.5 text-[11px] font-bold text-orange">
                       ↓ OUT
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-text/70">
+                  <td className="px-4 py-3 text-white/60">
                     {new Date(exp.paid_at).toLocaleDateString('en-PK')}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="rounded-full bg-text/10 px-2.5 py-0.5 text-xs font-medium text-text/70">
+                    <span className="rounded-full glass-card px-2.5 py-0.5 text-xs font-medium text-white/50">
                       {EXPENSE_CATEGORY_LABELS[exp.category as ExpenseCategory] ?? exp.category}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-text">{exp.description}</td>
+                  <td className="px-4 py-3 text-white/80">{exp.description}</td>
                   <td className="px-4 py-3 font-semibold text-orange">{formatPkr(Number(exp.amount))}</td>
-                  <td className="px-4 py-3 text-text/60 text-xs max-w-[160px] truncate">{exp.notes ?? '—'}</td>
+                  <td className="px-4 py-3 text-white/50 text-xs max-w-[160px] truncate">{exp.notes ?? '—'}</td>
                   <td className="px-4 py-3">
                     {(exp as Expense & { receipt_url?: string }).receipt_url ? (
                       <a
                         href={(exp as Expense & { receipt_url?: string }).receipt_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-xs text-blue hover:underline"
+                        className="flex items-center gap-1 text-xs text-white/60 hover:text-white hover:underline"
                       >
                         <Paperclip className="h-3 w-3" /> Receipt
                       </a>
@@ -638,51 +637,51 @@ function ExpensesTab() {
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:px-4"
           onClick={() => setModalOpen(false)} role="presentation">
-          <div className="flex h-full w-full flex-col overflow-y-auto bg-bg p-6 sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-[20px]"
+          <div className="flex h-full w-full flex-col overflow-y-auto dark-modal p-6 sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-[20px]"
             onClick={(e) => e.stopPropagation()} role="dialog">
             <div className="mb-4 flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-lg font-bold text-orange">Record Expense</h2>
                 <p className="text-xs text-orange/70 font-medium mt-0.5">↓ Outgoing cost / payment</p>
               </div>
-              <button type="button" onClick={() => setModalOpen(false)} className="flex min-h-[44px] min-w-[44px] items-center justify-center" aria-label="Close">
+              <button type="button" onClick={() => setModalOpen(false)} className="flex min-h-[44px] min-w-[44px] items-center justify-center text-white/60 hover:text-white" aria-label="Close">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-sm text-text">Category</label>
+                <label className="mb-1.5 block text-sm text-white/70">Category</label>
                 <select value={category} onChange={(e) => setCategory(e.target.value as ExpenseCategory)} className={inputClass}>
                   {EXPENSE_CATEGORIES.map((c) => <option key={c} value={c}>{EXPENSE_CATEGORY_LABELS[c]}</option>)}
                 </select>
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-text">Description</label>
+                <label className="mb-1.5 block text-sm text-white/70">Description</label>
                 <input value={description} onChange={(e) => setDescription(e.target.value)}
                   placeholder="e.g. Office rent June 2026" className={inputClass} required />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-text">Amount (PKR)</label>
+                <label className="mb-1.5 block text-sm text-white/70">Amount (PKR)</label>
                 <input type="number" min="1" value={amount} onChange={(e) => setAmount(e.target.value)}
                   placeholder="0" className={inputClass} required />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-text">Date paid</label>
+                <label className="mb-1.5 block text-sm text-white/70">Date paid</label>
                 <input type="date" value={paidAt} onChange={(e) => setPaidAt(e.target.value)} className={inputClass} required />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-text">Notes (optional)</label>
+                <label className="mb-1.5 block text-sm text-white/70">Notes (optional)</label>
                 <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2}
-                  className="w-full resize-none rounded-2xl border border-text bg-bg px-4 py-2.5 text-sm outline-none focus:border-blue" />
+                  className="w-full resize-none rounded-2xl px-4 py-2.5 text-sm outline-none glass-input" />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-text">Receipt (optional)</label>
+                <label className="mb-1.5 block text-sm text-white/70">Receipt (optional)</label>
                 <input
                   ref={receiptInputRef}
                   type="file"
@@ -696,8 +695,8 @@ function ExpensesTab() {
                   className={cn(
                     'flex min-h-[48px] w-full items-center gap-2 rounded-full border px-4 text-sm transition-colors',
                     receiptFile
-                      ? 'border-blue bg-blue/5 text-blue'
-                      : 'border-text/20 text-text/60 hover:border-text/40'
+                      ? 'border-blue bg-blue/10 text-white'
+                      : 'border-white/20 text-white/50 hover:text-white'
                   )}
                 >
                   <Paperclip className="h-4 w-4 shrink-0" />
@@ -743,14 +742,14 @@ export function InvoiceManager({
     <>
       {/* Page header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-blue md:text-3xl">Invoices &amp; Expenses</h1>
-        <p className="mt-1 text-sm text-text/60">
+        <h1 className="text-2xl font-semibold text-white md:text-3xl">Invoices &amp; Expenses</h1>
+        <p className="mt-1 text-sm text-white/60">
           Client invoices (incoming cash) and business expenses (outgoing costs) tracked separately.
         </p>
       </div>
 
       {/* Tab switcher */}
-      <div className="mb-6 flex gap-2 rounded-2xl border border-text/10 bg-white p-1.5 w-fit">
+      <div className="mb-6 flex gap-2 rounded-2xl tab-container p-1.5 w-fit">
         <button
           type="button"
           onClick={() => setActiveTab('invoices')}
@@ -758,7 +757,7 @@ export function InvoiceManager({
             'flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition-colors',
             activeTab === 'invoices'
               ? 'bg-green text-[#0A3F3A] shadow-sm'
-              : 'text-text/60 hover:text-text'
+              : 'text-white/50 hover:text-white'
           )}
         >
           <span>↑</span> Client Invoices
@@ -770,7 +769,7 @@ export function InvoiceManager({
             'flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition-colors',
             activeTab === 'expenses'
               ? 'bg-orange text-white shadow-sm'
-              : 'text-text/60 hover:text-text'
+              : 'text-white/50 hover:text-white'
           )}
         >
           <span>↓</span> Expenses

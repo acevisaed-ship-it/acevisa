@@ -87,10 +87,10 @@ export function DocumentsChecklistSection({ documents, clientId }: Props) {
   return (
     <BriefCard>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-bold text-text">Documents Checklist</h2>
+        <h2 className="text-lg font-bold text-white">Documents Checklist</h2>
         <button
           onClick={() => setShowForm((v) => !v)}
-          className="flex items-center gap-1.5 rounded-full bg-text/10 px-3 py-1.5 text-xs font-semibold text-text hover:bg-text/20"
+          className="flex items-center gap-1.5 rounded-full glass-card px-3 py-1.5 text-xs font-semibold text-white/70 hover:text-white"
         >
           {showForm ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
           {showForm ? 'Cancel' : 'Request document'}
@@ -98,33 +98,33 @@ export function DocumentsChecklistSection({ documents, clientId }: Props) {
       </div>
 
       {showForm && (
-        <div className="mb-4 rounded-xl border border-text/10 bg-bg p-4">
-          <p className="mb-2 text-xs font-semibold text-text/60 uppercase tracking-wide">Quick add</p>
+        <div className="mb-4 rounded-xl border border-white/10 glass-card p-4">
+          <p className="mb-2 text-xs font-semibold text-white/50 uppercase tracking-wide">Quick add</p>
           <div className="flex flex-wrap gap-2 mb-3">
             {QUICK_DOCS.map((name) => (
               <button
                 key={name}
                 onClick={() => requestDocument(name)}
                 disabled={requesting || docs.some((d) => d.document_name === name)}
-                className="rounded-full border border-text/20 bg-white px-3 py-1 text-xs text-text hover:bg-text/10 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="rounded-full border border-white/20 glass-card px-3 py-1 text-xs text-white/70 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {docs.some((d) => d.document_name === name) ? '✓ ' : ''}{name}
               </button>
             ))}
           </div>
-          <p className="mb-1.5 text-xs font-semibold text-text/60 uppercase tracking-wide">Or type a custom name</p>
+          <p className="mb-1.5 text-xs font-semibold text-white/50 uppercase tracking-wide">Or type a custom name</p>
           <div className="flex gap-2">
             <input
               value={customName}
               onChange={(e) => setCustomName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && requestDocument(customName)}
               placeholder="e.g. Police clearance certificate"
-              className="flex-1 rounded-xl border border-text/20 bg-white px-3 py-2 text-sm text-text outline-none focus:border-blue"
+              className="flex-1 rounded-xl px-3 py-2 text-sm outline-none glass-input"
             />
             <button
               onClick={() => requestDocument(customName)}
               disabled={requesting || !customName.trim()}
-              className="rounded-full bg-text px-4 py-2 text-xs font-semibold text-bg disabled:opacity-40"
+              className="rounded-full bg-grad-teal crisp-on-dark px-4 py-2 text-xs font-semibold text-white disabled:opacity-40"
             >
               {requesting ? '...' : 'Add'}
             </button>
@@ -133,7 +133,7 @@ export function DocumentsChecklistSection({ documents, clientId }: Props) {
       )}
 
       {docs.length === 0 ? (
-        <p className="text-sm text-text/60">No documents requested yet. Use &ldquo;Request document&rdquo; above to ask the client to upload files.</p>
+        <p className="text-sm text-white/50">No documents requested yet. Use &ldquo;Request document&rdquo; above to ask the client to upload files.</p>
       ) : (
         <div className="space-y-3">
           {docs.map((doc) => {
@@ -143,7 +143,7 @@ export function DocumentsChecklistSection({ documents, clientId }: Props) {
             return (
               <div key={doc.id} className="flex items-center gap-3">
                 <Icon className={`h-5 w-5 shrink-0 ${config.color}`} />
-                <span className="flex-1 text-sm font-medium text-text">
+                <span className="flex-1 text-sm font-medium text-white/80">
                   {doc.document_name}
                 </span>
                 {hasFile && <DownloadButton documentId={doc.id} />}

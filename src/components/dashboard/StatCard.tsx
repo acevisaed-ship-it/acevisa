@@ -5,17 +5,17 @@ type Props = {
 }
 
 const valueColorClasses = {
-  green: 'text-green-600',
-  orange: 'text-orange-500',
-  red: 'text-red-600',
-  default: 'text-blue',
+  green: 'text-green',
+  orange: 'text-orange',
+  red: 'text-red-400',
+  default: 'text-white',
 } as const
 
 export function StatCard({ label, value, valueColor = 'default' }: Props) {
   return (
-    <div className="rounded-2xl bg-grad-bg crisp px-5 py-4">
+    <div className="rounded-2xl glass-card crisp-on-dark px-5 py-4">
       <p className={`text-3xl font-semibold ${valueColorClasses[valueColor]}`}>{value}</p>
-      <p className="mt-1 text-sm text-text">{label}</p>
+      <p className="mt-1 text-sm text-white/60">{label}</p>
     </div>
   )
 }

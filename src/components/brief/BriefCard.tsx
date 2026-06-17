@@ -6,7 +6,7 @@ type Props = {
 export function BriefCard({ children, className = '' }: Props) {
   return (
     <section
-      className={`mb-6 rounded-card border border-text/10 bg-white/80 p-6 ${className}`}
+      className={`mb-6 rounded-card border border-white/10 glass-card crisp-on-dark p-6 ${className}`}
     >
       {children}
     </section>

@@ -103,7 +103,7 @@ function RescheduleMeetingButton({
             setMessage(null)
             setDatetime(utcToPktDatetimeLocal(scheduledTime))
           }}
-          className="text-sm font-medium text-blue hover:underline"
+          className="text-sm font-medium text-white/70 hover:text-white hover:underline"
         >
           Reschedule
         </button>
@@ -114,27 +114,27 @@ function RescheduleMeetingButton({
             value={datetime}
             onChange={(e) => setDatetime(e.target.value)}
             required
-            className="rounded-lg border border-text/20 bg-white px-2 py-1 text-sm text-text"
+            className="rounded-lg rounded-lg px-2 py-1 text-sm glass-input"
           />
           <div className="flex gap-2">
             <button
               type="submit"
               disabled={submitting}
-              className="text-sm font-medium text-blue hover:underline disabled:opacity-50"
+              className="text-sm font-medium text-white/70 hover:text-white hover:underline disabled:opacity-50"
             >
               {submitting ? 'Saving…' : 'Save'}
             </button>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="text-sm text-text/60 hover:underline"
+              className="text-sm text-white/50 hover:text-white hover:underline"
             >
               Cancel
             </button>
           </div>
         </form>
       )}
-      {message && <span className="text-xs text-text/70">{message}</span>}
+      {message && <span className="text-xs text-white/60">{message}</span>}
     </div>
   )
 }
@@ -147,9 +147,9 @@ type Props = {
 export function MeetingsHistorySection({ clientId, meetings }: Props) {
   return (
     <BriefCard>
-      <h2 className="mb-4 text-lg font-bold text-text">Meetings History</h2>
+      <h2 className="mb-4 text-lg font-bold text-white">Meetings History</h2>
       {meetings.length === 0 ? (
-        <p className="text-sm text-text/60">No meetings scheduled yet.</p>
+        <p className="text-sm text-white/50">No meetings scheduled yet.</p>
       ) : (
         <ul className="space-y-3">
           {meetings.map((meeting) => {
@@ -157,14 +157,14 @@ export function MeetingsHistorySection({ clientId, meetings }: Props) {
             return (
               <li
                 key={meeting.id}
-                className="flex flex-col gap-2 rounded-xl bg-bg px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-2 rounded-xl glass-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="min-w-0 space-y-1">
-                  <p className="text-sm font-medium text-text">
+                  <p className="text-sm font-medium text-white/80">
                     {formatPKTDate(meeting.scheduled_time)}{' '}
                     {formatPKTTime(meeting.scheduled_time)} PKT
                   </p>
-                  <p className="text-xs text-text/60">
+                  <p className="text-xs text-white/50">
                     Counselor: {getCounselorName(meeting)}
                   </p>
                 </div>
@@ -177,7 +177,7 @@ export function MeetingsHistorySection({ clientId, meetings }: Props) {
                   </span>
                   <Link
                     href={`/dashboard/brief/${meeting.id}`}
-                    className="text-sm font-medium text-blue hover:underline"
+                    className="text-sm font-medium text-white/70 hover:text-white hover:underline"
                   >
                     View Brief →
                   </Link>
@@ -193,10 +193,10 @@ export function MeetingsHistorySection({ clientId, meetings }: Props) {
           })}
         </ul>
       )}
-      <div className="mt-6 border-t border-text/10 pt-4">
+      <div className="mt-6 border-t border-white/10 pt-4">
         <Link
           href={`/schedule/${clientId}`}
-          className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-blue px-5 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-grad-blue crisp-on-dark px-5 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
         >
           Schedule a Meeting →
         </Link>

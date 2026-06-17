@@ -32,12 +32,12 @@ export function AccountsSection({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-blue md:text-3xl">Accounts</h1>
-        <p className="mt-1 text-sm text-text/60">Finance overview, invoices, and incentive structures</p>
+        <h1 className="text-2xl font-semibold text-white md:text-3xl">Accounts</h1>
+        <p className="mt-1 text-sm text-white/60">Finance overview, invoices, and incentive structures</p>
       </div>
 
       {/* Tab bar */}
-      <div className="flex gap-1 rounded-2xl border border-text/10 bg-white p-1.5 w-fit">
+      <div className="flex gap-1 rounded-2xl tab-container p-1.5 w-fit">
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -46,8 +46,8 @@ export function AccountsSection({
             className={cn(
               'min-h-[40px] rounded-xl px-5 text-sm font-medium transition-colors',
               tab === t.id
-                ? 'bg-text text-bg'
-                : 'text-text/60 hover:bg-text/5'
+                ? 'tab-btn-active'
+                : 'tab-btn-inactive'
             )}
           >
             {t.label}

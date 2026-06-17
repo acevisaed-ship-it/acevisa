@@ -17,7 +17,7 @@ type CounselorPolicy = {
 }
 
 const inputClass =
-  'min-h-[44px] w-full rounded-full border border-text/20 bg-bg px-4 py-2 text-sm text-text outline-none focus:border-blue'
+  'min-h-[44px] w-full rounded-full px-4 py-2 text-sm outline-none glass-input'
 
 export function IncentivePolicyPanel({ counselors }: { counselors: CounselorOption[] }) {
   const [policies, setPolicies] = useState<CounselorPolicy[]>([])
@@ -93,19 +93,19 @@ export function IncentivePolicyPanel({ counselors }: { counselors: CounselorOpti
     }
   }
 
-  if (loading) return <p className="text-sm text-text/60">Loading incentive policies…</p>
+  if (loading) return <p className="text-sm text-white/50">Loading incentive policies…</p>
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-4">
-        <p className="text-sm text-text/60">
+        <p className="text-sm text-white/50">
           Set base salary, default commission rate, and per-service commission rates for each counselor.
           Changes take effect immediately for future commission calculations.
         </p>
       </div>
 
       {policies.length === 0 ? (
-        <p className="text-sm text-text/60">No active counselors found.</p>
+        <p className="text-sm text-white/50">No active counselors found.</p>
       ) : (
         <div className="flex flex-col gap-3">
           {policies.map((policy) => {
@@ -115,7 +115,7 @@ export function IncentivePolicyPanel({ counselors }: { counselors: CounselorOpti
             return (
               <div
                 key={policy.counselorId}
-                className="rounded-2xl border border-text/10 bg-white overflow-hidden"
+                className="rounded-2xl border border-white/10 glass-card crisp-on-dark overflow-hidden"
               >
                 {/* Header row */}
                 <div
@@ -123,8 +123,8 @@ export function IncentivePolicyPanel({ counselors }: { counselors: CounselorOpti
                   onClick={() => setExpandedId(isExpanded ? null : policy.counselorId)}
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-text">{policy.counselorName}</p>
-                    <p className="text-xs text-text/50 mt-0.5">
+                    <p className="font-semibold text-white/80">{policy.counselorName}</p>
+                    <p className="text-xs text-white/50 mt-0.5">
                       Base: {formatPkr(policy.baseSalary)} · Default commission: {policy.defaultCommissionRate}%
                     </p>
                   </div>
@@ -132,30 +132,30 @@ export function IncentivePolicyPanel({ counselors }: { counselors: CounselorOpti
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); startEdit(policy) }}
-                      className="flex items-center gap-1.5 rounded-full border border-blue px-3 py-1.5 text-xs font-semibold text-blue hover:bg-blue/5"
+                      className="flex items-center gap-1.5 rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-white/60 hover:text-white"
                     >
                       <Edit2 className="h-3 w-3" />
                       Edit
                     </button>
                     {isExpanded ? (
-                      <ChevronUp className="h-4 w-4 text-text/40" />
+                      <ChevronUp className="h-4 w-4 text-white/40" />
                     ) : (
-                      <ChevronDown className="h-4 w-4 text-text/40" />
+                      <ChevronDown className="h-4 w-4 text-white/40" />
                     )}
                   </div>
                 </div>
 
                 {/* Expanded detail */}
                 {isExpanded && !isEditing && (
-                  <div className="border-t border-text/5 px-5 py-4">
-                    <p className="text-xs font-semibold text-text/40 uppercase tracking-wide mb-3">
+                  <div className="border-t border-white/5 px-5 py-4">
+                    <p className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-3">
                       Per-Service Commission Rates
                     </p>
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                       {DEAL_SERVICE_TYPES.map((svc) => (
-                        <div key={svc} className="rounded-xl bg-bg p-3">
-                          <p className="text-xs text-text/50">{DEAL_SERVICE_LABELS[svc]}</p>
-                          <p className="text-lg font-bold text-text mt-1">
+                        <div key={svc} className="rounded-xl glass-card p-3">
+                          <p className="text-xs text-white/50">{DEAL_SERVICE_LABELS[svc]}</p>
+                          <p className="text-lg font-bold text-white/80 mt-1">
                             {policy.serviceRates[svc] ?? policy.defaultCommissionRate}%
                           </p>
                         </div>
@@ -166,13 +166,13 @@ export function IncentivePolicyPanel({ counselors }: { counselors: CounselorOpti
 
                 {/* Edit form */}
                 {isEditing && (
-                  <div className="border-t border-text/5 px-5 py-4" onClick={(e) => e.stopPropagation()}>
+                  <div className="border-t border-white/5 px-5 py-4" onClick={(e) => e.stopPropagation()}>
                     {error && (
-                      <p className="mb-3 rounded-xl bg-red-50 px-4 py-2 text-sm text-red-600">{error}</p>
+                      <p className="mb-3 rounded-xl bg-red-500/20 px-4 py-2 text-sm text-red-400">{error}</p>
                     )}
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
                       <div>
-                        <label className="block text-xs font-medium text-text/60 mb-1.5">
+                        <label className="block text-xs font-medium text-white/50 mb-1.5">
                           Base Salary (PKR/month)
                         </label>
                         <input
@@ -185,7 +185,7 @@ export function IncentivePolicyPanel({ counselors }: { counselors: CounselorOpti
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-text/60 mb-1.5">
+                        <label className="block text-xs font-medium text-white/50 mb-1.5">
                           Default Commission Rate (%)
                         </label>
                         <input
@@ -201,13 +201,13 @@ export function IncentivePolicyPanel({ counselors }: { counselors: CounselorOpti
                       </div>
                     </div>
 
-                    <p className="text-xs font-semibold text-text/40 uppercase tracking-wide mb-3">
+                    <p className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-3">
                       Per-Service Commission Rates (%)
                     </p>
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 mb-4">
                       {DEAL_SERVICE_TYPES.map((svc) => (
                         <div key={svc}>
-                          <label className="block text-xs text-text/60 mb-1.5">
+                          <label className="block text-xs text-white/50 mb-1.5">
                             {DEAL_SERVICE_LABELS[svc]}
                           </label>
                           <input
@@ -231,7 +231,7 @@ export function IncentivePolicyPanel({ counselors }: { counselors: CounselorOpti
                         type="button"
                         onClick={() => saveEdit(policy.counselorId)}
                         disabled={saving}
-                        className="flex items-center gap-1.5 rounded-full bg-text px-4 py-2 text-sm font-semibold text-bg disabled:opacity-50"
+                        className="flex items-center gap-1.5 rounded-full bg-grad-blue crisp-on-dark px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
                       >
                         <Check className="h-4 w-4" />
                         {saving ? 'Saving…' : 'Save'}
@@ -239,7 +239,7 @@ export function IncentivePolicyPanel({ counselors }: { counselors: CounselorOpti
                       <button
                         type="button"
                         onClick={cancelEdit}
-                        className="flex items-center gap-1.5 rounded-full border border-text/20 px-4 py-2 text-sm font-medium text-text/60"
+                        className="flex items-center gap-1.5 rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white/50"
                       >
                         <X className="h-4 w-4" />
                         Cancel

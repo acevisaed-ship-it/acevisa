@@ -21,7 +21,7 @@ function SectionTab({ label, icon: Icon, active, onClick }: {
     <button
       onClick={onClick}
       className={`flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
-        active ? 'bg-text text-bg' : 'text-text/60 hover:bg-text/10 hover:text-text'
+        active ? 'tab-btn-active' : 'tab-btn-inactive'
       }`}
     >
       <Icon className="h-4 w-4" />
@@ -36,8 +36,8 @@ function Toggle({ label, description, checked, onChange }: {
   return (
     <div className="flex items-start justify-between gap-4 py-4">
       <div>
-        <p className="text-sm font-medium text-text">{label}</p>
-        <p className="mt-0.5 text-xs text-text/50">{description}</p>
+        <p className="text-sm font-medium text-white/80">{label}</p>
+        <p className="mt-0.5 text-xs text-white/50">{description}</p>
       </div>
       <button
         role="switch"
@@ -55,7 +55,7 @@ function Toggle({ label, description, checked, onChange }: {
   )
 }
 
-const inputCls = 'min-h-[44px] w-full rounded-xl border border-text/20 bg-bg px-3 py-2 text-sm text-text outline-none focus:border-blue'
+const inputCls = 'min-h-[44px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input'
 
 function TeamSection() {
   const [counselors, setCounselors] = useState<Counselor[]>([])
@@ -150,26 +150,26 @@ function TeamSection() {
     <div className="space-y-8">
       {/* Existing counselors */}
       <div>
-        <h2 className="text-base font-semibold text-text">Counselor Accounts</h2>
-        <p className="mt-1 text-sm text-text/50">All portal users with counselor or admin access.</p>
+        <h2 className="text-base font-semibold text-white">Counselor Accounts</h2>
+        <p className="mt-1 text-sm text-white/50">All portal users with counselor or admin access.</p>
 
         {loadingList ? (
-          <p className="mt-4 text-sm text-text/40">Loading…</p>
+          <p className="mt-4 text-sm text-white/40">Loading…</p>
         ) : counselors.length === 0 ? (
-          <p className="mt-4 text-sm text-text/40">No counselors yet.</p>
+          <p className="mt-4 text-sm text-white/40">No counselors yet.</p>
         ) : (
           <ul className="mt-4 space-y-2">
             {counselors.map((c) => (
               <li
                 key={c.id}
-                className="flex flex-wrap items-center gap-3 rounded-xl border border-text/10 bg-bg px-4 py-3"
+                className="flex flex-wrap items-center gap-3 rounded-xl border border-white/10 glass-card px-4 py-3"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-text">{c.name}</p>
-                  <p className="text-xs text-text/50">{c.email}{c.phone ? ` · ${c.phone}` : ''}</p>
+                  <p className="text-sm font-semibold text-white/80">{c.name}</p>
+                  <p className="text-xs text-white/50">{c.email}{c.phone ? ` · ${c.phone}` : ''}</p>
                 </div>
                 <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                  c.status === 'active' ? 'bg-green/20 text-text' : 'bg-text/10 text-text/40'
+                  c.status === 'active' ? 'bg-green/20 text-white' : 'glass-card text-white/40'
                 }`}>
                   {c.status.toUpperCase()}
                 </span>
@@ -198,7 +198,7 @@ function TeamSection() {
                     </button>
                     <button
                       onClick={() => setConfirmDelete(null)}
-                      className="rounded-full border border-text/20 px-3 py-1.5 text-xs text-text/60 hover:bg-text/5"
+                      className="rounded-full border border-white/20 px-3 py-1.5 text-xs text-white/60 hover:text-white"
                     >
                       Cancel
                     </button>
@@ -207,7 +207,7 @@ function TeamSection() {
                   <button
                     onClick={() => setConfirmDelete(c.id)}
                     title="Permanently delete (only if no clients)"
-                    className="flex items-center gap-1.5 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-500 hover:bg-red-50 disabled:opacity-40"
+                    className="flex items-center gap-1.5 rounded-full border border-red-400/30 px-3 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-500/10 disabled:opacity-40"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     Delete
@@ -221,8 +221,8 @@ function TeamSection() {
 
       {/* Add new counselor */}
       <div>
-        <h2 className="text-base font-semibold text-text">Add New Counselor</h2>
-        <p className="mt-1 text-sm text-text/50">
+        <h2 className="text-base font-semibold text-white">Add New Counselor</h2>
+        <p className="mt-1 text-sm text-white/50">
           Email must end with <span className="font-mono font-semibold">@acevisa.co</span>.
           The counselor will receive login details.
         </p>
@@ -230,7 +230,7 @@ function TeamSection() {
         <form onSubmit={handleCreate} className="mt-4 space-y-3">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium text-text/70">First name</label>
+              <label className="mb-1 block text-xs font-medium text-white/60">First name</label>
               <input
                 required
                 value={form.firstName}
@@ -240,7 +240,7 @@ function TeamSection() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-text/70">Last name</label>
+              <label className="mb-1 block text-xs font-medium text-white/60">Last name</label>
               <input
                 required
                 value={form.lastName}
@@ -252,7 +252,7 @@ function TeamSection() {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text/70">Phone number</label>
+            <label className="mb-1 block text-xs font-medium text-white/60">Phone number</label>
             <input
               type="tel"
               value={form.phone}
@@ -263,7 +263,7 @@ function TeamSection() {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text/70">
+            <label className="mb-1 block text-xs font-medium text-white/60">
               Email address <span className="text-orange">(@acevisa.co only)</span>
             </label>
             <input
@@ -277,7 +277,7 @@ function TeamSection() {
           </div>
 
           <div className="relative">
-            <label className="mb-1 block text-xs font-medium text-text/70">Password</label>
+            <label className="mb-1 block text-xs font-medium text-white/60">Password</label>
             <input
               required
               type={showPw ? 'text' : 'password'}
@@ -289,14 +289,14 @@ function TeamSection() {
             <button
               type="button"
               onClick={() => setShowPw((v) => !v)}
-              className="absolute bottom-2.5 right-3 text-text/40 hover:text-text"
+              className="absolute bottom-2.5 right-3 text-white/40 hover:text-white"
             >
               {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
 
           <div className="relative">
-            <label className="mb-1 block text-xs font-medium text-text/70">Re-type password</label>
+            <label className="mb-1 block text-xs font-medium text-white/60">Re-type password</label>
             <input
               required
               type={showConfirm ? 'text' : 'password'}
@@ -308,23 +308,23 @@ function TeamSection() {
             <button
               type="button"
               onClick={() => setShowConfirm((v) => !v)}
-              className="absolute bottom-2.5 right-3 text-text/40 hover:text-text"
+              className="absolute bottom-2.5 right-3 text-white/40 hover:text-white"
             >
               {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
 
           {createError && (
-            <p className="rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-600">{createError}</p>
+            <p className="rounded-xl bg-red-500/20 px-4 py-2.5 text-sm text-red-400">{createError}</p>
           )}
           {createSuccess && (
-            <p className="rounded-xl bg-green/10 px-4 py-2.5 text-sm text-text">✓ {createSuccess}</p>
+            <p className="rounded-xl bg-green/10 px-4 py-2.5 text-sm text-white/80">✓ {createSuccess}</p>
           )}
 
           <button
             type="submit"
             disabled={creating}
-            className="min-h-[44px] w-full rounded-full bg-blue px-6 py-2 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50 sm:w-auto"
+            className="min-h-[44px] w-full rounded-full bg-grad-blue crisp-on-dark px-6 py-2 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50 sm:w-auto"
           >
             {creating ? 'Creating…' : 'Create counselor account'}
           </button>
@@ -380,7 +380,7 @@ export function AdminSettings() {
     setTimeout(() => setSaved(false), 2500)
   }
 
-  if (loading) return <p className="mt-8 text-sm text-text/40">Loading settings…</p>
+  if (loading) return <p className="mt-8 text-sm text-white/40">Loading settings…</p>
 
   const isTeamSection = section === 'team'
 
@@ -388,13 +388,13 @@ export function AdminSettings() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-blue md:text-3xl">Settings</h1>
-          <p className="mt-1 text-sm text-text/60">Portal configuration</p>
+          <h1 className="text-2xl font-semibold text-white md:text-3xl">Settings</h1>
+          <p className="mt-1 text-sm text-white/60">Portal configuration</p>
         </div>
         {!isTeamSection && (
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 rounded-full bg-text px-4 py-2 text-sm font-semibold text-bg transition-opacity hover:opacity-80"
+            className="flex items-center gap-2 rounded-full bg-grad-blue crisp-on-dark px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-80"
           >
             <Save className="h-4 w-4" />
             {saved ? 'Saved!' : 'Save Changes'}
@@ -420,14 +420,14 @@ export function AdminSettings() {
         ))}
       </div>
 
-      <div className="mt-4 rounded-2xl border border-text/10 bg-white p-6">
+      <div className="mt-4 rounded-2xl border border-white/10 glass-card crisp-on-dark p-6">
         {section === 'team' && <TeamSection />}
 
         {section === 'notifications' && (
           <div>
-            <h2 className="text-base font-semibold text-text">Notification Preferences</h2>
-            <p className="mt-1 text-sm text-text/50">Choose which events trigger admin notifications.</p>
-            <div className="mt-4 divide-y divide-text/8">
+            <h2 className="text-base font-semibold text-white">Notification Preferences</h2>
+            <p className="mt-1 text-sm text-white/50">Choose which events trigger admin notifications.</p>
+            <div className="mt-4 divide-y divide-white/8">
               <Toggle label="New client registered" description="Alert when a new client signs up via portal" checked={notifs.newClient} onChange={(v) => setNotifs({ ...notifs, newClient: v })} />
               <Toggle label="New complaint filed" description="Alert when a client submits a complaint" checked={notifs.complaint} onChange={(v) => setNotifs({ ...notifs, complaint: v })} />
               <Toggle label="Escalation raised" description="Alert when an AI chat escalation is created" checked={notifs.escalation} onChange={(v) => setNotifs({ ...notifs, escalation: v })} />
@@ -439,31 +439,31 @@ export function AdminSettings() {
 
         {section === 'security' && (
           <div>
-            <h2 className="text-base font-semibold text-text">Security Settings</h2>
-            <p className="mt-1 text-sm text-text/50">Authentication and session policies.</p>
-            <div className="mt-4 divide-y divide-text/8">
+            <h2 className="text-base font-semibold text-white">Security Settings</h2>
+            <p className="mt-1 text-sm text-white/50">Authentication and session policies.</p>
+            <div className="mt-4 divide-y divide-white/8">
               <Toggle label="Require MFA for admins" description="Enforce two-factor auth on all admin accounts" checked={security.requireMfa} onChange={(v) => setSecurity({ ...security, requireMfa: v })} />
               <div className="py-4">
-                <label className="text-sm font-medium text-text">Session timeout (minutes)</label>
-                <p className="mt-0.5 text-xs text-text/50">Auto-logout after inactivity</p>
+                <label className="text-sm font-medium text-white/80">Session timeout (minutes)</label>
+                <p className="mt-0.5 text-xs text-white/50">Auto-logout after inactivity</p>
                 <input
                   type="number"
                   min="5"
                   max="480"
                   value={security.sessionTimeout}
                   onChange={(e) => setSecurity({ ...security, sessionTimeout: e.target.value })}
-                  className="mt-2 w-24 rounded-xl border border-text/20 bg-bg px-3 py-2 text-sm text-text outline-none focus:border-blue"
+                  className="mt-2 w-24 rounded-xl px-3 py-2 text-sm outline-none glass-input"
                 />
               </div>
               <div className="py-4">
-                <label className="text-sm font-medium text-text">IP Allowlist</label>
-                <p className="mt-0.5 text-xs text-text/50">Comma-separated CIDRs (leave blank to allow all)</p>
+                <label className="text-sm font-medium text-white/80">IP Allowlist</label>
+                <p className="mt-0.5 text-xs text-white/50">Comma-separated CIDRs (leave blank to allow all)</p>
                 <input
                   type="text"
                   value={security.ipWhitelist}
                   onChange={(e) => setSecurity({ ...security, ipWhitelist: e.target.value })}
                   placeholder="e.g. 192.168.1.0/24, 10.0.0.1"
-                  className="mt-2 w-full max-w-md rounded-xl border border-text/20 bg-bg px-3 py-2 text-sm text-text outline-none focus:border-blue"
+                  className="mt-2 w-full max-w-md rounded-xl px-3 py-2 text-sm outline-none glass-input"
                 />
               </div>
             </div>
@@ -472,30 +472,30 @@ export function AdminSettings() {
 
         {section === 'data' && (
           <div>
-            <h2 className="text-base font-semibold text-text">Data Management</h2>
-            <p className="mt-1 text-sm text-text/50">Backup, export, and retention settings.</p>
+            <h2 className="text-base font-semibold text-white">Data Management</h2>
+            <p className="mt-1 text-sm text-white/50">Backup, export, and retention settings.</p>
             <div className="mt-6 space-y-4">
-              <div className="rounded-xl border border-text/10 p-4">
-                <p className="text-sm font-medium text-text">Export Client Data</p>
-                <p className="mt-1 text-xs text-text/50">Download all client records as CSV</p>
-                <button className="mt-3 rounded-full bg-bg px-4 py-2 text-xs font-semibold text-text hover:bg-text/10">
+              <div className="rounded-xl border border-white/10 glass-card p-4">
+                <p className="text-sm font-medium text-white/80">Export Client Data</p>
+                <p className="mt-1 text-xs text-white/50">Download all client records as CSV</p>
+                <button className="mt-3 rounded-full glass-card px-4 py-2 text-xs font-semibold text-white/70 hover:text-white">
                   Export CSV
                 </button>
               </div>
-              <div className="rounded-xl border border-text/10 p-4">
-                <p className="text-sm font-medium text-text">Activity Log Retention</p>
-                <p className="mt-1 text-xs text-text/50">Logs older than this are archived</p>
-                <select className="mt-2 rounded-xl border border-text/20 bg-bg px-3 py-2 text-sm text-text outline-none">
+              <div className="rounded-xl border border-white/10 glass-card p-4">
+                <p className="text-sm font-medium text-white/80">Activity Log Retention</p>
+                <p className="mt-1 text-xs text-white/50">Logs older than this are archived</p>
+                <select className="mt-2 rounded-xl px-3 py-2 text-sm outline-none glass-input">
                   <option>90 days</option>
                   <option>180 days</option>
                   <option>1 year</option>
                   <option>Forever</option>
                 </select>
               </div>
-              <div className="rounded-xl border border-red-100 p-4">
-                <p className="text-sm font-medium text-red-600">Danger Zone</p>
-                <p className="mt-1 text-xs text-text/50">Permanently remove test/demo data</p>
-                <button className="mt-3 rounded-full bg-red-50 px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-100">
+              <div className="rounded-xl border border-red-500/20 glass-card p-4">
+                <p className="text-sm font-medium text-red-400">Danger Zone</p>
+                <p className="mt-1 text-xs text-white/50">Permanently remove test/demo data</p>
+                <button className="mt-3 rounded-full bg-red-500/20 px-4 py-2 text-xs font-semibold text-red-400 hover:bg-red-500/30">
                   Clear Demo Data
                 </button>
               </div>
@@ -505,18 +505,18 @@ export function AdminSettings() {
 
         {section === 'appearance' && (
           <div>
-            <h2 className="text-base font-semibold text-text">Appearance</h2>
-            <p className="mt-1 text-sm text-text/50">Visual preferences for the admin portal.</p>
-            <div className="mt-4 divide-y divide-text/8">
+            <h2 className="text-base font-semibold text-white">Appearance</h2>
+            <p className="mt-1 text-sm text-white/50">Visual preferences for the admin portal.</p>
+            <div className="mt-4 divide-y divide-white/8">
               <Toggle label="Compact mode" description="Reduce padding and font sizes in tables" checked={appearance.compactMode} onChange={(v) => setAppearance({ ...appearance, compactMode: v })} />
               <Toggle label="Show avatars" description="Display counselor/client avatars throughout portal" checked={appearance.showAvatars} onChange={(v) => setAppearance({ ...appearance, showAvatars: v })} />
               <div className="py-4">
-                <label className="text-sm font-medium text-text">Date format</label>
-                <p className="mt-0.5 text-xs text-text/50">How dates appear across the portal</p>
+                <label className="text-sm font-medium text-white/80">Date format</label>
+                <p className="mt-0.5 text-xs text-white/50">How dates appear across the portal</p>
                 <select
                   value={appearance.dateFormat}
                   onChange={(e) => setAppearance({ ...appearance, dateFormat: e.target.value })}
-                  className="mt-2 rounded-xl border border-text/20 bg-bg px-3 py-2 text-sm text-text outline-none focus:border-blue"
+                  className="mt-2 rounded-xl px-3 py-2 text-sm outline-none glass-input"
                 >
                   <option value="DD/MM/YYYY">DD/MM/YYYY</option>
                   <option value="MM/DD/YYYY">MM/DD/YYYY</option>

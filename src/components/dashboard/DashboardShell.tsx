@@ -30,7 +30,7 @@ export function DashboardShell({
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="flex min-h-screen bg-bg">
+    <div className="flex min-h-screen bg-grad-teal">
       {/* Mobile top bar */}
       <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center justify-between bg-grad-teal crisp-on-dark px-4 lg:hidden">
         <button
@@ -61,7 +61,7 @@ export function DashboardShell({
 
       <div className="flex min-h-screen flex-1 flex-col pt-14 lg:pt-0">
         {/* Desktop top bar */}
-        <header className="hidden shrink-0 items-center justify-end gap-3 border-b border-text/10 bg-bg px-6 py-3 lg:flex">
+        <header className="hidden shrink-0 items-center justify-end gap-3 border-b border-white/10 glass-card px-6 py-3 lg:flex">
           {headerActions}
           <ProfilePicture
             counselorId={counselorId}
@@ -69,7 +69,7 @@ export function DashboardShell({
             avatarUrl={avatarUrl}
             size={36}
           />
-          <span className="text-sm font-semibold text-text">{counselorName}</span>
+          <span className="text-sm font-semibold text-white">{counselorName}</span>
         </header>
         {banner}
         {children}

@@ -96,7 +96,7 @@ export function AllClientsTable({ clients, counselors }: Props) {
   return (
     <>
       {toast && (
-        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-text px-5 py-3 text-sm font-medium text-bg shadow-lg">
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-grad-blue crisp-on-dark px-5 py-3 text-sm font-medium text-white shadow-lg">
           {toast}
         </div>
       )}
@@ -117,8 +117,8 @@ export function AllClientsTable({ clients, counselors }: Props) {
             className={cn(
               'min-h-[40px] rounded-full px-4 text-sm font-medium transition-colors',
               filterMode === value
-                ? 'bg-green text-text'
-                : 'border border-text/15 bg-white/60 text-text hover:bg-bg'
+                ? 'bg-green text-[#0A3F3A]'
+                : 'border border-white/15 glass-card text-white/60 hover:text-white'
             )}
           >
             {label}
@@ -133,7 +133,7 @@ export function AllClientsTable({ clients, counselors }: Props) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by name, email or phone…"
-          className="min-h-[44px] w-full max-w-sm rounded-full border border-text/20 bg-white/80 px-4 py-2.5 text-sm text-text placeholder:text-text/40 outline-none focus:border-blue"
+          className="min-h-[44px] w-full max-w-sm rounded-full px-4 py-2.5 text-sm outline-none glass-input"
         />
       </div>
 
@@ -142,7 +142,7 @@ export function AllClientsTable({ clients, counselors }: Props) {
           <select
             value={counselorFilter}
             onChange={(e) => setCounselorFilter(e.target.value)}
-            className="min-h-[44px] rounded-full border border-text/20 bg-white/80 px-4 text-sm text-text outline-none focus:border-blue"
+            className="min-h-[44px] rounded-full px-4 text-sm outline-none glass-input"
           >
             <option value="">All counselors</option>
             {counselors.map((c) => (
@@ -159,7 +159,7 @@ export function AllClientsTable({ clients, counselors }: Props) {
           <select
             value={stageFilter}
             onChange={(e) => setStageFilter(e.target.value)}
-            className="min-h-[44px] rounded-full border border-text/20 bg-white/80 px-4 text-sm text-text outline-none focus:border-blue"
+            className="min-h-[44px] rounded-full px-4 text-sm outline-none glass-input"
           >
             {[1, 2, 3, 4, 5, 6, 7].map((stage) => (
               <option key={stage} value={stage}>
@@ -170,10 +170,10 @@ export function AllClientsTable({ clients, counselors }: Props) {
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-2xl border border-[rgba(10,63,58,0.12)] bg-white/80">
+      <div className="overflow-x-auto rounded-2xl border border-white/10 glass-card crisp-on-dark">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead>
-            <tr className="border-b border-text/10 text-xs uppercase tracking-wide text-text/50">
+            <tr className="border-b border-white/10 text-xs uppercase tracking-wide text-white/40">
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Counselor</th>
               <th className="px-4 py-3 font-medium">Ad Source</th>
@@ -186,41 +186,41 @@ export function AllClientsTable({ clients, counselors }: Props) {
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-text/50">
+                <td colSpan={7} className="px-4 py-10 text-center text-white/40">
                   No clients match this filter.
                 </td>
               </tr>
             ) : (
               filtered.map((client) => (
-                <tr key={client.id} className="border-b border-text/5 last:border-0">
-                  <td className="px-4 py-3 font-medium text-text">{client.name}</td>
-                  <td className="px-4 py-3">
+                <tr key={client.id} className="border-b border-white/5 last:border-0">
+                  <td className="px-4 py-3 font-medium text-white/80">{client.name}</td>
+                  <td className="px-4 py-3 text-white/60">
                     {client.counselor_name ? (
                       client.counselor_name
                     ) : (
-                      <span className="font-medium text-red-600">Unassigned</span>
+                      <span className="font-medium text-red-400">Unassigned</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-text/70">{client.ad_source || 'direct'}</td>
-                  <td className="px-4 py-3 text-text/70">
+                  <td className="px-4 py-3 text-white/60">{client.ad_source || 'direct'}</td>
+                  <td className="px-4 py-3 text-white/60">
                     {getPipelineStageLabel(client.pipeline_stage)}
                   </td>
-                  <td className="px-4 py-3 text-text/70">
+                  <td className="px-4 py-3 text-white/60">
                     {client.qualification_score ?? '—'}
                   </td>
-                  <td className="px-4 py-3 text-text/70">{formatDate(client.created_at)}</td>
+                  <td className="px-4 py-3 text-white/50">{formatDate(client.created_at)}</td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">
                       <button
                         type="button"
                         onClick={() => setTransferClient(client)}
-                        className="rounded-full border border-text/20 px-3 py-1 text-xs font-medium text-text hover:bg-bg"
+                        className="rounded-full border border-white/20 px-3 py-1 text-xs font-medium text-white/60 hover:text-white"
                       >
                         Transfer
                       </button>
                       <Link
                         href={`/admin/clients/${client.id}`}
-                        className="rounded-full bg-blue/10 px-3 py-1 text-xs font-medium text-blue hover:bg-blue/20"
+                        className="rounded-full bg-blue/20 px-3 py-1 text-xs font-medium text-white hover:bg-blue/30"
                       >
                         View Profile
                       </Link>

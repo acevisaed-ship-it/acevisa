@@ -39,12 +39,12 @@ export function ComplaintRow({ id, clientName, subject, createdAt }: Props) {
   if (acknowledged) return null
 
   return (
-    <div className="flex items-start gap-3 rounded-xl bg-grad-bg crisp px-4 py-3">
-      <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
+    <div className="flex items-start gap-3 rounded-xl glass-card crisp-on-dark px-4 py-3">
+      <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
       <div className="min-w-0 flex-1">
-        <p className="font-medium text-text">{clientName}</p>
-        <p className="text-sm text-text/80">{subject}</p>
-        <p className="mt-1 text-xs text-text/50">{timeAgo(createdAt)}</p>
+        <p className="font-medium text-white">{clientName}</p>
+        <p className="text-sm text-white/70">{subject}</p>
+        <p className="mt-1 text-xs text-white/40">{timeAgo(createdAt)}</p>
       </div>
       <button
         type="button"

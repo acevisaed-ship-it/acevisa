@@ -50,14 +50,14 @@ export function EscalationsView() {
   const filtered = escalations.filter((e) => filter === 'all' || e.status === filter)
   const openCount = escalations.filter((e) => e.status === 'open').length
 
-  if (loading) return <p className="text-sm text-text/50">Loading escalations...</p>
+  if (loading) return <p className="text-sm text-white/50">Loading escalations...</p>
 
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-blue md:text-3xl">Escalations</h1>
-          <p className="mt-1 text-sm text-text/60">{openCount} open · {escalations.length} total</p>
+          <h1 className="text-2xl font-semibold text-white md:text-3xl">Escalations</h1>
+          <p className="mt-1 text-sm text-white/60">{openCount} open · {escalations.length} total</p>
         </div>
         <div className="flex gap-2">
           {(['open', 'resolved', 'all'] as const).map((f) => (
@@ -65,7 +65,7 @@ export function EscalationsView() {
               key={f}
               onClick={() => setFilter(f)}
               className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize transition-colors ${
-                filter === f ? 'bg-text text-bg' : 'bg-text/10 text-text hover:bg-text/20'
+                filter === f ? 'tab-btn-active' : 'tab-btn-inactive'
               }`}
             >
               {f}
@@ -77,12 +77,12 @@ export function EscalationsView() {
       {filtered.length === 0 ? (
         <div className="mt-12 flex flex-col items-center gap-2 text-center">
           <CheckCircle className="h-10 w-10 text-green" />
-          <p className="text-text/50">No {filter === 'all' ? '' : filter} escalations</p>
+          <p className="text-white/50">No {filter === 'all' ? '' : filter} escalations</p>
         </div>
       ) : (
         <div className="mt-6 space-y-3">
           {filtered.map((e) => (
-            <div key={e.id} className="rounded-2xl border border-text/10 bg-white p-5">
+            <div key={e.id} className="rounded-2xl border border-white/10 glass-card crisp-on-dark p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2">
@@ -91,15 +91,15 @@ export function EscalationsView() {
                         <Clock className="h-3 w-3" /> Open
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-green/20 px-2.5 py-0.5 text-xs font-semibold text-text">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-green/20 px-2.5 py-0.5 text-xs font-semibold text-white">
                         <CheckCircle className="h-3 w-3" /> Resolved
                       </span>
                     )}
-                    <span className="text-xs text-text/40">{timeAgo(e.createdAt)}</span>
+                    <span className="text-xs text-white/40">{timeAgo(e.createdAt)}</span>
                   </div>
-                  <p className="mt-2 text-sm text-text/80">{e.questionText}</p>
-                  <div className="mt-2 flex flex-wrap gap-3 text-xs text-text/50">
-                    <Link href={`/admin/clients/${e.clientId}`} className="text-blue hover:underline">
+                  <p className="mt-2 text-sm text-white/70">{e.questionText}</p>
+                  <div className="mt-2 flex flex-wrap gap-3 text-xs text-white/50">
+                    <Link href={`/admin/clients/${e.clientId}`} className="text-white/60 hover:text-white hover:underline">
                       {e.clientName}
                     </Link>
                     {e.counselorName && <span>Counselor: {e.counselorName}</span>}

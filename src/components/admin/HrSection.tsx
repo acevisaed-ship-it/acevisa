@@ -24,14 +24,14 @@ export function HrSection({ counselors }: { counselors: { id: string; name: stri
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-blue md:text-3xl">HR</h1>
-        <p className="mt-1 text-sm text-text/60">
+        <h1 className="text-2xl font-semibold text-white md:text-3xl">HR</h1>
+        <p className="mt-1 text-sm text-white/60">
           Staff management, attendance, leave, policies, and performance analytics
         </p>
       </div>
 
       {/* Tab bar — scrollable on mobile */}
-      <div className="flex gap-1 overflow-x-auto rounded-2xl border border-text/10 bg-white p-1.5 w-fit max-w-full">
+      <div className="flex gap-1 overflow-x-auto rounded-2xl tab-container p-1.5 w-fit max-w-full">
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -39,7 +39,7 @@ export function HrSection({ counselors }: { counselors: { id: string; name: stri
             onClick={() => setTab(t.id)}
             className={cn(
               'min-h-[40px] whitespace-nowrap rounded-xl px-4 text-sm font-medium transition-colors',
-              tab === t.id ? 'bg-text text-bg' : 'text-text/60 hover:bg-text/5'
+              tab === t.id ? 'tab-btn-active' : 'tab-btn-inactive'
             )}
           >
             {t.label}

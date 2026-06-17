@@ -67,10 +67,10 @@ export function BehavioralNotesSection({ clientId }: Props) {
     <BriefCard>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Brain className="h-5 w-5 text-blue" />
-          <h2 className="text-base font-semibold text-text">Behavioural Analysis</h2>
+          <Brain className="h-5 w-5 text-white/60" />
+          <h2 className="text-base font-semibold text-white">Behavioural Analysis</h2>
           {notes.length > 0 && (
-            <span className="rounded-full bg-blue/10 px-2 py-0.5 text-xs font-medium text-blue">
+            <span className="rounded-full glass-card px-2 py-0.5 text-xs font-medium text-white/60">
               {notes.length} session{notes.length !== 1 ? 's' : ''}
             </span>
           )}
@@ -79,7 +79,7 @@ export function BehavioralNotesSection({ clientId }: Props) {
           type="button"
           onClick={handleReanalyse}
           disabled={reanalysing}
-          className="inline-flex items-center gap-1.5 rounded-full border border-text/20 px-3 py-1.5 text-xs font-medium text-text/70 hover:border-blue hover:text-blue transition-colors disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-full border border-white/20 px-3 py-1.5 text-xs font-medium text-white/60 hover:border-white/40 hover:text-white transition-colors disabled:opacity-50"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${reanalysing ? 'animate-spin' : ''}`} />
           {reanalysing ? 'Analysing…' : 'Re-analyse'}
@@ -87,9 +87,9 @@ export function BehavioralNotesSection({ clientId }: Props) {
       </div>
 
       {loading ? (
-        <p className="mt-4 text-sm text-text/60">Loading analysis…</p>
+        <p className="mt-4 text-sm text-white/50">Loading analysis…</p>
       ) : notes.length === 0 ? (
-        <p className="mt-4 text-sm text-text/60">
+        <p className="mt-4 text-sm text-white/50">
           No analysis yet. Analysis runs automatically every 5 messages, or click Re-analyse to run now.
         </p>
       ) : (
@@ -105,7 +105,7 @@ export function BehavioralNotesSection({ clientId }: Props) {
             return (
               <div
                 key={note.id}
-                className={`rounded-2xl border ${isLatest ? 'border-blue/30 bg-blue/5' : 'border-text/10 bg-white'}`}
+                className={`rounded-2xl border ${isLatest ? 'border-white/30 glass-card-md' : 'border-white/10 glass-card'}`}
               >
                 {/* Header row */}
                 <button
@@ -119,8 +119,8 @@ export function BehavioralNotesSection({ clientId }: Props) {
                         LATEST
                       </span>
                     )}
-                    <span className="text-sm font-medium text-text">{date}</span>
-                    <span className="text-xs text-text/50">
+                    <span className="text-sm font-medium text-white/80">{date}</span>
+                    <span className="text-xs text-white/40">
                       {note.message_count} msgs · {note.messages_since_last} new
                     </span>
                     {note.risk_flags?.length > 0 && (
@@ -131,28 +131,28 @@ export function BehavioralNotesSection({ clientId }: Props) {
                     )}
                   </div>
                   {isExpanded ? (
-                    <ChevronUp className="h-4 w-4 shrink-0 text-text/40" />
+                    <ChevronUp className="h-4 w-4 shrink-0 text-white/40" />
                   ) : (
-                    <ChevronDown className="h-4 w-4 shrink-0 text-text/40" />
+                    <ChevronDown className="h-4 w-4 shrink-0 text-white/40" />
                   )}
                 </button>
 
                 {/* Expanded content */}
                 {isExpanded && (
-                  <div className="border-t border-text/10 px-4 pb-4 pt-3 space-y-4">
+                  <div className="border-t border-white/10 px-4 pb-4 pt-3 space-y-4">
                     {/* Psychological read */}
                     {note.psychological_read && (
                       <div>
-                        <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-text/50">
+                        <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-white/50">
                           Psychological Read
                         </h3>
                         <div className="grid gap-2 sm:grid-cols-2">
                           {Object.entries(note.psychological_read).map(([key, val]) => (
-                            <div key={key} className="rounded-xl bg-bg px-3 py-2">
-                              <p className="text-[10px] font-semibold uppercase tracking-wide text-text/40">
+                            <div key={key} className="rounded-xl glass-card px-3 py-2">
+                              <p className="text-[10px] font-semibold uppercase tracking-wide text-white/40">
                                 {key.replace(/_/g, ' ')}
                               </p>
-                              <p className="mt-0.5 text-sm text-text">{val as string}</p>
+                              <p className="mt-0.5 text-sm text-white/80">{val as string}</p>
                             </div>
                           ))}
                         </div>
@@ -162,10 +162,10 @@ export function BehavioralNotesSection({ clientId }: Props) {
                     {/* Delta */}
                     {note.delta_from_last && (
                       <div>
-                        <h3 className="mb-1.5 text-xs font-bold uppercase tracking-wide text-text/50">
+                        <h3 className="mb-1.5 text-xs font-bold uppercase tracking-wide text-white/40">
                           Changes Since Last Session
                         </h3>
-                        <p className="rounded-xl bg-bg px-3 py-2 text-sm text-text">
+                        <p className="rounded-xl glass-card px-3 py-2 text-sm text-white/80">
                           {note.delta_from_last}
                         </p>
                       </div>
@@ -174,12 +174,12 @@ export function BehavioralNotesSection({ clientId }: Props) {
                     {/* Observations */}
                     {note.behavioral_observations?.length > 0 && (
                       <div>
-                        <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-text/50">
+                        <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-white/40">
                           Observations
                         </h3>
                         <ul className="space-y-1.5">
                           {note.behavioral_observations.map((obs, i) => (
-                            <li key={i} className="flex items-start gap-2 text-sm text-text">
+                            <li key={i} className="flex items-start gap-2 text-sm text-white/80">
                               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue" />
                               {obs}
                             </li>

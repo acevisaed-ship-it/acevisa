@@ -90,14 +90,14 @@ export function TeamManagement() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-blue md:text-3xl">Team Management</h1>
-          <p className="mt-1 text-sm text-text/60">
+          <h1 className="text-2xl font-semibold text-white md:text-3xl">Team Management</h1>
+          <p className="mt-1 text-sm text-white/60">
             {active} active · {counselors.length} total
           </p>
         </div>
         <button
           onClick={() => { setShowAdd(true); setError(null) }}
-          className="flex items-center gap-2 rounded-full bg-text px-4 py-2 text-sm font-semibold text-bg transition-opacity hover:opacity-80"
+          className="flex items-center gap-2 rounded-full bg-grad-blue crisp-on-dark px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-80"
         >
           <UserPlus className="h-4 w-4" />
           Add Member
@@ -105,45 +105,45 @@ export function TeamManagement() {
       </div>
 
       {showAdd && (
-        <div className="mt-6 rounded-2xl border border-text/10 bg-white p-5">
-          <h2 className="mb-4 text-base font-semibold text-text">New Team Member</h2>
-          {error && <p className="mb-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
+        <div className="mt-6 rounded-2xl border border-white/10 glass-card crisp-on-dark p-5">
+          <h2 className="mb-4 text-base font-semibold text-white">New Team Member</h2>
+          {error && <p className="mb-3 rounded-xl bg-red-500/20 px-3 py-2 text-sm text-red-400">{error}</p>}
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-semibold text-text/60">Name</label>
+              <label className="mb-1 block text-xs font-semibold text-white/60">Name</label>
               <input
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="Full name"
-                className="w-full rounded-xl border border-text/20 bg-bg px-3 py-2 text-sm text-text outline-none focus:border-blue"
+                className="w-full rounded-xl px-3 py-2 text-sm outline-none glass-input"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-text/60">Email</label>
+              <label className="mb-1 block text-xs font-semibold text-white/60">Email</label>
               <input
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="email@example.com"
-                className="w-full rounded-xl border border-text/20 bg-bg px-3 py-2 text-sm text-text outline-none focus:border-blue"
+                className="w-full rounded-xl px-3 py-2 text-sm outline-none glass-input"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-text/60">Password</label>
+              <label className="mb-1 block text-xs font-semibold text-white/60">Password</label>
               <input
                 type="password"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 placeholder="Temporary password"
-                className="w-full rounded-xl border border-text/20 bg-bg px-3 py-2 text-sm text-text outline-none focus:border-blue"
+                className="w-full rounded-xl px-3 py-2 text-sm outline-none glass-input"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-text/60">Role</label>
+              <label className="mb-1 block text-xs font-semibold text-white/60">Role</label>
               <select
                 value={form.role}
                 onChange={(e) => setForm({ ...form, role: e.target.value as 'counselor' | 'admin' })}
-                className="w-full rounded-xl border border-text/20 bg-bg px-3 py-2 text-sm text-text outline-none focus:border-blue"
+                className="w-full rounded-xl px-3 py-2 text-sm outline-none glass-input"
               >
                 <option value="counselor">Counselor</option>
                 <option value="admin">Admin</option>
@@ -154,13 +154,13 @@ export function TeamManagement() {
             <button
               onClick={addCounselor}
               disabled={saving}
-              className="rounded-full bg-text px-4 py-2 text-sm font-semibold text-bg disabled:opacity-50"
+              className="rounded-full bg-grad-blue crisp-on-dark px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
             >
               {saving ? 'Creating...' : 'Create'}
             </button>
             <button
               onClick={() => { setShowAdd(false); setError(null) }}
-              className="rounded-full bg-text/10 px-4 py-2 text-sm font-semibold text-text"
+              className="rounded-full glass-card px-4 py-2 text-sm font-semibold text-white/60"
             >
               Cancel
             </button>
@@ -171,14 +171,14 @@ export function TeamManagement() {
       {loading ? (
         <div className="mt-6 space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 animate-pulse rounded-2xl bg-text/5" />
+            <div key={i} className="h-16 animate-pulse rounded-2xl glass-card" />
           ))}
         </div>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-2xl border border-text/10 bg-white">
+        <div className="mt-6 overflow-x-auto rounded-2xl border border-white/10 glass-card crisp-on-dark">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-text/10 text-left text-xs font-semibold uppercase tracking-wide text-text/50">
+              <tr className="border-b border-white/10 text-left text-xs font-semibold uppercase tracking-wide text-white/40">
                 <th className="px-4 py-3">Member</th>
                 <th className="px-4 py-3">Role</th>
                 <th className="px-4 py-3">Clients</th>
@@ -186,12 +186,12 @@ export function TeamManagement() {
                 <th className="px-4 py-3">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-text/6">
+            <tbody className="divide-y divide-white/8">
               {counselors.map((c) => (
-                <tr key={c.id} className="hover:bg-bg/40">
+                <tr key={c.id} className="hover:bg-white/5">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-text/10 text-xs font-semibold text-text">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full glass-card-md text-xs font-semibold text-white/70">
                         {c.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
@@ -200,35 +200,35 @@ export function TeamManagement() {
                             <input
                               value={editName}
                               onChange={(e) => setEditName(e.target.value)}
-                              className="rounded border border-text/20 px-2 py-0.5 text-sm text-text outline-none"
+                              className="rounded px-2 py-0.5 text-sm outline-none glass-input"
                             />
                             <button onClick={() => saveName(c.id)} className="text-green hover:opacity-80">
                               <Check className="h-4 w-4" />
                             </button>
-                            <button onClick={() => setEditingId(null)} className="text-text/40 hover:text-text">
+                            <button onClick={() => setEditingId(null)} className="text-white/40 hover:text-white">
                               <X className="h-4 w-4" />
                             </button>
                           </div>
                         ) : (
-                          <p className="font-medium text-text">{c.name}</p>
+                          <p className="font-medium text-white/80">{c.name}</p>
                         )}
-                        <p className="text-xs text-text/50">{c.email}</p>
+                        <p className="text-xs text-white/50">{c.email}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${
-                      c.role === 'admin' ? 'bg-blue/15 text-blue' : 'bg-text/10 text-text/70'
+                      c.role === 'admin' ? 'bg-blue/20 text-white' : 'glass-card text-white/60'
                     }`}>
                       {c.role}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-text/70">{c.clientCount}</td>
+                  <td className="px-4 py-3 text-white/60">{c.clientCount}</td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                       c.status === 'active'
-                        ? 'bg-green/20 text-text'
-                        : 'bg-text/10 text-text/50'
+                        ? 'bg-green/20 text-white'
+                        : 'glass-card text-white/40'
                     }`}>
                       {c.status === 'active'
                         ? <CheckCircle className="h-3 w-3" />
@@ -240,7 +240,7 @@ export function TeamManagement() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => { setEditingId(c.id); setEditName(c.name) }}
-                        className="rounded-lg p-1.5 text-text/40 hover:bg-text/10 hover:text-text"
+                        className="rounded-lg p-1.5 text-white/40 hover:glass-card hover:text-white"
                         title="Edit name"
                       >
                         <Pencil className="h-3.5 w-3.5" />
@@ -249,8 +249,8 @@ export function TeamManagement() {
                         onClick={() => toggleStatus(c.id, c.status)}
                         className={`rounded-full px-3 py-1 text-xs font-semibold transition-opacity hover:opacity-80 ${
                           c.status === 'active'
-                            ? 'bg-red-100 text-red-600'
-                            : 'bg-green/20 text-text'
+                            ? 'bg-red-500/20 text-red-400'
+                            : 'bg-green/20 text-white'
                         }`}
                       >
                         {c.status === 'active' ? 'Deactivate' : 'Activate'}

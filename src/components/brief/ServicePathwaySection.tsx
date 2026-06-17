@@ -14,11 +14,11 @@ export function ServicePathwaySection({ profile }: Props) {
 
   return (
     <BriefCard>
-      <h2 className="mb-4 text-lg font-bold text-text">Recommended Service Pathway</h2>
+      <h2 className="mb-4 text-lg font-bold text-white">Recommended Service Pathway</h2>
       <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:gap-3">
         {steps.map((step, i) => (
           <div key={i} className="flex flex-col items-center gap-2 sm:flex-row sm:gap-3">
-            <div className="w-full rounded-xl border border-blue bg-bg px-4 py-3 text-sm font-medium text-text sm:w-auto">
+            <div className="w-full rounded-xl border border-white/20 glass-card px-4 py-3 text-sm font-medium text-white/80 sm:w-auto">
               {step}
             </div>
             {i < steps.length - 1 && (

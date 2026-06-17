@@ -164,13 +164,13 @@ export function NotificationBell({ counselorId, context = 'counselor', variant =
       </button>
 
       {open && (
-        <div className="absolute right-0 top-12 z-50 w-[340px] rounded-2xl border border-[#0A3F3A]/12 bg-white shadow-xl">
-          <div className="flex items-center justify-between border-b border-[#0A3F3A]/10 px-4 py-3">
-            <span className="font-bold text-[#0A3F3A]">Notifications</span>
+        <div className="absolute right-0 top-12 z-50 w-[340px] rounded-2xl border border-white/10 dark-modal shadow-xl">
+          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+            <span className="font-bold text-white">Notifications</span>
             {unreadCount > 0 && (
               <button
                 onClick={markAllRead}
-                className="flex items-center gap-1 text-xs text-[#2083B9] hover:underline"
+                className="flex items-center gap-1 text-xs text-white/50 hover:text-white"
               >
                 <CheckCheck size={14} />
                 Mark all read
@@ -180,7 +180,7 @@ export function NotificationBell({ counselorId, context = 'counselor', variant =
 
           <div className="max-h-[400px] overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-[#0A3F3A]/50">
+              <div className="px-4 py-8 text-center text-sm text-white/40">
                 No notifications yet
               </div>
             ) : (
@@ -188,26 +188,26 @@ export function NotificationBell({ counselorId, context = 'counselor', variant =
                 <div
                   key={n.id}
                   onClick={() => handleNotificationClick(n)}
-                  className={`flex gap-3 px-4 py-3 border-b border-[#0A3F3A]/6 cursor-pointer hover:bg-[#E6E8E7]/40 transition-colors ${
-                    !n.is_read ? 'bg-[#E6E8E7]/60' : ''
+                  className={`flex gap-3 px-4 py-3 border-b border-white/5 cursor-pointer hover:bg-white/5 transition-colors ${
+                    !n.is_read ? 'bg-white/8' : ''
                   }`}
                 >
                   <div className="mt-0.5 shrink-0">
-                    {TYPE_ICONS[n.type] || <Bell size={16} className="text-[#0A3F3A]/40" />}
+                    {TYPE_ICONS[n.type] || <Bell size={16} className="text-white/30" />}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p
-                      className={`text-sm ${!n.is_read ? 'font-semibold text-[#0A3F3A]' : 'text-[#0A3F3A]/80'}`}
+                      className={`text-sm ${!n.is_read ? 'font-semibold text-white' : 'text-white/70'}`}
                     >
                       {n.title}
                     </p>
                     {n.body && (
-                      <p className="mt-0.5 truncate text-xs text-[#0A3F3A]/60">{n.body}</p>
+                      <p className="mt-0.5 truncate text-xs text-white/50">{n.body}</p>
                     )}
-                    <p className="mt-1 text-[10px] text-[#0A3F3A]/40">{timeAgo(n.created_at)}</p>
+                    <p className="mt-1 text-[10px] text-white/30">{timeAgo(n.created_at)}</p>
                   </div>
                   {!n.is_read && (
-                    <div className="mt-2 h-2 w-2 shrink-0 rounded-full bg-[#E48328]" />
+                    <div className="mt-2 h-2 w-2 shrink-0 rounded-full bg-orange" />
                   )}
                 </div>
               ))

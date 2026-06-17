@@ -11,13 +11,13 @@ export function PsychologicalReadSection({ profile }: Props) {
 
   return (
     <BriefCard>
-      <h2 className="mb-4 text-lg font-bold text-text">Psychological Read</h2>
+      <h2 className="mb-4 text-lg font-bold text-white">Psychological Read</h2>
       {notes.length > 0 ? (
         <div className="space-y-3">
           {notes.map((note, i) => (
             <div
               key={i}
-              className="flex items-start gap-3 rounded-xl bg-text px-4 py-3 text-sm text-bg"
+              className="flex items-start gap-3 rounded-xl glass-card-md px-4 py-3 text-sm text-white/80"
             >
               <Brain className="mt-0.5 h-5 w-5 shrink-0" />
               {note}
@@ -25,7 +25,7 @@ export function PsychologicalReadSection({ profile }: Props) {
           ))}
         </div>
       ) : (
-        <p className="text-sm text-text/60">No psychological notes generated yet.</p>
+        <p className="text-sm text-white/50">No psychological notes generated yet.</p>
       )}
     </BriefCard>
   )

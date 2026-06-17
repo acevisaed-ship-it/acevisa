@@ -24,7 +24,7 @@ export function AdminShell({
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="flex min-h-screen bg-bg">
+    <div className="flex min-h-screen bg-grad-teal">
       <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center justify-between bg-grad-teal crisp-on-dark px-4 lg:hidden">
         <button
           type="button"
@@ -58,15 +58,15 @@ export function AdminShell({
       />
 
       <div className="flex min-h-screen flex-1 flex-col pt-14 lg:pt-0">
-        <header className="hidden shrink-0 items-center justify-end gap-3 border-b border-text/10 bg-bg px-6 py-3 lg:flex">
-          <NotificationBell counselorId={adminId} context="admin" />
+        <header className="hidden shrink-0 items-center justify-end gap-3 border-b border-white/10 glass-card px-6 py-3 lg:flex">
+          <NotificationBell counselorId={adminId} context="admin" variant="dark" />
           <ProfilePicture
             counselorId={adminId}
             counselorName={adminName}
             avatarUrl={avatarUrl}
             size={36}
           />
-          <span className="text-sm font-semibold text-text">{adminName}</span>
+          <span className="text-sm font-semibold text-white">{adminName}</span>
         </header>
         {children}
       </div>

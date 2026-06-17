@@ -142,6 +142,67 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
+/* ── Dashboard / Admin dark-teal glassmorphism system ──────────────────
+   Applied after the light-mode rules so they take precedence when on
+   the dark teal (bg-grad-teal) background.                            */
+
+/* Frosted-glass card — the universal card surface on dark bg */
+.glass-card {
+  background: rgba(238, 238, 237, 0.10);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.glass-card-md {
+  background: rgba(238, 238, 237, 0.14);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Semi-transparent input on dark bg */
+.glass-input {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: white !important;
+}
+.glass-input::placeholder {
+  color: rgba(255, 255, 255, 0.35) !important;
+}
+.glass-input option {
+  background: #072e29;
+  color: white;
+}
+.glass-input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.30) !important;
+}
+
+/* Dark panel — modals / detail panels */
+.dark-modal {
+  background: rgba(4, 22, 20, 0.97);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+/* Tab container wrapper */
+.tab-container {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+/* Individual tab buttons */
+.tab-btn-active {
+  background: rgba(255, 255, 255, 0.20) !important;
+  color: white !important;
+}
+.tab-btn-inactive {
+  color: rgba(255, 255, 255, 0.50) !important;
+  background: transparent !important;
+}
+.tab-btn-inactive:hover {
+  color: rgba(255, 255, 255, 0.80) !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+}
+
 /* Rocky/stone texture overlay */
 .bg-texture {
   position: relative;
