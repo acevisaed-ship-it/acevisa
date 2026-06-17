@@ -291,7 +291,7 @@ export function StrategyChat({ clientId, clientName }: Props) {
                   className="max-w-[85%] rounded-2xl rounded-bl-sm px-4 py-3 text-sm leading-relaxed text-text"
                   style={ANALYSIS_BUBBLE}
                 >
-                  {msg.analysis}
+                  {msg.text}
                 </div>
               </div>
             )
