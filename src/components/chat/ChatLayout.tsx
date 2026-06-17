@@ -70,6 +70,33 @@ export function ChatLayout({
   const [stage, setStage] = useState(initialStage)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const layoutRef = useRef<HTMLDivElement>(null)
+
+  // ── Visual Viewport — keeps layout pinned to actual visible area on mobile ─
+  // iOS Safari: position:fixed doesn't track the visual viewport when the
+  // system keyboard opens. Instead we size + offset the root container in JS
+  // so the layout (including the in-flow bottom nav) always fits exactly the
+  // visible screen, regardless of keyboard state.
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv) return
+
+    const update = () => {
+      const el = layoutRef.current
+      if (!el) return
+      el.style.height = `${vv.height}px`
+      el.style.transform = `translateY(${vv.offsetTop}px)`
+    }
+
+    vv.addEventListener('resize', update)
+    vv.addEventListener('scroll', update)
+    update()
+
+    return () => {
+      vv.removeEventListener('resize', update)
+      vv.removeEventListener('scroll', update)
+    }
+  }, [])
 
   // ── Load history ───────────────────────────────────────────────────────
   useEffect(() => {
@@ -287,8 +314,8 @@ export function ChatLayout({
         </div>
       </div>
 
-      {/* Tab content — padded so content clears the fixed bottom nav */}
-      <div className="min-h-0 flex-1 overflow-hidden" style={{ paddingBottom: 'calc(3.5rem + env(safe-area-inset-bottom, 0px))' }}>
+      {/* Tab content */}
+      <div className="min-h-0 flex-1 overflow-hidden">
         {mobileTab === 'chat' && chatThread}
 
         {mobileTab === 'progress' && (
@@ -351,9 +378,9 @@ export function ChatLayout({
         )}
       </div>
 
-      {/* Bottom tab bar — fixed so keyboard does not push it up */}
+      {/* Bottom tab bar — in flow; Visual Viewport API keeps it at visual bottom */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-4 pb-[env(safe-area-inset-bottom,0px)]"
+        className="grid shrink-0 grid-cols-4 pb-[env(safe-area-inset-bottom,0px)]"
         style={{ background: 'rgba(4,80,71,0.95)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
       >
         {([
@@ -380,8 +407,9 @@ export function ChatLayout({
 
   return (
     <div
-      className="h-dvh overflow-hidden"
-      style={{ background: 'var(--grad-teal)' }}
+      ref={layoutRef}
+      className="overflow-hidden"
+      style={{ background: 'var(--grad-teal)', height: '100dvh' }}
     >
       {desktopLayout}
       {mobileLayout}
