@@ -7,5 +7,5 @@ type Props = {
 export default async function PortalDocumentsPage({ searchParams }: Props) {
   const { clientId } = await searchParams
   if (!clientId) redirect('/')
-  redirect(`/student/documents?clientId=${clientId}`)
+  redirect(`/student/chat?clientId=${clientId}`)
 }

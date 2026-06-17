@@ -81,10 +81,10 @@ export function ChatBubble({ message }: Props) {
   // ── Card style per sender ─────────────────────────────────────────
   const cardStyle: React.CSSProperties = isAi
     ? {
-        background: 'rgba(255,255,255,0.12)',
+        background: 'rgba(10,63,58,0.80)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.25)',
       }
     : {
         background: 'rgba(183,199,51,0.92)',  /* --green at high opacity */
@@ -95,7 +95,7 @@ export function ChatBubble({ message }: Props) {
     <div className={`flex flex-col gap-0.5 ${isAi ? 'items-start' : 'items-end'}`}>
       {hasAttachment && (
         <div
-          className={`max-w-[80%] rounded-2xl px-3 py-2.5 ${isAi ? 'text-white' : 'text-[#0A3F3A]'}`}
+          className={`max-w-[80%] overflow-hidden rounded-2xl px-3 py-2.5 ${isAi ? 'text-white' : 'text-[#0A3F3A]'}`}
           style={cardStyle}
         >
           <AttachmentPreview
@@ -108,7 +108,7 @@ export function ChatBubble({ message }: Props) {
 
       {!isFilePlaceholder && (
         <div
-          className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+          className={`max-w-[80%] overflow-hidden rounded-2xl px-4 py-3 text-sm leading-relaxed ${
             isAi ? 'text-white' : 'font-semibold text-[#0A3F3A]'
           }`}
           style={cardStyle}

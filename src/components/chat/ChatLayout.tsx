@@ -177,7 +177,7 @@ export function ChatLayout({
       <ProgressStrip currentStage={stage} />
 
       {/* Messages */}
-      <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4" style={{ overscrollBehavior: 'contain' }}>
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-4" style={{ overscrollBehavior: 'contain', touchAction: 'pan-y' }}>
         {messages.length === 0 && !isLoading && (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
             <MessageCircle className="h-10 w-10 text-white/20" />
@@ -251,9 +251,9 @@ export function ChatLayout({
           <Bell className="h-4 w-4 text-white/60" />
           <span className="text-sm font-semibold text-white">Updates</span>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
-          <div className="flex flex-col gap-3 p-3">
-            <ApplicationCard currentStage={stage} />
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3" style={{ overscrollBehavior: 'contain' }}>
+          <ApplicationCard currentStage={stage} />
+          <div className="min-h-0 flex-1">
             <UpdatesFeed clientId={clientId} />
           </div>
         </div>
@@ -281,8 +281,8 @@ export function ChatLayout({
         </div>
       </div>
 
-      {/* Tab content */}
-      <div className="min-h-0 flex-1 overflow-hidden">
+      {/* Tab content — padded so content clears the fixed bottom nav */}
+      <div className="min-h-0 flex-1 overflow-hidden" style={{ paddingBottom: 'calc(3.5rem + env(safe-area-inset-bottom, 0px))' }}>
         {mobileTab === 'chat' && chatThread}
 
         {mobileTab === 'progress' && (
@@ -345,10 +345,10 @@ export function ChatLayout({
         )}
       </div>
 
-      {/* Bottom tab bar */}
+      {/* Bottom tab bar — fixed so keyboard does not push it up */}
       <nav
-        className="grid shrink-0 grid-cols-4 pb-[env(safe-area-inset-bottom,0px)]"
-        style={{ background: 'rgba(4,80,71,0.95)', backdropFilter: 'blur(12px)' }}
+        className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-4 pb-[env(safe-area-inset-bottom,0px)]"
+        style={{ background: 'rgba(4,80,71,0.95)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
       >
         {([
           { id: 'chat',     Icon: MessageCircle, label: 'Chat' },

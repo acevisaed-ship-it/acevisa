@@ -245,7 +245,7 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
 
       {/* ── Input bar ─────────────────────────────────────────────────── */}
       <div
-        className="shrink-0 pb-[env(safe-area-inset-bottom,0px)]"
+        className="mx-3 mb-3 shrink-0 overflow-hidden rounded-2xl pb-[env(safe-area-inset-bottom,0px)]"
         style={{ background: 'rgba(4,80,71,0.6)', backdropFilter: 'blur(12px)' }}
       >
         {/* Pending file preview */}

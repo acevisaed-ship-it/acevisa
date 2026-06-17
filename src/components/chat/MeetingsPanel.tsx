@@ -55,6 +55,52 @@ export function MeetingsPanel({ clientId, client, counselorName, meetings, onReq
   return (
     <div className="flex flex-col gap-3">
 
+      {/* ── Student profile card ── */}
+      {client && (
+        <div className="rounded-2xl p-3" style={glassPanel}>
+          <div className="mb-2 flex items-center gap-2">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-bold text-white">
+              {client.name.charAt(0).toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-white">{client.name}</p>
+              {counselorName && (
+                <p className="truncate text-[10px] text-white/40">
+                  With <span className="text-white/60">{counselorName}</span>
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            {client.city && (
+              <div className="flex items-center gap-2 text-[11px] text-white/60">
+                <MapPin className="h-3 w-3 shrink-0 text-white/30" />
+                {client.city}
+              </div>
+            )}
+            {client.phone && (
+              <div className="flex items-center gap-2 text-[11px] text-white/60">
+                <Phone className="h-3 w-3 shrink-0 text-white/30" />
+                {client.phone}
+              </div>
+            )}
+            {client.target_country && (
+              <div className="flex items-center gap-2 text-[11px] text-white/60">
+                <Globe className="h-3 w-3 shrink-0 text-white/30" />
+                {client.target_country}
+              </div>
+            )}
+            {client.interested_in && (
+              <div className="flex items-center gap-2 text-[11px] text-white/60">
+                <User className="h-3 w-3 shrink-0 text-white/30" />
+                {client.interested_in}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ── Meetings card ── */}
       <div className="rounded-2xl p-3" style={glassPanel}>
         {/* Header */}
@@ -145,52 +191,6 @@ export function MeetingsPanel({ clientId, client, counselorName, meetings, onReq
           </div>
         )}
       </div>
-
-      {/* ── Student profile card ── */}
-      {client && (
-        <div className="rounded-2xl p-3" style={glassPanel}>
-          <div className="mb-2 flex items-center gap-2">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-bold text-white">
-              {client.name.charAt(0).toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-white">{client.name}</p>
-              {counselorName && (
-                <p className="truncate text-[10px] text-white/40">
-                  With <span className="text-white/60">{counselorName}</span>
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            {client.city && (
-              <div className="flex items-center gap-2 text-[11px] text-white/60">
-                <MapPin className="h-3 w-3 shrink-0 text-white/30" />
-                {client.city}
-              </div>
-            )}
-            {client.phone && (
-              <div className="flex items-center gap-2 text-[11px] text-white/60">
-                <Phone className="h-3 w-3 shrink-0 text-white/30" />
-                {client.phone}
-              </div>
-            )}
-            {client.target_country && (
-              <div className="flex items-center gap-2 text-[11px] text-white/60">
-                <Globe className="h-3 w-3 shrink-0 text-white/30" />
-                {client.target_country}
-              </div>
-            )}
-            {client.interested_in && (
-              <div className="flex items-center gap-2 text-[11px] text-white/60">
-                <User className="h-3 w-3 shrink-0 text-white/30" />
-                {client.interested_in}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   )
 }
