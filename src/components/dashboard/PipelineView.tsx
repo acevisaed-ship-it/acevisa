@@ -48,10 +48,32 @@ export function PipelineView({
 
   const [activeStage, setActiveStage] = useState(defaultStage)
   const [transferClient, setTransferClient] = useState<Client | null>(null)
+  const [search, setSearch] = useState('')
 
-  const stageClients = clientsByStage[activeStage] ?? []
-  const briefBasePath = `${basePath}/brief`
   const clientBasePath = allowTransfer ? '/admin/clients' : `${basePath}/clients`
+
+  // Filter clients by search query across name, email, phone
+  const filterClients = (clients: Client[]) => {
+    const q = search.trim().toLowerCase()
+    if (!q) return clients
+    return clients.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        (c.phone && c.phone.toLowerCase().includes(q)) ||
+        (c.email && c.email.toLowerCase().includes(q))
+    )
+  }
+
+  const filteredByStage = useMemo(() => {
+    const result: Record<number, Client[]> = {}
+    for (const { stage } of stages) {
+      result[stage] = filterClients(clientsByStage[stage] ?? [])
+    }
+    return result
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, clientsByStage, stages])
+
+  const stageClients = filteredByStage[activeStage] ?? []
 
   function renderClientCard(client: Client) {
     const meetingId = meetingByClient[client.id]
@@ -89,19 +111,6 @@ export function PipelineView({
         )}
 
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          {isQualifiedOrBeyond &&
-            (hasMeeting ? (
-              <Link
-                href={`${briefBasePath}/${meetingId}`}
-                className="inline-flex min-h-[44px] items-center rounded-full border border-text/20 px-3 py-1.5 text-xs font-medium text-text transition-colors hover:border-text/40"
-              >
-                View Brief →
-              </Link>
-            ) : (
-              <span className="text-xs italic text-text/50">
-                No meeting scheduled yet.
-              </span>
-            ))}
           <Link
             href={`${clientBasePath}/${client.id}`}
             className="inline-flex min-h-[44px] items-center rounded-full border border-blue/30 px-3 py-1.5 text-xs font-medium text-blue transition-colors hover:border-blue/50"
@@ -130,10 +139,21 @@ export function PipelineView({
 
   return (
     <>
+      {/* Search bar */}
+      <div className="mb-4">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by name, email or phone…"
+          className="min-h-[44px] w-full max-w-sm rounded-full border border-text/20 bg-white/80 px-4 py-2.5 text-sm text-text placeholder:text-text/40 outline-none focus:border-blue"
+        />
+      </div>
+
       {/* Mobile: stage tabs */}
       <div className="mb-4 flex gap-2 overflow-x-auto pb-2 lg:hidden">
         {stages.map(({ stage, label }) => {
-          const count = clientsByStage[stage]?.length ?? 0
+          const count = filteredByStage[stage]?.length ?? 0
           const isActive = activeStage === stage
           return (
             <button
@@ -165,7 +185,7 @@ export function PipelineView({
       <div className="-mx-6 hidden overflow-x-auto px-6 pb-4 md:-mx-8 md:px-8 lg:block">
         <div className="flex min-w-max gap-4 snap-x snap-mandatory">
           {stages.map(({ stage, label }) => {
-            const clients = clientsByStage[stage] ?? []
+            const clients = filteredByStage[stage] ?? []
             return (
               <div
                 key={stage}

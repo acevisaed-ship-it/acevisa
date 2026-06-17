@@ -11,6 +11,8 @@ type CounselorOption = { id: string; name: string }
 export type AdminClientRow = {
   id: string
   name: string
+  email?: string | null
+  phone?: string | null
   counselor_id: string | null
   counselor_name: string | null
   ad_source: string | null
@@ -30,24 +32,40 @@ export function AllClientsTable({ clients, counselors }: Props) {
   const [filterMode, setFilterMode] = useState<FilterMode>('all')
   const [counselorFilter, setCounselorFilter] = useState('')
   const [stageFilter, setStageFilter] = useState('1')
+  const [search, setSearch] = useState('')
   const [transferClient, setTransferClient] = useState<AdminClientRow | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [rows, setRows] = useState(clients)
 
   const filtered = useMemo(() => {
+    let result = rows
+
+    // Filter mode
     switch (filterMode) {
       case 'unassigned':
-        return rows.filter((c) => !c.counselor_id)
+        result = result.filter((c) => !c.counselor_id)
+        break
       case 'counselor':
-        return counselorFilter
-          ? rows.filter((c) => c.counselor_id === counselorFilter)
-          : rows
+        if (counselorFilter) result = result.filter((c) => c.counselor_id === counselorFilter)
+        break
       case 'stage':
-        return rows.filter((c) => c.pipeline_stage === Number(stageFilter))
-      default:
-        return rows
+        result = result.filter((c) => c.pipeline_stage === Number(stageFilter))
+        break
     }
-  }, [filterMode, counselorFilter, stageFilter, rows])
+
+    // Search
+    const q = search.trim().toLowerCase()
+    if (q) {
+      result = result.filter(
+        (c) =>
+          c.name.toLowerCase().includes(q) ||
+          (c.email && c.email.toLowerCase().includes(q)) ||
+          (c.phone && c.phone.toLowerCase().includes(q))
+      )
+    }
+
+    return result
+  }, [filterMode, counselorFilter, stageFilter, search, rows])
 
   function handleTransferSuccess(clientId: string, counselorName: string) {
     const counselor = counselors.find((c) => c.name === counselorName)
@@ -106,6 +124,17 @@ export function AllClientsTable({ clients, counselors }: Props) {
             {label}
           </button>
         ))}
+      </div>
+
+      {/* Search */}
+      <div className="mb-4">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by name, email or phone…"
+          className="min-h-[44px] w-full max-w-sm rounded-full border border-text/20 bg-white/80 px-4 py-2.5 text-sm text-text placeholder:text-text/40 outline-none focus:border-blue"
+        />
       </div>
 
       {filterMode === 'counselor' && (

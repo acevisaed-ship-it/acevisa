@@ -58,6 +58,7 @@ export type Counselor = {
 export type Client = {
   id: string
   name: string
+  email?: string | null
   phone: string
   language: ClientLanguage
   city: string | null

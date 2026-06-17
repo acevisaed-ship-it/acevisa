@@ -22,6 +22,8 @@ export default async function AllClientsPage() {
     return {
       id: client.id,
       name: client.name,
+      email: (client as Record<string, unknown>).email as string | null ?? null,
+      phone: client.phone as string | null ?? null,
       counselor_id: client.counselor_id,
       counselor_name: counselor?.name ?? null,
       ad_source: client.ad_source,
