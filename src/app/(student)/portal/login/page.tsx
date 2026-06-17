@@ -43,7 +43,6 @@ export default function StudentLoginPage() {
       return
     }
 
-    // Set Supabase session in the browser client
     const supabase = createClient()
     await supabase.auth.setSession({
       access_token: data.accessToken,
@@ -75,26 +74,25 @@ export default function StudentLoginPage() {
     }
   }
 
-  const inputCls =
-    'min-h-[52px] w-full rounded-xl bg-grad-bg crisp px-4 py-3 text-text outline-none focus:ring-1 focus:ring-blue/40'
+  const inputCls = 'glass-input min-h-[52px] w-full rounded-xl px-4 py-3 text-sm outline-none'
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-grad-teal px-4 py-8">
-      <div className="w-full max-w-sm rounded-[24px] bg-grad-bg crisp p-6 sm:p-8">
+      <div className="w-full max-w-sm rounded-[24px] glass-card-blue p-6 sm:p-8">
         <div className="mb-8 flex justify-center">
           <img src="/logo.png" alt="ACE Altius Consulting" className="h-14 w-auto" />
         </div>
 
-        <h1 className="text-center text-2xl font-semibold text-text">Student Portal</h1>
-        <p className="mt-1 text-center text-sm text-text/50">Sign in to track your application</p>
+        <h1 className="text-center text-2xl font-semibold text-white">Student Portal</h1>
+        <p className="mt-1 text-center text-sm text-white/60">Sign in to track your application</p>
         <div className="mt-3 flex justify-center">
-          <PWAInstallButton className="inline-flex items-center gap-2 rounded-full bg-grad-bg crisp px-4 py-2 text-xs font-medium text-text/60 hover:brightness-95 hover:text-text transition-all" />
+          <PWAInstallButton className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-xs font-medium text-white/50 hover:text-white transition-all" />
         </div>
 
         {view === 'login' ? (
           <form onSubmit={handleLogin} className="mt-8 space-y-4">
             <div>
-              <label htmlFor="identifier" className="mb-1.5 block text-xs font-medium text-text/70">
+              <label htmlFor="identifier" className="mb-1.5 block text-xs font-medium text-white/60">
                 Email address or phone number
               </label>
               <input
@@ -110,7 +108,7 @@ export default function StudentLoginPage() {
             </div>
 
             <div className="relative">
-              <label htmlFor="password" className="mb-1.5 block text-xs font-medium text-text/70">
+              <label htmlFor="password" className="mb-1.5 block text-xs font-medium text-white/60">
                 Password
               </label>
               <input
@@ -126,14 +124,14 @@ export default function StudentLoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPw((v) => !v)}
-                className="absolute bottom-3.5 right-4 text-text/40 hover:text-text"
+                className="absolute bottom-3.5 right-4 text-white/40 hover:text-white"
               >
                 {showPw ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
             </div>
 
             {error && (
-              <p className="rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-600">{error}</p>
+              <p className="rounded-xl bg-red-500/20 px-4 py-2.5 text-sm text-red-300">{error}</p>
             )}
 
             <button
@@ -147,19 +145,19 @@ export default function StudentLoginPage() {
             <button
               type="button"
               onClick={() => { setView('forgot'); setError(null) }}
-              className="w-full text-center text-sm text-blue hover:underline"
+              className="w-full text-center text-sm text-white/50 hover:text-white"
             >
               Forgot password?
             </button>
           </form>
         ) : (
           <form onSubmit={handleForgotPassword} className="mt-8 space-y-4">
-            <p className="text-sm text-text/70">
+            <p className="text-sm text-white/60">
               Enter your email address or phone number. If a profile exists, we will send a password reset link.
             </p>
 
             <div>
-              <label htmlFor="fp-identifier" className="mb-1.5 block text-xs font-medium text-text/70">
+              <label htmlFor="fp-identifier" className="mb-1.5 block text-xs font-medium text-white/60">
                 Email or phone number
               </label>
               <input
@@ -174,10 +172,10 @@ export default function StudentLoginPage() {
             </div>
 
             {fpError && (
-              <p className="rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-600">{fpError}</p>
+              <p className="rounded-xl bg-red-500/20 px-4 py-2.5 text-sm text-red-300">{fpError}</p>
             )}
             {fpMessage && (
-              <p className="rounded-xl bg-green/20 px-4 py-2.5 text-sm text-text">✓ {fpMessage}</p>
+              <p className="rounded-xl bg-green/20 px-4 py-2.5 text-sm text-white">✓ {fpMessage}</p>
             )}
 
             <button
@@ -191,16 +189,16 @@ export default function StudentLoginPage() {
             <button
               type="button"
               onClick={() => { setView('login'); setFpMessage(null); setFpError(null) }}
-              className="w-full text-center text-sm text-blue hover:underline"
+              className="w-full text-center text-sm text-white/50 hover:text-white"
             >
               Back to login
             </button>
           </form>
         )}
 
-        <p className="mt-8 text-center text-xs text-text/40">
+        <p className="mt-8 text-center text-xs text-white/30">
           New student?{' '}
-          <a href="/" className="text-blue hover:underline">Register on our website</a>
+          <a href="/" className="text-white/60 hover:text-white hover:underline">Register on our website</a>
         </p>
       </div>
     </div>

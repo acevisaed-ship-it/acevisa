@@ -85,7 +85,9 @@ export function ChatLayout({
       const el = layoutRef.current
       if (!el) return
       el.style.height = `${vv.height}px`
-      el.style.transform = `translateY(${vv.offsetTop}px)`
+      // Only translateY when viewport scrolled due to page content (not keyboard).
+      // On Android with resizes-visual, offsetTop stays 0 when keyboard opens.
+      el.style.transform = vv.offsetTop > 0 ? `translateY(${vv.offsetTop}px)` : ''
     }
 
     vv.addEventListener('resize', update)

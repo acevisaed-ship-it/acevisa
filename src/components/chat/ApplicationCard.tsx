@@ -68,14 +68,21 @@ export function ApplicationCard({ currentStage }: Props) {
                   {i < STEP_COUNT - 1 && (
                     <div
                       className="absolute left-1/2 top-2 h-0.5 w-full"
-                      style={{ background: done ? 'rgba(74,222,128,0.5)' : 'rgba(255,255,255,0.1)' }}
+                      style={{ background: done ? 'rgba(183,199,51,0.7)' : 'rgba(255,255,255,0.1)' }}
                     />
                   )}
-                  <div className={`relative z-10 flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold transition-all ${
-                    done   ? 'bg-green-400 text-[#0A3F3A]' :
-                    active ? 'bg-white text-[#0A3F3A] ring-2 ring-white/30' :
-                             'bg-white/10 text-white/30'
-                  }`}>
+                  <div
+                    className={`relative z-10 flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold transition-all ${
+                      done   ? 'text-[#0A3F3A]' :
+                      active ? 'text-white pulse-orange' :
+                               'bg-white/10 text-white/30'
+                    }`}
+                    style={
+                      done   ? { backgroundColor: '#B7C733' } :
+                      active ? { backgroundColor: '#E48328' } :
+                               {}
+                    }
+                  >
                     {done ? '✓' : step}
                   </div>
                 </div>

@@ -25,6 +25,14 @@
   --crisp-dark:  inset 0 0 0 0.75px rgba(10, 63, 58, 0.09);
 }
 
+/* ── Safe-area background fill ──────────────────────────────────────
+   html background is dark teal so Android/iOS safe-area insets
+   (notch, gesture bar, navigation bar) never show the browser default
+   gray. Page-level bg classes override this for non-chat pages.     */
+html {
+  background-color: #0A3F3A;
+}
+
 /* ── Gradient text utilities ──────────────────────────────────────── */
 .text-grad-orange {
   background: var(--grad-orange);
@@ -94,11 +102,11 @@ body {
   overscroll-behavior: none;
 }
 
-/* Clip horizontal overflow without creating a scroll container.
-   overflow-x: hidden on html/body locks vertical scroll on iOS Safari — use
-   overflow-x: clip instead, which clamps overflow without side-effects. */
+/* Minimum page width — prevents layouts from squishing below mobile size.
+   Dashboard/admin shells set their own higher minimums (1024px / 1280px)
+   which trigger horizontal scroll on narrow windows instead of squishing. */
 body {
-  overflow-x: clip;
+  min-width: 375px;
 }
 
 /* ── Hide all scrollbars globally (web + mobile) ──────────────────── */
@@ -176,6 +184,14 @@ body {
   border-color: rgba(255, 255, 255, 0.30) !important;
 }
 
+/* Blue-tinted glass card — login pages */
+.glass-card-blue {
+  background: linear-gradient(145deg, rgba(53,165,224,0.20) 0%, rgba(32,131,185,0.14) 55%, rgba(23,111,160,0.10) 100%);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
 /* Dark panel — modals / detail panels */
 .dark-modal {
   background: rgba(4, 22, 20, 0.97);
@@ -201,6 +217,15 @@ body {
 .tab-btn-inactive:hover {
   color: rgba(255, 255, 255, 0.80) !important;
   background: rgba(255, 255, 255, 0.07) !important;
+}
+
+/* Pulsing orange animation — pipeline current stage */
+@keyframes pulse-orange {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(228, 131, 40, 0.70); }
+  50%       { box-shadow: 0 0 0 6px rgba(228, 131, 40, 0); }
+}
+.pulse-orange {
+  animation: pulse-orange 1.6s ease-in-out infinite;
 }
 
 /* Rocky/stone texture overlay */

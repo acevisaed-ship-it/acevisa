@@ -73,7 +73,10 @@ const AI_STYLE: React.CSSProperties = {
 }
 
 const STUDENT_STYLE: React.CSSProperties = {
-  background: 'rgba(183,199,51,0.92)',
+  background: 'rgba(255,255,255,0.14)',
+  backdropFilter: 'blur(12px)',
+  WebkitBackdropFilter: 'blur(12px)',
+  border: '1px solid rgba(255,255,255,0.18)',
   boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
 }
 
@@ -107,7 +110,7 @@ export function ChatBubble({ message, counselorName }: Props) {
   const alignLeft = isAi || isCounselor
 
   // text colour
-  const textColor = isStudent ? 'font-semibold text-[#0A3F3A]' : 'text-white'
+  const textColor = 'text-white'
 
   // counselor name to display (from message record or prop fallback)
   const displayName = message.counselor_name ?? counselorName ?? 'Your Counselor'

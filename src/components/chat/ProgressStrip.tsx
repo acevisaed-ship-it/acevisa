@@ -28,12 +28,15 @@ export function ProgressStrip({ currentStage }: Props) {
             <div className="flex flex-col items-center gap-0.5" title={s.label}>
               <div
                 className={`h-2.5 w-2.5 rounded-full transition-all ${
+                  active ? 'scale-125 pulse-orange' : ''
+                } ${!done && !active ? 'bg-white/20' : ''}`}
+                style={
                   done
-                    ? 'bg-green-400'
+                    ? { backgroundColor: '#B7C733' }
                     : active
-                    ? 'scale-125 bg-white ring-2 ring-white/40 ring-offset-1 ring-offset-transparent'
-                    : 'bg-white/20'
-                }`}
+                    ? { backgroundColor: '#E48328' }
+                    : {}
+                }
               />
               {active && (
                 <span className="hidden whitespace-nowrap text-[9px] font-semibold text-white/90 sm:block">
@@ -48,7 +51,7 @@ export function ProgressStrip({ currentStage }: Props) {
                 className="mx-0.5 h-px flex-1"
                 style={{
                   background: done
-                    ? 'rgba(74,222,128,0.6)'
+                    ? 'rgba(183,199,51,0.7)'
                     : 'rgba(255,255,255,0.15)',
                 }}
               />

@@ -30,7 +30,7 @@ export function DashboardShell({
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="flex min-h-screen bg-grad-teal">
+    <div className="flex min-h-screen min-w-[1024px] bg-grad-teal">
       {/* Mobile top bar */}
       <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center justify-between bg-grad-teal crisp-on-dark px-4 lg:hidden">
         <button

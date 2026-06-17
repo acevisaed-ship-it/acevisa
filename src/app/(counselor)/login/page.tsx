@@ -25,10 +25,7 @@ export default function CounselorLoginPage() {
     setLoading(true)
 
     const supabase = createClient()
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
 
     if (signInError) {
       setError('Invalid email or password')
@@ -56,15 +53,12 @@ export default function CounselorLoginPage() {
       return
     }
 
-    // Store remember-me preference (persistent cookie, 30 days)
     document.cookie = `ace_remember=${rememberMe ? '1' : '0'}; path=/; max-age=${30 * 24 * 3600}; SameSite=Lax`
 
     if (!rememberMe) {
-      // Session-only token — no max-age means it dies when the browser closes
       const token = crypto.randomUUID()
       document.cookie = `ace_session_token=${token}; path=/; SameSite=Lax`
     } else {
-      // Clear any old session-only token if switching to remember me
       document.cookie = 'ace_session_token=; path=/; max-age=0'
     }
 
@@ -93,25 +87,22 @@ export default function CounselorLoginPage() {
     setResetLoading(false)
   }
 
-  const inputClassName =
-    'min-h-[52px] w-full rounded-xl bg-grad-bg crisp px-4 py-3 text-text outline-none focus:ring-1 focus:ring-blue/40'
+  const inputCls = 'glass-input min-h-[52px] w-full rounded-xl px-4 py-3 text-sm outline-none'
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-grad-teal px-4 py-6">
-      <div className="w-full rounded-[20px] bg-grad-bg crisp p-6 sm:max-w-[400px] sm:p-8">
+      <div className="w-full rounded-[20px] glass-card-blue p-6 sm:max-w-[400px] sm:p-8">
         <div className="mb-8 flex flex-col items-center gap-2">
           <img src="/logo.png" alt="ACE Altius Consulting" className="h-16 w-auto" />
         </div>
 
-        <h1 className="text-center text-2xl font-semibold text-blue">Counselor Portal</h1>
-        <p className="mt-1 text-center text-sm text-text">Sign in to your dashboard</p>
+        <h1 className="text-center text-2xl font-semibold text-white">Counselor Portal</h1>
+        <p className="mt-1 text-center text-sm text-white/60">Sign in to your dashboard</p>
 
         {showForgotPassword ? (
           <form onSubmit={handleForgotPassword} className="mt-8 space-y-4">
             <div>
-              <label htmlFor="reset-email" className="sr-only">
-                Email
-              </label>
+              <label htmlFor="reset-email" className="sr-only">Email</label>
               <input
                 id="reset-email"
                 type="email"
@@ -120,7 +111,7 @@ export default function CounselorLoginPage() {
                 value={resetEmail}
                 onChange={(e) => setResetEmail(e.target.value)}
                 placeholder="Email"
-                className={inputClassName}
+                className={inputCls}
               />
             </div>
 
@@ -133,25 +124,21 @@ export default function CounselorLoginPage() {
             </button>
 
             {resetMessage && (
-              <p className="text-center text-sm text-green" role="status">
-                {resetMessage}
+              <p className="rounded-xl bg-green/20 px-4 py-2.5 text-center text-sm text-white" role="status">
+                ✓ {resetMessage}
               </p>
             )}
 
             {resetError && (
-              <p className="text-center text-sm text-orange" role="alert">
+              <p className="rounded-xl bg-red-500/20 px-4 py-2.5 text-center text-sm text-red-300" role="alert">
                 {resetError}
               </p>
             )}
 
             <button
               type="button"
-              onClick={() => {
-                setShowForgotPassword(false)
-                setResetMessage(null)
-                setResetError(null)
-              }}
-              className="w-full text-center text-sm text-blue hover:underline"
+              onClick={() => { setShowForgotPassword(false); setResetMessage(null); setResetError(null) }}
+              className="w-full text-center text-sm text-white/50 hover:text-white"
             >
               Back to login
             </button>
@@ -159,9 +146,7 @@ export default function CounselorLoginPage() {
         ) : (
           <form onSubmit={handleSubmit} className="mt-8 space-y-4">
             <div>
-              <label htmlFor="email" className="sr-only">
-                Email
-              </label>
+              <label htmlFor="email" className="sr-only">Email</label>
               <input
                 id="email"
                 type="email"
@@ -170,14 +155,12 @@ export default function CounselorLoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email"
-                className={inputClassName}
+                className={inputCls}
               />
             </div>
 
             <div className="relative">
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
+              <label htmlFor="password" className="sr-only">Password</label>
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
@@ -186,12 +169,12 @@ export default function CounselorLoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
-                className={`${inputClassName} pr-12`}
+                className={`${inputCls} pr-12`}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-text/60 hover:text-text"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -206,7 +189,7 @@ export default function CounselorLoginPage() {
                 onChange={(e) => setRememberMe(e.target.checked)}
                 className="h-4 w-4 cursor-pointer accent-blue"
               />
-              <label htmlFor="remember-me" className="cursor-pointer text-sm text-text">
+              <label htmlFor="remember-me" className="cursor-pointer text-sm text-white/60">
                 Remember me
               </label>
             </div>
@@ -222,13 +205,13 @@ export default function CounselorLoginPage() {
             <button
               type="button"
               onClick={() => setShowForgotPassword(true)}
-              className="w-full text-center text-sm text-blue hover:underline"
+              className="w-full text-center text-sm text-white/50 hover:text-white"
             >
               Forgot password?
             </button>
 
             {error && (
-              <p className="text-center text-sm text-orange" role="alert">
+              <p className="rounded-xl bg-red-500/20 px-4 py-2.5 text-center text-sm text-red-300" role="alert">
                 {error}
               </p>
             )}

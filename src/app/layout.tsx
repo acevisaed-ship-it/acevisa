@@ -47,11 +47,11 @@ export default function RootLayout({
             input stays above the keyboard (Bug #5 fix) */}
         <meta
           name="viewport"
-          content="width=device-width, initial-scale=1, interactive-widget=resizes-content"
+          content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-visual"
         />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
-      <body className="min-h-full flex flex-col bg-bg text-text">
+      <body className="min-h-full flex flex-col bg-bg text-text overflow-x-hidden">
         <Script id="js-enabled" strategy="beforeInteractive">
           {`document.documentElement.classList.add('js-enabled')`}
         </Script>
