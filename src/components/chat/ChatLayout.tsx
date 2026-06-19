@@ -5,6 +5,7 @@ import { MessageCircle, LayoutList, Bell, User } from 'lucide-react'
 import type { ChatMessage } from '@/types'
 import { ChatBubble } from './ChatBubble'
 import { ChatInput } from './ChatInput'
+import { ClientProfilePicture } from './ClientProfilePicture'
 import { MeetingsPanel } from './MeetingsPanel'
 import { ProgressStrip } from './ProgressStrip'
 import { TypingIndicator } from './TypingIndicator'
@@ -39,6 +40,7 @@ type Props = {
   initialClient: ClientData | null
   counselorName: string | null
   initialMeetings: Meeting[]
+  clientAvatarUrl?: string | null
 }
 
 // ── Glass panel style ──────────────────────────────────────────────────────
@@ -61,6 +63,7 @@ export function ChatLayout({
   initialClient,
   counselorName,
   initialMeetings,
+  clientAvatarUrl,
 }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = useState('')
@@ -276,6 +279,15 @@ export function ChatLayout({
             <img src="/logo.png" alt="ACE" className="h-7 w-auto" />
           </div>
         </div>
+        {/* Client profile picture */}
+        <div className="flex flex-col items-center gap-1 px-4 pb-4">
+          <ClientProfilePicture
+            clientName={clientName}
+            avatarUrl={clientAvatarUrl}
+            size={72}
+          />
+          <p className="text-sm font-semibold text-white">{clientName}</p>
+        </div>
         <div className="min-h-0 flex-1 overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
           <div className="flex flex-col gap-3 p-3">
             <MeetingsPanel
@@ -393,6 +405,21 @@ export function ChatLayout({
         {mobileTab === 'profile' && (
           <div className="h-full overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
             <div className="flex flex-col gap-3 p-3">
+              {/* Profile picture upload */}
+              <div
+                className="flex flex-col items-center gap-3 rounded-2xl p-5"
+                style={{ background: 'rgba(238,238,237,0.10)', border: '1px solid rgba(255,255,255,0.10)' }}
+              >
+                <ClientProfilePicture
+                  clientName={clientName}
+                  avatarUrl={clientAvatarUrl}
+                  size={88}
+                />
+                <div className="text-center">
+                  <p className="font-semibold text-white">{clientName}</p>
+                  <p className="text-xs text-white/40">Tap photo to update</p>
+                </div>
+              </div>
               <MeetingsPanel
                 clientId={clientId}
                 client={initialClient}

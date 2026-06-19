@@ -15,7 +15,7 @@ export default async function StudentChatPage({ searchParams }: Props) {
   const [clientRes, meetingsRes] = await Promise.all([
     supabase
       .from('clients')
-      .select('name, phone, email, city, pipeline_stage, counselor_id, target_country, interested_in')
+      .select('name, phone, email, city, pipeline_stage, counselor_id, target_country, interested_in, avatar_url')
       .eq('id', clientId)
       .single(),
     supabase
@@ -44,6 +44,7 @@ export default async function StudentChatPage({ searchParams }: Props) {
       clientId={clientId}
       clientName={client.name}
       initialStage={client.pipeline_stage ?? 1}
+      clientAvatarUrl={client.avatar_url ?? null}
       initialClient={{
         name: client.name,
         phone: client.phone,

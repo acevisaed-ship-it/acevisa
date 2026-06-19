@@ -72,6 +72,7 @@ export type Client = {
   pipeline_stage: PipelineStage
   notes: string | null
   status: 'active' | 'suspended'
+  avatar_url?: string | null
   created_at: string
   updated_at: string
 }

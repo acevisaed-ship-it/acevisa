@@ -2,19 +2,10 @@
 
 import { useRef, useState } from 'react'
 import { Camera } from 'lucide-react'
-import { cn } from '@/lib/utils'
 
 const MAX_SIZE_BYTES = 2 * 1024 * 1024
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const MAX_DIMENSION = 400
-
-type Props = {
-  counselorId: string
-  counselorName: string
-  avatarUrl?: string | null
-  size?: number
-  className?: string
-}
 
 function getInitial(name: string) {
   return name.trim().charAt(0).toUpperCase() || '?'
@@ -61,13 +52,13 @@ async function resizeImage(file: File): Promise<Blob> {
   })
 }
 
-export function ProfilePicture({
-  counselorId,
-  counselorName,
-  avatarUrl: initialAvatarUrl,
-  size = 80,
-  className,
-}: Props) {
+type Props = {
+  clientName: string
+  avatarUrl?: string | null
+  size?: number
+}
+
+export function ClientProfilePicture({ clientName, avatarUrl: initialAvatarUrl, size = 80 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl)
   const [isUploading, setIsUploading] = useState(false)
@@ -96,17 +87,15 @@ export function ProfilePicture({
     try {
       const resized = await resizeImage(file)
       const formData = new FormData()
-      formData.append('file', resized, `${counselorId}.jpg`)
+      formData.append('file', resized, 'avatar.jpg')
 
-      const res = await fetch('/api/counselor/avatar', {
+      const res = await fetch('/api/student/avatar', {
         method: 'POST',
         body: formData,
       })
 
       const data = await res.json()
-      if (!res.ok) {
-        throw new Error(data.error ?? 'Upload failed')
-      }
+      if (!res.ok) throw new Error(data.error ?? 'Upload failed')
 
       setAvatarUrl(data.avatarUrl)
     } catch (err) {
@@ -116,10 +105,11 @@ export function ProfilePicture({
     }
   }
 
-  const initial = getInitial(counselorName)
+  const initial = getInitial(clientName)
+  const fontSize = size * 0.4
 
   return (
-    <div className={cn('flex flex-col items-center gap-1', className)}>
+    <div className="flex flex-col items-center gap-2">
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
@@ -127,39 +117,39 @@ export function ProfilePicture({
         aria-label="Upload profile picture"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="relative shrink-0 overflow-hidden rounded-full transition-opacity disabled:opacity-60"
+        className="relative shrink-0 overflow-hidden rounded-full transition-opacity hover:opacity-90 disabled:opacity-60"
         style={{ width: size, height: size }}
       >
         {avatarUrl ? (
           <img
             src={avatarUrl}
-            alt={`${counselorName} profile`}
+            alt={`${clientName} profile`}
             className="h-full w-full object-cover"
           />
         ) : (
           <span
             className="flex h-full w-full items-center justify-center font-bold"
-            style={{ backgroundColor: '#B7C733', color: '#0A3F3A', fontSize: size * 0.4 }}
+            style={{ backgroundColor: '#B7C733', color: '#0A3F3A', fontSize }}
           >
             {initial}
           </span>
         )}
-        {/* Hover / uploading overlay */}
+
+        {/* Hover/uploading overlay */}
         {(hovered || isUploading) && (
           <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/50">
             {isUploading ? (
               <span className="text-xs font-medium text-white">Uploading…</span>
             ) : (
               <>
-                <Camera className="h-4 w-4 text-white" />
-                {size >= 48 && (
-                  <span className="text-[9px] font-medium text-white leading-tight">Change</span>
-                )}
+                <Camera className="h-5 w-5 text-white" />
+                <span className="text-[10px] font-medium text-white">Change photo</span>
               </>
             )}
           </span>
         )}
       </button>
+
       <input
         ref={inputRef}
         type="file"
@@ -167,7 +157,10 @@ export function ProfilePicture({
         className="hidden"
         onChange={handleFileChange}
       />
-      {error && <p className="max-w-[120px] text-center text-xs text-orange">{error}</p>}
+
+      {error && (
+        <p className="max-w-[160px] text-center text-xs text-orange-300">{error}</p>
+      )}
     </div>
   )
 }
