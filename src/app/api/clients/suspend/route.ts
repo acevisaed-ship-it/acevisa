@@ -29,13 +29,13 @@ export async function PATCH(request: Request) {
     query.eq('counselor_id', counselor.id)
   }
 
-  const { error, count } = await query.select('id', { count: 'exact', head: true })
+  const { data, error } = await query.select('id')
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  if (count === 0) {
+  if (!data || data.length === 0) {
     return NextResponse.json({ error: 'Client not found or not authorized' }, { status: 404 })
   }
 
