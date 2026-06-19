@@ -141,6 +141,7 @@ export default async function ClientRecordPage({ params }: Props) {
               clientId={clientId}
               initialStage={typedClient.pipeline_stage}
               initialNotes={typedClient.notes ?? ''}
+              initialStatus={typedClient.status ?? 'active'}
             />
           }
         />

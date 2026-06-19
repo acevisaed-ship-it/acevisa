@@ -71,6 +71,7 @@ export type Client = {
   qualification_score: number | null
   pipeline_stage: PipelineStage
   notes: string | null
+  status: 'active' | 'suspended'
   created_at: string
   updated_at: string
 }

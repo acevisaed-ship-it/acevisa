@@ -9,9 +9,11 @@ type Props = {
   clientId: string
   initialStage: PipelineStage
   initialNotes: string
+  initialStatus?: 'active' | 'suspended'
+  isAdmin?: boolean
 }
 
-export function ClientControls({ clientId, initialStage, initialNotes }: Props) {
+export function ClientControls({ clientId, initialStage, initialNotes, initialStatus = 'active', isAdmin = false }: Props) {
   const [stage, setStage] = useState(initialStage)
   const [notes, setNotes] = useState(initialNotes)
   const [saving, setSaving] = useState<'stage' | 'notes' | null>(null)
@@ -23,6 +25,10 @@ export function ClientControls({ clientId, initialStage, initialNotes }: Props) 
   const [updateVisibility, setUpdateVisibility] = useState<'internal' | 'shared'>('internal')
   const [sendingUpdate, setSendingUpdate] = useState(false)
   const [updateSent, setUpdateSent] = useState(false)
+
+  // Suspension
+  const [status, setStatus] = useState(initialStatus)
+  const [suspending, setSuspending] = useState(false)
 
   async function patchClient(body: Record<string, unknown>) {
     const res = await fetch('/api/clients/update', {
@@ -47,6 +53,22 @@ export function ClientControls({ clientId, initialStage, initialNotes }: Props) 
     setSaving('notes')
     await patchClient({ notes })
     setSaving(null)
+  }
+
+  async function handleToggleSuspension() {
+    setSuspending(true)
+    const action = status === 'active' ? 'suspend' : 'reactivate'
+    const res = await fetch('/api/clients/suspend', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId, action }),
+    })
+    setSuspending(false)
+    if (res.ok) {
+      const data = await res.json()
+      setStatus(data.status)
+      startTransition(() => router.refresh())
+    }
   }
 
   async function handleSendUpdate() {
@@ -160,6 +182,31 @@ export function ClientControls({ clientId, initialStage, initialNotes }: Props) 
           className="mt-3 min-h-[44px] w-full rounded-full bg-orange px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40"
         >
           {sendingUpdate ? 'Saving…' : updateSent ? '✓ Saved!' : 'Save update'}
+        </button>
+      </div>
+      {/* Suspension */}
+      <div className="rounded-xl border border-white/10 glass-card p-4">
+        <p className="mb-1 text-sm font-medium text-white/70">Account access</p>
+        <p className="mb-3 text-xs text-white/40">
+          {status === 'suspended'
+            ? 'This client is suspended and cannot log in to the portal.'
+            : 'This client has normal portal access.'}
+        </p>
+        <button
+          type="button"
+          disabled={suspending}
+          onClick={handleToggleSuspension}
+          className={`min-h-[44px] w-full rounded-full px-4 py-2 text-sm font-medium transition-opacity hover:opacity-90 disabled:opacity-50 ${
+            status === 'suspended'
+              ? 'bg-green/20 text-green border border-green/30'
+              : 'bg-red-500/20 text-red-300 border border-red-500/30'
+          }`}
+        >
+          {suspending
+            ? '…'
+            : status === 'suspended'
+            ? 'Reactivate account'
+            : 'Suspend account'}
         </button>
       </div>
     </div>

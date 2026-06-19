@@ -182,14 +182,14 @@ export function PipelineView({
       </div>
 
       {/* Desktop: horizontal Kanban */}
-      <div className="-mx-6 hidden overflow-x-auto px-6 pb-4 md:-mx-8 md:px-8 lg:block">
-        <div className="flex min-w-max gap-4 snap-x snap-mandatory">
+      <div className="hidden overflow-x-auto pb-4 lg:block">
+        <div className="flex w-max gap-4">
           {stages.map(({ stage, label }) => {
             const clients = filteredByStage[stage] ?? []
             return (
               <div
                 key={stage}
-                className="flex w-[280px] shrink-0 snap-start flex-col sm:w-[300px]"
+                className="flex w-[280px] shrink-0 flex-col sm:w-[300px]"
               >
                 <div className="mb-3 flex items-center gap-2">
                   <h2 className="text-sm font-bold text-white">{label}</h2>

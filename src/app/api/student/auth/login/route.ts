@@ -17,8 +17,8 @@ export async function POST(request: Request) {
   // Determine if identifier is email or phone; look up client
   const isEmail = id.includes('@')
   const query = isEmail
-    ? supabase.from('clients').select('id, email, portal_password_set').eq('email', id).maybeSingle()
-    : supabase.from('clients').select('id, email, portal_password_set').eq('phone', identifier.trim()).maybeSingle()
+    ? supabase.from('clients').select('id, email, portal_password_set, status').eq('email', id).maybeSingle()
+    : supabase.from('clients').select('id, email, portal_password_set, status').eq('phone', identifier.trim()).maybeSingle()
 
   const { data: client } = await query
 
@@ -27,6 +27,10 @@ export async function POST(request: Request) {
       { error: 'No account found with that email or phone number.' },
       { status: 404 }
     )
+  }
+
+  if ((client as Record<string, unknown>).status === 'suspended') {
+    return NextResponse.json({ error: 'Incorrect password.' }, { status: 401 })
   }
 
   if (!client.portal_password_set) {

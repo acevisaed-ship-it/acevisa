@@ -28,16 +28,14 @@ type Props = {
 
 // ── Styles ──────────────────────────────────────────────────────────────────
 
-const TEAL_BUBBLE: React.CSSProperties = {
-  background: 'linear-gradient(145deg, #0d5c53 0%, #0a4a42 100%)',
-  border: '1px solid rgba(255,255,255,0.10)',
+const COUNSELOR_BUBBLE: React.CSSProperties = {
+  background: 'linear-gradient(145deg, #f5a24e 0%, #E48328 55%, #ca7220 100%)',
+  boxShadow: '0 2px 12px rgba(0,0,0,0.25)',
 }
 
 const ANALYSIS_BUBBLE: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.06)',
-  border: '1px solid rgba(255,255,255,0.10)',
-  backdropFilter: 'blur(12px)',
-  WebkitBackdropFilter: 'blur(12px)',
+  background: 'linear-gradient(145deg, #35a5e0 0%, #2083B9 55%, #176fa0 100%)',
+  boxShadow: '0 2px 12px rgba(0,0,0,0.25)',
 }
 
 const OBJECTIVE_CONFIRM: React.CSSProperties = {
@@ -270,7 +268,7 @@ export function StrategyChat({ clientId, clientName }: Props) {
               <div key={i} className="flex justify-end">
                 <div
                   className="max-w-[80%] rounded-2xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed text-white"
-                  style={TEAL_BUBBLE}
+                  style={COUNSELOR_BUBBLE}
                 >
                   {msg.text}
                 </div>
@@ -288,7 +286,7 @@ export function StrategyChat({ clientId, clientName }: Props) {
                   <Bot className="h-3.5 w-3.5 text-blue" />
                 </div>
                 <div
-                  className="max-w-[85%] rounded-2xl rounded-bl-sm px-4 py-3 text-sm leading-relaxed text-text"
+                  className="max-w-[85%] rounded-2xl rounded-bl-sm px-4 py-3 text-sm leading-relaxed text-white"
                   style={ANALYSIS_BUBBLE}
                 >
                   {msg.text}
@@ -313,7 +311,7 @@ export function StrategyChat({ clientId, clientName }: Props) {
                   <p className="mb-1 text-[10px] font-bold" style={{ color: '#f5a24e' }}>
                     Objective set ✓
                   </p>
-                  <p className="text-sm leading-relaxed text-text/80">{msg.analysis}</p>
+                  <p className="text-sm leading-relaxed text-white/80">{msg.analysis}</p>
                 </div>
               </div>
             )

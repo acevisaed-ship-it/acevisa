@@ -19,10 +19,11 @@ export default async function AllClientsPage() {
 
   const rows = (clients ?? []).map((client) => {
     const counselor = client.counselors as { name: string } | null
+    const row = client as Record<string, unknown>
     return {
       id: client.id,
       name: client.name,
-      email: (client as Record<string, unknown>).email as string | null ?? null,
+      email: row.email as string | null ?? null,
       phone: client.phone as string | null ?? null,
       counselor_id: client.counselor_id,
       counselor_name: counselor?.name ?? null,
@@ -30,6 +31,7 @@ export default async function AllClientsPage() {
       pipeline_stage: client.pipeline_stage ?? 1,
       qualification_score: client.qualification_score,
       created_at: client.created_at,
+      status: (row.status as 'active' | 'suspended') ?? 'active',
     }
   })
 

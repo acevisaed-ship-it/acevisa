@@ -19,6 +19,7 @@ export type AdminClientRow = {
   pipeline_stage: number
   qualification_score: number | null
   created_at: string
+  status?: 'active' | 'suspended'
 }
 
 type Props = {
@@ -193,7 +194,17 @@ export function AllClientsTable({ clients, counselors }: Props) {
             ) : (
               filtered.map((client) => (
                 <tr key={client.id} className="border-b border-white/5 last:border-0">
-                  <td className="px-4 py-3 font-medium text-white/80">{client.name}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-white/80">{client.name}</span>
+                      {client.status === 'suspended' && (
+                        <span className="inline-flex items-center rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-300">
+                          Suspended
+                        </span>
+                      )}
+                    </div>
+                    {client.email && <p className="text-xs text-white/40">{client.email}</p>}
+                  </td>
                   <td className="px-4 py-3 text-white/60">
                     {client.counselor_name ? (
                       client.counselor_name

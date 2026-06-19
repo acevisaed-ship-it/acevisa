@@ -10,7 +10,7 @@ export default async function ClientsPage() {
 
   const { data: clients } = await supabase
     .from('clients')
-    .select('id, name, email, phone, city, pipeline_stage, qualification_score, registration_date')
+    .select('id, name, email, phone, city, pipeline_stage, qualification_score, registration_date, status')
     .eq('counselor_id', counselor.id)
     .order('registration_date', { ascending: false })
 
@@ -23,6 +23,7 @@ export default async function ClientsPage() {
     pipeline_stage: c.pipeline_stage ?? 1,
     qualification_score: c.qualification_score ?? null,
     registration_date: c.registration_date,
+    status: ((c as Record<string, unknown>).status as 'active' | 'suspended') ?? 'active',
   }))
 
   return (

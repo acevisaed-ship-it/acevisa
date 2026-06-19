@@ -14,6 +14,7 @@ export type CounselorClientRow = {
   pipeline_stage: number
   qualification_score: number | null
   registration_date: string
+  status?: 'active' | 'suspended'
 }
 
 type Props = {
@@ -76,7 +77,14 @@ export function CounselorClientsList({ clients, basePath = '/dashboard' }: Props
                 return (
                   <tr key={client.id} className="border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
                     <td className="px-4 py-3">
-                      <p className="font-semibold text-white/80">{client.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-white/80">{client.name}</p>
+                        {client.status === 'suspended' && (
+                          <span className="inline-flex items-center rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-300">
+                            Suspended
+                          </span>
+                        )}
+                      </div>
                       {client.email && (
                         <p className="text-xs text-white/40">{client.email}</p>
                       )}
