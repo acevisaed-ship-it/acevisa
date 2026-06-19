@@ -148,7 +148,7 @@ export function AdminSidebar({
 }: Props) {
   return (
     <>
-      <aside className="hidden w-60 shrink-0 flex-col glass-card-md crisp-on-dark border-r border-white/10 text-bg lg:flex">
+      <aside className="hidden w-60 shrink-0 flex-col glass-card-md crisp-on-dark rounded-2xl m-3 text-bg lg:flex">
         <SidebarContent
           adminId={adminId}
           adminName={adminName}
@@ -167,7 +167,7 @@ export function AdminSidebar({
 
       <aside
         className={cn(
-          'fixed left-0 top-0 z-50 flex h-full w-[280px] flex-col glass-card-md crisp-on-dark border-r border-white/10 transition-transform duration-300 lg:hidden',
+          'fixed left-0 top-0 z-50 flex h-full w-[280px] flex-col glass-card-md crisp-on-dark transition-transform duration-300 lg:hidden',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
