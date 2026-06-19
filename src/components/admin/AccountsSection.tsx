@@ -6,14 +6,16 @@ import { FinanceSummary } from '@/components/admin/FinanceSummary'
 import { InvoiceManager } from '@/components/admin/InvoiceManager'
 import { IncentivePolicyPanel } from '@/components/admin/IncentivePolicyPanel'
 import { HRMView } from '@/components/admin/HRMView'
+import { CounselorAccountsPanel } from '@/components/admin/CounselorAccountsPanel'
 
-type Tab = 'pl' | 'invoices' | 'payroll' | 'incentive'
+type Tab = 'counselors' | 'pl' | 'invoices' | 'payroll' | 'incentive'
 
 type ClientOption = { id: string; name: string; counselor_id: string | null }
 type DealOption = { id: string; client_id: string; deal_value: number; service_type: string }
 type CounselorOption = { id: string; name: string }
 
 const TABS: { id: Tab; label: string }[] = [
+  { id: 'counselors', label: 'Counselor Accounts' },
   { id: 'pl', label: 'P&L Summary' },
   { id: 'invoices', label: 'Invoices & Expenses' },
   { id: 'payroll', label: 'Payroll' },
@@ -29,7 +31,7 @@ export function AccountsSection({
   deals: DealOption[]
   counselors: CounselorOption[]
 }) {
-  const [tab, setTab] = useState<Tab>('pl')
+  const [tab, setTab] = useState<Tab>('counselors')
 
   return (
     <div className="flex flex-col gap-6">
@@ -59,6 +61,7 @@ export function AccountsSection({
 
       {/* Tab panels */}
       <div>
+        {tab === 'counselors' && <CounselorAccountsPanel />}
         {tab === 'pl' && <FinanceSummary />}
         {tab === 'invoices' && <InvoiceManager clients={clients} deals={deals} />}
         {tab === 'payroll' && <HRMView />}

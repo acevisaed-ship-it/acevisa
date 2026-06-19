@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  AlertTriangle,
   BarChart3,
   BookOpen,
   Calendar,
@@ -11,7 +10,6 @@ import {
   Handshake,
   Megaphone,
   Settings,
-  ShieldAlert,
   ShieldCheck,
   UserCircle,
   Users,
@@ -45,8 +43,6 @@ const navItems: NavItem[] = [
   { href: '/admin/crm', label: 'CRM Pipeline', icon: Handshake },
   { href: '/admin/accounts', label: 'Accounts', icon: Wallet },
   { href: '/admin/hr', label: 'HR', icon: ShieldCheck },
-  { href: '/admin/complaints', label: 'Complaints', icon: AlertTriangle },
-  { href: '/admin/escalations', label: 'Escalations', icon: ShieldAlert },
   { href: '/admin/activity', label: 'Activity Log', icon: ClipboardList },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ]
