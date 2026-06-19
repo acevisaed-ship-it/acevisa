@@ -61,7 +61,7 @@ export function DashboardShell({
 
       <div className="flex min-h-screen min-w-0 flex-1 flex-col pt-14 lg:pt-0">
         {/* Desktop top bar */}
-        <header className="hidden shrink-0 items-center justify-end gap-3 glass-card-md crisp-on-dark px-6 py-3 lg:flex">
+        <header className="hidden shrink-0 items-center justify-end gap-3 px-6 py-3 lg:flex">
           {headerActions}
           <ProfilePicture
             counselorId={counselorId}

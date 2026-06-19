@@ -148,11 +148,12 @@ export function NotificationBell({ counselorId, context = 'counselor', variant =
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
+        className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-opacity hover:opacity-80 ${
           variant === 'dark'
-            ? 'bg-white/15 hover:bg-white/25 text-white'
-            : 'bg-[#0A3F3A]/10 hover:bg-[#0A3F3A]/20 text-[#0A3F3A]'
+            ? 'text-white'
+            : 'text-[#0A3F3A]'
         }`}
+        style={{ background: 'linear-gradient(135deg, #f5a24e 0%, #E48328 100%)' }}
         aria-label="Notifications"
       >
         <Bell size={20} />
