@@ -8,6 +8,7 @@ function mapDeal(row: Record<string, unknown>) {
   const client = parseClientJoin(
     row.clients as { name: string; id: string } | { name: string; id: string }[] | null
   )
+  const product = row.products as { name: string } | null
   return {
     id: row.id as string,
     client_id: row.client_id as string,
@@ -27,6 +28,8 @@ function mapDeal(row: Record<string, unknown>) {
     counselor_name: parseCounselorName(
       row.counselors as { name: string } | { name: string }[] | null
     ),
+    product_id: row.product_id as string | null,
+    product_name: product?.name ?? null,
   }
 }
 
@@ -73,6 +76,7 @@ export async function PATCH(
   if (body.actual_close_date !== undefined) {
     updates.actual_close_date = body.actual_close_date || null
   }
+  if (body.product_id !== undefined) updates.product_id = body.product_id || null
 
   const supabase = createAdminClient()
   const { data, error: updateError } = await supabase
@@ -80,7 +84,7 @@ export async function PATCH(
     .update(updates)
     .eq('id', dealId)
     .select(
-      'id, client_id, counselor_id, service_type, target_country, deal_value, currency, stage, stage_notes, signed_at, expected_close_date, actual_close_date, created_at, updated_at, clients(name, id), counselors(name)'
+      'id, client_id, counselor_id, product_id, service_type, target_country, deal_value, currency, stage, stage_notes, signed_at, expected_close_date, actual_close_date, created_at, updated_at, clients(name, id), counselors(name), products(name)'
     )
     .single()
 

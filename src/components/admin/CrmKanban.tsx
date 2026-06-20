@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils'
 
 type CounselorOption = { id: string; name: string }
 type ClientOption = { id: string; name: string }
+type ProductOption = { id: string; name: string; base_price: number }
 
 type Deal = {
   id: string
@@ -32,6 +33,8 @@ type Deal = {
   created_at: string
   client_name: string | null
   counselor_name: string | null
+  product_id: string | null
+  product_name: string | null
 }
 
 type DealForm = {
@@ -42,6 +45,7 @@ type DealForm = {
   deal_value: string
   expected_close_date: string
   stage_notes: string
+  product_id: string
 }
 
 const emptyForm: DealForm = {
@@ -52,6 +56,7 @@ const emptyForm: DealForm = {
   deal_value: '',
   expected_close_date: '',
   stage_notes: '',
+  product_id: '',
 }
 
 const inputClass =
@@ -80,6 +85,8 @@ export function CrmKanban({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [draggingId, setDraggingId] = useState<string | null>(null)
+  const [products, setProducts] = useState<ProductOption[]>([])
+  const [productsLoading, setProductsLoading] = useState(false)
 
   const loadDeals = useCallback(async () => {
     setLoading(true)
@@ -100,6 +107,19 @@ export function CrmKanban({
   useEffect(() => {
     loadDeals()
   }, [loadDeals])
+
+  // Load products when New Deal modal or detail panel opens
+  useEffect(() => {
+    if (!modalOpen && !selectedDeal) return
+    if (products.length > 0) return // already loaded
+    setProductsLoading(true)
+    fetch('/api/admin/products')
+      .then((r) => r.json())
+      .then((d) => setProducts(d.products ?? []))
+      .catch(() => setProducts([]))
+      .finally(() => setProductsLoading(false))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modalOpen, selectedDeal])
 
   const dealsByStage = useMemo(() => {
     const map = Object.fromEntries(DEAL_STAGES.map((s) => [s, [] as Deal[]])) as Record<
@@ -156,6 +176,7 @@ export function CrmKanban({
         body: JSON.stringify({
           ...form,
           counselor_id: form.counselor_id || null,
+          product_id: form.product_id || null,
           deal_value: Number(form.deal_value) || 0,
         }),
       })
@@ -306,6 +327,9 @@ export function CrmKanban({
                           deal.service_type}
                         {deal.target_country ? ` · ${deal.target_country}` : ''}
                       </p>
+                      {deal.product_name && (
+                        <p className="mt-1 text-[11px] text-white/40 truncate">{deal.product_name}</p>
+                      )}
                       <p className="mt-2 text-sm font-semibold text-green">
                         {formatPkr(deal.deal_value)}
                       </p>
@@ -377,6 +401,21 @@ export function CrmKanban({
                     selectedDeal.service_type}
                   {selectedDeal.target_country ? ` · ${selectedDeal.target_country}` : ''}
                 </p>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm text-white/70">Product</label>
+                <select
+                  value={selectedDeal.product_id ?? ''}
+                  onChange={(e) => handlePanelUpdate({ product_id: e.target.value || null } as Partial<Deal>)}
+                  disabled={saving}
+                  className={inputClass}
+                >
+                  <option value="">No product</option>
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
               </div>
 
               {selectedDeal.expected_close_date && (
@@ -515,6 +554,32 @@ export function CrmKanban({
                   }
                   className={inputClass}
                 />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm text-white/70">
+                  Product
+                  <span className="ml-1.5 text-xs text-white/35">(optional — auto-fills deal value)</span>
+                </label>
+                <select
+                  value={form.product_id}
+                  onChange={(e) => {
+                    const pid = e.target.value
+                    const prod = products.find((p) => p.id === pid)
+                    setForm((f) => ({
+                      ...f,
+                      product_id: pid,
+                      deal_value: prod ? String(prod.base_price) : f.deal_value,
+                    }))
+                  }}
+                  className={inputClass}
+                  disabled={productsLoading}
+                >
+                  <option value="">{productsLoading ? 'Loading…' : 'No product'}</option>
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
               </div>
 
               {error && <p className="text-sm text-orange">{error}</p>}

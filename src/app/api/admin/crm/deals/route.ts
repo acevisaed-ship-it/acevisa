@@ -12,6 +12,7 @@ function mapDeal(row: Record<string, unknown>) {
   const client = parseClientJoin(
     row.clients as { name: string; id: string } | { name: string; id: string }[] | null
   )
+  const product = row.products as { name: string } | null
   return {
     id: row.id as string,
     client_id: row.client_id as string,
@@ -31,6 +32,8 @@ function mapDeal(row: Record<string, unknown>) {
     counselor_name: parseCounselorName(
       row.counselors as { name: string } | { name: string }[] | null
     ),
+    product_id: row.product_id as string | null,
+    product_name: product?.name ?? null,
   }
 }
 
@@ -47,7 +50,7 @@ export async function GET(request: Request) {
   let query = supabase
     .from('deals')
     .select(
-      'id, client_id, counselor_id, service_type, target_country, deal_value, currency, stage, stage_notes, signed_at, expected_close_date, actual_close_date, created_at, updated_at, clients(name, id), counselors(name)'
+      'id, client_id, counselor_id, product_id, service_type, target_country, deal_value, currency, stage, stage_notes, signed_at, expected_close_date, actual_close_date, created_at, updated_at, clients(name, id), counselors(name), products(name)'
     )
     .order('created_at', { ascending: false })
 
@@ -84,6 +87,7 @@ export async function POST(request: Request) {
     stage,
     stage_notes,
     expected_close_date,
+    product_id,
   } = body
 
   if (!client_id) {
@@ -102,6 +106,7 @@ export async function POST(request: Request) {
     .insert({
       client_id,
       counselor_id: counselor_id || null,
+      product_id: product_id || null,
       service_type,
       target_country: target_country?.trim() || null,
       deal_value: Number(deal_value) || 0,
@@ -110,7 +115,7 @@ export async function POST(request: Request) {
       expected_close_date: expected_close_date || null,
     })
     .select(
-      'id, client_id, counselor_id, service_type, target_country, deal_value, currency, stage, stage_notes, signed_at, expected_close_date, actual_close_date, created_at, updated_at, clients(name, id), counselors(name)'
+      'id, client_id, counselor_id, product_id, service_type, target_country, deal_value, currency, stage, stage_notes, signed_at, expected_close_date, actual_close_date, created_at, updated_at, clients(name, id), counselors(name), products(name)'
     )
     .single()
 

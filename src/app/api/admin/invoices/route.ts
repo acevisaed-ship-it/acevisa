@@ -10,12 +10,15 @@ function mapInvoice(row: Record<string, unknown>) {
   const client = parseClientJoin(
     row.clients as { name: string; id: string } | { name: string; id: string }[] | null
   )
+  const product = row.products as { name: string } | null
   return {
     id: row.id as string,
     invoice_number: row.invoice_number as string,
     client_id: row.client_id as string,
     deal_id: row.deal_id as string | null,
     counselor_id: row.counselor_id as string | null,
+    product_id: row.product_id as string | null,
+    product_name: product?.name ?? null,
     line_items: row.line_items as LineItem[],
     subtotal: Number(row.subtotal),
     tax_rate: Number(row.tax_rate),
@@ -61,7 +64,7 @@ export async function GET(request: Request) {
   let query = supabase
     .from('invoices')
     .select(
-      'id, invoice_number, client_id, deal_id, counselor_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors(name)'
+      'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors(name), products(name)'
     )
     .order('created_at', { ascending: false })
 
@@ -93,7 +96,7 @@ export async function POST(request: Request) {
   if (error) return error
 
   const body = await request.json()
-  const { client_id, deal_id, counselor_id, line_items, due_date, notes, status } = body
+  const { client_id, deal_id, counselor_id, line_items, due_date, notes, status, product_id } = body
 
   if (!client_id) {
     return NextResponse.json({ error: 'Client is required' }, { status: 400 })
@@ -118,6 +121,7 @@ export async function POST(request: Request) {
       client_id,
       deal_id: deal_id || null,
       counselor_id: counselor_id || null,
+      product_id: product_id || null,
       line_items: validItems,
       subtotal,
       tax_rate: 0,
@@ -128,13 +132,45 @@ export async function POST(request: Request) {
       notes: notes?.trim() || null,
     })
     .select(
-      'id, invoice_number, client_id, deal_id, counselor_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors(name)'
+      'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors(name)'
     )
     .single()
 
   if (insertError) {
     console.error('Invoice insert error:', insertError)
     return NextResponse.json({ error: 'Failed to create invoice' }, { status: 500 })
+  }
+
+  // ── Auto-create expense records for fixed-amount product vendors ──────────────
+  if (product_id && data) {
+    const [{ data: vendors }, { data: productRow }] = await Promise.all([
+      supabase
+        .from('product_vendors')
+        .select('vendor_name, amount_type, amount')
+        .eq('product_id', product_id)
+        .eq('amount_type', 'fixed')
+        .gt('amount', 0),
+      supabase
+        .from('products')
+        .select('name')
+        .eq('id', product_id)
+        .single(),
+    ])
+
+    if (vendors && vendors.length > 0) {
+      const today = new Date().toISOString().slice(0, 10)
+      const productName = productRow?.name ?? 'Product'
+      await supabase.from('expenses').insert(
+        vendors.map((v) => ({
+          category: 'other',
+          description: `${v.vendor_name} — ${productName} (${invoice_number})`,
+          amount: Number(v.amount),
+          currency: 'PKR',
+          paid_at: today,
+          notes: `Auto-created from invoice ${invoice_number}`,
+        }))
+      )
+    }
   }
 
   return NextResponse.json({ invoice: mapInvoice(data) })

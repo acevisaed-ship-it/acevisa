@@ -31,6 +31,44 @@ async function uploadReceipt(file: File): Promise<string | null> {
 type ClientOption = { id: string; name: string; counselor_id: string | null }
 type DealOption = { id: string; client_id: string; deal_value: number; service_type: string }
 
+type ProductStage = {
+  stage_order: number
+  stage_name: string
+  amount_type: 'fixed' | 'percentage'
+  amount: number
+  percentage: number
+}
+
+type ProductVendor = {
+  id?: string
+  vendor_name: string
+  vendor_type: string
+  amount_type: 'fixed' | 'percentage'
+  amount: number
+  percentage: number
+  currency: string
+}
+
+type ProductCommission = {
+  id?: string
+  counselor_id: string | null
+  role: string
+  commission_type: 'percentage' | 'fixed'
+  commission_value: number
+  applies_to_stage: number | null
+  notes: string | null
+}
+
+type ProductOption = {
+  id: string
+  name: string
+  category: string
+  base_price: number
+  product_payment_stages: ProductStage[]
+  product_vendors: ProductVendor[]
+  product_commission_rules: ProductCommission[]
+}
+
 type LineItem = { description: string; amount: string }
 
 type Invoice = {
@@ -39,6 +77,8 @@ type Invoice = {
   client_id: string
   deal_id: string | null
   counselor_id: string | null
+  product_id: string | null
+  product_name: string | null
   line_items: { description: string; amount: number }[]
   subtotal: number
   total: number
@@ -105,6 +145,9 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
 
   const [clientId, setClientId] = useState('')
   const [dealId, setDealId] = useState('')
+  const [productId, setProductId] = useState('')
+  const [products, setProducts] = useState<ProductOption[]>([])
+  const [productsLoading, setProductsLoading] = useState(false)
   const [dueDate, setDueDate] = useState('')
   const [notes, setNotes] = useState('')
   const [lineItems, setLineItems] = useState<LineItem[]>([{ description: '', amount: '' }])
@@ -129,12 +172,45 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
 
   useEffect(() => { loadInvoices() }, [loadInvoices])
 
+  // Load products when modal opens
+  useEffect(() => {
+    if (!modalOpen) return
+    setProductsLoading(true)
+    fetch('/api/admin/products')
+      .then((r) => r.json())
+      .then((d) => setProducts(d.products ?? []))
+      .catch(() => setProducts([]))
+      .finally(() => setProductsLoading(false))
+  }, [modalOpen])
+
+  // Derive selected product
+  const selectedProduct = useMemo(
+    () => products.find((p) => p.id === productId) ?? null,
+    [productId, products]
+  )
+
+  // Auto-fill line items when a product is selected
+  useEffect(() => {
+    if (!selectedProduct) return
+    const stages = selectedProduct.product_payment_stages
+    if (stages.length === 0) return
+    setLineItems(
+      stages.map((s) => ({
+        description: s.stage_name,
+        amount:
+          s.amount_type === 'fixed'
+            ? String(s.amount)
+            : String(Math.round((selectedProduct.base_price * Number(s.percentage)) / 100)),
+      }))
+    )
+  }, [selectedProduct])
+
   const clientDeals = useMemo(() => deals.filter((d) => d.client_id === clientId), [deals, clientId])
   const subtotal = useMemo(() => lineItems.reduce((s, i) => s + (Number(i.amount) || 0), 0), [lineItems])
   const selectedClient = clients.find((c) => c.id === clientId)
 
   function openCreate() {
-    setClientId(''); setDealId(''); setDueDate(''); setNotes('')
+    setClientId(''); setDealId(''); setProductId(''); setDueDate(''); setNotes('')
     setLineItems([{ description: '', amount: '' }]); setError('')
     setModalOpen(true)
   }
@@ -149,6 +225,7 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
           client_id: clientId,
           deal_id: dealId || null,
           counselor_id: selectedClient?.counselor_id || null,
+          product_id: productId || null,
           line_items: lineItems.map((i) => ({ description: i.description, amount: Number(i.amount) })),
           due_date: dueDate || null,
           notes: notes || null,
@@ -240,6 +317,7 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
                 <th className="px-4 py-3 font-medium">Invoice #</th>
                 <th className="px-4 py-3 font-medium">Client</th>
                 <th className="px-4 py-3 font-medium">Counselor</th>
+                <th className="px-4 py-3 font-medium">Product</th>
                 <th className="px-4 py-3 font-medium">Amount</th>
                 <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 font-medium">Due date</th>
@@ -257,6 +335,9 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
                   <td className="px-4 py-3 font-mono text-xs text-white/70">{invoice.invoice_number}</td>
                   <td className="px-4 py-3 text-white/80">{invoice.client_name ?? '—'}</td>
                   <td className="px-4 py-3 text-white/60">{invoice.counselor_name ?? '—'}</td>
+                  <td className="px-4 py-3 text-white/60 max-w-[160px] truncate">
+                    {invoice.product_name ?? <span className="text-white/25">—</span>}
+                  </td>
                   <td className="px-4 py-3 font-semibold text-green">{formatPkr(invoice.total)}</td>
                   <td className="px-4 py-3">
                     <span className={cn('rounded-full px-3 py-1 text-xs font-medium', statusBadgeClass(invoice.status))}>
@@ -320,6 +401,91 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
                     <option value="">No deal</option>
                     {clientDeals.map((d) => <option key={d.id} value={d.id}>{d.service_type} — {formatPkr(d.deal_value)}</option>)}
                   </select>
+                </div>
+              )}
+
+              {/* ── Product selector ── */}
+              <div>
+                <label className="mb-1.5 block text-sm text-white/70">
+                  Product
+                  <span className="ml-1.5 text-xs text-white/35">(auto-fills line items, expenses &amp; commissions)</span>
+                </label>
+                <select
+                  value={productId}
+                  onChange={(e) => setProductId(e.target.value)}
+                  className={inputClass}
+                  disabled={productsLoading}
+                >
+                  <option value="">
+                    {productsLoading ? 'Loading products…' : 'No product / custom invoice'}
+                  </option>
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* ── Product breakdown preview ── */}
+              {selectedProduct && (
+                <div className="rounded-2xl border border-white/10 glass-card overflow-hidden divide-y divide-white/5">
+                  {/* Header */}
+                  <div className="flex items-center justify-between px-4 py-2.5 bg-white/[0.03]">
+                    <p className="text-xs font-bold text-white/60 uppercase tracking-wide">
+                      {selectedProduct.name}
+                    </p>
+                    <p className="text-xs text-white/40">Base: {formatPkr(selectedProduct.base_price)}</p>
+                  </div>
+
+                  {/* Vendor costs */}
+                  {selectedProduct.product_vendors.length > 0 && (
+                    <div className="px-4 py-3">
+                      <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-orange/70">
+                        ↓ Vendor Costs (auto-saved as expenses)
+                      </p>
+                      <div className="space-y-1">
+                        {selectedProduct.product_vendors.map((v, i) => (
+                          <div key={i} className="flex items-center justify-between text-xs">
+                            <span className="text-white/60">{v.vendor_name}</span>
+                            <span className={cn('font-semibold', v.amount > 0 || v.percentage > 0 ? 'text-orange' : 'text-white/25')}>
+                              {v.amount_type === 'fixed'
+                                ? v.amount > 0 ? formatPkr(v.amount) : 'Not set'
+                                : v.percentage > 0 ? `${v.percentage}% of total` : 'Not set'}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Commission recipients */}
+                  {selectedProduct.product_commission_rules.length > 0 && (
+                    <div className="px-4 py-3">
+                      <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-[#B7C733]/70">
+                        ↑ Commission Recipients
+                      </p>
+                      <div className="space-y-1">
+                        {selectedProduct.product_commission_rules.map((r, i) => {
+                          const stageLabel = r.applies_to_stage ? `Stage ${r.applies_to_stage}` : 'All'
+                          const roleLabel = r.role.charAt(0).toUpperCase() + r.role.slice(1)
+                          return (
+                            <div key={i} className="flex items-center justify-between text-xs">
+                              <span className="text-white/60">
+                                {roleLabel}
+                                <span className="ml-1 text-white/30">({stageLabel})</span>
+                              </span>
+                              <span className={cn('font-semibold', r.commission_value > 0 ? 'text-[#B7C733]' : 'text-white/25')}>
+                                {r.commission_value > 0
+                                  ? r.commission_type === 'fixed'
+                                    ? formatPkr(r.commission_value)
+                                    : `${r.commission_value}%`
+                                  : 'Not set'}
+                              </span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
