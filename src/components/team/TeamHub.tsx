@@ -350,6 +350,18 @@ function GroupChat({ currentUserId }: { currentUserId: string }) {
   const [content, setContent] = useState('')
   const [sending, setSending] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  // Returns true if the user is within 120px of the bottom
+  function isNearBottom() {
+    const el = scrollContainerRef.current
+    if (!el) return true
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 120
+  }
+
+  function scrollToBottom(behavior: ScrollBehavior = 'smooth') {
+    bottomRef.current?.scrollIntoView({ behavior })
+  }
 
   const loadMessages = useCallback(async () => {
     const res = await fetch('/api/team/messages')
@@ -393,8 +405,19 @@ function GroupChat({ currentUserId }: { currentUserId: string }) {
     return () => clearInterval(poll)
   }, [])
 
+  // Scroll to bottom on initial load (instant) and when user sends a message
+  const prevCountRef = useRef(0)
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const count = messages.length
+    if (count === 0) return
+    if (prevCountRef.current === 0) {
+      // Initial load — jump instantly
+      scrollToBottom('instant' as ScrollBehavior)
+    } else if (count > prevCountRef.current && isNearBottom()) {
+      // New message arrived and user is near bottom — smooth scroll
+      scrollToBottom('smooth')
+    }
+    prevCountRef.current = count
   }, [messages])
 
   async function handleSend(e: React.FormEvent) {
@@ -408,6 +431,7 @@ function GroupChat({ currentUserId }: { currentUserId: string }) {
     })
     setContent('')
     setSending(false)
+    scrollToBottom('smooth')
   }
 
   return (
@@ -418,7 +442,7 @@ function GroupChat({ currentUserId }: { currentUserId: string }) {
         <span className="text-xs text-white/30">All members</span>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {loading ? (
           <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-white/30" /></div>
         ) : messages.length === 0 ? (

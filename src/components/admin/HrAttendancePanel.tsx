@@ -65,7 +65,11 @@ export function HrAttendancePanel({ counselors }: { counselors: CounselorOption[
       if (filterCounselorId) qs.set('counselorId', filterCounselorId)
       const res = await fetch(`/api/admin/hr/attendance?${qs}`)
       const data = await res.json()
-      if (res.ok) setRecords(data.records ?? [])
+      if (res.ok) {
+        setRecords(data.records ?? [])
+      } else {
+        console.error('[HrAttendancePanel] API error:', res.status, data)
+      }
     } finally {
       setLoading(false)
     }

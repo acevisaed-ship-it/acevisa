@@ -7,7 +7,8 @@ export default async function HrPage() {
   const { data: counselors } = await supabase
     .from('counselors')
     .select('id, name')
-    .eq('role', 'counselor')
+    .in('role', ['counselor', 'admin'])
+    .eq('status', 'active')
     .order('name')
 
   return (

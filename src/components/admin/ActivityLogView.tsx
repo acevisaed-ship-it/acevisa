@@ -58,6 +58,10 @@ export function ActivityLogView() {
   async function fetchLogs(off: number, append = false) {
     const res = await fetch(`/api/admin/activity?limit=${PAGE_SIZE}&offset=${off}`)
     const data = await res.json()
+    if (!res.ok) {
+      console.error('[ActivityLogView] API error:', res.status, data)
+      return
+    }
     if (append) {
       setLogs((prev) => [...prev, ...(data.logs ?? [])])
     } else {
