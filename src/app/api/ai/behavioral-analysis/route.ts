@@ -1,14 +1,22 @@
 import { runBehavioralAnalysis } from '@/lib/behavioralAnalysis'
-import { getAuthenticatedCounselor } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/server'
+import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { getAuthenticatedCounselor, createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+
+/** Accepts either a logged-in counselor or admin session. */
+async function requireAuth() {
+  const counselor = await getAuthenticatedCounselor()
+  if (counselor) return true
+  const { error } = await requireAdminApi()
+  return !error
+}
 
 /** GET /api/ai/behavioral-analysis?clientId=UUID
  *  Returns all analysis records for a client, newest first.
  */
 export async function GET(request: Request) {
-  const counselor = await getAuthenticatedCounselor()
-  if (!counselor) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const ok = await requireAuth()
+  if (!ok) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const clientId = new URL(request.url).searchParams.get('clientId')
   if (!clientId) return NextResponse.json({ error: 'clientId required' }, { status: 400 })
@@ -36,13 +44,17 @@ export async function GET(request: Request) {
  *  Manually triggers a fresh analysis (ignores the 5-message threshold).
  */
 export async function POST(request: Request) {
-  const counselor = await getAuthenticatedCounselor()
-  if (!counselor) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const ok = await requireAuth()
+  if (!ok) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { clientId } = await request.json()
   if (!clientId) return NextResponse.json({ error: 'clientId required' }, { status: 400 })
 
   const result = await runBehavioralAnalysis(clientId, /* forceRun */ true)
+
+  if (!result.ran) {
+    return NextResponse.json({ error: result.reason ?? 'Analysis did not run' }, { status: 500 })
+  }
 
   return NextResponse.json(result)
 }

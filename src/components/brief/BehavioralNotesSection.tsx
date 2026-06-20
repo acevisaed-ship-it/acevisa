@@ -31,6 +31,7 @@ export function BehavioralNotesSection({ clientId }: Props) {
   const [notes, setNotes] = useState<AnalysisNote[]>([])
   const [loading, setLoading] = useState(true)
   const [reanalysing, setReanalysing] = useState(false)
+  const [reanalyseError, setReanalyseError] = useState<string | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
@@ -51,13 +52,21 @@ export function BehavioralNotesSection({ clientId }: Props) {
 
   async function handleReanalyse() {
     setReanalysing(true)
+    setReanalyseError(null)
     try {
-      await fetch('/api/ai/behavioral-analysis', {
+      const res = await fetch('/api/ai/behavioral-analysis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ clientId }),
       })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setReanalyseError(data.error ?? 'Analysis failed — check server logs')
+        return
+      }
       await load()
+    } catch {
+      setReanalyseError('Network error — please try again')
     } finally {
       setReanalysing(false)
     }
@@ -86,11 +95,17 @@ export function BehavioralNotesSection({ clientId }: Props) {
         </button>
       </div>
 
+      {reanalyseError && (
+        <p className="mt-3 rounded-xl border border-red-400/20 bg-red-400/5 px-4 py-2 text-xs text-red-400">
+          {reanalyseError}
+        </p>
+      )}
+
       {loading ? (
         <p className="mt-4 text-sm text-white/50">Loading analysis…</p>
       ) : notes.length === 0 ? (
         <p className="mt-4 text-sm text-white/50">
-          No analysis yet. Analysis runs automatically every 5 messages, or click Re-analyse to run now.
+          No analysis yet. Click <strong>Re-analyse</strong> to run now, or it runs automatically after every 5 messages.
         </p>
       ) : (
         <div className="mt-4 space-y-4">

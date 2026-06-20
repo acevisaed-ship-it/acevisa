@@ -81,7 +81,14 @@ export async function POST(request: Request) {
         ? profile.qualification_score
         : existingProfile?.qualification_score ?? 0
 
-    await supabase.from('ai_profiles').upsert(
+    // AI prompt returns 'behaviour_type' (not 'detected_behaviour_type')
+    const behaviourType =
+      (profile.behaviour_type as string) ??
+      (profile.detected_behaviour_type as string) ??
+      existingProfile?.detected_behaviour_type ??
+      null
+
+    const { error: upsertErr } = await supabase.from('ai_profiles').upsert(
       {
         client_id: clientId,
         profile_json: profile,
@@ -89,20 +96,26 @@ export async function POST(request: Request) {
         stage: existingProfile?.stage ?? null,
         qualification_score: score,
         detected_language:
-          (profile.detected_language as string) ?? existingProfile?.detected_language,
+          (profile.detected_language as string) ?? existingProfile?.detected_language ?? null,
         detected_region:
-          (profile.detected_region as string) ?? existingProfile?.detected_region,
+          (profile.detected_region as string) ?? existingProfile?.detected_region ?? null,
         detected_fears:
-          (profile.detected_fears as string[]) ?? existingProfile?.detected_fears,
-        detected_behaviour_type:
-          (profile.detected_behaviour_type as string) ??
-          existingProfile?.detected_behaviour_type,
+          (profile.detected_fears as string[]) ?? existingProfile?.detected_fears ?? [],
+        detected_behaviour_type: behaviourType,
         service_match:
-          (profile.service_match as string) ?? existingProfile?.service_match,
+          (profile.recommended_service_pathway as string) ??
+          (profile.service_match as string) ??
+          existingProfile?.service_match ??
+          null,
         last_updated: new Date().toISOString(),
       },
       { onConflict: 'client_id' }
     )
+
+    if (upsertErr) {
+      console.error('[regenerate-profile] upsert failed:', upsertErr)
+      return NextResponse.json({ error: `DB save failed: ${upsertErr.message}` }, { status: 500 })
+    }
 
     const newStage = score >= 7 ? 2 : 1
     await supabase

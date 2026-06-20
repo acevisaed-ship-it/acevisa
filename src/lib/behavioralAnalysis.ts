@@ -98,9 +98,17 @@ Analyse the full chat history and return JSON as specified.`
     })
 
     const text = response.content[0].type === 'text' ? response.content[0].text : ''
-    result = JSON.parse(text) as BehavioralAnalysisResult
+
+    // Claude sometimes wraps JSON in markdown fences — strip them before parsing
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) {
+      console.error('[behavioralAnalysis] No JSON found in Claude response:', text.slice(0, 200))
+      return { ran: false, reason: 'no json in response' }
+    }
+
+    result = JSON.parse(jsonMatch[0]) as BehavioralAnalysisResult
   } catch (err) {
-    console.error('[behavioralAnalysis] Claude call failed:', err)
+    console.error('[behavioralAnalysis] Claude call or parse failed:', err)
     return { ran: false, reason: 'claude error' }
   }
 
@@ -120,7 +128,7 @@ Analyse the full chat history and return JSON as specified.`
   }
 
   // Store the analysis
-  await supabase.from('ai_behavioral_notes').insert({
+  const { error: insertErr } = await supabase.from('ai_behavioral_notes').insert({
     client_id: clientId,
     message_count: newMessageCount,
     messages_since_last: messagesSinceLast,
@@ -132,6 +140,11 @@ Analyse the full chat history and return JSON as specified.`
     profile_snapshot: aiProfile?.profile_json ?? null,
     model: 'claude-haiku-4-5-20251001',
   })
+
+  if (insertErr) {
+    console.error('[behavioralAnalysis] Insert failed:', insertErr)
+    return { ran: false, reason: `db error: ${insertErr.message}` }
+  }
 
   return { ran: true }
 }

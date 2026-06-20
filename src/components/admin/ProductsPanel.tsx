@@ -708,33 +708,98 @@ function CommissionsEditor({ rules, setRules, counselors, stages, totalCommPct, 
 
   // When no stages configured, fall back to a simple flat list
   if (stages.length === 0) {
+    const unsetCount = rules.filter(r => !r.counselor_id || r.commission_value === 0).length
+
     return (
       <div>
-        <p className="mb-4 text-xs text-white/30">
-          No payment stages defined. Add stages first to assign milestone-based commissions, or add general rules below.
-        </p>
-        <div className="flex flex-col gap-2 mb-4">
-          {rules.map((r, i) => (
-            <div key={i} className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/[0.02] p-3">
-              <select value={r.counselor_id ?? ''} onChange={(e) => updateRule(i, 'counselor_id', e.target.value || null)} className={cn(selectClass, 'flex-1')}>
-                <option value="">Whoever closes</option>
-                {counselors.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-              <select value={r.role} onChange={(e) => updateRule(i, 'role', e.target.value)} className={cn(selectClass, 'w-28')}>
-                {ROLES.map((ro) => <option key={ro.value} value={ro.value}>{ro.label}</option>)}
-              </select>
-              <select value={r.commission_type} onChange={(e) => updateRule(i, 'commission_type', e.target.value)} className={cn(selectClass, 'w-28')}>
-                <option value="percentage">% of deal</option>
-                <option value="fixed">Fixed PKR</option>
-              </select>
-              <input type="number" value={r.commission_value} onChange={(e) => updateRule(i, 'commission_value', Number(e.target.value))} placeholder={r.commission_type === 'percentage' ? '%' : 'PKR'} min="0" className={cn(inputClass, 'w-24')} />
-              <button type="button" onClick={() => removeRule(i)} className="text-white/25 hover:text-red-400 shrink-0"><X className="h-4 w-4" /></button>
+        {/* Setup banner — shown when rows still need filling in */}
+        {unsetCount > 0 && (
+          <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-yellow-400/20 bg-yellow-400/5 px-4 py-3">
+            <span className="mt-0.5 text-yellow-400">⚠</span>
+            <div>
+              <p className="text-xs font-semibold text-yellow-300">
+                {unsetCount} commission {unsetCount === 1 ? 'recipient needs' : 'recipients need'} setup
+              </p>
+              <p className="mt-0.5 text-xs text-yellow-200/60">
+                Select a counselor from each row&apos;s dropdown, enter the % or PKR amount, then click <strong>Save Commission Rules</strong>.
+              </p>
             </div>
-          ))}
+          </div>
+        )}
+
+        <div className="flex flex-col gap-3 mb-4">
+          {rules.length === 0 && (
+            <p className="text-xs text-white/30">No commission rules yet. Add who gets paid when this product is sold.</p>
+          )}
+          {rules.map((r, i) => {
+            const needsSetup = !r.counselor_id || r.commission_value === 0
+            const roleLabel = ROLES.find(ro => ro.value === r.role)?.label ?? r.role
+            return (
+              <div
+                key={i}
+                className={cn(
+                  'rounded-xl border p-3',
+                  needsSetup ? 'border-yellow-400/15 bg-yellow-400/[0.03]' : 'border-white/8 bg-white/[0.02]'
+                )}
+              >
+                {/* Role label + setup badge */}
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="text-xs font-semibold text-white/60">{roleLabel}</span>
+                  {needsSetup && (
+                    <span className="rounded-full bg-yellow-400/20 px-2 py-0.5 text-[10px] font-semibold text-yellow-300">
+                      Not configured
+                    </span>
+                  )}
+                  {r.notes && (
+                    <span className="text-[10px] text-white/30 truncate">{r.notes}</span>
+                  )}
+                </div>
+
+                {/* Controls */}
+                <div className="flex items-center gap-2">
+                  {/* Counselor */}
+                  <select
+                    value={r.counselor_id ?? ''}
+                    onChange={(e) => updateRule(i, 'counselor_id', e.target.value || null)}
+                    className={cn(selectClass, 'flex-1', !r.counselor_id && 'border-yellow-400/25 text-yellow-200/70')}
+                  >
+                    <option value="">— Select counselor —</option>
+                    {counselors.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+
+                  {/* Role */}
+                  <select value={r.role} onChange={(e) => updateRule(i, 'role', e.target.value)} className={cn(selectClass, 'w-28 shrink-0')}>
+                    {ROLES.map((ro) => <option key={ro.value} value={ro.value}>{ro.label}</option>)}
+                  </select>
+
+                  {/* Type */}
+                  <select value={r.commission_type} onChange={(e) => updateRule(i, 'commission_type', e.target.value)} className={cn(selectClass, 'w-24 shrink-0')}>
+                    <option value="percentage">%</option>
+                    <option value="fixed">PKR</option>
+                  </select>
+
+                  {/* Value */}
+                  <input
+                    type="number"
+                    value={r.commission_value || ''}
+                    onChange={(e) => updateRule(i, 'commission_value', Number(e.target.value))}
+                    placeholder={r.commission_type === 'percentage' ? 'e.g. 10' : 'e.g. 5000'}
+                    min="0"
+                    className={cn(inputClass, 'w-28 shrink-0', r.commission_value === 0 && 'border-yellow-400/25')}
+                  />
+
+                  <button type="button" onClick={() => removeRule(i)} className="shrink-0 text-white/25 hover:text-red-400">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            )
+          })}
         </div>
+
         <div className="flex items-center gap-3">
           <button type="button" onClick={() => addToStage(null)} className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white">
-            <Plus className="h-3.5 w-3.5" /> Add Rule
+            <Plus className="h-3.5 w-3.5" /> Add recipient
           </button>
           <button type="button" onClick={onSave} disabled={saving} className="ml-auto flex items-center gap-1.5 rounded-full bg-grad-blue crisp-on-dark px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-50">
             <Check className="h-3.5 w-3.5" /> {saving ? 'Saving…' : 'Save Commission Rules'}
@@ -802,9 +867,9 @@ function CommissionsEditor({ rules, setRules, counselors, stages, totalCommPct, 
                     <select
                       value={r.counselor_id ?? ''}
                       onChange={(e) => updateRule(globalIdx, 'counselor_id', e.target.value || null)}
-                      className={cn(selectClass, 'flex-1 min-w-0')}
+                      className={cn(selectClass, 'flex-1 min-w-0', !r.counselor_id && 'border-yellow-400/25 text-yellow-200/70')}
                     >
-                      <option value="">Whoever closes</option>
+                      <option value="">— Select counselor —</option>
                       {counselors.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
 
@@ -823,11 +888,11 @@ function CommissionsEditor({ rules, setRules, counselors, stages, totalCommPct, 
                       <div className="flex items-center gap-1 shrink-0">
                         <input
                           type="number"
-                          value={r.commission_value}
+                          value={r.commission_value || ''}
                           onChange={(e) => updateRule(globalIdx, 'commission_value', Number(e.target.value))}
-                          placeholder="Amount"
+                          placeholder="e.g. 5000"
                           min="0"
-                          className={cn(inputClass, 'w-28')}
+                          className={cn(inputClass, 'w-28', r.commission_value === 0 && 'border-yellow-400/25')}
                         />
                         <span className="text-xs text-white/40 shrink-0">PKR</span>
                       </div>
@@ -844,11 +909,11 @@ function CommissionsEditor({ rules, setRules, counselors, stages, totalCommPct, 
                         </select>
                         <input
                           type="number"
-                          value={r.commission_value}
+                          value={r.commission_value || ''}
                           onChange={(e) => updateRule(globalIdx, 'commission_value', Number(e.target.value))}
-                          placeholder={r.commission_type === 'percentage' ? '%' : 'PKR'}
+                          placeholder={r.commission_type === 'percentage' ? 'e.g. 10' : 'e.g. 5000'}
                           min="0"
-                          className={cn(inputClass, 'w-24')}
+                          className={cn(inputClass, 'w-24', r.commission_value === 0 && 'border-yellow-400/25')}
                         />
                       </div>
                     )}

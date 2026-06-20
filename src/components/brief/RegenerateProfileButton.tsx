@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { RefreshCw } from 'lucide-react'
 
 export function RegenerateProfileButton({ clientId }: { clientId: string }) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
+  const router = useRouter()
 
   async function handleClick() {
     setStatus('loading')
@@ -14,11 +16,14 @@ export function RegenerateProfileButton({ clientId }: { clientId: string }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ clientId }),
       })
-      if (!res.ok) throw new Error('Failed')
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed')
       setStatus('done')
-      // Reload the page after a short delay so the new profile is shown
-      setTimeout(() => window.location.reload(), 800)
-    } catch {
+      // router.refresh() re-runs the server component without browser cache
+      setTimeout(() => router.refresh(), 600)
+      setTimeout(() => setStatus('idle'), 2000)
+    } catch (err) {
+      console.error('[RegenerateProfileButton]', err)
       setStatus('error')
       setTimeout(() => setStatus('idle'), 3000)
     }
