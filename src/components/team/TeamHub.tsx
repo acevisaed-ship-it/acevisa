@@ -317,11 +317,11 @@ function GroupChat({ currentUserId }: { currentUserId: string }) {
 
   useEffect(() => { loadMessages() }, [loadMessages])
 
-  // Real-time subscription + polling fallback
+  // Supabase realtime (requires: alter publication supabase_realtime add table team_messages)
   useEffect(() => {
     const supabase = createClient()
     const channel = supabase
-      .channel('team_messages')
+      .channel('team_messages_rt')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'team_messages' }, (payload) => {
         setMessages((prev) => {
           if (prev.some((m) => m.id === (payload.new as Message).id)) return prev
@@ -329,24 +329,25 @@ function GroupChat({ currentUserId }: { currentUserId: string }) {
         })
       })
       .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [])
 
-    // Polling fallback every 5s in case realtime drops
+  // Polling every 3s — replaces full list, keeps any pending optimistic messages
+  useEffect(() => {
     const poll = setInterval(async () => {
-      const res = await fetch('/api/team/messages')
-      const data = await res.json()
-      if (data.messages?.length) {
+      try {
+        const res = await fetch('/api/team/messages')
+        const data = await res.json()
+        if (!data.messages?.length) return
         setMessages((prev) => {
-          const existingIds = new Set(prev.map((m) => m.id))
-          const newOnes = (data.messages as Message[]).filter((m) => !existingIds.has(m.id))
-          return newOnes.length ? [...prev, ...newOnes] : prev
+          const incomingIds = new Set((data.messages as Message[]).map((m) => m.id))
+          const lastTime = data.messages[data.messages.length - 1]?.created_at ?? '0'
+          const pending = prev.filter((m) => !incomingIds.has(m.id) && m.created_at > lastTime)
+          return [...data.messages, ...pending]
         })
-      }
-    }, 5000)
-
-    return () => {
-      supabase.removeChannel(channel)
-      clearInterval(poll)
-    }
+      } catch { /* non-fatal */ }
+    }, 1000)
+    return () => clearInterval(poll)
   }, [])
 
   useEffect(() => {
