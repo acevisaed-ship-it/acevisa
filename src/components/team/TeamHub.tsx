@@ -43,29 +43,61 @@ function timeAgo(iso: string) {
   return new Date(iso).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' })
 }
 
-const BUBBLE_COLORS = [
-  { bubble: 'bg-blue-500/30 text-blue-100', avatar: 'bg-blue-500/30 text-blue-200' },
-  { bubble: 'bg-teal-500/30 text-teal-100', avatar: 'bg-teal-500/30 text-teal-200' },
-  { bubble: 'bg-orange-500/30 text-orange-100', avatar: 'bg-orange-500/30 text-orange-200' },
-  { bubble: 'bg-lime-500/30 text-lime-100', avatar: 'bg-lime-500/30 text-lime-200' },
+// Named color assignments — keyed by lowercase first name
+// All gradients are in sync with the palette (--grad-blue, --grad-orange, etc.)
+const NAMED_COLORS: Record<string, { bubble: string; avatar: string }> = {
+  // Hashaam — blue-to-teal (palette grad-blue → teal)
+  hashaam: {
+    bubble: 'bg-gradient-to-br from-[#35a5e0]/50 to-[#2083B9]/35 text-blue-50',
+    avatar: 'bg-gradient-to-br from-[#35a5e0]/50 to-[#2083B9]/35 text-blue-100',
+  },
+  // Arooj — baby pink
+  arooj: {
+    bubble: 'bg-gradient-to-br from-pink-200/50 to-pink-300/35 text-pink-950',
+    avatar: 'bg-gradient-to-br from-pink-200/50 to-pink-300/35 text-pink-900',
+  },
+  // Aniqa / Aneeqa — candy pink (more saturated)
+  aniqa: {
+    bubble: 'bg-gradient-to-br from-pink-500/45 to-rose-600/30 text-pink-50',
+    avatar: 'bg-gradient-to-br from-pink-500/45 to-rose-600/30 text-pink-100',
+  },
+  aneeqa: {
+    bubble: 'bg-gradient-to-br from-pink-500/45 to-rose-600/30 text-pink-50',
+    avatar: 'bg-gradient-to-br from-pink-500/45 to-rose-600/30 text-pink-100',
+  },
+  // Admin — navy / royal blue (palette: deep blue)
+  admin: {
+    bubble: 'bg-gradient-to-br from-blue-700/55 to-blue-900/40 text-blue-100',
+    avatar: 'bg-gradient-to-br from-blue-700/55 to-blue-900/40 text-blue-200',
+  },
+  // Osama — orange (palette grad-orange: #f5a24e → #E48328 → #ca7220)
+  osama: {
+    bubble: 'bg-gradient-to-br from-[#f5a24e]/45 to-[#ca7220]/30 text-orange-50',
+    avatar: 'bg-gradient-to-br from-[#f5a24e]/45 to-[#ca7220]/30 text-orange-100',
+  },
+}
+
+// Fallback palette for unknown senders
+const FALLBACK_COLORS = [
+  { bubble: 'bg-teal-500/30 text-teal-100',   avatar: 'bg-teal-500/30 text-teal-200' },
+  { bubble: 'bg-[#B7C733]/25 text-[#e4f09a]', avatar: 'bg-[#B7C733]/25 text-[#ccd94a]' },
   { bubble: 'bg-yellow-500/30 text-yellow-100', avatar: 'bg-yellow-500/30 text-yellow-200' },
-  { bubble: 'bg-pink-500/30 text-pink-100', avatar: 'bg-pink-500/30 text-pink-200' },
-  { bubble: 'bg-indigo-700/40 text-indigo-100', avatar: 'bg-indigo-700/40 text-indigo-200' },
   { bubble: 'bg-purple-500/30 text-purple-100', avatar: 'bg-purple-500/30 text-purple-200' },
 ]
 
-const MY_BUBBLE = 'bg-gradient-to-br from-blue-500/50 to-teal-500/40 text-white'
+// MY_BUBBLE kept for backward compat (Hashaam as current user renders this)
+const MY_BUBBLE = 'bg-gradient-to-br from-[#35a5e0]/50 to-[#2083B9]/40 text-white'
 
-function senderColor(id: string) {
+function senderColor(name: string) {
+  const key = name.trim().split(' ')[0].toLowerCase()
+  if (NAMED_COLORS[key]) return NAMED_COLORS[key]
   let hash = 0
-  for (const c of id) hash = (hash * 31 + c.charCodeAt(0)) % BUBBLE_COLORS.length
-  return BUBBLE_COLORS[hash]
+  for (const c of name) hash = (hash * 31 + c.charCodeAt(0)) % FALLBACK_COLORS.length
+  return FALLBACK_COLORS[hash]
 }
 
 function avatarColor(name: string) {
-  let hash = 0
-  for (const c of name) hash = (hash * 31 + c.charCodeAt(0)) % BUBBLE_COLORS.length
-  return BUBBLE_COLORS[hash].avatar
+  return senderColor(name).avatar
 }
 
 function Avatar({ name, initials, size = 32 }: { name: string; initials: string; size?: number }) {
@@ -397,7 +429,7 @@ function GroupChat({ currentUserId }: { currentUserId: string }) {
         ) : (
           messages.map((msg) => {
             const isMine = msg.sender_id === currentUserId
-            const color = senderColor(msg.sender_id)
+            const color = senderColor(msg.sender_name)
             return (
               <div key={msg.id} className={cn('flex items-end gap-2.5', isMine && 'flex-row-reverse')}>
                 {!isMine && (
