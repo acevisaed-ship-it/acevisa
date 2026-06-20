@@ -132,7 +132,7 @@ export async function POST(request: Request) {
       notes: notes?.trim() || null,
     })
     .select(
-      'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors(name)'
+      'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors(name), products(name)'
     )
     .single()
 

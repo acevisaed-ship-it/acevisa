@@ -8,12 +8,15 @@ function mapInvoice(row: Record<string, unknown>) {
   const client = parseClientJoin(
     row.clients as { name: string; id: string } | { name: string; id: string }[] | null
   )
+  const product = row.products as { name: string } | null
   return {
     id: row.id as string,
     invoice_number: row.invoice_number as string,
     client_id: row.client_id as string,
     deal_id: row.deal_id as string | null,
     counselor_id: row.counselor_id as string | null,
+    product_id: row.product_id as string | null,
+    product_name: product?.name ?? null,
     line_items: row.line_items as { description: string; amount: number }[],
     subtotal: Number(row.subtotal),
     tax_rate: Number(row.tax_rate),
@@ -58,7 +61,7 @@ export async function PATCH(
     .update(updates)
     .eq('id', id)
     .select(
-      'id, invoice_number, client_id, deal_id, counselor_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors(name)'
+      'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors(name), products(name)'
     )
     .single()
 
