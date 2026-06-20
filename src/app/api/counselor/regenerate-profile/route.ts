@@ -14,9 +14,9 @@ export async function POST(request: Request) {
   // Fetch conversation history
   const { data: history, error: histErr } = await supabase
     .from('conversations')
-    .select('sender, message_text, created_at')
+    .select('sender, message_text, timestamp')
     .eq('client_id', clientId)
-    .order('created_at', { ascending: true })
+    .order('timestamp', { ascending: true })
     .limit(80)
 
   if (histErr || !history?.length) {
@@ -31,10 +31,33 @@ export async function POST(request: Request) {
     .maybeSingle()
 
   // Sender values in DB: 'student' | 'ai' | 'counselor'
-  const conversationMessages = history.map((msg) => ({
+  // Anthropic requires: messages must start with 'user' and alternate roles.
+  // We merge consecutive same-role messages and skip leading assistant messages.
+  const rawMessages = history.map((msg) => ({
     role: msg.sender === 'student' ? ('user' as const) : ('assistant' as const),
     content: msg.message_text,
   }))
+
+  // Merge consecutive same-role messages into one
+  const merged: Array<{ role: 'user' | 'assistant'; content: string }> = []
+  for (const msg of rawMessages) {
+    if (merged.length > 0 && merged[merged.length - 1].role === msg.role) {
+      merged[merged.length - 1].content += '\n' + msg.content
+    } else {
+      merged.push({ ...msg })
+    }
+  }
+
+  // Anthropic requires first message to be 'user'
+  while (merged.length > 0 && merged[0].role === 'assistant') {
+    merged.shift()
+  }
+
+  if (merged.length === 0) {
+    return NextResponse.json({ error: 'No client messages found in conversation' }, { status: 404 })
+  }
+
+  const conversationMessages = merged
 
   try {
     const response = await anthropic.messages.create({
