@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Clock, LogIn, LogOut, MapPin, Loader2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 type AttendanceRecord = {
   id: string
@@ -9,6 +10,18 @@ type AttendanceRecord = {
   check_in: string | null
   check_out: string | null
   status: string
+  notes?: string | null
+}
+
+const STATUS_STYLE: Record<string, string> = {
+  present:  'bg-green/20 text-white',
+  remote:   'bg-blue/20 text-white',
+  half_day: 'bg-orange/15 text-orange',
+  absent:   'bg-red-500/20 text-red-400',
+  leave:    'glass-card text-white/40',
+}
+const STATUS_LABEL: Record<string, string> = {
+  present: 'Present', remote: 'Remote', half_day: 'Half Day', absent: 'Absent', leave: 'Leave',
 }
 
 function formatTime(iso: string | null) {
@@ -36,6 +49,9 @@ export function AttendanceClock() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [now, setNow] = useState(new Date())
+  const [history, setHistory] = useState<AttendanceRecord[]>([])
+  const [showHistory, setShowHistory] = useState(false)
+  const [historyLoading, setHistoryLoading] = useState(false)
 
   // Live clock
   useEffect(() => {
@@ -50,6 +66,16 @@ export function AttendanceClock() {
       .then((d) => setRecord(d.record))
       .finally(() => setLoading(false))
   }, [])
+
+  // Load history when expanded
+  useEffect(() => {
+    if (!showHistory || history.length > 0) return
+    setHistoryLoading(true)
+    fetch('/api/counselor/attendance/history')
+      .then((r) => r.json())
+      .then((d) => setHistory(d.records ?? []))
+      .finally(() => setHistoryLoading(false))
+  }, [showHistory, history.length])
 
   async function handleAction(action: 'clock_in' | 'clock_out') {
     setError(null)
@@ -167,6 +193,39 @@ export function AttendanceClock() {
           )}
           {success && (
             <p className="mt-3 rounded-xl bg-green/10 px-4 py-2.5 text-xs text-white/80">✓ {success}</p>
+          )}
+
+          {/* History toggle */}
+          <button
+            type="button"
+            onClick={() => setShowHistory((v) => !v)}
+            className="mt-4 w-full text-center text-[11px] text-white/30 hover:text-white/60 transition-colors"
+          >
+            {showHistory ? '▲ Hide history' : '▼ View attendance history'}
+          </button>
+
+          {showHistory && (
+            <div className="mt-3 border-t border-white/10 pt-3">
+              {historyLoading ? (
+                <p className="text-center text-xs text-white/30 py-2">Loading…</p>
+              ) : history.length === 0 ? (
+                <p className="text-center text-xs text-white/30 py-2">No records in the last 30 days</p>
+              ) : (
+                <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+                  {history.map((r) => (
+                    <div key={r.id} className="flex items-center gap-2 rounded-xl glass-card px-3 py-2">
+                      <span className="text-xs text-white/50 w-20 shrink-0">{r.date}</span>
+                      <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-semibold shrink-0', STATUS_STYLE[r.status] ?? 'text-white/40')}>
+                        {STATUS_LABEL[r.status] ?? r.status}
+                      </span>
+                      <span className="text-xs text-white/50 ml-auto tabular-nums">
+                        {formatTime(r.check_in)} → {formatTime(r.check_out)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </>
       )}

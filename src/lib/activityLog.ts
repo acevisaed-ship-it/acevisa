@@ -16,7 +16,7 @@ export async function logActivity({
   metadata?: Record<string, unknown>
 }) {
   const supabase = createAdminClient()
-  await supabase.from('activity_logs').insert({
+  const { error } = await supabase.from('activity_logs').insert({
     client_id: clientId,
     counselor_id: counselorId || null,
     action_type: actionType,
@@ -24,6 +24,9 @@ export async function logActivity({
     visibility,
     metadata,
   })
+  if (error) {
+    console.error('[activityLog] insert failed:', error.message, { actionType, clientId })
+  }
 }
 
 // Human-readable stage labels for the student-facing feed
