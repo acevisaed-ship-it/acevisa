@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server'
-import { requireAdminApi } from '@/lib/admin/requireAdminApi'
-import { getEmailConfig } from '@/lib/email/config'
+import { getAuthenticatedCounselor } from '@/lib/supabase/server'
+import { getCounselorEmailConfig } from '@/lib/email/config'
 
 export async function GET(request: Request) {
-  const { error } = await requireAdminApi()
-  if (error) return error
+  const counselor = await getAuthenticatedCounselor()
+  if (!counselor) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const config = getEmailConfig()
-  if (!config) return NextResponse.json({ error: 'Not configured' }, { status: 503 })
+  const config = await getCounselorEmailConfig()
+  if (!config) return NextResponse.json({ error: 'Email not configured' }, { status: 503 })
 
   const sp = new URL(request.url).searchParams
   const uid = Number(sp.get('uid'))

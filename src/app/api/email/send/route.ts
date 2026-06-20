@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
-import { requireAdminApi } from '@/lib/admin/requireAdminApi'
-import { getEmailConfig } from '@/lib/email/config'
+import { getAuthenticatedCounselor } from '@/lib/supabase/server'
+import { getCounselorEmailConfig } from '@/lib/email/config'
 
 export async function POST(request: Request) {
-  const { error } = await requireAdminApi()
-  if (error) return error
+  const counselor = await getAuthenticatedCounselor()
+  if (!counselor) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const config = getEmailConfig()
+  const config = await getCounselorEmailConfig()
   if (!config) return NextResponse.json({ error: 'Email not configured' }, { status: 503 })
 
   const contentType = request.headers.get('content-type') ?? ''
@@ -43,8 +43,8 @@ export async function POST(request: Request) {
   try {
     const nodemailer = await import('nodemailer')
     const transporter = nodemailer.default.createTransport({
-      host: config.host,
-      port: 465,
+      host: config.smtpHost,
+      port: config.smtpPort,
       secure: true,
       auth: { user: config.user, pass: config.password },
     })

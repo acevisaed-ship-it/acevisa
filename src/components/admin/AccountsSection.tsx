@@ -6,8 +6,9 @@ import { FinanceSummary } from '@/components/admin/FinanceSummary'
 import { InvoiceManager } from '@/components/admin/InvoiceManager'
 import { IncentivePolicyPanel } from '@/components/admin/IncentivePolicyPanel'
 import { HRMView } from '@/components/admin/HRMView'
+import { ProductsPanel } from '@/components/admin/ProductsPanel'
 
-type Tab = 'pl' | 'invoices' | 'payroll' | 'incentive'
+type Tab = 'pl' | 'invoices' | 'payroll' | 'incentive' | 'products'
 
 type ClientOption = { id: string; name: string; counselor_id: string | null }
 type DealOption = { id: string; client_id: string; deal_value: number; service_type: string }
@@ -18,6 +19,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'payroll', label: 'Payroll' },
   { id: 'pl', label: 'P&L Summary' },
   { id: 'incentive', label: 'Incentive Policy' },
+  { id: 'products', label: 'Products' },
 ]
 
 export function AccountsSection({
@@ -63,6 +65,7 @@ export function AccountsSection({
         {tab === 'invoices' && <InvoiceManager clients={clients} deals={deals} />}
         {tab === 'payroll' && <HRMView />}
         {tab === 'incentive' && <IncentivePolicyPanel counselors={counselors} />}
+        {tab === 'products' && <ProductsPanel counselors={counselors} />}
       </div>
     </div>
   )

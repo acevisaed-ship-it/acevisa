@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Check, ChevronDown, ChevronUp, Edit2, X } from 'lucide-react'
 import { DEAL_SERVICE_LABELS, DEAL_SERVICE_TYPES, formatPkr } from '@/lib/admin/dealTypes'
 import { cn } from '@/lib/utils'
+import { TeamCommissionSection } from './TeamCommissionSection'
 
 type CounselorOption = { id: string; name: string }
 
@@ -252,6 +253,8 @@ export function IncentivePolicyPanel({ counselors }: { counselors: CounselorOpti
           })}
         </div>
       )}
+
+      <TeamCommissionSection />
     </div>
   )
 }

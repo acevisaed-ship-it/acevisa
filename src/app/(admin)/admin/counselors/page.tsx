@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Mail, Phone, ArrowRight } from 'lucide-react'
 import { getCounselorsWithCounts } from '@/lib/admin/getCounselorsWithCounts'
+import { CounselorEmailConfig } from '@/components/admin/CounselorEmailConfig'
 
 export default async function AdminCounselorsPage() {
   const counselors = await getCounselorsWithCounts()
@@ -41,6 +42,8 @@ export default async function AdminCounselorsPage() {
                 <span className="mx-2 text-white/20">|</span>
                 {counselor.openTaskCount} open task{counselor.openTaskCount === 1 ? '' : 's'}
               </p>
+
+              <CounselorEmailConfig counselorId={counselor.id} />
 
               <Link
                 href={`/admin/counselors/${counselor.id}/dashboard`}

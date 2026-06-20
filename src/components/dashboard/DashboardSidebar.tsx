@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { CheckSquare, Home, Kanban, MessageSquareMore, Users, X } from 'lucide-react'
+import { CheckSquare, Home, Kanban, Mail, MessageSquareMore, Users, X } from 'lucide-react'
 import { clearAceSessionCookies } from '@/lib/auth/session-cookies'
 import { createClient } from '@/lib/supabase/client'
 import { ProfilePicture } from '@/components/dashboard/ProfilePicture'
@@ -22,6 +22,7 @@ function buildNavItems(basePath: string): NavItem[] {
     { href: `${basePath}/tasks`, label: 'Tasks', icon: CheckSquare },
     { href: `${basePath}/clients`, label: 'Clients', icon: Users },
     { href: `${basePath}/hub`, label: 'Team Hub', icon: MessageSquareMore },
+    { href: `${basePath}/email`, label: 'Email', icon: Mail },
   ]
 }
 

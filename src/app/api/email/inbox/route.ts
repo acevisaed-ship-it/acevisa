@@ -1,14 +1,16 @@
 import { NextResponse } from 'next/server'
-import { requireAdminApi } from '@/lib/admin/requireAdminApi'
-import { getEmailConfig } from '@/lib/email/config'
+import { getAuthenticatedCounselor } from '@/lib/supabase/server'
+import { getCounselorEmailConfig } from '@/lib/email/config'
 
 export async function GET(request: Request) {
-  const { error } = await requireAdminApi()
-  if (error) return error
+  const counselor = await getAuthenticatedCounselor()
+  if (!counselor) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
-  const config = getEmailConfig()
+  const config = await getCounselorEmailConfig()
   if (!config) {
-    return NextResponse.json({ connected: false, emails: [] })
+    return NextResponse.json({ connected: false, emails: [], reason: 'no_config' })
   }
 
   const sp = new URL(request.url).searchParams
@@ -77,6 +79,7 @@ export async function GET(request: Request) {
       emails: emails.reverse(),
       folder,
       page,
+      connectedAs: config.user,
     })
   } catch (err) {
     console.error('IMAP error:', err)
