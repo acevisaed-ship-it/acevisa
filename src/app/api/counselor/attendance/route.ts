@@ -113,16 +113,18 @@ export async function POST(request: Request) {
   const now = new Date().toISOString()
   const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' })
 
-  const upsertData =
+  const upsertQuery =
     action === 'clock_in'
-      ? { counselor_id: counselor.id, date: today, check_in: now, status: 'present' }
-      : { counselor_id: counselor.id, date: today, check_out: now, status: 'present' }
+      ? admin.from('attendance_records').upsert(
+          { counselor_id: counselor.id, date: today, check_in: now, status: 'present' },
+          { onConflict: 'counselor_id,date' }
+        )
+      : admin.from('attendance_records').upsert(
+          { counselor_id: counselor.id, date: today, check_out: now, status: 'present' },
+          { onConflict: 'counselor_id,date' }
+        )
 
-  const { data: record, error } = await admin
-    .from('attendance_records')
-    .upsert(upsertData, { onConflict: 'counselor_id,date' })
-    .select()
-    .single()
+  const { data: record, error } = await upsertQuery.select().single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 

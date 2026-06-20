@@ -39,7 +39,8 @@ export async function GET(request: Request) {
     }[] = []
 
     try {
-      const total = client.mailbox?.exists ?? 0
+      const mailbox = client.mailbox
+      const total = typeof mailbox === 'boolean' ? 0 : (mailbox?.exists ?? 0)
       const from = Math.max(1, total - (page * limit) + 1)
       const to = Math.max(1, total - ((page - 1) * limit))
 
@@ -51,6 +52,8 @@ export async function GET(request: Request) {
           bodyParts: ['TEXT'],
         })) {
           const env = msg.envelope
+          if (!env) continue
+
           emails.push({
             uid: msg.uid,
             subject: env.subject ?? '(no subject)',
@@ -58,7 +61,7 @@ export async function GET(request: Request) {
               ? `${env.from[0].name ?? ''} <${env.from[0].address ?? ''}>`.trim()
               : 'Unknown',
             date: env.date?.toISOString() ?? new Date().toISOString(),
-            seen: msg.flags.has('\\Seen'),
+            seen: msg.flags?.has('\\Seen') ?? false,
             preview: '',
           })
         }

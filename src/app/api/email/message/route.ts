@@ -42,6 +42,8 @@ export async function GET(request: Request) {
         bodyParts: ['', 'TEXT', 'HTML', '1', '1.1', '1.2'],
       })) {
         const env = msg.envelope
+        if (!env) continue
+
         subject = env.subject ?? '(no subject)'
         from = env.from?.[0]
           ? `${env.from[0].name ?? ''} <${env.from[0].address ?? ''}>`.trim()
@@ -51,12 +53,14 @@ export async function GET(request: Request) {
           `${t.name ?? ''} <${t.address ?? ''}>`.trim()
         ).join(', ') ?? ''
 
-        for (const [, buf] of msg.bodyParts) {
-          const str = buf.toString()
-          if (str.includes('<html') || str.includes('<body') || str.includes('<div')) {
-            html = str
-          } else if (!text) {
-            text = str
+        if (msg.bodyParts) {
+          for (const [, buf] of msg.bodyParts) {
+            const str = buf.toString()
+            if (str.includes('<html') || str.includes('<body') || str.includes('<div')) {
+              html = str
+            } else if (!text) {
+              text = str
+            }
           }
         }
       }
