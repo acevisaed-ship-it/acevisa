@@ -12,7 +12,6 @@ import {
   Megaphone,
   Settings,
   ShieldCheck,
-  UserCircle,
   Users,
   Users2,
   Wallet,
@@ -35,7 +34,6 @@ type NavItem = {
 const navItems: NavItem[] = [
   { href: '/admin/unassigned', label: 'Unassigned', icon: Users, badge: 'unassigned' },
   { href: '/admin/clients', label: 'All Clients', icon: Users },
-  { href: '/admin/counselors', label: 'Counselors', icon: UserCircle },
   { href: '/admin/team', label: 'Team', icon: Users2 },
   { href: '/admin/meetings', label: 'All Meetings', icon: Calendar },
   { href: '/admin/knowledge-base', label: 'Knowledge Base', icon: BookOpen },

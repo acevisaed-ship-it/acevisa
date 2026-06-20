@@ -14,9 +14,9 @@ type DealOption = { id: string; client_id: string; deal_value: number; service_t
 type CounselorOption = { id: string; name: string }
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'pl', label: 'P&L Summary' },
   { id: 'invoices', label: 'Invoices & Expenses' },
   { id: 'payroll', label: 'Payroll' },
+  { id: 'pl', label: 'P&L Summary' },
   { id: 'incentive', label: 'Incentive Policy' },
 ]
 
@@ -29,7 +29,7 @@ export function AccountsSection({
   deals: DealOption[]
   counselors: CounselorOption[]
 }) {
-  const [tab, setTab] = useState<Tab>('pl')
+  const [tab, setTab] = useState<Tab>('invoices')
 
   return (
     <div className="flex flex-col gap-6">
