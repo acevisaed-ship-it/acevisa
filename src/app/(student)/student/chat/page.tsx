@@ -12,20 +12,50 @@ export default async function StudentChatPage({ searchParams }: Props) {
 
   const supabase = createAdminClient()
 
-  const [clientRes, meetingsRes] = await Promise.all([
-    supabase
-      .from('clients')
-      .select('name, phone, email, city, pipeline_stage, counselor_id, target_country, interested_in, avatar_url')
-      .eq('id', clientId)
-      .single(),
-    supabase
-      .from('meetings')
-      .select('id, scheduled_time, status, counselor_id')
-      .eq('client_id', clientId)
-      .order('scheduled_time', { ascending: false })
-      .limit(10),
-  ])
+  const coreColumns =
+    'name, phone, email, city, counselor_id' as const
+  const optionalColumns =
+    'pipeline_stage, target_country, interested_in, avatar_url' as const
 
+  const meetingsPromise = supabase
+    .from('meetings')
+    .select('id, scheduled_time, status, counselor_id')
+    .eq('client_id', clientId)
+    .order('scheduled_time', { ascending: false })
+    .limit(10)
+
+  let clientRes = await supabase
+    .from('clients')
+    .select(`${coreColumns}, ${optionalColumns}`)
+    .eq('id', clientId)
+    .single()
+
+  if (clientRes.error) {
+    console.error(
+      '[student/chat] full client fetch failed, retrying with core columns:',
+      clientRes.error.message,
+      clientRes.error.code,
+      '| clientId:',
+      clientId
+    )
+    clientRes = await supabase
+      .from('clients')
+      .select(coreColumns)
+      .eq('id', clientId)
+      .single()
+  }
+
+  if (clientRes.error) {
+    console.error(
+      '[student/chat] client fetch error:',
+      clientRes.error.message,
+      clientRes.error.code,
+      '| clientId:',
+      clientId
+    )
+  }
+
+  const [meetingsRes] = await Promise.all([meetingsPromise])
   const client = clientRes.data
   if (!client) redirect('/')
 
