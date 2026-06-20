@@ -16,7 +16,7 @@ export async function logActivity({
   metadata?: Record<string, unknown>
 }) {
   const supabase = createAdminClient()
-  await supabase.from('student_activity_log').insert({
+  await supabase.from('activity_logs').insert({
     client_id: clientId,
     counselor_id: counselorId || null,
     action_type: actionType,

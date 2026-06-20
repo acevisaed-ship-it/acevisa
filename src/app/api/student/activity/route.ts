@@ -11,7 +11,7 @@ export async function GET(request: Request) {
 
   const supabase = createAdminClient()
   const { data, error } = await supabase
-    .from('student_activity_log')
+    .from('activity_logs')
     .select('id, action_type, description, created_at, metadata')
     .eq('client_id', clientId)
     .eq('visibility', 'shared')

@@ -72,7 +72,7 @@ export default async function ClientRecordPage({ params }: Props) {
       .eq('client_id', clientId)
       .order('scheduled_time', { ascending: false }),
     supabase
-      .from('student_activity_log')
+      .from('activity_logs')
       .select('*')
       .eq('client_id', clientId)
       .order('created_at', { ascending: false })

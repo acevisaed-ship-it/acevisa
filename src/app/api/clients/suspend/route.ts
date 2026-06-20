@@ -1,3 +1,4 @@
+import { logActivity } from '@/lib/activityLog'
 import { createAdminClient, getAuthenticatedCounselor } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -39,10 +40,10 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Client not found or not authorized' }, { status: 404 })
   }
 
-  // Log to student_activity_log
-  await supabase.from('student_activity_log').insert({
-    client_id: clientId,
-    action_type: action === 'suspend' ? 'account_suspended' : 'account_reactivated',
+  await logActivity({
+    clientId,
+    counselorId: counselor.id,
+    actionType: action === 'suspend' ? 'account_suspended' : 'account_reactivated',
     description: action === 'suspend'
       ? `Account suspended by ${counselor.name}`
       : `Account reactivated by ${counselor.name}`,

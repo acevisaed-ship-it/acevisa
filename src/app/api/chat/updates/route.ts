@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   const supabase = createAdminClient()
 
   const { data } = await supabase
-    .from('student_activity_log')
+    .from('activity_logs')
     .select('id, action_type, description, created_at, counselor_id, metadata')
     .eq('client_id', clientId)
     .eq('visibility', 'shared')

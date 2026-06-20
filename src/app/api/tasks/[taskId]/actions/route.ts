@@ -1,3 +1,4 @@
+import { logActivity } from '@/lib/activityLog'
 import { createAdminClient, getAuthenticatedCounselor } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -72,10 +73,10 @@ export async function POST(
 
   const noteVisibility = visibility === 'shared' ? 'shared' : 'internal'
 
-  await supabase.from('student_activity_log').insert({
-    client_id: clientId,
-    counselor_id: counselorId || counselor.id,
-    action_type: `task_${actionType}`,
+  await logActivity({
+    clientId,
+    counselorId: counselorId || counselor.id,
+    actionType: `task_${actionType}`,
     description: actionDescriptions[actionType] || `Task action: ${actionType}`,
     visibility: actionType === 'note' ? noteVisibility : 'internal',
     metadata: { task_id: taskId, note: noteText, new_status: newStatus },
