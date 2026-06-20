@@ -95,6 +95,11 @@ const VENDOR_TYPES = [
   { value: 'institute', label: 'Institute' },
   { value: 'test_center', label: 'Test Center' },
   { value: 'government', label: 'Government' },
+  // Language test specific
+  { value: 'voucher', label: 'Voucher / Booking Charges' },
+  { value: 'service_charge', label: 'Booking Service Charges' },
+  { value: 'facility', label: 'Facility Charges' },
+  { value: 'connectivity', label: 'Connectivity Charges' },
   { value: 'other', label: 'Other' },
 ]
 
@@ -103,6 +108,9 @@ const ROLES = [
   { value: 'referrer', label: 'Referrer' },
   { value: 'support', label: 'Support' },
   { value: 'manager', label: 'Manager' },
+  // Language test specific
+  { value: 'instructor', label: 'Instructor' },
+  { value: 'referee', label: 'Referee' },
 ]
 
 const inputClass = 'w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/25 outline-none focus:border-white/25'
@@ -655,6 +663,15 @@ function VendorsEditor({ vendors, setVendors, basePrice, totalVendorFixed, onSav
 
 // ─── Commissions Editor ───────────────────────────────────────────────────────
 
+/** Stage 4 and any stage named "Got Visa" disburse a flat PKR amount, not a %. */
+function isGotVisaStage(stage: PaymentStage): boolean {
+  return (
+    stage.stage_order === 4 ||
+    stage.stage_name.toLowerCase().replace(/\s+/g, '').includes('gotvisa') ||
+    stage.stage_name.toLowerCase().includes('visa received')
+  )
+}
+
 function CommissionsEditor({ rules, setRules, counselors, stages, totalCommPct, onSave, saving }: {
   rules: CommissionRule[]
   setRules: (r: CommissionRule[]) => void
@@ -664,87 +681,228 @@ function CommissionsEditor({ rules, setRules, counselors, stages, totalCommPct, 
   onSave: () => void
   saving: boolean
 }) {
-  function add() {
-    setRules([...rules, { counselor_id: null, role: 'closer', commission_type: 'percentage', commission_value: 0, applies_to_stage: null, notes: '' }])
+  function addToStage(stageOrder: number | null) {
+    const stage = stageOrder !== null ? stages.find(s => s.stage_order === stageOrder) : null
+    const defaultType: 'percentage' | 'fixed' = stage && isGotVisaStage(stage) ? 'fixed' : 'percentage'
+    setRules([...rules, {
+      counselor_id: null,
+      role: 'closer',
+      commission_type: defaultType,
+      commission_value: 0,
+      applies_to_stage: stageOrder,
+      notes: '',
+    }])
   }
 
-  function update(i: number, key: keyof CommissionRule, val: string | number | null) {
+  function updateRule(i: number, key: keyof CommissionRule, val: string | number | null) {
     const updated = [...rules]
     ;(updated[i] as Record<string, unknown>)[key] = val
     setRules(updated)
   }
 
-  function remove(i: number) { setRules(rules.filter((_, idx) => idx !== i)) }
+  function removeRule(i: number) {
+    setRules(rules.filter((_, idx) => idx !== i))
+  }
+
+  // When no stages configured, fall back to a simple flat list
+  if (stages.length === 0) {
+    return (
+      <div>
+        <p className="mb-4 text-xs text-white/30">
+          No payment stages defined. Add stages first to assign milestone-based commissions, or add general rules below.
+        </p>
+        <div className="flex flex-col gap-2 mb-4">
+          {rules.map((r, i) => (
+            <div key={i} className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/[0.02] p-3">
+              <select value={r.counselor_id ?? ''} onChange={(e) => updateRule(i, 'counselor_id', e.target.value || null)} className={cn(selectClass, 'flex-1')}>
+                <option value="">Whoever closes</option>
+                {counselors.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+              <select value={r.role} onChange={(e) => updateRule(i, 'role', e.target.value)} className={cn(selectClass, 'w-28')}>
+                {ROLES.map((ro) => <option key={ro.value} value={ro.value}>{ro.label}</option>)}
+              </select>
+              <select value={r.commission_type} onChange={(e) => updateRule(i, 'commission_type', e.target.value)} className={cn(selectClass, 'w-28')}>
+                <option value="percentage">% of deal</option>
+                <option value="fixed">Fixed PKR</option>
+              </select>
+              <input type="number" value={r.commission_value} onChange={(e) => updateRule(i, 'commission_value', Number(e.target.value))} placeholder={r.commission_type === 'percentage' ? '%' : 'PKR'} min="0" className={cn(inputClass, 'w-24')} />
+              <button type="button" onClick={() => removeRule(i)} className="text-white/25 hover:text-red-400 shrink-0"><X className="h-4 w-4" /></button>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={() => addToStage(null)} className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white">
+            <Plus className="h-3.5 w-3.5" /> Add Rule
+          </button>
+          <button type="button" onClick={onSave} disabled={saving} className="ml-auto flex items-center gap-1.5 rounded-full bg-grad-blue crisp-on-dark px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-50">
+            <Check className="h-3.5 w-3.5" /> {saving ? 'Saving…' : 'Save Commission Rules'}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Milestone-based view — one card per stage
+  const unlinked = rules.map((r, i) => ({ r, i })).filter(({ r }) => r.applies_to_stage === null)
 
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-wide text-white/40">Commission Split</p>
+      {/* Header */}
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase tracking-wide text-white/40">Commission by Milestone</p>
         {totalCommPct > 0 && (
           <span className={cn('text-xs', totalCommPct > 100 ? 'text-red-400' : totalCommPct === 100 ? 'text-green-400' : 'text-yellow-400')}>
-            {totalCommPct}% allocated
+            {totalCommPct}% in % rules
           </span>
         )}
       </div>
 
-      <div className="flex flex-col gap-2 mb-4">
-        {rules.length === 0 && (
-          <p className="text-xs text-white/30">No commission rules yet. Add who gets what % when this product closes.</p>
-        )}
-        {rules.map((r, i) => (
-          <div key={i} className="flex items-start gap-2 rounded-xl border border-white/8 bg-white/[0.02] p-3">
-            <div className="flex-1 grid grid-cols-2 gap-2 sm:grid-cols-5">
-              {/* Counselor */}
-              <select
-                value={r.counselor_id ?? ''}
-                onChange={(e) => update(i, 'counselor_id', e.target.value || null)}
-                className={selectClass}
-              >
-                <option value="">Anyone (whoever closes)</option>
-                {counselors.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
+      {/* Per-stage cards */}
+      <div className="flex flex-col gap-3 mb-4">
+        {stages.map((stage, si) => {
+          const gotVisa = isGotVisaStage(stage)
+          const stageRows = rules.map((r, i) => ({ r, i })).filter(({ r }) => r.applies_to_stage === stage.stage_order)
 
-              {/* Role */}
-              <select value={r.role} onChange={(e) => update(i, 'role', e.target.value)} className={selectClass}>
-                {ROLES.map((ro) => <option key={ro.value} value={ro.value}>{ro.label}</option>)}
-              </select>
+          return (
+            <div
+              key={si}
+              className={cn(
+                'rounded-xl border overflow-hidden',
+                gotVisa ? 'border-green-500/20' : 'border-white/8'
+              )}
+            >
+              {/* Stage header */}
+              <div className={cn(
+                'flex items-center gap-3 px-4 py-2.5',
+                gotVisa ? 'bg-green-500/10' : 'bg-white/[0.04]'
+              )}>
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-[10px] font-bold text-white/60">
+                  {stage.stage_order}
+                </span>
+                <p className="flex-1 text-sm font-semibold text-white/80">{stage.stage_name || `Stage ${stage.stage_order}`}</p>
+                {gotVisa && (
+                  <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-[10px] font-semibold text-green-400">
+                    Fixed PKR
+                  </span>
+                )}
+                <span className="text-xs text-white/30">{stageRows.length} recipient{stageRows.length !== 1 ? 's' : ''}</span>
+              </div>
 
-              {/* Type */}
-              <select value={r.commission_type} onChange={(e) => update(i, 'commission_type', e.target.value)} className={selectClass}>
-                <option value="percentage">% of deal</option>
-                <option value="fixed">Fixed (PKR)</option>
-              </select>
+              {/* Recipients */}
+              <div className="px-4 py-3 bg-white/[0.01] flex flex-col gap-2">
+                {stageRows.length === 0 && (
+                  <p className="text-xs text-white/25">No recipients yet — add who earns when this milestone is reached.</p>
+                )}
 
-              {/* Value */}
-              <input
-                type="number"
-                value={r.commission_value}
-                onChange={(e) => update(i, 'commission_value', Number(e.target.value))}
-                placeholder={r.commission_type === 'percentage' ? '%' : 'PKR'}
-                min="0"
-                className={inputClass}
-              />
+                {stageRows.map(({ r, i: globalIdx }) => (
+                  <div key={globalIdx} className="flex items-center gap-2">
+                    {/* Counselor */}
+                    <select
+                      value={r.counselor_id ?? ''}
+                      onChange={(e) => updateRule(globalIdx, 'counselor_id', e.target.value || null)}
+                      className={cn(selectClass, 'flex-1 min-w-0')}
+                    >
+                      <option value="">Whoever closes</option>
+                      {counselors.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
 
-              {/* Applies to stage */}
-              <select
-                value={r.applies_to_stage ?? ''}
-                onChange={(e) => update(i, 'applies_to_stage', e.target.value ? Number(e.target.value) : null)}
-                className={selectClass}
-              >
-                <option value="">All stages</option>
-                {stages.map((s, si) => <option key={si} value={s.stage_order}>Stage {s.stage_order}: {s.stage_name}</option>)}
-              </select>
+                    {/* Role */}
+                    <select
+                      value={r.role}
+                      onChange={(e) => updateRule(globalIdx, 'role', e.target.value)}
+                      className={cn(selectClass, 'w-28 shrink-0')}
+                    >
+                      {ROLES.map((ro) => <option key={ro.value} value={ro.value}>{ro.label}</option>)}
+                    </select>
+
+                    {/* Type + Value */}
+                    {gotVisa ? (
+                      /* Got Visa — always fixed PKR */
+                      <div className="flex items-center gap-1 shrink-0">
+                        <input
+                          type="number"
+                          value={r.commission_value}
+                          onChange={(e) => updateRule(globalIdx, 'commission_value', Number(e.target.value))}
+                          placeholder="Amount"
+                          min="0"
+                          className={cn(inputClass, 'w-28')}
+                        />
+                        <span className="text-xs text-white/40 shrink-0">PKR</span>
+                      </div>
+                    ) : (
+                      /* Other stages — % or fixed selectable */
+                      <div className="flex items-center gap-1 shrink-0">
+                        <select
+                          value={r.commission_type}
+                          onChange={(e) => updateRule(globalIdx, 'commission_type', e.target.value)}
+                          className={cn(selectClass, 'w-20')}
+                        >
+                          <option value="percentage">%</option>
+                          <option value="fixed">PKR</option>
+                        </select>
+                        <input
+                          type="number"
+                          value={r.commission_value}
+                          onChange={(e) => updateRule(globalIdx, 'commission_value', Number(e.target.value))}
+                          placeholder={r.commission_type === 'percentage' ? '%' : 'PKR'}
+                          min="0"
+                          className={cn(inputClass, 'w-24')}
+                        />
+                      </div>
+                    )}
+
+                    <button type="button" onClick={() => removeRule(globalIdx)} className="shrink-0 text-white/25 hover:text-red-400">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() => addToStage(stage.stage_order)}
+                  className="mt-1 flex w-fit items-center gap-1.5 text-xs text-white/40 hover:text-white/70"
+                >
+                  <Plus className="h-3 w-3" />
+                  Add recipient for this milestone
+                </button>
+              </div>
             </div>
-            <button type="button" onClick={() => remove(i)} className="mt-2 text-white/25 hover:text-red-400">
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
+      {/* Unlinked / general rules */}
+      {unlinked.length > 0 && (
+        <div className="mb-4 rounded-xl border border-white/8 overflow-hidden">
+          <div className="flex items-center gap-3 px-4 py-2.5 bg-white/[0.04]">
+            <p className="flex-1 text-xs font-semibold text-white/40 uppercase tracking-wide">General (all stages)</p>
+          </div>
+          <div className="px-4 py-3 bg-white/[0.01] flex flex-col gap-2">
+            {unlinked.map(({ r, i: globalIdx }) => (
+              <div key={globalIdx} className="flex items-center gap-2">
+                <select value={r.counselor_id ?? ''} onChange={(e) => updateRule(globalIdx, 'counselor_id', e.target.value || null)} className={cn(selectClass, 'flex-1')}>
+                  <option value="">Whoever closes</option>
+                  {counselors.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+                <select value={r.role} onChange={(e) => updateRule(globalIdx, 'role', e.target.value)} className={cn(selectClass, 'w-28 shrink-0')}>
+                  {ROLES.map((ro) => <option key={ro.value} value={ro.value}>{ro.label}</option>)}
+                </select>
+                <select value={r.commission_type} onChange={(e) => updateRule(globalIdx, 'commission_type', e.target.value)} className={cn(selectClass, 'w-20 shrink-0')}>
+                  <option value="percentage">%</option>
+                  <option value="fixed">PKR</option>
+                </select>
+                <input type="number" value={r.commission_value} onChange={(e) => updateRule(globalIdx, 'commission_value', Number(e.target.value))} placeholder={r.commission_type === 'percentage' ? '%' : 'PKR'} min="0" className={cn(inputClass, 'w-24 shrink-0')} />
+                <button type="button" onClick={() => removeRule(globalIdx)} className="shrink-0 text-white/25 hover:text-red-400"><X className="h-4 w-4" /></button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Footer */}
       <div className="flex items-center gap-3">
-        <button type="button" onClick={add} className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white">
-          <Plus className="h-3.5 w-3.5" /> Add Rule
+        <button type="button" onClick={() => addToStage(null)} className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/60">
+          <Plus className="h-3.5 w-3.5" /> Add general rule
         </button>
         <button type="button" onClick={onSave} disabled={saving} className="ml-auto flex items-center gap-1.5 rounded-full bg-grad-blue crisp-on-dark px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-50">
           <Check className="h-3.5 w-3.5" /> {saving ? 'Saving…' : 'Save Commission Rules'}
