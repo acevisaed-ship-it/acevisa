@@ -21,6 +21,7 @@ import type { Client, Conversation, Document } from '@/types'
 import { ClientControls } from './ClientControls'
 import { PendingProfileUpdates } from './PendingProfileUpdates'
 import { CopyPortalLink } from '@/components/CopyPortalLink'
+import { RegenerateProfileButton } from '@/components/brief/RegenerateProfileButton'
 
 type Props = {
   params: Promise<{ clientId: string }>
@@ -121,7 +122,10 @@ export default async function ClientRecordPage({ params }: Props) {
           </div>
         </div>
 
-        <ClientProfileHeader client={typedClient} score={score} />
+        <div className="flex items-center justify-between">
+          <ClientProfileHeader client={typedClient} score={score} />
+          <RegenerateProfileButton clientId={clientId} />
+        </div>
 
         <PendingProfileUpdates
           updates={(pendingUpdates ?? []).map((u) => ({

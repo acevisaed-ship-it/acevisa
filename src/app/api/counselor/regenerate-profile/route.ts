@@ -30,8 +30,9 @@ export async function POST(request: Request) {
     .eq('client_id', clientId)
     .maybeSingle()
 
+  // Sender values in DB: 'student' | 'ai' | 'counselor'
   const conversationMessages = history.map((msg) => ({
-    role: msg.sender === 'client' ? ('user' as const) : ('assistant' as const),
+    role: msg.sender === 'student' ? ('user' as const) : ('assistant' as const),
     content: msg.message_text,
   }))
 
