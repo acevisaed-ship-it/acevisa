@@ -730,8 +730,11 @@ Use this context to make your opening message highly relevant to their specific 
     runBehavioralAnalysis(clientId).catch(() => {})
   }
 
+  // Generate full profile at 8+ messages (was 15) so counselors have data sooner,
+  // or when conversation is complete, or on any stage advance to 2+.
+  const stageReached2Plus = internal && internal.stage >= 2
   const needsFullProfile =
-    totalMessages >= 15 && !existingProfile?.profile_json
+    (totalMessages >= 8 || stageReached2Plus) && !existingProfile?.profile_json
 
   if (conversationComplete || needsFullProfile) {
     runPostConversationProfile(conversationMessages, clientId, internal).catch(

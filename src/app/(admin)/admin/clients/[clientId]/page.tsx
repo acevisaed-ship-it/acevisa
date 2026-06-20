@@ -18,6 +18,7 @@ import type { Client, Conversation, Document } from '@/types'
 import { ClientControls } from '@/app/(counselor)/dashboard/clients/[clientId]/ClientControls'
 import { PendingProfileUpdates } from '@/app/(counselor)/dashboard/clients/[clientId]/PendingProfileUpdates'
 import { CopyPortalLink } from '@/components/CopyPortalLink'
+import { RegenerateProfileButton } from '@/components/brief/RegenerateProfileButton'
 
 type Props = {
   params: Promise<{ clientId: string }>
@@ -100,7 +101,10 @@ export default async function AdminClientProfilePage({ params }: Props) {
           <CopyPortalLink clientId={clientId} />
         </div>
 
-        <ClientProfileHeader client={typedClient} score={score} />
+        <div className="flex items-center justify-between">
+          <ClientProfileHeader client={typedClient} score={score} />
+          <RegenerateProfileButton clientId={clientId} />
+        </div>
 
         <PendingProfileUpdates
           updates={(pendingUpdates ?? []).map((u) => ({

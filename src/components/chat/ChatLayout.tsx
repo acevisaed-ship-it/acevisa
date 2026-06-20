@@ -195,16 +195,35 @@ export function ChatLayout({
       })
       const data = await res.json()
 
-      if (data.content) {
-        setMessages((prev) => [...prev, {
-          id: crypto.randomUUID(),
-          sender: 'ai',
-          message_text: data.content,
-          timestamp: new Date().toISOString(),
-        }])
-      }
       // Update stage if AI moved it
       if (data.newStage) setStage(data.newStage)
+
+      if (data.content) {
+        // Immediately fetch real history so optimistic messages are replaced
+        // by DB records with real IDs — prevents duplicate messages on next poll
+        try {
+          const histRes = await fetch(`/api/chat/history?clientId=${clientId}`)
+          const histData = await histRes.json()
+          if (histData.messages?.length) {
+            setMessages(histData.messages)
+          } else {
+            // Fallback if history fetch fails
+            setMessages((prev) => [...prev, {
+              id: crypto.randomUUID(),
+              sender: 'ai',
+              message_text: data.content,
+              timestamp: new Date().toISOString(),
+            }])
+          }
+        } catch {
+          setMessages((prev) => [...prev, {
+            id: crypto.randomUUID(),
+            sender: 'ai',
+            message_text: data.content,
+            timestamp: new Date().toISOString(),
+          }])
+        }
+      }
     } catch (err) {
       console.error('Chat error:', err)
     } finally {

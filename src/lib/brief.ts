@@ -42,10 +42,9 @@ export function resolveAiProfile(row: AiProfileRow | null | undefined): {
 
   return {
     profile: {
-      goal_country:
-        row.detected_region && row.detected_region !== 'unknown'
-          ? row.detected_region
-          : null,
+      // detected_region = Pakistani city/region where client lives — NOT their target country.
+      // Leave goal_country null in partial profile; only the full profile_json has the real value.
+      goal_country: null,
       study_field: null,
       start_date: null,
       education_level: null,

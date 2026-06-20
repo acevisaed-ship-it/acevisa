@@ -86,7 +86,7 @@ export function ProfileSummarySection({
               </p>
               {profilePartial && (
                 <p className="text-sm italic text-white/50">
-                  Partial profile — full summary generates after conversation completes.
+                  Partial profile — full summary generates after 8+ messages. Use &quot;Regenerate AI Profile&quot; to force it now.
                 </p>
               )}
             </>

@@ -16,6 +16,7 @@ import { ServicePathwaySection } from './ServicePathwaySection'
 import { StrategyChat } from './StrategyChat'
 import { TalkingPointsSection } from './TalkingPointsSection'
 import { BriefCard } from './BriefCard'
+import { RegenerateProfileButton } from './RegenerateProfileButton'
 
 type Props = {
   meetingTime: string
@@ -75,7 +76,10 @@ export function BriefShell({
             />
           </div>
 
-          <ClientProfileHeader client={client} score={score} />
+          <div className="mb-2 flex items-center justify-between">
+            <ClientProfileHeader client={client} score={score} />
+            <RegenerateProfileButton clientId={client.id} />
+          </div>
 
           <ProfileSummarySection
             client={client}

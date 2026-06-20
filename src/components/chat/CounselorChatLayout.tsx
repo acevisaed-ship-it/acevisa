@@ -30,6 +30,9 @@ export function CounselorChatLayout({
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // ── Focus input on mount ───────────────────────────────────────────────
+  useEffect(() => { setTimeout(() => inputRef.current?.focus(), 100) }, [])
+
   // ── Set counselor_active on mount, clear on unmount ────────────────────
   useEffect(() => {
     const setActive = (active: boolean) =>
@@ -167,6 +170,8 @@ export function CounselorChatLayout({
           onKeyDown={handleKeyDown}
           placeholder={`Message ${clientName}…`}
           disabled={isSending}
+          autoFocus
+          autoComplete="off"
           className="min-h-[44px] min-w-0 flex-1 rounded-full px-4 py-2.5 text-sm outline-none glass-input placeholder:text-white/30 disabled:opacity-50"
         />
         <button

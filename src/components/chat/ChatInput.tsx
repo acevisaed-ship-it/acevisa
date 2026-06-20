@@ -120,7 +120,16 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
 
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current) }, [])
 
-  const closeAll = () => { setSheetOpen(false); setEmojiOpen(false) }
+  // Focus input on mount (autoFocus alone is suppressed by some mobile browsers)
+  useEffect(() => {
+    setTimeout(() => (ref as React.RefObject<HTMLInputElement>)?.current?.focus(), 150)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const closeAll = () => {
+    setSheetOpen(false)
+    setEmojiOpen(false)
+    setTimeout(() => (ref as React.RefObject<HTMLInputElement>)?.current?.focus(), 50)
+  }
 
   // ── Voice recording ──────────────────────────────────────────────────────
   const startRecording = useCallback(async () => {
