@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Save, Bell, Shield, Database, Palette } from 'lucide-react'
+import { Save, Bell, Shield, Database, Palette, MapPin } from 'lucide-react'
 
-type Section = 'notifications' | 'security' | 'data' | 'appearance'
+type Section = 'notifications' | 'security' | 'data' | 'appearance' | 'office'
 
 function SectionTab({ label, icon: Icon, active, onClick }: {
   label: string; icon: React.ElementType; active: boolean; onClick: () => void
@@ -47,7 +47,7 @@ function Toggle({ label, description, checked, onChange }: {
 }
 
 export function AdminSettings() {
-  const [section, setSection] = useState<Section>('notifications')
+  const [section, setSection] = useState<Section>('office')
   const [saved, setSaved] = useState(false)
   const [loading, setLoading] = useState(true)
 
@@ -71,6 +71,15 @@ export function AdminSettings() {
     dateFormat: 'DD/MM/YYYY',
   })
 
+  const [office, setOffice] = useState({
+    ip: '',
+    lat: '',
+    lng: '',
+    radius: '100',
+  })
+  const [locating, setLocating] = useState(false)
+  const [locateError, setLocateError] = useState<string | null>(null)
+
   useEffect(() => {
     fetch('/api/admin/settings')
       .then((r) => r.json())
@@ -78,15 +87,32 @@ export function AdminSettings() {
         if (d.settings?.notifications) setNotifs(d.settings.notifications)
         if (d.settings?.security) setSecurity(d.settings.security)
         if (d.settings?.appearance) setAppearance(d.settings.appearance)
+        if (d.settings?.office_location) setOffice(d.settings.office_location)
       })
       .finally(() => setLoading(false))
   }, [])
+
+  function useMyLocation() {
+    setLocateError(null)
+    setLocating(true)
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setOffice((o) => ({ ...o, lat: String(pos.coords.latitude), lng: String(pos.coords.longitude) }))
+        setLocating(false)
+      },
+      () => {
+        setLocateError('Could not get location. Allow browser location access and try again.')
+        setLocating(false)
+      }
+    )
+  }
 
   async function handleSave() {
     await Promise.all([
       fetch('/api/admin/settings', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: 'notifications', value: notifs }) }),
       fetch('/api/admin/settings', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: 'security', value: security }) }),
       fetch('/api/admin/settings', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: 'appearance', value: appearance }) }),
+      fetch('/api/admin/settings', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: 'office_location', value: office }) }),
     ])
     setSaved(true)
     setTimeout(() => setSaved(false), 2500)
@@ -112,6 +138,7 @@ export function AdminSettings() {
 
       <div className="mt-6 flex flex-wrap gap-2">
         {([
+          { id: 'office' as Section, label: 'Office Location', icon: MapPin },
           { id: 'notifications' as Section, label: 'Notifications', icon: Bell },
           { id: 'security' as Section, label: 'Security', icon: Shield },
           { id: 'data' as Section, label: 'Data', icon: Database },
@@ -128,6 +155,72 @@ export function AdminSettings() {
       </div>
 
       <div className="mt-4 rounded-2xl glass-card crisp-on-dark p-6">
+        {section === 'office' && (
+          <div>
+            <h2 className="text-base font-semibold text-white">Office Location</h2>
+            <p className="mt-1 text-sm text-white/50">
+              Counselors can only clock in when physically at the office — verified by IP address and GPS location.
+            </p>
+            <div className="mt-6 space-y-4">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-white/60">Office Public IP Address</label>
+                <input
+                  type="text"
+                  value={office.ip}
+                  onChange={(e) => setOffice({ ...office, ip: e.target.value })}
+                  placeholder="e.g. 203.101.54.12"
+                  className="min-h-[44px] w-full max-w-sm rounded-xl px-3 py-2 text-sm outline-none glass-input"
+                />
+                <p className="mt-1 text-xs text-white/40">Find this at whatismyip.com from the office network</p>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 max-w-sm">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-white/60">Latitude</label>
+                  <input
+                    type="text"
+                    value={office.lat}
+                    onChange={(e) => setOffice({ ...office, lat: e.target.value })}
+                    placeholder="e.g. 31.5204"
+                    className="min-h-[44px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-white/60">Longitude</label>
+                  <input
+                    type="text"
+                    value={office.lng}
+                    onChange={(e) => setOffice({ ...office, lng: e.target.value })}
+                    placeholder="e.g. 74.3587"
+                    className="min-h-[44px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input"
+                  />
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={useMyLocation}
+                disabled={locating}
+                className="flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm text-white/70 hover:text-white disabled:opacity-40"
+              >
+                <MapPin className="h-4 w-4" />
+                {locating ? 'Detecting…' : 'Use my current location'}
+              </button>
+              {locateError && <p className="text-xs text-red-400">{locateError}</p>}
+              <div>
+                <label className="mb-1 block text-xs font-medium text-white/60">Allowed Radius (metres)</label>
+                <input
+                  type="number"
+                  min="50"
+                  max="1000"
+                  value={office.radius}
+                  onChange={(e) => setOffice({ ...office, radius: e.target.value })}
+                  className="min-h-[44px] w-24 rounded-xl px-3 py-2 text-sm outline-none glass-input"
+                />
+                <p className="mt-1 text-xs text-white/40">Counselor must be within this distance of the office to clock in</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {section === 'notifications' && (
           <div>
             <h2 className="text-base font-semibold text-white">Notification Preferences</h2>

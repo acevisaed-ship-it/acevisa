@@ -78,7 +78,8 @@ export function RegistrationSection() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
-    const ref = params.get('ref') || 'direct'
+    // Support ?utm_campaign= (Meta ads) and legacy ?ref=
+    const ref = params.get('utm_campaign') || params.get('ref') || 'direct'
     setAdSource(ref)
     setForm((prev) => ({ ...prev, ad_source: ref }))
   }, [])
@@ -107,6 +108,10 @@ export function RegistrationSection() {
       }
 
       setClientId(data.clientId)
+      // Fire Meta Pixel Lead event
+      if (typeof window !== 'undefined' && (window as any).fbq) {
+        ;(window as any).fbq('track', 'Lead', { content_name: form.interested_in, content_category: adSource })
+      }
       setStep('password')
     } catch {
       setError('Something went wrong. Please try again.')

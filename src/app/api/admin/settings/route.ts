@@ -30,7 +30,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'key and value required' }, { status: 400 })
   }
 
-  const allowed = ['notifications', 'security', 'appearance']
+  const allowed = ['notifications', 'security', 'appearance', 'office_location']
   if (!allowed.includes(key)) {
     return NextResponse.json({ error: 'Invalid settings key' }, { status: 400 })
   }
