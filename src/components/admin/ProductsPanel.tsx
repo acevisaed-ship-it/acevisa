@@ -100,6 +100,8 @@ const VENDOR_TYPES = [
   { value: 'service_charge', label: 'Booking Service Charges' },
   { value: 'facility', label: 'Facility Charges' },
   { value: 'connectivity', label: 'Connectivity Charges' },
+  // Appointment assistance
+  { value: 'appointment', label: 'Appointment Cost' },
   { value: 'other', label: 'Other' },
 ]
 
