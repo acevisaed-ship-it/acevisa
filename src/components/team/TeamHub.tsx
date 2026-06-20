@@ -43,18 +43,29 @@ function timeAgo(iso: string) {
   return new Date(iso).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' })
 }
 
-const AVATAR_COLORS = [
-  'bg-blue-500/20 text-blue-300',
-  'bg-green/20 text-green',
-  'bg-orange/20 text-orange',
-  'bg-purple-500/20 text-purple-300',
-  'bg-pink-500/20 text-pink-300',
+const BUBBLE_COLORS = [
+  { bubble: 'bg-blue-500/30 text-blue-100', avatar: 'bg-blue-500/30 text-blue-200' },
+  { bubble: 'bg-teal-500/30 text-teal-100', avatar: 'bg-teal-500/30 text-teal-200' },
+  { bubble: 'bg-orange-500/30 text-orange-100', avatar: 'bg-orange-500/30 text-orange-200' },
+  { bubble: 'bg-lime-500/30 text-lime-100', avatar: 'bg-lime-500/30 text-lime-200' },
+  { bubble: 'bg-yellow-500/30 text-yellow-100', avatar: 'bg-yellow-500/30 text-yellow-200' },
+  { bubble: 'bg-pink-500/30 text-pink-100', avatar: 'bg-pink-500/30 text-pink-200' },
+  { bubble: 'bg-indigo-700/40 text-indigo-100', avatar: 'bg-indigo-700/40 text-indigo-200' },
+  { bubble: 'bg-purple-500/30 text-purple-100', avatar: 'bg-purple-500/30 text-purple-200' },
 ]
+
+const MY_BUBBLE = 'bg-gradient-to-br from-blue-500/50 to-teal-500/40 text-white'
+
+function senderColor(id: string) {
+  let hash = 0
+  for (const c of id) hash = (hash * 31 + c.charCodeAt(0)) % BUBBLE_COLORS.length
+  return BUBBLE_COLORS[hash]
+}
 
 function avatarColor(name: string) {
   let hash = 0
-  for (const c of name) hash = (hash * 31 + c.charCodeAt(0)) % AVATAR_COLORS.length
-  return AVATAR_COLORS[hash]
+  for (const c of name) hash = (hash * 31 + c.charCodeAt(0)) % BUBBLE_COLORS.length
+  return BUBBLE_COLORS[hash].avatar
 }
 
 function Avatar({ name, initials, size = 32 }: { name: string; initials: string; size?: number }) {
@@ -386,24 +397,25 @@ function GroupChat({ currentUserId }: { currentUserId: string }) {
         ) : (
           messages.map((msg) => {
             const isMine = msg.sender_id === currentUserId
+            const color = senderColor(msg.sender_id)
             return (
-              <div key={msg.id} className={cn('flex items-end gap-2', isMine && 'flex-row-reverse')}>
+              <div key={msg.id} className={cn('flex items-end gap-2.5', isMine && 'flex-row-reverse')}>
                 {!isMine && (
-                  <Avatar name={msg.sender_name} initials={msg.sender_initials} size={28} />
+                  <Avatar name={msg.sender_name} initials={msg.sender_initials} size={32} />
                 )}
-                <div className={cn('max-w-[72%]', isMine && 'items-end flex flex-col')}>
+                <div className={cn('max-w-[68%] flex flex-col', isMine && 'items-end')}>
                   {!isMine && (
-                    <p className="mb-1 ml-1 text-[11px] text-white/40">{msg.sender_name}</p>
+                    <p className="mb-1 ml-1 text-[11px] font-medium text-white/50">{msg.sender_name}</p>
                   )}
                   <div className={cn(
-                    'rounded-2xl px-3 py-2 text-sm',
+                    'px-3.5 py-2.5 text-sm leading-relaxed',
                     isMine
-                      ? 'bg-blue-600/40 text-white rounded-br-sm'
-                      : 'glass-card border border-white/10 text-white/80 rounded-bl-sm'
+                      ? `${MY_BUBBLE} rounded-2xl rounded-br-sm`
+                      : `${color.bubble} rounded-2xl rounded-bl-sm`
                   )}>
                     {msg.content}
                   </div>
-                  <p className="mt-0.5 text-[10px] text-white/20 px-1">{timeAgo(msg.created_at)}</p>
+                  <p className="mt-1 text-[10px] text-white/20 px-1">{timeAgo(msg.created_at)}</p>
                 </div>
               </div>
             )
@@ -433,62 +445,83 @@ function GroupChat({ currentUserId }: { currentUserId: string }) {
 }
 
 // ── Main TeamHub ──────────────────────────────────────────────────────────────
-type View = 'chat' | 'bulletin'
+type MobileView = 'chat' | 'bulletin'
 
 export function TeamHub({ currentUserId }: { currentUserId: string }) {
-  const [view, setView] = useState<View>('chat')
+  const [mobileView, setMobileView] = useState<MobileView>('chat')
   const [mobileShowContent, setMobileShowContent] = useState(false)
 
-  const navItems: { id: View; label: string; icon: typeof Users }[] = [
-    { id: 'chat', label: 'Team chat', icon: Users },
-    { id: 'bulletin', label: 'Bulletin board', icon: MessageSquare },
-  ]
-
   return (
-    <div className="flex h-[calc(100vh-100px)] gap-0 rounded-2xl overflow-hidden border border-white/10 glass-card crisp-on-dark">
-      {/* Sidebar */}
-      <div className={cn(
-        'flex w-full flex-col border-r border-white/10 lg:w-52 lg:shrink-0',
-        mobileShowContent && 'hidden lg:flex'
-      )}>
-        <div className="px-4 py-4 border-b border-white/10">
-          <p className="text-xs font-semibold text-white/40 uppercase tracking-wider">Team Hub</p>
-        </div>
-        <nav className="flex flex-col gap-1 p-2">
-          {navItems.map(({ id, label, icon: Icon }) => (
+    <div className="flex flex-col gap-3 h-[calc(100vh-112px)]">
+
+      {/* ── Main card: sidebar + chat ── */}
+      <div className="flex flex-1 min-h-0 rounded-2xl overflow-hidden border border-white/10 glass-card crisp-on-dark">
+
+        {/* Sidebar */}
+        <div className={cn(
+          'flex w-full flex-col border-r border-white/10 lg:w-52 lg:shrink-0',
+          mobileShowContent && 'hidden lg:flex'
+        )}>
+          <div className="px-4 py-4 border-b border-white/10">
+            <p className="text-sm font-semibold text-white">Team Hub</p>
+          </div>
+          <nav className="flex flex-col p-2 pt-3 gap-0.5">
+            <p className="px-3 mb-1 text-[10px] font-semibold text-white/30 uppercase tracking-widest">Chat</p>
             <button
-              key={id}
-              onClick={() => { setView(id); setMobileShowContent(true) }}
+              onClick={() => { setMobileView('chat'); setMobileShowContent(true) }}
               className={cn(
-                'flex items-center gap-3 min-h-[44px] rounded-xl px-3 text-sm font-medium transition-colors text-left',
-                view === id ? 'tab-btn-active' : 'tab-btn-inactive'
+                'flex items-center gap-2.5 min-h-[40px] rounded-xl px-3 text-sm font-medium transition-colors text-left',
+                mobileView === 'chat' || !mobileShowContent ? 'tab-btn-active' : 'tab-btn-inactive'
               )}
             >
-              <Icon className="h-4 w-4 shrink-0" />
-              {label}
+              <Users className="h-4 w-4 shrink-0" />
+              Team chat
             </button>
-          ))}
-        </nav>
-      </div>
 
-      {/* Content area */}
-      <div className={cn(
-        'flex-1 min-w-0',
-        !mobileShowContent && 'hidden lg:flex lg:flex-col'
-      )}>
-        {/* Mobile back */}
-        <button
-          onClick={() => setMobileShowContent(false)}
-          className="flex items-center gap-1 px-4 py-2 text-xs text-white/40 hover:text-white lg:hidden"
-        >
-          <ChevronLeft className="h-4 w-4" /> Back
-        </button>
+            <p className="px-3 mt-3 mb-1 text-[10px] font-semibold text-white/30 uppercase tracking-widest">Bulletin Board</p>
+            <button
+              onClick={() => { setMobileView('bulletin'); setMobileShowContent(true) }}
+              className={cn(
+                'flex items-center gap-2.5 min-h-[40px] rounded-xl px-3 text-sm font-medium transition-colors text-left',
+                mobileView === 'bulletin' && mobileShowContent ? 'tab-btn-active' : 'tab-btn-inactive'
+              )}
+            >
+              <MessageSquare className="h-4 w-4 shrink-0" />
+              Bulletin board
+            </button>
+          </nav>
+        </div>
 
-        <div className="flex-1 flex flex-col h-full">
-          {view === 'chat' && <GroupChat currentUserId={currentUserId} />}
-          {view === 'bulletin' && <BulletinBoard />}
+        {/* Desktop: always show chat | Mobile: show selected view */}
+        <div className={cn(
+          'flex-1 min-w-0 flex flex-col',
+          !mobileShowContent && 'hidden lg:flex'
+        )}>
+          <button
+            onClick={() => setMobileShowContent(false)}
+            className="flex items-center gap-1 px-4 py-2 text-xs text-white/40 hover:text-white lg:hidden"
+          >
+            <ChevronLeft className="h-4 w-4" /> Back
+          </button>
+          <div className="flex-1 min-h-0 flex flex-col">
+            {/* Desktop always shows chat here */}
+            <div className="hidden lg:flex flex-col flex-1 min-h-0">
+              <GroupChat currentUserId={currentUserId} />
+            </div>
+            {/* Mobile switches */}
+            <div className="lg:hidden flex-1 min-h-0 flex flex-col">
+              {mobileView === 'chat' && <GroupChat currentUserId={currentUserId} />}
+              {mobileView === 'bulletin' && <BulletinBoard />}
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* ── Bulletin board — shown below chat on desktop ── */}
+      <div className="hidden lg:flex flex-col rounded-2xl overflow-hidden border border-white/10 glass-card crisp-on-dark" style={{ height: '280px' }}>
+        <BulletinBoard />
+      </div>
+
     </div>
   )
 }

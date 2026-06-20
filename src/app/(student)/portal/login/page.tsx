@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, type FormEvent } from 'react'
-import { useRouter } from 'next/navigation'
 import { Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { PWAInstallButton } from '@/components/PWAInstallButton'
@@ -9,7 +8,6 @@ import { PWAInstallButton } from '@/components/PWAInstallButton'
 type View = 'login' | 'forgot'
 
 export default function StudentLoginPage() {
-  const router = useRouter()
   const [view, setView] = useState<View>('login')
 
   // Login state
@@ -49,8 +47,7 @@ export default function StudentLoginPage() {
       refresh_token: data.refreshToken,
     })
 
-    router.push(`/portal?clientId=${data.clientId}`)
-    router.refresh()
+    window.location.href = `/student/chat?clientId=${data.clientId}`
   }
 
   async function handleForgotPassword(e: FormEvent) {
