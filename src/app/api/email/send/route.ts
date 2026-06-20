@@ -9,13 +9,31 @@ export async function POST(request: Request) {
   const config = getEmailConfig()
   if (!config) return NextResponse.json({ error: 'Email not configured' }, { status: 503 })
 
-  const body = await request.json()
-  const { to, subject, html, text, replyTo } = body as {
-    to: string
-    subject: string
-    html?: string
-    text?: string
-    replyTo?: string
+  const contentType = request.headers.get('content-type') ?? ''
+  let to = '', subject = '', html = '', text = '', replyTo = ''
+  let attachmentFiles: { filename: string; content: Buffer }[] = []
+
+  if (contentType.includes('multipart/form-data')) {
+    const formData = await request.formData()
+    to = (formData.get('to') as string) ?? ''
+    subject = (formData.get('subject') as string) ?? ''
+    html = (formData.get('html') as string) ?? ''
+    text = (formData.get('text') as string) ?? ''
+    replyTo = (formData.get('replyTo') as string) ?? ''
+    const files = formData.getAll('attachments') as File[]
+    attachmentFiles = await Promise.all(
+      files.map(async (f) => ({
+        filename: f.name,
+        content: Buffer.from(await f.arrayBuffer()),
+      }))
+    )
+  } else {
+    const body = await request.json()
+    to = body.to ?? ''
+    subject = body.subject ?? ''
+    html = body.html ?? ''
+    text = body.text ?? ''
+    replyTo = body.replyTo ?? ''
   }
 
   if (!to || !subject || (!html && !text)) {
@@ -35,10 +53,11 @@ export async function POST(request: Request) {
       from: config.from,
       to,
       subject,
-      html: html ?? undefined,
-      text: text ?? undefined,
-      inReplyTo: replyTo ?? undefined,
-      references: replyTo ?? undefined,
+      html: html || undefined,
+      text: text || undefined,
+      inReplyTo: replyTo || undefined,
+      references: replyTo || undefined,
+      attachments: attachmentFiles.length ? attachmentFiles : undefined,
     })
 
     return NextResponse.json({ success: true })

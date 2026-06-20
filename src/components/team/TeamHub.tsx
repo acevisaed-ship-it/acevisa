@@ -317,16 +317,36 @@ function GroupChat({ currentUserId }: { currentUserId: string }) {
 
   useEffect(() => { loadMessages() }, [loadMessages])
 
-  // Real-time subscription
+  // Real-time subscription + polling fallback
   useEffect(() => {
     const supabase = createClient()
     const channel = supabase
       .channel('team_messages')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'team_messages' }, (payload) => {
-        setMessages((prev) => [...prev, payload.new as Message])
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === (payload.new as Message).id)) return prev
+          return [...prev, payload.new as Message]
+        })
       })
       .subscribe()
-    return () => { supabase.removeChannel(channel) }
+
+    // Polling fallback every 5s in case realtime drops
+    const poll = setInterval(async () => {
+      const res = await fetch('/api/team/messages')
+      const data = await res.json()
+      if (data.messages?.length) {
+        setMessages((prev) => {
+          const existingIds = new Set(prev.map((m) => m.id))
+          const newOnes = (data.messages as Message[]).filter((m) => !existingIds.has(m.id))
+          return newOnes.length ? [...prev, ...newOnes] : prev
+        })
+      }
+    }, 5000)
+
+    return () => {
+      supabase.removeChannel(channel)
+      clearInterval(poll)
+    }
   }, [])
 
   useEffect(() => {

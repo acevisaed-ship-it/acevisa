@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
-import { Inbox, Send, RefreshCw, Pencil, X, ChevronLeft, Loader2, Mail, MailOpen } from 'lucide-react'
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { Inbox, Send, RefreshCw, Pencil, X, ChevronLeft, Loader2, Mail, MailOpen, Paperclip, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type EmailSummary = {
@@ -66,19 +66,34 @@ function ComposeModal({
   const [to, setTo] = useState(replyTo?.to ?? '')
   const [subject, setSubject] = useState(replyTo ? `Re: ${replyTo.subject}` : '')
   const [body, setBody] = useState('')
+  const [attachments, setAttachments] = useState<File[]>([])
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sent, setSent] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  function addFiles(files: FileList | null) {
+    if (!files) return
+    setAttachments((prev) => [...prev, ...Array.from(files)])
+  }
+
+  function removeAttachment(idx: number) {
+    setAttachments((prev) => prev.filter((_, i) => i !== idx))
+  }
 
   async function handleSend() {
     if (!to || !subject || !body) { setError('All fields required'); return }
     setSending(true)
     setError(null)
-    const res = await fetch('/api/email/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ to, subject, text: body }),
-    })
+
+    const formData = new FormData()
+    formData.append('to', to)
+    formData.append('subject', subject)
+    formData.append('text', body)
+    if (replyTo) formData.append('replyTo', String(replyTo.uid))
+    attachments.forEach((f) => formData.append('attachments', f))
+
+    const res = await fetch('/api/email/send', { method: 'POST', body: formData })
     const data = await res.json()
     setSending(false)
     if (!res.ok) { setError(data.error ?? 'Send failed'); return }
@@ -116,11 +131,38 @@ function ComposeModal({
               <textarea
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                rows={8}
+                rows={6}
                 className="w-full rounded-xl px-3 py-2 text-sm outline-none glass-input resize-none"
                 placeholder="Write your message…"
               />
             </div>
+
+            {/* Attachments */}
+            <div>
+              <input ref={fileRef} type="file" multiple className="hidden" onChange={(e) => addFiles(e.target.files)} />
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 transition-colors"
+              >
+                <Paperclip className="h-3.5 w-3.5" /> Add attachment
+              </button>
+              {attachments.length > 0 && (
+                <ul className="mt-2 space-y-1">
+                  {attachments.map((f, i) => (
+                    <li key={i} className="flex items-center gap-2 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-white/60">
+                      <Paperclip className="h-3 w-3 shrink-0" />
+                      <span className="flex-1 truncate">{f.name}</span>
+                      <span className="shrink-0 text-white/30">{(f.size / 1024).toFixed(0)} KB</span>
+                      <button onClick={() => removeAttachment(i)} className="text-white/30 hover:text-red-400">
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
             {error && <p className="text-xs text-red-400">{error}</p>}
             <button
               onClick={handleSend}
@@ -128,7 +170,7 @@ function ComposeModal({
               className="flex items-center justify-center gap-2 min-h-[44px] rounded-full bg-grad-blue crisp-on-dark text-sm font-bold text-white disabled:opacity-50"
             >
               {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              {sending ? 'Sending…' : 'Send'}
+              {sending ? 'Sending…' : `Send${attachments.length ? ` (${attachments.length} attachment${attachments.length > 1 ? 's' : ''})` : ''}`}
             </button>
           </div>
         )}
