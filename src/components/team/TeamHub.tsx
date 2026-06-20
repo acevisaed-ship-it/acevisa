@@ -492,7 +492,7 @@ export function TeamHub({ currentUserId }: { currentUserId: string }) {
           </nav>
         </div>
 
-        {/* Desktop: always show chat | Mobile: show selected view */}
+        {/* Content area */}
         <div className={cn(
           'flex-1 min-w-0 flex flex-col',
           !mobileShowContent && 'hidden lg:flex'
@@ -504,15 +504,19 @@ export function TeamHub({ currentUserId }: { currentUserId: string }) {
             <ChevronLeft className="h-4 w-4" /> Back
           </button>
           <div className="flex-1 min-h-0 flex flex-col">
-            {/* Desktop always shows chat here */}
-            <div className="hidden lg:flex flex-col flex-1 min-h-0">
+            {/* GroupChat — always mounted; hidden on mobile only when bulletin is selected */}
+            <div className={cn(
+              'flex-1 min-h-0 flex flex-col',
+              mobileView === 'bulletin' && 'hidden lg:flex'
+            )}>
               <GroupChat currentUserId={currentUserId} />
             </div>
-            {/* Mobile switches */}
-            <div className="lg:hidden flex-1 min-h-0 flex flex-col">
-              {mobileView === 'chat' && <GroupChat currentUserId={currentUserId} />}
-              {mobileView === 'bulletin' && <BulletinBoard />}
-            </div>
+            {/* BulletinBoard — mobile only when bulletin tab selected */}
+            {mobileView === 'bulletin' && (
+              <div className="lg:hidden flex-1 min-h-0 flex flex-col">
+                <BulletinBoard />
+              </div>
+            )}
           </div>
         </div>
       </div>
