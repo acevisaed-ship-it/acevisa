@@ -7,6 +7,7 @@ import {
   BookOpen,
   Building2,
   Calendar,
+  CheckSquare,
   ClipboardList,
   Handshake,
   Mail,
@@ -34,6 +35,7 @@ type NavItem = {
 }
 
 const navItems: NavItem[] = [
+  { href: '/admin/my-tasks', label: 'My Tasks', icon: CheckSquare },
   { href: '/admin/unassigned', label: 'Unassigned', icon: Users, badge: 'unassigned' },
   { href: '/admin/clients', label: 'All Clients', icon: Users },
   { href: '/admin/team', label: 'Team', icon: Users2 },

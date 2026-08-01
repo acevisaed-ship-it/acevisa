@@ -8,6 +8,7 @@ export type NotificationType =
   | 'profile_update'
   | 'complaint'
   | 'chat_message'
+  | 'task_assigned'
 
 export async function createNotification({
   counselorId,

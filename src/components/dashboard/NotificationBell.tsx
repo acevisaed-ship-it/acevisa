@@ -11,6 +11,7 @@ import {
   Megaphone,
   UserCog,
   ShieldAlert,
+  ClipboardList,
 } from 'lucide-react'
 
 interface Notification {
@@ -30,6 +31,7 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   escalation: <AlertCircle size={16} className="text-[#E48328]" />,
   meeting_request: <Calendar size={16} className="text-[#2083B9]" />,
   task_due: <AlertCircle size={16} className="text-[#E48328]" />,
+  task_assigned: <ClipboardList size={16} className="text-[#2083B9]" />,
   complaint: <Megaphone size={16} className="text-red-400" />,
   profile_update: <UserCog size={16} className="text-[#B7C733]" />,
   chat_message: <MessageSquare size={16} className="text-[#2083B9]" />,
@@ -61,6 +63,8 @@ function getNotificationHref(
         return client_id ? `/admin/clients/${client_id}` : null
       case 'complaint':
         return '/admin/complaints'
+      case 'task_assigned':
+        return '/admin/my-tasks'
       default:
         return null
     }
@@ -76,6 +80,8 @@ function getNotificationHref(
       return client_id ? `/dashboard/clients/${client_id}` : null
     case 'complaint':
       return client_id ? `/dashboard/clients/${client_id}` : null
+    case 'task_assigned':
+      return '/dashboard/tasks'
     default:
       return null
   }

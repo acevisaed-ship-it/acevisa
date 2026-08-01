@@ -163,6 +163,7 @@ export type Task = {
   task_text: string
   due_date: string | null
   status: TaskStatus
+  assigned_by?: string | null
   created_at: string
 }
 
