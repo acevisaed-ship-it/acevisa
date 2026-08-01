@@ -13,6 +13,7 @@ import { UpdatesFeed } from './UpdatesFeed'
 import { MeetingRequestModal } from './MeetingRequestModal'
 import { DocumentsCard } from './DocumentsCard'
 import { ApplicationCard } from './ApplicationCard'
+import { ApplicationsListCard } from './ApplicationsListCard'
 import { ComplaintCard } from './ComplaintCard'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -348,6 +349,7 @@ export function ChatLayout({
         </div>
         <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3" style={{ overscrollBehavior: 'contain' }}>
           <ApplicationCard currentStage={stage} />
+          <ApplicationsListCard clientId={clientId} />
           <UpdatesFeed clientId={clientId} />
         </div>
       </aside>
@@ -416,6 +418,7 @@ export function ChatLayout({
           <div className="h-full overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
             <div className="flex flex-col gap-3 p-3">
               <ApplicationCard currentStage={stage} />
+              <ApplicationsListCard clientId={clientId} />
               <UpdatesFeed clientId={clientId} />
             </div>
           </div>

@@ -7,6 +7,7 @@ import { BehavioralNotesSection } from '@/components/brief/BehavioralNotesSectio
 import { BriefCard } from '@/components/brief/BriefCard'
 import { ConversationDigestSection } from '@/components/brief/ConversationDigestSection'
 import { DocumentsChecklistSection } from '@/components/brief/DocumentsChecklistSection'
+import { ApplicationsSection } from '@/components/brief/ApplicationsSection'
 import { MeetingsHistorySection } from '@/components/brief/MeetingsHistorySection'
 import { OnlineStatusToggle } from '@/components/brief/OnlineStatusToggle'
 import {
@@ -55,6 +56,7 @@ export default async function ClientRecordPage({ params }: Props) {
     { data: activityLog },
     { data: pendingUpdates },
     { data: counselorStatus },
+    { data: applications },
   ] = await Promise.all([
     supabase
       .from('ai_profiles')
@@ -91,6 +93,7 @@ export default async function ClientRecordPage({ params }: Props) {
       .select('is_online, auto_reply_enabled')
       .eq('counselor_id', counselor.id)
       .maybeSingle(),
+    supabase.from('applications').select('*').eq('client_id', clientId).order('created_at', { ascending: false }),
   ])
 
   const { profile, isPartial: profilePartial } = resolveAiProfile(aiProfile)
@@ -161,6 +164,7 @@ export default async function ClientRecordPage({ params }: Props) {
         <BehavioralNotesSection clientId={clientId} />
         <TalkingPointsSection profile={profile} />
         <DocumentsChecklistSection documents={(documents ?? []) as Document[]} clientId={clientId} />
+        <ApplicationsSection clientId={clientId} applications={applications ?? []} />
         <MeetingsHistorySection clientId={clientId} meetings={meetings ?? []} />
         <ActivityHistorySection entries={activityLog ?? []} />
 

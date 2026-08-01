@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { ArrowLeft, ArrowRight, User } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Mic, Square, User } from 'lucide-react'
+import { useVoiceRecorder } from '@/hooks/useVoiceRecorder'
 import Link from 'next/link'
 import type { ChatMessage } from '@/types'
 import { ChatBubble } from './ChatBubble'
@@ -27,6 +28,25 @@ export function CounselorChatLayout({
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
   const [inputValue, setInputValue] = useState('')
   const [isSending, setIsSending] = useState(false)
+  const [voiceUploading, setVoiceUploading] = useState(false)
+  const { recording, start: startRecording, stop: stopRecording, cancel: cancelRecording } =
+    useVoiceRecorder({
+      onRecorded: async (blob, mimeType, ext) => {
+        setVoiceUploading(true)
+        try {
+          const fd = new FormData()
+          fd.append('clientId', clientId)
+          fd.append('mimeType', mimeType)
+          fd.append('audio', blob, `voice-${Date.now()}.${ext}`)
+          const res = await fetch('/api/counselor/chat/voice', { method: 'POST', body: fd })
+          const data = await res.json()
+          if (!res.ok) return
+          setMessages((prev) => [...prev, data.message])
+        } finally {
+          setVoiceUploading(false)
+        }
+      },
+    })
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -169,15 +189,26 @@ export function CounselorChatLayout({
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={`Message ${clientName}…`}
-          disabled={isSending}
+          disabled={isSending || recording || voiceUploading}
           autoFocus
           autoComplete="off"
           className="min-h-[44px] min-w-0 flex-1 rounded-full px-4 py-2.5 text-sm outline-none glass-input placeholder:text-white/30 disabled:opacity-50"
         />
         <button
           type="button"
+          onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); startRecording() }}
+          onPointerUp={(e) => { e.currentTarget.releasePointerCapture(e.pointerId); stopRecording() }}
+          onPointerCancel={() => cancelRecording()}
+          disabled={isSending || voiceUploading}
+          aria-label={recording ? 'Stop recording' : 'Hold to record voice note'}
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-all ${recording ? 'scale-110 bg-red-500/20 text-red-400' : 'text-white/50 hover:text-white'}`}
+        >
+          {recording ? <Square className="h-5 w-5 fill-current" /> : <Mic className="h-5 w-5" />}
+        </button>
+        <button
+          type="button"
           onClick={handleSend}
-          disabled={isSending || !inputValue.trim()}
+          disabled={isSending || recording || voiceUploading || !inputValue.trim()}
           aria-label="Send"
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white transition-opacity disabled:opacity-40"
           style={{ background: ORANGE_GRADIENT }}

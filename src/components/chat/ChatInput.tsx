@@ -1,8 +1,9 @@
 'use client'
 
 import {
-  type FormEvent, forwardRef, useRef, useState, useCallback, useEffect,
+  type FormEvent, forwardRef, useRef, useState, useEffect,
 } from 'react'
+import { useVoiceRecorder } from '@/hooks/useVoiceRecorder'
 import {
   Paperclip, Mic, Square, X,
   FileText, FileImage, FileArchive, File, Camera, Music, Smile,
@@ -110,15 +111,29 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
   const [uploadError, setUploadError]   = useState<string | null>(null)
   const fileRefs = useRef<(HTMLInputElement | null)[]>([])
 
-  // ── Voice state ─────────────────────────────────────────────────────────
-  const [recording, setRecording]         = useState(false)
-  const [recordSeconds, setRecordSeconds] = useState(0)
   const [voiceUploading, setVoiceUploading] = useState(false)
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const audioChunksRef   = useRef<Blob[]>([])
-  const timerRef         = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current) }, [])
+  const { recording, seconds: recordSeconds, start: startRecording, stop: stopRecording, cancel: cancelRecording } =
+    useVoiceRecorder({
+      onRecorded: async (blob, mimeType, ext) => {
+        setVoiceUploading(true)
+        try {
+          const fd = new FormData()
+          fd.append('clientId', clientId)
+          fd.append('mimeType', mimeType)
+          fd.append('audio', blob, `voice-${Date.now()}.${ext}`)
+          const res = await fetch('/api/chat/voice', { method: 'POST', body: fd })
+          const data = await res.json()
+          if (!res.ok) throw new Error(data.error || 'Upload failed')
+          onAttachmentSent?.(data.studentMessage, data.aiMessage)
+        } catch (err) {
+          setUploadError(err instanceof Error ? err.message : 'Voice upload failed')
+        } finally {
+          setVoiceUploading(false)
+        }
+      },
+      onError: (message) => setUploadError(message),
+    })
 
   // Focus input on mount (autoFocus alone is suppressed by some mobile browsers)
   useEffect(() => {
@@ -130,58 +145,6 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
     setEmojiOpen(false)
     setTimeout(() => (ref as React.RefObject<HTMLInputElement>)?.current?.focus(), 50)
   }
-
-  // ── Voice recording ──────────────────────────────────────────────────────
-  const startRecording = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      audioChunksRef.current = []
-
-      // Pick the best supported mimeType for this browser/device
-      // Safari (iOS/macOS) only supports audio/mp4 — webm is Chrome/Firefox only
-      const mimeType = [
-        'audio/webm;codecs=opus',
-        'audio/webm',
-        'audio/ogg;codecs=opus',
-        'audio/mp4',
-      ].find((t) => MediaRecorder.isTypeSupported(t)) ?? ''
-
-      const mr = new MediaRecorder(stream, mimeType ? { mimeType } : undefined)
-      mediaRecorderRef.current = mr
-
-      mr.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data) }
-      mr.onstop = async () => {
-        stream.getTracks().forEach((t) => t.stop())
-        if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
-
-        const actualMime = mr.mimeType || mimeType || 'audio/webm'
-        const ext = actualMime.includes('mp4') ? 'mp4' : actualMime.includes('ogg') ? 'ogg' : 'webm'
-        const blob = new Blob(audioChunksRef.current, { type: actualMime })
-        if (blob.size < 1000) { setRecording(false); setRecordSeconds(0); return }
-
-        setVoiceUploading(true); setRecording(false); setRecordSeconds(0)
-        try {
-          const fd = new FormData()
-          fd.append('clientId', clientId)
-          fd.append('mimeType', actualMime)
-          fd.append('audio', blob, `voice-${Date.now()}.${ext}`)
-          const res  = await fetch('/api/chat/voice', { method: 'POST', body: fd })
-          const data = await res.json()
-          if (!res.ok) throw new Error(data.error || 'Upload failed')
-          onAttachmentSent?.(data.studentMessage, data.aiMessage)
-        } catch (err) {
-          setUploadError(err instanceof Error ? err.message : 'Voice upload failed')
-        } finally { setVoiceUploading(false) }
-      }
-
-      mr.start(250); setRecording(true); setRecordSeconds(0)
-      timerRef.current = setInterval(() => setRecordSeconds((s) => s + 1), 1000)
-    } catch {
-      alert('Microphone access denied. Please allow microphone permission and try again.')
-    }
-  }, [clientId, onAttachmentSent])
-
-  const stopRecording = useCallback(() => { mediaRecorderRef.current?.stop() }, [])
 
   // ── File selection ───────────────────────────────────────────────────────
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -431,10 +394,15 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
           {/* Mic */}
           <button
             type="button"
-            onMouseDown={startRecording}
-            onMouseUp={stopRecording}
-            onTouchStart={(e) => { e.preventDefault(); startRecording() }}
-            onTouchEnd={(e) => { e.preventDefault(); stopRecording() }}
+            onPointerDown={(e) => {
+              e.currentTarget.setPointerCapture(e.pointerId)
+              startRecording()
+            }}
+            onPointerUp={(e) => {
+              e.currentTarget.releasePointerCapture(e.pointerId)
+              stopRecording()
+            }}
+            onPointerCancel={() => cancelRecording()}
             disabled={busy || !!pendingFile}
             aria-label={recording ? 'Stop recording' : 'Hold to record voice note'}
             className={`shrink-0 transition-all disabled:opacity-20 ${recording ? 'scale-110 text-red-400' : 'text-white/30 hover:text-white/70'}`}
