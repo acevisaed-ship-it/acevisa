@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
+import { clientsByCounselorCount } from '@/lib/supabase/relations'
 
 export type CounselorWithCounts = {
   id: string
@@ -15,7 +16,7 @@ export async function getCounselorsWithCounts(branchId?: string | null): Promise
 
   let counselorsQuery = supabase
     .from('counselors')
-    .select('id, name, email, phone, role, clients(count)')
+    .select(`id, name, email, phone, role, ${clientsByCounselorCount}`)
     .eq('role', 'counselor')
     .eq('status', 'active')
     .order('name')

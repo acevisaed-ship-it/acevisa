@@ -1,5 +1,6 @@
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
 import { createAdminClient } from '@/lib/supabase/server'
+import { clientCounselorName } from '@/lib/supabase/relations'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
@@ -10,7 +11,7 @@ export async function GET() {
 
   const { data: clients, error: queryError } = await supabase
     .from('clients')
-    .select('*, counselors(name)')
+    .select(`*, ${clientCounselorName}`)
     .order('created_at', { ascending: false })
 
   if (queryError) {

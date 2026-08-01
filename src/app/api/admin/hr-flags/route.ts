@@ -57,7 +57,7 @@ export async function GET() {
   if (clientIds.length > 0) {
     let clientsQuery = supabase
       .from('clients')
-      .select('id, branch_id, counselors(name)')
+      .select('id, branch_id, counselors!clients_counselor_id_fkey(name)')
       .in('id', clientIds)
 
     if (branchScoped) {

@@ -20,8 +20,8 @@ export async function GET() {
     .from('escalations')
     .select(
       branchScoped
-        ? 'id, question_text, conversation_context, status, created_at, client_id, clients!inner(name, branch_id, counselors(name))'
-        : 'id, question_text, conversation_context, status, created_at, client_id, clients(name, counselors(name))'
+        ? 'id, question_text, conversation_context, status, created_at, client_id, clients!inner(name, branch_id, counselors!clients_counselor_id_fkey(name))'
+        : 'id, question_text, conversation_context, status, created_at, client_id, clients(name, counselors!clients_counselor_id_fkey(name))'
     )
     .order('created_at', { ascending: false })
 

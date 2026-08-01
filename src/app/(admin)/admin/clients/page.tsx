@@ -1,4 +1,5 @@
 import { createAdminClient, requireAdmin, isBranchScoped } from '@/lib/supabase/server'
+import { clientCounselorName } from '@/lib/supabase/relations'
 import { AllClientsTable } from '@/components/admin/AllClientsTable'
 
 export default async function AllClientsPage() {
@@ -8,7 +9,7 @@ export default async function AllClientsPage() {
 
   let clientsQuery = supabase
     .from('clients')
-    .select('*, counselors(name)')
+    .select(`*, ${clientCounselorName}`)
     .order('created_at', { ascending: false })
   let counselorsQuery = supabase
     .from('counselors')

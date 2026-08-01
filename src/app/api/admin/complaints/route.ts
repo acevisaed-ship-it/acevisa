@@ -20,8 +20,8 @@ export async function GET() {
     .from('complaints')
     .select(
       branchScoped
-        ? 'id, client_id, client_name, client_phone, subject, body, status, created_at, acknowledged_at, acknowledged_by, clients!inner(name, branch_id, counselors(name))'
-        : 'id, client_id, client_name, client_phone, subject, body, status, created_at, acknowledged_at, acknowledged_by, clients(name, counselors(name))'
+        ? 'id, client_id, client_name, client_phone, subject, body, status, created_at, acknowledged_at, acknowledged_by, clients!inner(name, branch_id, counselors!clients_counselor_id_fkey(name))'
+        : 'id, client_id, client_name, client_phone, subject, body, status, created_at, acknowledged_at, acknowledged_by, clients(name, counselors!clients_counselor_id_fkey(name))'
     )
     .order('created_at', { ascending: false })
 
