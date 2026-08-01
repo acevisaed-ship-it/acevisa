@@ -11,6 +11,7 @@ type CounselorOption = { id: string; name: string }
 export type AdminClientRow = {
   id: string
   name: string
+  client_code?: string | null
   email?: string | null
   phone?: string | null
   counselor_id: string | null
@@ -60,6 +61,7 @@ export function AllClientsTable({ clients, counselors }: Props) {
       result = result.filter(
         (c) =>
           c.name.toLowerCase().includes(q) ||
+          (c.client_code && c.client_code.toLowerCase().includes(q)) ||
           (c.email && c.email.toLowerCase().includes(q)) ||
           (c.phone && c.phone.toLowerCase().includes(q))
       )
@@ -133,7 +135,7 @@ export function AllClientsTable({ clients, counselors }: Props) {
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name, email or phone…"
+          placeholder="Search by name, ID, email or phone…"
           className="min-h-[44px] w-full max-w-sm rounded-full px-4 py-2.5 text-sm outline-none glass-input"
         />
       </div>
@@ -203,7 +205,12 @@ export function AllClientsTable({ clients, counselors }: Props) {
                         </span>
                       )}
                     </div>
-                    {client.email && <p className="text-xs text-white/40">{client.email}</p>}
+                    <div className="flex flex-wrap items-center gap-x-2 text-xs text-white/40">
+                      {client.client_code && (
+                        <span className="font-mono font-semibold text-orange/80">{client.client_code}</span>
+                      )}
+                      {client.email && <span>{client.email}</span>}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-white/60">
                     {client.counselor_name ? (

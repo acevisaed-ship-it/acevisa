@@ -1,22 +1,38 @@
+import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
   const url = new URL(request.url)
   const limit = Math.min(Number(url.searchParams.get('limit') ?? 100), 200)
   const offset = Number(url.searchParams.get('offset') ?? 0)
 
+  const branchScoped = isBranchScopedAdmin(admin)
   const supabase = createAdminClient()
 
-  const { data: logs, error: fetchError, count } = await supabase
+  let query = supabase
     .from('activity_logs')
-    .select('id, action_type, description, created_at, client_id, counselor_id, metadata, clients(name), counselors(name)', { count: 'exact' })
+    .select(
+      branchScoped
+        ? 'id, action_type, description, created_at, client_id, counselor_id, metadata, clients(name, branch_id), counselors(name, branch_id)'
+        : 'id, action_type, description, created_at, client_id, counselor_id, metadata, clients(name), counselors(name)',
+      { count: 'exact' }
+    )
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1)
+
+  if (branchScoped) {
+    // Show client events in this branch OR staff events by counselors in this branch.
+    query = query.or(
+      `clients.branch_id.eq.${admin.branch_id},and(client_id.is.null,counselors.branch_id.eq.${admin.branch_id})`
+    )
+  }
+
+  const { data: logs, error: fetchError, count } = await query
 
   if (fetchError) {
     console.error('Activity log fetch error:', fetchError)

@@ -35,6 +35,11 @@ export async function createServerClient() {
   )
 }
 
+// Roles that get Admin-panel access with UNSCOPED (all-branch) visibility.
+// 'admin' (Branch Manager) is scoped to its own branch_id everywhere the app
+// applies branch filtering; 'ceo' (Super Admin) has branch_id = NULL and sees everything.
+const ADMIN_PANEL_ROLES = ['admin', 'ceo'] as const
+
 export async function getAuthenticatedCounselor() {
   const supabase = await createServerClient()
   const {
@@ -46,7 +51,7 @@ export async function getAuthenticatedCounselor() {
   const admin = createAdminClient()
   const { data: counselor } = await admin
     .from('counselors')
-    .select('id, name, email, status, avatar_url, role')
+    .select('id, name, email, status, avatar_url, role, branch_id')
     .eq('email', user.email)
     .single()
 
@@ -66,11 +71,12 @@ export async function getAuthenticatedAdmin() {
   const admin = createAdminClient()
   const { data: account } = await admin
     .from('counselors')
-    .select('id, name, email, status, avatar_url, role')
+    .select('id, name, email, status, avatar_url, role, branch_id')
     .eq('email', user.email)
     .single()
 
-  if (!account || account.status !== 'active' || account.role !== 'admin') return null
+  if (!account || account.status !== 'active') return null
+  if (!ADMIN_PANEL_ROLES.includes(account.role as (typeof ADMIN_PANEL_ROLES)[number])) return null
 
   return account
 }
@@ -82,8 +88,44 @@ export async function requireAdmin() {
     redirect('/login')
   }
 
-  if (counselor.role !== 'admin') {
-    redirect('/dashboard')
+  if (!ADMIN_PANEL_ROLES.includes(counselor.role as (typeof ADMIN_PANEL_ROLES)[number])) {
+    redirect(counselor.role === 'receptionist' ? '/receptionist' : '/dashboard')
+  }
+
+  return counselor
+}
+
+// CEO-only pages (e.g. Branches management). Redirects Branch Managers back to /admin.
+export async function requireCeo() {
+  const counselor = await requireAdmin()
+
+  if (counselor.role !== 'ceo') {
+    redirect('/admin')
+  }
+
+  return counselor
+}
+
+// True for Branch Managers ('admin') — these accounts should have their data
+// filtered to `branch_id = counselor.branch_id`. CEO (branch_id null) sees all.
+export function isBranchScoped(counselor: { role: string }) {
+  return counselor.role === 'admin'
+}
+
+// Page guard for /receptionist — mirrors requireAdmin() but for the receptionist role only.
+export async function requireReceptionist() {
+  const counselor = await getAuthenticatedCounselor()
+
+  if (!counselor) {
+    redirect('/login')
+  }
+
+  if (counselor.role !== 'receptionist') {
+    redirect(
+      ADMIN_PANEL_ROLES.includes(counselor.role as (typeof ADMIN_PANEL_ROLES)[number])
+        ? '/admin'
+        : '/dashboard'
+    )
   }
 
   return counselor

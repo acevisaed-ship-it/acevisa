@@ -6,6 +6,7 @@ import { AdminShell } from '@/components/admin/AdminShell'
 type Props = {
   adminId: string
   adminName: string
+  adminRole: string
   avatarUrl?: string | null
   unassignedCount: number
   children: React.ReactNode
@@ -14,6 +15,7 @@ type Props = {
 export function AdminLayoutClient({
   adminId,
   adminName,
+  adminRole,
   avatarUrl,
   unassignedCount,
   children,
@@ -29,6 +31,7 @@ export function AdminLayoutClient({
     <AdminShell
       adminId={adminId}
       adminName={adminName}
+      adminRole={adminRole}
       avatarUrl={avatarUrl}
       unassignedCount={unassignedCount}
     >

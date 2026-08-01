@@ -1,20 +1,28 @@
+import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 // GET /api/admin/incentive — returns all counselors with their base_salary, commission_rate, and per-service rates
 export async function GET() {
-  const { error: authError } = await requireAdminApi()
+  const { admin, error: authError } = await requireAdminApi()
   if (authError) return authError
 
+  const branchScoped = isBranchScopedAdmin(admin)
   const supabase = createAdminClient()
 
+  let counselorsQuery = supabase
+    .from('counselors')
+    .select('id, name, base_salary, commission_rate, status')
+    .eq('role', 'counselor')
+    .order('name')
+
+  if (branchScoped) {
+    counselorsQuery = counselorsQuery.eq('branch_id', admin.branch_id)
+  }
+
   const [{ data: counselors }, { data: rules }, { data: policyRules }] = await Promise.all([
-    supabase
-      .from('counselors')
-      .select('id, name, base_salary, commission_rate, status')
-      .eq('role', 'counselor')
-      .order('name'),
+    counselorsQuery,
     supabase.from('commission_rules').select('counselor_id, commission_rate, base_salary'),
     supabase.from('commission_policy_rules').select('counselor_id, service_type, commission_rate'),
   ])
@@ -42,7 +50,7 @@ export async function GET() {
 
 // POST /api/admin/incentive — upsert base salary, default commission rate, and per-service rates for a counselor
 export async function POST(request: Request) {
-  const { error: authError } = await requireAdminApi()
+  const { admin, error: authError } = await requireAdminApi()
   if (authError) return authError
 
   const body = await request.json()
@@ -51,6 +59,17 @@ export async function POST(request: Request) {
   if (!counselorId) return NextResponse.json({ error: 'counselorId required' }, { status: 400 })
 
   const supabase = createAdminClient()
+
+  if (isBranchScopedAdmin(admin)) {
+    const { data: counselorRow } = await supabase
+      .from('counselors')
+      .select('branch_id')
+      .eq('id', counselorId)
+      .single()
+    if (!counselorRow || counselorRow.branch_id !== admin.branch_id) {
+      return NextResponse.json({ error: 'Counselor not in your branch' }, { status: 403 })
+    }
+  }
 
   // Upsert commission_rules (base salary + default rate)
   const { error: ruleErr } = await supabase.from('commission_rules').upsert(

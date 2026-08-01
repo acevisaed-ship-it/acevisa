@@ -1,3 +1,4 @@
+import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { DEAL_SERVICE_TYPES, DEAL_STAGES, type DealStage } from '@/lib/admin/dealTypes'
 import { parseClientJoin, parseCounselorName } from '@/lib/admin/parseCounselorJoin'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
@@ -37,11 +38,25 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ dealId: string }> }
 ) {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
   const { dealId } = await params
   const body = await request.json()
+
+  const supabase = createAdminClient()
+
+  if (isBranchScopedAdmin(admin)) {
+    const { data: row } = await supabase
+      .from('deals')
+      .select('id, clients!inner(branch_id)')
+      .eq('id', dealId)
+      .eq('clients.branch_id', admin.branch_id)
+      .maybeSingle()
+    if (!row) {
+      return NextResponse.json({ error: 'Deal not in your branch' }, { status: 403 })
+    }
+  }
 
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() }
 
@@ -78,7 +93,6 @@ export async function PATCH(
   }
   if (body.product_id !== undefined) updates.product_id = body.product_id || null
 
-  const supabase = createAdminClient()
   const { data, error: updateError } = await supabase
     .from('deals')
     .update(updates)

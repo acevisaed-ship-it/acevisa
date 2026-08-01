@@ -2,9 +2,11 @@ import Link from 'next/link'
 import { Mail, Phone, ArrowRight } from 'lucide-react'
 import { getCounselorsWithCounts } from '@/lib/admin/getCounselorsWithCounts'
 import { CounselorEmailConfig } from '@/components/admin/CounselorEmailConfig'
+import { requireAdmin, isBranchScoped } from '@/lib/supabase/server'
 
 export default async function AdminCounselorsPage() {
-  const counselors = await getCounselorsWithCounts()
+  const admin = await requireAdmin()
+  const counselors = await getCounselorsWithCounts(isBranchScoped(admin) ? admin.branch_id : undefined)
 
   return (
     <main className="flex-1 p-4 md:p-8">

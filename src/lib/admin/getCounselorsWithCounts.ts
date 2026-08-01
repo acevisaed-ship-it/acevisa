@@ -10,16 +10,23 @@ export type CounselorWithCounts = {
   openTaskCount: number
 }
 
-export async function getCounselorsWithCounts(): Promise<CounselorWithCounts[]> {
+export async function getCounselorsWithCounts(branchId?: string | null): Promise<CounselorWithCounts[]> {
   const supabase = createAdminClient()
 
+  let counselorsQuery = supabase
+    .from('counselors')
+    .select('id, name, email, phone, role, clients(count)')
+    .eq('role', 'counselor')
+    .eq('status', 'active')
+    .order('name')
+
+  // branchId === undefined → unscoped (CEO). branchId set → Branch Manager's own branch.
+  if (branchId) {
+    counselorsQuery = counselorsQuery.eq('branch_id', branchId)
+  }
+
   const [{ data: counselors }, { data: pendingTasks }] = await Promise.all([
-    supabase
-      .from('counselors')
-      .select('id, name, email, phone, role, clients(count)')
-      .eq('role', 'counselor')
-      .eq('status', 'active')
-      .order('name'),
+    counselorsQuery,
     supabase.from('tasks').select('counselor_id').eq('status', 'pending'),
   ])
 

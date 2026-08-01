@@ -1,36 +1,49 @@
+import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { parseClientJoin, parseCounselorName } from '@/lib/admin/parseCounselorJoin'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
+  const branchScoped = isBranchScopedAdmin(admin)
   const supabase = createAdminClient()
 
+  let negligenceQuery = supabase
+    .from('tasks')
+    .select(
+      branchScoped
+        ? 'id, task_text, created_at, negligence_flagged, counselors!inner(name, branch_id), clients!inner(name, id, branch_id)'
+        : 'id, task_text, created_at, negligence_flagged, counselors(name), clients(name, id)'
+    )
+    .eq('negligence_flagged', true)
+    .order('created_at', { ascending: false })
+
+  let slowResponseQuery = supabase
+    .from('response_tracking')
+    .select(
+      branchScoped
+        ? 'id, student_message_at, response_at, response_time_seconds, counselors!inner(name, branch_id), clients!inner(name, id, branch_id)'
+        : 'id, student_message_at, response_at, response_time_seconds, counselors(name), clients(name, id)'
+    )
+    .gt('response_time_seconds', 86400)
+    .order('response_at', { ascending: false })
+
+  let complaintsQuery = supabase
+    .from('complaints')
+    .select('id, client_id, client_name, subject, body, created_at, status')
+    .eq('status', 'open')
+    .order('created_at', { ascending: false })
+
+  if (branchScoped) {
+    negligenceQuery = negligenceQuery.eq('clients.branch_id', admin.branch_id)
+    slowResponseQuery = slowResponseQuery.eq('clients.branch_id', admin.branch_id)
+  }
+
   const [{ data: negligenceTasks }, { data: slowResponses }, { data: complaints }] =
-    await Promise.all([
-      supabase
-        .from('tasks')
-        .select(
-          'id, task_text, created_at, negligence_flagged, counselors(name), clients(name, id)'
-        )
-        .eq('negligence_flagged', true)
-        .order('created_at', { ascending: false }),
-      supabase
-        .from('response_tracking')
-        .select(
-          'id, student_message_at, response_at, response_time_seconds, counselors(name), clients(name, id)'
-        )
-        .gt('response_time_seconds', 86400)
-        .order('response_at', { ascending: false }),
-      supabase
-        .from('complaints')
-        .select('id, client_id, client_name, subject, body, created_at, status')
-        .eq('status', 'open')
-        .order('created_at', { ascending: false }),
-    ])
+    await Promise.all([negligenceQuery, slowResponseQuery, complaintsQuery])
 
   const clientIds = [
     ...new Set(
@@ -42,10 +55,16 @@ export async function GET() {
 
   const clientCounselorMap = new Map<string, { name: string }>()
   if (clientIds.length > 0) {
-    const { data: clients } = await supabase
+    let clientsQuery = supabase
       .from('clients')
-      .select('id, counselors(name)')
+      .select('id, branch_id, counselors(name)')
       .in('id', clientIds)
+
+    if (branchScoped) {
+      clientsQuery = clientsQuery.eq('branch_id', admin.branch_id)
+    }
+
+    const { data: clients } = await clientsQuery
 
     for (const client of clients ?? []) {
       const counselorName = parseCounselorName(
@@ -93,7 +112,13 @@ export async function GET() {
     }
   })
 
-  const openComplaints = (complaints ?? []).map((complaint) => {
+  const openComplaints = (complaints ?? [])
+    .filter((complaint) => {
+      if (!branchScoped) return true
+      if (!complaint.client_id) return false
+      return clientCounselorMap.has(complaint.client_id)
+    })
+    .map((complaint) => {
     const counselor = complaint.client_id
       ? clientCounselorMap.get(complaint.client_id)
       : null
@@ -106,7 +131,7 @@ export async function GET() {
       submittedDate: complaint.created_at,
       counselorName: counselor?.name ?? 'Unassigned',
     }
-  })
+    })
 
   return NextResponse.json({
     negligenceFlags,

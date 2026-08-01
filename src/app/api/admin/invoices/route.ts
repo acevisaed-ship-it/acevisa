@@ -1,5 +1,6 @@
 import { INVOICE_STATUSES, type InvoiceStatus } from '@/lib/admin/dealTypes'
 import { parseClientJoin, parseCounselorName } from '@/lib/admin/parseCounselorJoin'
+import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
@@ -55,19 +56,25 @@ async function generateInvoiceNumber(supabase: ReturnType<typeof createAdminClie
 }
 
 export async function GET(request: Request) {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
   const status = new URL(request.url).searchParams.get('status')
 
+  const branchScoped = isBranchScopedAdmin(admin)
   const supabase = createAdminClient()
   let query = supabase
     .from('invoices')
     .select(
-      'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors(name), products(name)'
+      branchScoped
+        ? 'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients!inner(name, id, branch_id), counselors(name), products(name)'
+        : 'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors(name), products(name)'
     )
     .order('created_at', { ascending: false })
 
+  if (branchScoped) {
+    query = query.eq('clients.branch_id', admin.branch_id)
+  }
   if (status && INVOICE_STATUSES.includes(status as InvoiceStatus)) {
     query = query.eq('status', status)
   }
@@ -92,7 +99,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
   const body = await request.json()
@@ -112,6 +119,18 @@ export async function POST(request: Request) {
   const invoiceStatus = status === 'sent' ? 'sent' : 'draft'
 
   const supabase = createAdminClient()
+
+  if (isBranchScopedAdmin(admin)) {
+    const { data: clientRow } = await supabase
+      .from('clients')
+      .select('branch_id')
+      .eq('id', client_id)
+      .single()
+    if (!clientRow || clientRow.branch_id !== admin.branch_id) {
+      return NextResponse.json({ error: 'Client not in your branch' }, { status: 403 })
+    }
+  }
+
   const invoice_number = await generateInvoiceNumber(supabase)
 
   const { data, error: insertError } = await supabase
@@ -121,7 +140,7 @@ export async function POST(request: Request) {
       client_id,
       deal_id: deal_id || null,
       counselor_id: counselor_id || null,
-      product_id: product_id || null,
+      ...(product_id ? { product_id } : {}),
       line_items: validItems,
       subtotal,
       tax_rate: 0,

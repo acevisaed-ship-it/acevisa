@@ -79,6 +79,27 @@ export function escalationEmailHtml(opts: {
     </a>`)
 }
 
+export function studentWelcomeEmailHtml(opts: {
+  studentName: string
+  clientCode: string
+  loginEmail: string
+  tempPassword: string
+  portalUrl: string
+}) {
+  return wrap(`
+    <h2 style="color:#0A3F3A;margin:0 0 16px">Welcome to ACE Altius, ${opts.studentName}!</h2>
+    <p>Your account has been created. Here are your portal login details:</p>
+    <table style="width:100%;border-collapse:collapse;margin:16px 0;background:#fff;border-radius:12px;overflow:hidden">
+      <tr><td style="padding:10px 16px;font-weight:bold;width:140px">Your ID:</td><td style="padding:10px 16px;font-family:monospace;font-weight:bold;color:#E48328">${opts.clientCode}</td></tr>
+      <tr><td style="padding:10px 16px;font-weight:bold">Login email:</td><td style="padding:10px 16px">${opts.loginEmail}</td></tr>
+      <tr><td style="padding:10px 16px;font-weight:bold">Temporary password:</td><td style="padding:10px 16px;font-family:monospace">${opts.tempPassword}</td></tr>
+    </table>
+    <p>Please keep your ID handy — your counselor will use it to look up your file quickly. We recommend changing your password after your first login.</p>
+    <a href="${opts.portalUrl}" style="background:#0A3F3A;color:#B7C733;padding:12px 28px;border-radius:24px;text-decoration:none;font-weight:bold">
+      Go to your portal →
+    </a>`)
+}
+
 export function meetingBookedEmailHtml(opts: {
   counselorName: string
   clientName: string

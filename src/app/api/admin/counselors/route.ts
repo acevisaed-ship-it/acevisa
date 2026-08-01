@@ -1,5 +1,5 @@
 import { getCounselorsWithCounts } from '@/lib/admin/getCounselorsWithCounts'
-import { getAuthenticatedAdmin } from '@/lib/supabase/server'
+import { getAuthenticatedAdmin, isBranchScoped } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
@@ -9,7 +9,7 @@ export async function GET() {
   }
 
   try {
-    const counselors = await getCounselorsWithCounts()
+    const counselors = await getCounselorsWithCounts(isBranchScoped(admin) ? admin.branch_id : undefined)
     return NextResponse.json({ counselors })
   } catch (error) {
     console.error('Admin counselors fetch error:', error)

@@ -1,3 +1,4 @@
+import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { CAMPAIGN_SERVICES } from '@/lib/admin/categories'
 import { parseCounselorName } from '@/lib/admin/parseCounselorJoin'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
@@ -9,16 +10,23 @@ function normalizeAdSourceCode(code: string) {
 }
 
 export async function GET() {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
+  const branchScoped = isBranchScopedAdmin(admin)
   const supabase = createAdminClient()
-  const { data: campaigns, error: fetchError } = await supabase
+  let query = supabase
     .from('campaigns')
     .select(
-      'id, campaign_name, ad_source_code, opening_line, context_hint, target_country, target_service, default_counselor_id, is_active, created_at, counselors(name)'
+      'id, campaign_name, ad_source_code, opening_line, context_hint, target_country, target_service, default_counselor_id, is_active, created_at, branch_id, counselors(name)'
     )
     .order('created_at', { ascending: false })
+
+  if (branchScoped) {
+    query = query.eq('branch_id', admin.branch_id)
+  }
+
+  const { data: campaigns, error: fetchError } = await query
 
   if (fetchError) {
     console.error('Campaigns fetch error:', fetchError)
@@ -48,7 +56,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
   const body = await request.json()
@@ -83,6 +91,8 @@ export async function POST(request: Request) {
   }
 
   const supabase = createAdminClient()
+  const branchId = isBranchScopedAdmin(admin) ? admin.branch_id : body.branch_id || null
+
   const { data: campaign, error: insertError } = await supabase
     .from('campaigns')
     .insert({
@@ -93,6 +103,7 @@ export async function POST(request: Request) {
       target_country: target_country?.trim() || null,
       target_service: target_service || null,
       default_counselor_id: default_counselor_id || null,
+      branch_id: branchId,
       is_active: is_active !== false,
     })
     .select(

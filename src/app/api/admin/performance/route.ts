@@ -1,3 +1,4 @@
+import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
@@ -13,13 +14,28 @@ function parseMonth(monthParam: string | null) {
 }
 
 export async function GET(request: Request) {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
   const monthParam = new URL(request.url).searchParams.get('month')
   const { month, start, end } = parseMonth(monthParam)
 
+  const branchScoped = isBranchScopedAdmin(admin)
   const supabase = createAdminClient()
+
+  let counselorsQuery = supabase
+    .from('counselors')
+    .select('id, name, base_salary, commission_rate')
+    .eq('role', 'counselor')
+    .eq('status', 'active')
+    .order('name')
+
+  let clientsQuery = supabase.from('clients').select('id, counselor_id, qualification_score, branch_id')
+
+  if (branchScoped) {
+    counselorsQuery = counselorsQuery.eq('branch_id', admin.branch_id)
+    clientsQuery = clientsQuery.eq('branch_id', admin.branch_id)
+  }
 
   const [
     { data: counselors },
@@ -30,13 +46,8 @@ export async function GET(request: Request) {
     { data: commissionRules },
     { data: closedDeals },
   ] = await Promise.all([
-    supabase
-      .from('counselors')
-      .select('id, name, base_salary, commission_rate')
-      .eq('role', 'counselor')
-      .eq('status', 'active')
-      .order('name'),
-    supabase.from('clients').select('id, counselor_id, qualification_score'),
+    counselorsQuery,
+    clientsQuery,
     supabase
       .from('meetings')
       .select('counselor_id, status, scheduled_time')

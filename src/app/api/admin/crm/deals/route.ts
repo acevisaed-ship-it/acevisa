@@ -4,6 +4,7 @@ import {
   type DealStage,
 } from '@/lib/admin/dealTypes'
 import { parseClientJoin, parseCounselorName } from '@/lib/admin/parseCounselorJoin'
+import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
@@ -38,7 +39,7 @@ function mapDeal(row: Record<string, unknown>) {
 }
 
 export async function GET(request: Request) {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
   const { searchParams } = new URL(request.url)
@@ -46,14 +47,20 @@ export async function GET(request: Request) {
   const serviceType = searchParams.get('service_type')
   const month = searchParams.get('month')
 
+  const branchScoped = isBranchScopedAdmin(admin)
   const supabase = createAdminClient()
   let query = supabase
     .from('deals')
     .select(
-      'id, client_id, counselor_id, product_id, service_type, target_country, deal_value, currency, stage, stage_notes, signed_at, expected_close_date, actual_close_date, created_at, updated_at, clients(name, id), counselors(name), products(name)'
+      branchScoped
+        ? 'id, client_id, counselor_id, product_id, service_type, target_country, deal_value, currency, stage, stage_notes, signed_at, expected_close_date, actual_close_date, created_at, updated_at, clients!inner(name, id, branch_id), counselors(name), products(name)'
+        : 'id, client_id, counselor_id, product_id, service_type, target_country, deal_value, currency, stage, stage_notes, signed_at, expected_close_date, actual_close_date, created_at, updated_at, clients(name, id), counselors(name), products(name)'
     )
     .order('created_at', { ascending: false })
 
+  if (branchScoped) {
+    query = query.eq('clients.branch_id', admin.branch_id)
+  }
   if (counselorId) query = query.eq('counselor_id', counselorId)
   if (serviceType) query = query.eq('service_type', serviceType)
   if (month && /^\d{4}-\d{2}$/.test(month)) {
@@ -74,7 +81,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
   const body = await request.json()
@@ -101,12 +108,24 @@ export async function POST(request: Request) {
   }
 
   const supabase = createAdminClient()
+
+  if (isBranchScopedAdmin(admin)) {
+    const { data: clientRow } = await supabase
+      .from('clients')
+      .select('branch_id')
+      .eq('id', client_id)
+      .single()
+    if (!clientRow || clientRow.branch_id !== admin.branch_id) {
+      return NextResponse.json({ error: 'Client not in your branch' }, { status: 403 })
+    }
+  }
+
   const { data, error: insertError } = await supabase
     .from('deals')
     .insert({
       client_id,
       counselor_id: counselor_id || null,
-      product_id: product_id || null,
+      ...(product_id ? { product_id } : {}),
       service_type,
       target_country: target_country?.trim() || null,
       deal_value: Number(deal_value) || 0,

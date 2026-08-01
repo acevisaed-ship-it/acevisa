@@ -225,7 +225,7 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
           client_id: clientId,
           deal_id: dealId || null,
           counselor_id: selectedClient?.counselor_id || null,
-          product_id: productId || null,
+          ...(productId ? { product_id: productId } : {}),
           line_items: lineItems.map((i) => ({ description: i.description, amount: Number(i.amount) })),
           due_date: dueDate || null,
           notes: notes || null,

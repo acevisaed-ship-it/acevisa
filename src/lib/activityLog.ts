@@ -3,13 +3,15 @@ import { createAdminClient } from '@/lib/supabase/server'
 export async function logActivity({
   clientId,
   counselorId,
+  actorRole,
   actionType,
   description,
   visibility = 'internal',
   metadata = {},
 }: {
-  clientId: string
+  clientId?: string | null
   counselorId?: string
+  actorRole?: string
   actionType: string
   description: string
   visibility?: 'internal' | 'shared'
@@ -17,8 +19,9 @@ export async function logActivity({
 }) {
   const supabase = createAdminClient()
   const { error } = await supabase.from('activity_logs').insert({
-    client_id: clientId,
+    client_id: clientId || null,
     counselor_id: counselorId || null,
+    actor_role: actorRole || null,
     action_type: actionType,
     description,
     visibility,
@@ -27,6 +30,33 @@ export async function logActivity({
   if (error) {
     console.error('[activityLog] insert failed:', error.message, { actionType, clientId })
   }
+}
+
+// Convenience wrapper for staff-only events with no associated client
+// (logins, account creation, settings changes) — feeds the CEO's global
+// staff activity feed at /admin/staff-activity.
+export async function logStaffActivity({
+  counselorId,
+  actorRole,
+  actionType,
+  description,
+  metadata = {},
+}: {
+  counselorId: string
+  actorRole: string
+  actionType: string
+  description: string
+  metadata?: Record<string, unknown>
+}) {
+  return logActivity({
+    clientId: null,
+    counselorId,
+    actorRole,
+    actionType,
+    description,
+    visibility: 'internal',
+    metadata,
+  })
 }
 
 // Human-readable stage labels for the student-facing feed

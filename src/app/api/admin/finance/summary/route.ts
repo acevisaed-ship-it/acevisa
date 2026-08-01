@@ -1,3 +1,4 @@
+import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import {
   EXPENSE_CATEGORY_LABELS,
   type ExpenseCategory,
@@ -9,13 +10,42 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
   const monthParam = new URL(request.url).searchParams.get('month')
   const { month, start, end, startDate, endDate } = parseMonth(monthParam)
 
+  const branchScoped = isBranchScopedAdmin(admin)
   const supabase = createAdminClient()
+
+  let invoicesQuery = supabase
+    .from('invoices')
+    .select(
+      branchScoped
+        ? 'id, invoice_number, total, status, created_at, paid_at, clients!inner(name, branch_id)'
+        : 'id, invoice_number, total, status, created_at, paid_at, clients(name)'
+    )
+    .gte('created_at', start)
+    .lt('created_at', end)
+
+  let counselorsQuery = supabase
+    .from('counselors')
+    .select('id, name')
+    .eq('role', 'counselor')
+    .eq('status', 'active')
+    .order('name')
+
+  let closedDealsQuery = supabase
+    .from('deals')
+    .select('id, counselor_id, deal_value, stage, signed_at, actual_close_date, counselors(name, branch_id)')
+    .in('stage', ['completed', 'agreement_signed'])
+
+  if (branchScoped) {
+    invoicesQuery = invoicesQuery.eq('clients.branch_id', admin.branch_id)
+    counselorsQuery = counselorsQuery.eq('branch_id', admin.branch_id)
+    closedDealsQuery = closedDealsQuery.eq('counselors.branch_id', admin.branch_id)
+  }
 
   const [
     { data: invoices },
@@ -24,27 +54,15 @@ export async function GET(request: Request) {
     { data: closedDeals },
     { data: counselors },
   ] = await Promise.all([
-    supabase
-      .from('invoices')
-      .select('id, invoice_number, total, status, created_at, paid_at, clients(name)')
-      .gte('created_at', start)
-      .lt('created_at', end),
+    invoicesQuery,
     supabase
       .from('expenses')
       .select('id, category, description, amount, paid_at')
       .gte('paid_at', startDate)
       .lt('paid_at', endDate),
     supabase.from('commission_rules').select('counselor_id, commission_rate, base_salary'),
-    supabase
-      .from('deals')
-      .select('id, counselor_id, deal_value, stage, signed_at, actual_close_date, counselors(name)')
-      .in('stage', ['completed', 'agreement_signed']),
-    supabase
-      .from('counselors')
-      .select('id, name')
-      .eq('role', 'counselor')
-      .eq('status', 'active')
-      .order('name'),
+    closedDealsQuery,
+    counselorsQuery,
   ])
 
   const totalInvoiced = (invoices ?? []).reduce((sum, i) => sum + Number(i.total), 0)

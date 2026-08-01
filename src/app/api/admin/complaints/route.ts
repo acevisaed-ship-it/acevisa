@@ -1,3 +1,4 @@
+import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { parseCounselorName } from '@/lib/admin/parseCounselorJoin'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
 import { createAdminClient } from '@/lib/supabase/server'
@@ -9,15 +10,26 @@ type ClientJoin = {
 }
 
 export async function GET() {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
+  const branchScoped = isBranchScopedAdmin(admin)
   const supabase = createAdminClient()
 
-  const { data: complaints, error: fetchError } = await supabase
+  let query = supabase
     .from('complaints')
-    .select('id, client_id, client_name, client_phone, subject, body, status, created_at, acknowledged_at, acknowledged_by, clients(name, counselors(name))')
+    .select(
+      branchScoped
+        ? 'id, client_id, client_name, client_phone, subject, body, status, created_at, acknowledged_at, acknowledged_by, clients!inner(name, branch_id, counselors(name))'
+        : 'id, client_id, client_name, client_phone, subject, body, status, created_at, acknowledged_at, acknowledged_by, clients(name, counselors(name))'
+    )
     .order('created_at', { ascending: false })
+
+  if (branchScoped) {
+    query = query.eq('clients.branch_id', admin.branch_id)
+  }
+
+  const { data: complaints, error: fetchError } = await query
 
   if (fetchError) {
     console.error('Complaints fetch error:', fetchError)

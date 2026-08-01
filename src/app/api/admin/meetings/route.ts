@@ -3,15 +3,29 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
   const supabase = createAdminClient()
 
-  const { data: meetings, error: fetchError } = await supabase
+  // Branch Managers ('admin') only see meetings for clients in their own branch.
+  // CEO (branch_id null) sees everything — no filter applied.
+  const branchScoped = admin.role === 'admin'
+
+  let query = supabase
     .from('meetings')
-    .select('id, scheduled_time, status, notes, client_id, counselor_id, clients(name), counselors(name)')
+    .select(
+      branchScoped
+        ? 'id, scheduled_time, status, notes, client_id, counselor_id, clients!inner(name, branch_id), counselors(name)'
+        : 'id, scheduled_time, status, notes, client_id, counselor_id, clients(name), counselors(name)'
+    )
     .order('scheduled_time', { ascending: false })
+
+  if (branchScoped) {
+    query = query.eq('clients.branch_id', admin.branch_id)
+  }
+
+  const { data: meetings, error: fetchError } = await query
 
   if (fetchError) {
     console.error('Meetings fetch error:', fetchError)

@@ -3,9 +3,11 @@ import { Mail, Phone, ArrowRight } from 'lucide-react'
 import { TeamManagement } from '@/components/admin/TeamManagement'
 import { CounselorAccountsPanel } from '@/components/admin/CounselorAccountsPanel'
 import { getCounselorsWithCounts } from '@/lib/admin/getCounselorsWithCounts'
+import { requireAdmin, isBranchScoped } from '@/lib/supabase/server'
 
 export default async function AdminTeamPage() {
-  const counselors = await getCounselorsWithCounts()
+  const admin = await requireAdmin()
+  const counselors = await getCounselorsWithCounts(isBranchScoped(admin) ? admin.branch_id : undefined)
 
   return (
     <main className="flex-1 p-4 md:p-8 space-y-10">
@@ -60,7 +62,7 @@ export default async function AdminTeamPage() {
       </div>
 
       <hr className="border-white/10" />
-      <CounselorAccountsPanel />
+      <CounselorAccountsPanel isCeo={admin.role === 'ceo'} />
     </main>
   )
 }

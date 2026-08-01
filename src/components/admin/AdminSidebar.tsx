@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import {
   BarChart3,
   BookOpen,
+  Building2,
   Calendar,
   ClipboardList,
   Handshake,
@@ -49,9 +50,21 @@ const navItems: NavItem[] = [
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
+// Visible to 'ceo' (Super Admin) only.
+const ceoOnlyNavItems: NavItem[] = [
+  { href: '/admin/branches', label: 'Branches', icon: Building2 },
+  { href: '/admin/staff-activity', label: 'Staff Activity', icon: ShieldCheck },
+]
+
+const roleLabels: Record<string, string> = {
+  ceo: 'Super Admin (CEO)',
+  admin: 'Branch Manager',
+}
+
 type Props = {
   adminId: string
   adminName: string
+  adminRole: string
   avatarUrl?: string | null
   unassignedCount: number
   isOpen: boolean
@@ -61,16 +74,20 @@ type Props = {
 function SidebarContent({
   adminId,
   adminName,
+  adminRole,
   avatarUrl,
   unassignedCount,
   onNavigate,
 }: {
   adminId: string
   adminName: string
+  adminRole: string
   avatarUrl?: string | null
   unassignedCount: number
   onNavigate?: () => void
 }) {
+  const isCeo = adminRole === 'ceo'
+  const items = isCeo ? [...navItems, ...ceoOnlyNavItems] : navItems
   const pathname = usePathname()
 
   async function handleSignOut() {
@@ -94,7 +111,7 @@ function SidebarContent({
       </div>
 
       <nav className="flex flex-1 flex-col gap-1 px-3">
-        {navItems.map(({ href, label, icon: Icon, exact, badge }) => {
+        {items.map(({ href, label, icon: Icon, exact, badge }) => {
           const active = isActive(href, exact)
           return (
             <Link
@@ -127,7 +144,7 @@ function SidebarContent({
           className="mb-3 items-start"
         />
         <p className="font-bold text-bg">{adminName}</p>
-        <p className="text-xs text-bg/60">Admin</p>
+        <p className="text-xs text-bg/60">{roleLabels[adminRole] ?? 'Admin'}</p>
         <button
           type="button"
           onClick={handleSignOut}
@@ -143,6 +160,7 @@ function SidebarContent({
 export function AdminSidebar({
   adminId,
   adminName,
+  adminRole,
   avatarUrl,
   unassignedCount,
   isOpen,
@@ -154,6 +172,7 @@ export function AdminSidebar({
         <SidebarContent
           adminId={adminId}
           adminName={adminName}
+          adminRole={adminRole}
           avatarUrl={avatarUrl}
           unassignedCount={unassignedCount}
         />
@@ -184,6 +203,7 @@ export function AdminSidebar({
         <SidebarContent
           adminId={adminId}
           adminName={adminName}
+          adminRole={adminRole}
           avatarUrl={avatarUrl}
           unassignedCount={unassignedCount}
           onNavigate={onClose}

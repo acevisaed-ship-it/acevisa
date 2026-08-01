@@ -1,10 +1,11 @@
+import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 // GET /api/admin/hr/attendance?month=2026-06&counselorId=...
 export async function GET(request: Request) {
-  const { error: authError } = await requireAdminApi()
+  const { admin, error: authError } = await requireAdminApi()
   if (authError) return authError
 
   const sp = new URL(request.url).searchParams
@@ -15,15 +16,23 @@ export async function GET(request: Request) {
   const start = new Date(Date.UTC(y, m - 1, 1)).toISOString().slice(0, 10)
   const end = new Date(Date.UTC(y, m, 1)).toISOString().slice(0, 10)
 
+  const branchScoped = isBranchScopedAdmin(admin)
   const supabase = createAdminClient()
 
   let query = supabase
     .from('attendance_records')
-    .select('id, counselor_id, date, check_in, check_out, status, notes, counselors(name)')
+    .select(
+      branchScoped
+        ? 'id, counselor_id, date, check_in, check_out, status, notes, counselors!inner(name, branch_id)'
+        : 'id, counselor_id, date, check_in, check_out, status, notes, counselors(name)'
+    )
     .gte('date', start)
     .lt('date', end)
     .order('date', { ascending: false })
 
+  if (branchScoped) {
+    query = query.eq('counselors.branch_id', admin.branch_id)
+  }
   if (counselorId) query = query.eq('counselor_id', counselorId)
 
   const { data, error } = await query
@@ -35,7 +44,7 @@ export async function GET(request: Request) {
 
 // POST /api/admin/hr/attendance — create or update a record
 export async function POST(request: Request) {
-  const { error: authError } = await requireAdminApi()
+  const { admin, error: authError } = await requireAdminApi()
   if (authError) return authError
 
   const body = await request.json()
@@ -46,6 +55,17 @@ export async function POST(request: Request) {
   }
 
   const supabase = createAdminClient()
+
+  if (isBranchScopedAdmin(admin)) {
+    const { data: counselorRow } = await supabase
+      .from('counselors')
+      .select('branch_id')
+      .eq('id', counselorId)
+      .single()
+    if (!counselorRow || counselorRow.branch_id !== admin.branch_id) {
+      return NextResponse.json({ error: 'Counselor not in your branch' }, { status: 403 })
+    }
+  }
 
   const { data, error } = await supabase
     .from('attendance_records')

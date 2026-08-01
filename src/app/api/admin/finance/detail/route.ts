@@ -1,3 +1,4 @@
+import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { EXPENSE_CATEGORY_LABELS, type ExpenseCategory } from '@/lib/admin/dealTypes'
 import { parseClientJoin } from '@/lib/admin/parseCounselorJoin'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
@@ -60,7 +61,7 @@ function getPeriodRange(mode: Mode, date: string, from: string, to: string) {
 }
 
 export async function GET(request: Request) {
-  const { error: authError } = await requireAdminApi()
+  const { admin, error: authError } = await requireAdminApi()
   if (authError) return authError
 
   const sp = new URL(request.url).searchParams
@@ -71,7 +72,40 @@ export async function GET(request: Request) {
 
   const { start, end, label } = getPeriodRange(mode, date, from, to)
 
+  const branchScoped = isBranchScopedAdmin(admin)
   const supabase = createAdminClient()
+
+  let invoicesQuery = supabase
+    .from('invoices')
+    .select(
+      branchScoped
+        ? 'id, invoice_number, total, status, created_at, paid_at, clients!inner(name, id, branch_id)'
+        : 'id, invoice_number, total, status, created_at, paid_at, clients(name, id)'
+    )
+    .gte('paid_at', start)
+    .lte('paid_at', end)
+    .eq('status', 'paid')
+    .order('paid_at', { ascending: false })
+
+  let counselorsQuery = supabase
+    .from('counselors')
+    .select('id, name')
+    .eq('role', 'counselor')
+    .eq('status', 'active')
+    .order('name')
+
+  let closedDealsQuery = supabase
+    .from('deals')
+    .select('id, counselor_id, deal_value, stage, signed_at, actual_close_date, counselors(branch_id)')
+    .in('stage', ['completed', 'agreement_signed'])
+    .gte('actual_close_date', start.slice(0, 10))
+    .lte('actual_close_date', end.slice(0, 10))
+
+  if (branchScoped) {
+    invoicesQuery = invoicesQuery.eq('clients.branch_id', admin.branch_id)
+    counselorsQuery = counselorsQuery.eq('branch_id', admin.branch_id)
+    closedDealsQuery = closedDealsQuery.eq('counselors.branch_id', admin.branch_id)
+  }
 
   const [
     { data: invoices },
@@ -80,13 +114,7 @@ export async function GET(request: Request) {
     { data: closedDeals },
     { data: counselors },
   ] = await Promise.all([
-    supabase
-      .from('invoices')
-      .select('id, invoice_number, total, status, created_at, paid_at, clients(name, id)')
-      .gte('paid_at', start)
-      .lte('paid_at', end)
-      .eq('status', 'paid')
-      .order('paid_at', { ascending: false }),
+    invoicesQuery,
     supabase
       .from('expenses')
       .select('id, category, subcategory, description, amount, paid_at, created_at')
@@ -95,18 +123,8 @@ export async function GET(request: Request) {
       .order('category')
       .order('paid_at', { ascending: false }),
     supabase.from('commission_rules').select('counselor_id, commission_rate, base_salary'),
-    supabase
-      .from('deals')
-      .select('id, counselor_id, deal_value, stage, signed_at, actual_close_date')
-      .in('stage', ['completed', 'agreement_signed'])
-      .gte('actual_close_date', start.slice(0, 10))
-      .lte('actual_close_date', end.slice(0, 10)),
-    supabase
-      .from('counselors')
-      .select('id, name')
-      .eq('role', 'counselor')
-      .eq('status', 'active')
-      .order('name'),
+    closedDealsQuery,
+    counselorsQuery,
   ])
 
   // Income — individual paid invoices

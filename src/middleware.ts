@@ -31,7 +31,9 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname
   const isProtected =
-    pathname.startsWith('/dashboard') || pathname.startsWith('/admin')
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/receptionist')
 
   if (isProtected && !session) {
     return NextResponse.redirect(new URL('/login', request.url))
@@ -71,14 +73,22 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    const isAdmin = account.role === 'admin'
+    // 'ceo' (Super Admin) gets full, unscoped access to the same /admin panel as
+    // 'admin' (Branch Manager). 'receptionist' gets its own single-purpose area.
+    const isAdmin = account.role === 'admin' || account.role === 'ceo'
+    const isReceptionist = account.role === 'receptionist'
+    const homeForRole = isAdmin ? '/admin' : isReceptionist ? '/receptionist' : '/dashboard'
 
     if (pathname.startsWith('/admin') && !isAdmin) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+      return NextResponse.redirect(new URL(homeForRole, request.url))
     }
 
-    if (pathname.startsWith('/dashboard') && isAdmin) {
-      return NextResponse.redirect(new URL('/admin', request.url))
+    if (pathname.startsWith('/receptionist') && !isReceptionist) {
+      return NextResponse.redirect(new URL(homeForRole, request.url))
+    }
+
+    if (pathname.startsWith('/dashboard') && (isAdmin || isReceptionist)) {
+      return NextResponse.redirect(new URL(homeForRole, request.url))
     }
   }
 
@@ -86,5 +96,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*'],
+  matcher: ['/dashboard/:path*', '/admin/:path*', '/receptionist/:path*'],
 }

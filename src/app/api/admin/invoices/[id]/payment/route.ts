@@ -1,3 +1,4 @@
+import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { PAYMENT_METHODS, type PaymentMethod } from '@/lib/admin/dealTypes'
 import { parseClientJoin, parseCounselorName } from '@/lib/admin/parseCounselorJoin'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
@@ -60,6 +61,17 @@ export async function POST(
 
   if (fetchError || !invoice) {
     return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
+  }
+
+  if (isBranchScopedAdmin(admin)) {
+    const { data: clientRow } = await supabase
+      .from('clients')
+      .select('branch_id')
+      .eq('id', invoice.client_id)
+      .single()
+    if (!clientRow || clientRow.branch_id !== admin.branch_id) {
+      return NextResponse.json({ error: 'Invoice not in your branch' }, { status: 403 })
+    }
   }
 
   if (invoice.status === 'paid') {

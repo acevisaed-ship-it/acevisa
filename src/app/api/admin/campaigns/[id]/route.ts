@@ -1,3 +1,4 @@
+import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { CAMPAIGN_SERVICES } from '@/lib/admin/categories'
 import { parseCounselorName } from '@/lib/admin/parseCounselorJoin'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
@@ -11,7 +12,7 @@ function normalizeAdSourceCode(code: string) {
 }
 
 export async function PATCH(request: Request, { params }: Params) {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
   const { id } = await params
@@ -48,6 +49,19 @@ export async function PATCH(request: Request, { params }: Params) {
   }
 
   const supabase = createAdminClient()
+
+  if (isBranchScopedAdmin(admin)) {
+    const { data: row } = await supabase
+      .from('campaigns')
+      .select('id')
+      .eq('id', id)
+      .eq('branch_id', admin.branch_id)
+      .maybeSingle()
+    if (!row) {
+      return NextResponse.json({ error: 'Campaign not in your branch' }, { status: 403 })
+    }
+  }
+
   const { data: campaign, error: updateError } = await supabase
     .from('campaigns')
     .update(updates)

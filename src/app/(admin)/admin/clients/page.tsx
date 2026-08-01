@@ -1,20 +1,30 @@
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient, requireAdmin, isBranchScoped } from '@/lib/supabase/server'
 import { AllClientsTable } from '@/components/admin/AllClientsTable'
 
 export default async function AllClientsPage() {
+  const admin = await requireAdmin()
   const supabase = createAdminClient()
+  const scoped = isBranchScoped(admin)
+
+  let clientsQuery = supabase
+    .from('clients')
+    .select('*, counselors(name)')
+    .order('created_at', { ascending: false })
+  let counselorsQuery = supabase
+    .from('counselors')
+    .select('id, name')
+    .eq('role', 'counselor')
+    .eq('status', 'active')
+    .order('name')
+
+  if (scoped) {
+    clientsQuery = clientsQuery.eq('branch_id', admin.branch_id)
+    counselorsQuery = counselorsQuery.eq('branch_id', admin.branch_id)
+  }
 
   const [{ data: clients }, { data: counselors }] = await Promise.all([
-    supabase
-      .from('clients')
-      .select('*, counselors(name)')
-      .order('created_at', { ascending: false }),
-    supabase
-      .from('counselors')
-      .select('id, name')
-      .eq('role', 'counselor')
-      .eq('status', 'active')
-      .order('name'),
+    clientsQuery,
+    counselorsQuery,
   ])
 
   const rows = (clients ?? []).map((client) => {
@@ -23,6 +33,7 @@ export default async function AllClientsPage() {
     return {
       id: client.id,
       name: client.name,
+      client_code: row.client_code as string | null ?? null,
       email: row.email as string | null ?? null,
       phone: client.phone as string | null ?? null,
       counselor_id: client.counselor_id,

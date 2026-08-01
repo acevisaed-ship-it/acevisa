@@ -1,4 +1,4 @@
-import { createAdminClient, getAuthenticatedAdmin } from '@/lib/supabase/server'
+import { createAdminClient, getAuthenticatedAdmin, isBranchScoped } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
@@ -8,10 +8,14 @@ export async function GET() {
   }
 
   const supabase = createAdminClient()
-  const { count, error } = await supabase
+  let query = supabase
     .from('clients')
     .select('*', { count: 'exact', head: true })
     .is('counselor_id', null)
+  if (isBranchScoped(admin)) {
+    query = query.eq('branch_id', admin.branch_id)
+  }
+  const { count, error } = await query
 
   if (error) {
     console.error('Unassigned count error:', error)

@@ -9,6 +9,7 @@ import { ProfilePicture } from '@/components/dashboard/ProfilePicture'
 type Props = {
   adminId: string
   adminName: string
+  adminRole: string
   avatarUrl?: string | null
   unassignedCount: number
   children: React.ReactNode
@@ -17,6 +18,7 @@ type Props = {
 export function AdminShell({
   adminId,
   adminName,
+  adminRole,
   avatarUrl,
   unassignedCount,
   children,
@@ -51,6 +53,7 @@ export function AdminShell({
       <AdminSidebar
         adminId={adminId}
         adminName={adminName}
+        adminRole={adminRole}
         avatarUrl={avatarUrl}
         unassignedCount={unassignedCount}
         isOpen={sidebarOpen}

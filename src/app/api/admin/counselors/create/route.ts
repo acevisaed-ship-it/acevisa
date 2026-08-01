@@ -2,17 +2,37 @@ import { requireAdminApi } from '@/lib/admin/requireAdminApi'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
+const CREATABLE_ROLES_BY_ADMIN = ['counselor', 'receptionist'] as const
+const CREATABLE_ROLES_BY_CEO = ['counselor', 'receptionist', 'admin'] as const
+
 export async function POST(request: Request) {
-  const { error: authError } = await requireAdminApi()
+  const { admin: requester, error: authError } = await requireAdminApi()
   if (authError) return authError
 
-  const { firstName, lastName, phone, email, password } = await request.json() as {
+  const { firstName, lastName, phone, email, password, role, branchId } = await request.json() as {
     firstName?: string
     lastName?: string
     phone?: string
     email?: string
     password?: string
+    role?: string
+    branchId?: string
   }
+
+  const isCeo = requester.role === 'ceo'
+  const requestedRole = role || 'counselor'
+  const allowedRoles = isCeo ? CREATABLE_ROLES_BY_CEO : CREATABLE_ROLES_BY_ADMIN
+
+  if (!allowedRoles.includes(requestedRole as never)) {
+    return NextResponse.json(
+      { error: `You are not allowed to create a "${requestedRole}" account` },
+      { status: 403 }
+    )
+  }
+
+  // Branch Managers can only create staff within their own branch.
+  // CEO can target any branch (or none, for another CEO — not exposed via this form).
+  const targetBranchId = isCeo ? (branchId || null) : requester.branch_id
 
   if (!firstName?.trim() || !lastName?.trim() || !email?.trim() || !password) {
     return NextResponse.json({ error: 'All fields are required' }, { status: 400 })
@@ -70,10 +90,11 @@ export async function POST(request: Request) {
       name: fullName,
       email: email.toLowerCase(),
       phone: phone?.trim() || null,
-      role: 'counselor',
+      role: requestedRole,
+      branch_id: targetBranchId,
       status: 'active',
     })
-    .select('id, name, email, phone, status, created_at')
+    .select('id, name, email, phone, role, status, created_at')
     .single()
 
   if (insertError || !counselor) {

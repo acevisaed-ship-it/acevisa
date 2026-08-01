@@ -1,21 +1,37 @@
+import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { EXPENSE_CATEGORIES, type ExpenseCategory } from '@/lib/admin/dealTypes'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
   const url = new URL(request.url)
   const category = url.searchParams.get('category')
   const month = url.searchParams.get('month') // YYYY-MM
 
+  const branchScoped = isBranchScopedAdmin(admin)
   const supabase = createAdminClient()
+
+  let branchCounselorIds: string[] | null = null
+  if (branchScoped) {
+    const { data: branchCounselors } = await supabase
+      .from('counselors')
+      .select('id')
+      .eq('branch_id', admin.branch_id)
+    branchCounselorIds = (branchCounselors ?? []).map((c) => c.id)
+  }
+
   let query = supabase
     .from('expenses')
-    .select('id, category, description, amount, currency, paid_at, notes, created_at')
+    .select('id, category, description, amount, currency, paid_at, notes, created_at, counselor_id')
     .order('paid_at', { ascending: false })
+
+  if (branchCounselorIds) {
+    query = query.in('counselor_id', branchCounselorIds.length > 0 ? branchCounselorIds : [''])
+  }
 
   if (category && EXPENSE_CATEGORIES.includes(category as ExpenseCategory)) {
     query = query.eq('category', category)
@@ -59,6 +75,17 @@ export async function POST(request: Request) {
   }
 
   const supabase = createAdminClient()
+  if (isBranchScopedAdmin(admin) && counselor_id) {
+    const { data: counselorRow } = await supabase
+      .from('counselors')
+      .select('branch_id')
+      .eq('id', counselor_id)
+      .single()
+    if (!counselorRow || counselorRow.branch_id !== admin.branch_id) {
+      return NextResponse.json({ error: 'Counselor not in your branch' }, { status: 403 })
+    }
+  }
+
   const { data, error: insertError } = await supabase
     .from('expenses')
     .insert({

@@ -12,14 +12,27 @@ interface Counselor {
   created_at: string
 }
 
+type Branch = { id: string; name: string }
+
 const inputCls = 'min-h-[44px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input'
 
-export function CounselorAccountsPanel() {
+const rolesForAdmin = [
+  { value: 'counselor', label: 'Counselor' },
+  { value: 'receptionist', label: 'Receptionist' },
+]
+const rolesForCeo = [
+  ...rolesForAdmin,
+  { value: 'admin', label: 'Branch Manager' },
+]
+
+export function CounselorAccountsPanel({ isCeo = false }: { isCeo?: boolean }) {
   const [counselors, setCounselors] = useState<Counselor[]>([])
   const [loadingList, setLoadingList] = useState(true)
+  const [branches, setBranches] = useState<Branch[]>([])
 
   const [form, setForm] = useState({
     firstName: '', lastName: '', phone: '', email: '', password: '', confirm: '',
+    role: 'counselor', branchId: '',
   })
   const [showPw, setShowPw] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
@@ -40,10 +53,22 @@ export function CounselorAccountsPanel() {
 
   useEffect(() => { loadCounselors() }, [])
 
+  useEffect(() => {
+    if (!isCeo) return
+    fetch('/api/admin/branches')
+      .then((r) => r.json())
+      .then((d) => setBranches(d.branches || []))
+  }, [isCeo])
+
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
     setCreateError(null)
     setCreateSuccess(null)
+
+    if (isCeo && !form.branchId) {
+      setCreateError('Please select a branch')
+      return
+    }
 
     if (!form.email.toLowerCase().endsWith('@acevisa.co')) {
       setCreateError('Email must end with @acevisa.co')
@@ -68,6 +93,8 @@ export function CounselorAccountsPanel() {
         phone: form.phone,
         email: form.email,
         password: form.password,
+        role: form.role,
+        branchId: form.branchId || undefined,
       }),
     })
     const data = await res.json()
@@ -79,7 +106,7 @@ export function CounselorAccountsPanel() {
     }
 
     setCreateSuccess(`${form.firstName} ${form.lastName} has been added. They can now log in at /login.`)
-    setForm({ firstName: '', lastName: '', phone: '', email: '', password: '', confirm: '' })
+    setForm({ firstName: '', lastName: '', phone: '', email: '', password: '', confirm: '', role: 'counselor', branchId: '' })
     loadCounselors()
   }
 
@@ -217,6 +244,36 @@ export function CounselorAccountsPanel() {
               placeholder="03XX XXXXXXX"
               className={inputCls}
             />
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-medium text-white/60">Role</label>
+              <select
+                value={form.role}
+                onChange={(e) => setForm({ ...form, role: e.target.value })}
+                className={inputCls}
+              >
+                {(isCeo ? rolesForCeo : rolesForAdmin).map((r) => (
+                  <option key={r.value} value={r.value}>{r.label}</option>
+                ))}
+              </select>
+            </div>
+            {isCeo && (
+              <div>
+                <label className="mb-1 block text-xs font-medium text-white/60">Branch</label>
+                <select
+                  value={form.branchId}
+                  onChange={(e) => setForm({ ...form, branchId: e.target.value })}
+                  className={inputCls}
+                >
+                  <option value="">Select branch…</option>
+                  {branches.map((b) => (
+                    <option key={b.id} value={b.id}>{b.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
           <div>
