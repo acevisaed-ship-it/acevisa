@@ -8,6 +8,7 @@ import { formatPKTRegistrationDate } from '@/lib/pkt'
 export type CounselorClientRow = {
   id: string
   name: string
+  client_code: string | null
   email: string | null
   phone: string
   city: string | null
@@ -31,6 +32,7 @@ export function CounselorClientsList({ clients, basePath = '/dashboard' }: Props
     return clients.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
+        (c.client_code && c.client_code.toLowerCase().includes(q)) ||
         (c.email && c.email.toLowerCase().includes(q)) ||
         (c.phone && c.phone.toLowerCase().includes(q))
     )
@@ -44,7 +46,7 @@ export function CounselorClientsList({ clients, basePath = '/dashboard' }: Props
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name, email or phone…"
+          placeholder="Search by name, ID, email or phone…"
           className="min-h-[44px] w-full max-w-sm rounded-full px-4 py-2.5 text-sm outline-none glass-input"
         />
       </div>
@@ -85,6 +87,9 @@ export function CounselorClientsList({ clients, basePath = '/dashboard' }: Props
                           </span>
                         )}
                       </div>
+                      {client.client_code && (
+                        <p className="font-mono text-xs font-semibold text-orange/80">{client.client_code}</p>
+                      )}
                       {client.email && (
                         <p className="text-xs text-white/40">{client.email}</p>
                       )}

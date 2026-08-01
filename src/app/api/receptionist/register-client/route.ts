@@ -2,6 +2,7 @@ import { requireReceptionistApi } from '@/lib/receptionist/requireReceptionistAp
 import { createAdminClient } from '@/lib/supabase/server'
 import { sendEmail, studentWelcomeEmailHtml } from '@/lib/email'
 import { logStaffActivity } from '@/lib/activityLog'
+import { createNotification } from '@/lib/notifications'
 import { NextResponse } from 'next/server'
 
 function generateTempPassword() {
@@ -25,9 +26,10 @@ export async function POST(request: Request) {
     language?: string
     interested_in?: string
     target_country?: string
+    counselorId?: string
   }
 
-  const { name, phone, email, city, language, interested_in, target_country } = body
+  const { name, phone, email, city, language, interested_in, target_country, counselorId } = body
 
   if (!name?.trim() || !phone?.trim() || !email?.trim() || !language?.trim()) {
     return NextResponse.json(
@@ -66,6 +68,25 @@ export async function POST(request: Request) {
     )
   }
 
+  let referredCounselor: { id: string; name: string } | null = null
+  if (counselorId) {
+    const { data: counselorRow } = await supabase
+      .from('counselors')
+      .select('id, name, role, status, branch_id')
+      .eq('id', counselorId)
+      .maybeSingle()
+
+    if (
+      !counselorRow ||
+      counselorRow.role !== 'counselor' ||
+      counselorRow.status !== 'active' ||
+      counselorRow.branch_id !== receptionist.branch_id
+    ) {
+      return NextResponse.json({ error: 'Invalid counselor selection' }, { status: 400 })
+    }
+    referredCounselor = { id: counselorRow.id, name: counselorRow.name }
+  }
+
   const tempPassword = generateTempPassword()
 
   // Create the Supabase Auth user with the preset password directly (no magic-link
@@ -97,6 +118,7 @@ export async function POST(request: Request) {
       ad_source: 'receptionist',
       branch_id: receptionist.branch_id,
       registered_by: receptionist.id,
+      counselor_id: referredCounselor?.id ?? null,
       pipeline_stage: 1,
       qualification_score: 0,
       auth_user_id: authUser.user.id,
@@ -125,17 +147,34 @@ export async function POST(request: Request) {
     }),
   })
 
+  if (referredCounselor) {
+    await createNotification({
+      counselorId: referredCounselor.id,
+      type: 'chat_message',
+      title: `New client assigned — ${newClient.name}`,
+      body: `Registered and referred to you directly by reception.`,
+      clientId: newClient.id,
+    })
+  }
+
   await logStaffActivity({
     counselorId: receptionist.id,
     actorRole: 'receptionist',
     actionType: 'client_registered',
-    description: `Receptionist ${receptionist.name} registered new client ${newClient.name} (${newClient.client_code})`,
-    metadata: { clientId: newClient.id, clientCode: newClient.client_code },
+    description: `Receptionist ${receptionist.name} registered new client ${newClient.name} (${newClient.client_code})${
+      referredCounselor ? ` and referred them to ${referredCounselor.name}` : ''
+    }`,
+    metadata: {
+      clientId: newClient.id,
+      clientCode: newClient.client_code,
+      referredCounselorId: referredCounselor?.id ?? null,
+    },
   })
 
   return NextResponse.json({
     success: true,
     clientId: newClient.id,
     clientCode: newClient.client_code,
+    referredCounselorName: referredCounselor?.name ?? null,
   })
 }

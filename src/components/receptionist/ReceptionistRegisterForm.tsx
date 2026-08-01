@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type FormEvent } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 
@@ -24,6 +24,7 @@ interface FormState {
   language: (typeof languages)[number]
   interested_in: (typeof services)[number]
   target_country: string
+  counselorId: string
 }
 
 const emptyForm: FormState = {
@@ -34,13 +35,22 @@ const emptyForm: FormState = {
   language: 'Urdu',
   interested_in: 'Study Visa',
   target_country: 'United Kingdom',
+  counselorId: '',
 }
 
 export function ReceptionistRegisterForm() {
   const [form, setForm] = useState<FormState>(emptyForm)
+  const [counselors, setCounselors] = useState<{ id: string; name: string }[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<{ name: string; clientCode: string } | null>(null)
+  const [success, setSuccess] = useState<{ name: string; clientCode: string; counselorName: string | null } | null>(null)
+
+  useEffect(() => {
+    fetch('/api/receptionist/branch-counselors')
+      .then((res) => res.json())
+      .then((data) => setCounselors(data.counselors ?? []))
+      .catch(() => {})
+  }, [])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -61,7 +71,7 @@ export function ReceptionistRegisterForm() {
         return
       }
 
-      setSuccess({ name: form.name, clientCode: data.clientCode })
+      setSuccess({ name: form.name, clientCode: data.clientCode, counselorName: data.referredCounselorName ?? null })
       setForm(emptyForm)
     } catch {
       setError('Network error — please try again')
@@ -76,6 +86,9 @@ export function ReceptionistRegisterForm() {
         <p className="text-sm font-medium text-bg/70">Account created</p>
         <p className="mt-2 text-2xl font-bold text-bg">{success.name}</p>
         <p className="mt-1 font-mono text-lg font-bold text-orange">{success.clientCode}</p>
+        {success.counselorName && (
+          <p className="mt-2 text-sm text-bg/70">Referred to <span className="font-semibold">{success.counselorName}</span></p>
+        )}
         <p className="mt-4 text-sm text-bg/60">
           A welcome email with their portal ID and login password has been sent.
         </p>
@@ -173,6 +186,20 @@ export function ReceptionistRegisterForm() {
             ))}
           </select>
         </div>
+      </div>
+
+      <div>
+        <label className={labelCls}>Refer to counselor (optional)</label>
+        <select
+          value={form.counselorId}
+          onChange={(e) => setForm({ ...form, counselorId: e.target.value })}
+          className={inputCls}
+        >
+          <option value="">Leave unassigned (Admin will assign)</option>
+          {counselors.map((c) => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </select>
       </div>
 
       {error && (

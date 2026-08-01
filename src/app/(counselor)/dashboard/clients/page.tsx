@@ -10,13 +10,14 @@ export default async function ClientsPage() {
 
   const { data: clients } = await supabase
     .from('clients')
-    .select('id, name, email, phone, city, pipeline_stage, qualification_score, registration_date, status')
+    .select('id, name, client_code, email, phone, city, pipeline_stage, qualification_score, registration_date, status')
     .eq('counselor_id', counselor.id)
     .order('registration_date', { ascending: false })
 
   const rows: CounselorClientRow[] = (clients ?? []).map((c) => ({
     id: c.id,
     name: c.name,
+    client_code: c.client_code ?? null,
     email: c.email ?? null,
     phone: c.phone,
     city: c.city ?? null,

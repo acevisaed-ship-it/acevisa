@@ -1,3 +1,4 @@
+import { ReceptionistLookup } from '@/components/receptionist/ReceptionistLookup'
 import { ReceptionistRegisterForm } from '@/components/receptionist/ReceptionistRegisterForm'
 
 export default function ReceptionistPage() {
@@ -10,6 +11,7 @@ export default function ReceptionistPage() {
           credentials will be created and emailed to them automatically.
         </p>
       </div>
+      <ReceptionistLookup />
       <ReceptionistRegisterForm />
     </div>
   )

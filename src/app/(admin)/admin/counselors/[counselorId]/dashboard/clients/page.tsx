@@ -19,7 +19,7 @@ export default async function AdminCounselorClientsPage({ params }: Props) {
       .single(),
     supabase
       .from('clients')
-      .select('id, name, email, phone, city, pipeline_stage, qualification_score, registration_date')
+      .select('id, name, client_code, email, phone, city, pipeline_stage, qualification_score, registration_date')
       .eq('counselor_id', counselorId)
       .order('registration_date', { ascending: false }),
   ])
@@ -31,6 +31,7 @@ export default async function AdminCounselorClientsPage({ params }: Props) {
   const rows: CounselorClientRow[] = (clients ?? []).map((c) => ({
     id: c.id,
     name: c.name,
+    client_code: c.client_code ?? null,
     email: (c as Record<string, unknown>).email as string | null ?? null,
     phone: c.phone,
     city: c.city ?? null,
