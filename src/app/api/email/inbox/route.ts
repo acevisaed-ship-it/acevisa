@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getAuthenticatedCounselor } from '@/lib/supabase/server'
 import { getCounselorEmailConfig } from '@/lib/email/config'
 import { createImapClient } from '@/lib/email/imap'
+import { processDueScheduledEmails } from '@/lib/email/processScheduled'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -10,6 +11,13 @@ export async function GET(request: Request) {
   const counselor = await getAuthenticatedCounselor()
   if (!counselor) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // Flush any "send later" emails that are due (best-effort)
+  try {
+    await processDueScheduledEmails(counselor.id)
+  } catch {
+    // ignore — inbox should still load
   }
 
   const config = await getCounselorEmailConfig()

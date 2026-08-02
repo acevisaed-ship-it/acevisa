@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Inbox, Send, RefreshCw, Pencil, X, ChevronLeft, Loader2, Mail, MailOpen, Paperclip, Trash2 } from 'lucide-react'
+import { Inbox, Send, RefreshCw, Pencil, X, ChevronLeft, Loader2, Mail, MailOpen, Paperclip, Trash2, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type EmailSummary = {
@@ -18,9 +18,11 @@ type EmailDetail = {
   subject: string
   from: string
   to: string
+  cc?: string
   date: string
   html: string
   text: string
+  error?: string
 }
 
 function timeAgo(iso: string) {
@@ -33,6 +35,20 @@ function timeAgo(iso: string) {
   const days = Math.floor(hrs / 24)
   if (days < 7) return `${days}d ago`
   return new Date(iso).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' })
+}
+
+function toLocalInputValue(d: Date) {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+function wrapEmailHtml(html: string) {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><base target="_blank"/><style>
+    body{margin:16px;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:14px;line-height:1.5;color:#111;background:#fff;word-wrap:break-word;}
+    img{max-width:100%;height:auto;}
+    a{color:#1a56db;}
+    pre{white-space:pre-wrap;}
+  </style></head><body>${html}</body></html>`
 }
 
 function NotConnected({ error, reason }: { error?: string | null; reason?: string | null }) {
@@ -75,12 +91,21 @@ function ComposeModal({
   replyTo?: { to: string; subject: string; uid: number }
 }) {
   const [to, setTo] = useState(replyTo?.to ?? '')
+  const [cc, setCc] = useState('')
+  const [bcc, setBcc] = useState('')
+  const [showCcBcc, setShowCcBcc] = useState(false)
   const [subject, setSubject] = useState(replyTo ? `Re: ${replyTo.subject}` : '')
   const [body, setBody] = useState('')
   const [attachments, setAttachments] = useState<File[]>([])
+  const [scheduleEnabled, setScheduleEnabled] = useState(false)
+  const [scheduleAt, setScheduleAt] = useState(() => {
+    const d = new Date(Date.now() + 60 * 60 * 1000)
+    return toLocalInputValue(d)
+  })
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sent, setSent] = useState(false)
+  const [scheduledMsg, setScheduledMsg] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   function addFiles(files: FileList | null) {
@@ -93,23 +118,35 @@ function ComposeModal({
   }
 
   async function handleSend() {
-    if (!to || !subject || !body) { setError('All fields required'); return }
+    if (!to || !subject || !body) { setError('To, subject, and message are required'); return }
+    if (scheduleEnabled && attachments.length) {
+      setError('Scheduled emails cannot include attachments yet. Send now, or remove attachments.')
+      return
+    }
     setSending(true)
     setError(null)
 
     const formData = new FormData()
     formData.append('to', to)
+    if (cc.trim()) formData.append('cc', cc)
+    if (bcc.trim()) formData.append('bcc', bcc)
     formData.append('subject', subject)
     formData.append('text', body)
     if (replyTo) formData.append('replyTo', String(replyTo.uid))
+    if (scheduleEnabled && scheduleAt) {
+      formData.append('scheduleAt', new Date(scheduleAt).toISOString())
+    }
     attachments.forEach((f) => formData.append('attachments', f))
 
     const res = await fetch('/api/email/send', { method: 'POST', body: formData })
     const data = await res.json()
     setSending(false)
     if (!res.ok) { setError(data.error ?? 'Send failed'); return }
+    if (data.scheduled) {
+      setScheduledMsg(`Scheduled for ${new Date(data.sendAt).toLocaleString()}`)
+    }
     setSent(true)
-    setTimeout(onClose, 1500)
+    setTimeout(onClose, 1600)
   }
 
   const inputCls = 'w-full min-h-[44px] rounded-xl px-3 py-2 text-sm outline-none glass-input'
@@ -117,7 +154,7 @@ function ComposeModal({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center sm:px-4" onClick={onClose}>
       <div
-        className="flex w-full flex-col dark-modal rounded-t-2xl p-6 sm:max-w-2xl sm:rounded-2xl"
+        className="flex w-full max-h-[90vh] flex-col overflow-y-auto dark-modal rounded-t-2xl p-6 sm:max-w-2xl sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
@@ -126,13 +163,40 @@ function ComposeModal({
         </div>
 
         {sent ? (
-          <p className="py-8 text-center text-sm text-green">✓ Sent successfully</p>
+          <p className="py-8 text-center text-sm text-green">
+            {scheduledMsg ? `✓ ${scheduledMsg}` : '✓ Sent successfully'}
+          </p>
         ) : (
           <div className="flex flex-col gap-3">
             <div>
-              <label className="mb-1 block text-xs text-white/50">To</label>
+              <div className="mb-1 flex items-center justify-between">
+                <label className="block text-xs text-white/50">To</label>
+                {!showCcBcc && (
+                  <button
+                    type="button"
+                    onClick={() => setShowCcBcc(true)}
+                    className="text-[11px] text-white/40 hover:text-white/70"
+                  >
+                    Cc / Bcc
+                  </button>
+                )}
+              </div>
               <input value={to} onChange={(e) => setTo(e.target.value)} className={inputCls} placeholder="recipient@example.com" />
             </div>
+
+            {showCcBcc && (
+              <>
+                <div>
+                  <label className="mb-1 block text-xs text-white/50">Cc</label>
+                  <input value={cc} onChange={(e) => setCc(e.target.value)} className={inputCls} placeholder="cc@example.com" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-white/50">Bcc</label>
+                  <input value={bcc} onChange={(e) => setBcc(e.target.value)} className={inputCls} placeholder="bcc@example.com" />
+                </div>
+              </>
+            )}
+
             <div>
               <label className="mb-1 block text-xs text-white/50">Subject</label>
               <input value={subject} onChange={(e) => setSubject(e.target.value)} className={inputCls} placeholder="Subject" />
@@ -148,7 +212,27 @@ function ComposeModal({
               />
             </div>
 
-            {/* Attachments */}
+            <div className="rounded-xl border border-white/10 p-3">
+              <label className="flex items-center gap-2 text-xs text-white/60 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={scheduleEnabled}
+                  onChange={(e) => setScheduleEnabled(e.target.checked)}
+                  className="rounded border-white/30"
+                />
+                <Clock className="h-3.5 w-3.5" />
+                Schedule send
+              </label>
+              {scheduleEnabled && (
+                <input
+                  type="datetime-local"
+                  value={scheduleAt}
+                  onChange={(e) => setScheduleAt(e.target.value)}
+                  className={cn(inputCls, 'mt-2')}
+                />
+              )}
+            </div>
+
             <div>
               <input ref={fileRef} type="file" multiple className="hidden" onChange={(e) => addFiles(e.target.files)} />
               <button
@@ -180,8 +264,12 @@ function ComposeModal({
               disabled={sending}
               className="flex items-center justify-center gap-2 min-h-[44px] rounded-full bg-grad-blue crisp-on-dark text-sm font-bold text-white disabled:opacity-50"
             >
-              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              {sending ? 'Sending…' : `Send${attachments.length ? ` (${attachments.length} attachment${attachments.length > 1 ? 's' : ''})` : ''}`}
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : scheduleEnabled ? <Clock className="h-4 w-4" /> : <Send className="h-4 w-4" />}
+              {sending
+                ? (scheduleEnabled ? 'Scheduling…' : 'Sending…')
+                : scheduleEnabled
+                  ? 'Schedule send'
+                  : `Send${attachments.length ? ` (${attachments.length} attachment${attachments.length > 1 ? 's' : ''})` : ''}`}
             </button>
           </div>
         )}
@@ -203,13 +291,32 @@ function EmailDetailView({
 }) {
   const [detail, setDetail] = useState<EmailDetail | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
+    setLoading(true)
+    setError(null)
+    setDetail(null)
     fetch(`/api/email/message?uid=${uid}&folder=${folder}`)
-      .then((r) => r.json())
-      .then(setDetail)
+      .then(async (r) => {
+        const data = await r.json()
+        if (!r.ok || data.error) {
+          setError(data.error ?? 'Failed to load email')
+          return
+        }
+        setDetail(data)
+      })
+      .catch(() => setError('Failed to load email'))
       .finally(() => setLoading(false))
   }, [uid, folder])
+
+  function onIframeLoad() {
+    const iframe = iframeRef.current
+    if (!iframe?.contentDocument?.body) return
+    const h = iframe.contentDocument.body.scrollHeight
+    iframe.style.height = `${Math.max(320, Math.min(h + 32, 2000))}px`
+  }
 
   if (loading) return (
     <div className="flex items-center justify-center h-full">
@@ -217,7 +324,17 @@ function EmailDetailView({
     </div>
   )
 
-  if (!detail) return <p className="p-6 text-sm text-white/40">Failed to load email.</p>
+  if (error || !detail) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-3 p-6">
+        <p className="text-sm text-white/50">{error ?? 'Failed to load email.'}</p>
+        <button onClick={onBack} className="text-xs text-white/40 hover:text-white lg:hidden">Back</button>
+      </div>
+    )
+  }
+
+  const hasHtml = Boolean(detail.html?.trim())
+  const hasText = Boolean(detail.text?.trim())
 
   return (
     <div className="flex flex-col h-full">
@@ -237,21 +354,28 @@ function EmailDetailView({
         </button>
       </div>
 
-      <div className="px-4 py-3 border-b border-white/5 shrink-0">
+      <div className="px-4 py-3 border-b border-white/5 shrink-0 space-y-1">
         <p className="text-xs text-white/50"><span className="text-white/30">From:</span> {detail.from}</p>
         <p className="text-xs text-white/50"><span className="text-white/30">To:</span> {detail.to}</p>
+        {detail.cc ? (
+          <p className="text-xs text-white/50"><span className="text-white/30">Cc:</span> {detail.cc}</p>
+        ) : null}
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
-        {detail.html ? (
+        {hasHtml ? (
           <iframe
-            srcDoc={detail.html}
-            className="w-full min-h-[400px] rounded-xl bg-white"
-            sandbox="allow-same-origin"
+            ref={iframeRef}
+            srcDoc={wrapEmailHtml(detail.html)}
+            className="w-full min-h-[320px] rounded-xl bg-white border border-white/10"
+            sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"
             title="Email content"
+            onLoad={onIframeLoad}
           />
-        ) : (
+        ) : hasText ? (
           <pre className="whitespace-pre-wrap text-sm text-white/70 font-sans">{detail.text}</pre>
+        ) : (
+          <p className="text-sm text-white/40">This message has no readable text or HTML body.</p>
         )}
       </div>
     </div>
@@ -297,7 +421,6 @@ export function EmailClient() {
 
   return (
     <div className="flex h-[calc(100vh-120px)] rounded-2xl overflow-hidden border border-white/10 glass-card crisp-on-dark">
-      {/* Left sidebar — folders */}
       <div className="hidden w-48 shrink-0 flex-col border-r border-white/10 p-3 gap-1 lg:flex">
         <button
           onClick={() => { setComposing(true); setReplyTo(null) }}
@@ -335,7 +458,6 @@ export function EmailClient() {
         </button>
       </div>
 
-      {/* Email list */}
       <div className={cn(
         'flex w-full flex-col border-r border-white/10 lg:w-80 lg:shrink-0',
         selectedUid !== null && 'hidden lg:flex'
@@ -387,7 +509,6 @@ export function EmailClient() {
         )}
       </div>
 
-      {/* Email detail */}
       <div className={cn(
         'flex-1 min-w-0',
         selectedUid === null && 'hidden lg:flex lg:items-center lg:justify-center'
@@ -407,10 +528,9 @@ export function EmailClient() {
         )}
       </div>
 
-      {/* Compose modal */}
       {composing && (
         <ComposeModal
-          onClose={() => { setComposing(false); setReplyTo(null) }}
+          onClose={() => { setComposing(false); setReplyTo(null); loadInbox(true) }}
           replyTo={replyTo ? {
             to: replyTo.from,
             subject: replyTo.subject,

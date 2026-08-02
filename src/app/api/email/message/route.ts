@@ -28,6 +28,7 @@ export async function GET(request: Request) {
     let from = ''
     let date = ''
     let to = ''
+    let cc = ''
     let html = ''
     let text = ''
 
@@ -51,19 +52,26 @@ export async function GET(request: Request) {
       to = env.to?.map((t) =>
         `${t.name ?? ''} <${t.address ?? ''}>`.trim()
       ).join(', ') ?? ''
+      cc = env.cc?.map((t) =>
+        `${t.name ?? ''} <${t.address ?? ''}>`.trim()
+      ).join(', ') ?? ''
 
       const bodies = await downloadMessageBodies(client, uid, msg.bodyStructure)
       html = bodies.html
       text = bodies.text
 
-      await client.messageFlagsAdd({ uid }, ['\\Seen'])
+      try {
+        await client.messageFlagsAdd(String(uid), ['\\Seen'], { uid: true })
+      } catch {
+        // Non-fatal — body still returned
+      }
     } finally {
       lock.release()
     }
 
     await client.logout()
 
-    return NextResponse.json({ uid, subject, from, to, date, html, text })
+    return NextResponse.json({ uid, subject, from, to, cc, date, html, text })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to fetch message'
     console.error('IMAP fetch error:', err)
