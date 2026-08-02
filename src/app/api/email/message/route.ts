@@ -39,7 +39,8 @@ export async function GET(request: Request) {
         bodyStructure: true,
       }, { uid: true })
 
-      if (!msg?.envelope) {
+      // fetchOne returns `false` when the message is missing
+      if (msg === false || !msg.envelope) {
         return NextResponse.json({ error: 'Message not found' }, { status: 404 })
       }
 
