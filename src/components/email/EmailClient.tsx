@@ -35,23 +35,34 @@ function timeAgo(iso: string) {
   return new Date(iso).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' })
 }
 
-function NotConnected() {
+function NotConnected({ error, reason }: { error?: string | null; reason?: string | null }) {
   return (
     <div className="flex flex-col items-center justify-center h-full gap-4 text-center p-8">
       <Mail className="h-12 w-12 text-white/20" />
       <div>
         <p className="text-white font-semibold">Email not connected</p>
         <p className="mt-1 text-sm text-white/50">
-          Add your Bluehost credentials to <code className="text-orange">.env.local</code> to connect.
+          {reason === 'no_config'
+            ? 'Email credentials are not configured for this account.'
+            : error
+              ? 'Could not reach the mail server. See details below.'
+              : 'Add your Bluehost credentials to connect the shared mailbox.'}
         </p>
       </div>
-      <div className="rounded-xl glass-card border border-white/10 p-4 text-left text-xs font-mono text-white/60 w-full max-w-sm">
-        <p>EMAIL_HOST=mail.acevisa.co</p>
-        <p>EMAIL_PORT=993</p>
-        <p>EMAIL_USER=info@acevisa.co</p>
-        <p>EMAIL_PASSWORD=your_password</p>
-        <p>EMAIL_FROM=info@acevisa.co</p>
-      </div>
+      {error && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-left text-xs text-red-200 w-full max-w-md">
+          {error}
+        </div>
+      )}
+      {reason === 'no_config' && (
+        <div className="rounded-xl glass-card border border-white/10 p-4 text-left text-xs font-mono text-white/60 w-full max-w-sm">
+          <p>EMAIL_HOST=box2422.bluehost.com</p>
+          <p>EMAIL_PORT=993</p>
+          <p>EMAIL_USER=admin@aceyourvisa.com</p>
+          <p>EMAIL_PASSWORD=your_password</p>
+          <p>EMAIL_FROM=admin@aceyourvisa.com</p>
+        </div>
+      )}
     </div>
   )
 }
@@ -256,6 +267,8 @@ export function EmailClient() {
   const [selectedUid, setSelectedUid] = useState<number | null>(null)
   const [composing, setComposing] = useState(false)
   const [replyTo, setReplyTo] = useState<EmailDetail | null>(null)
+  const [connectionError, setConnectionError] = useState<string | null>(null)
+  const [connectionReason, setConnectionReason] = useState<string | null>(null)
 
   const loadInbox = useCallback(async (silent = false) => {
     if (!silent) setLoading(true)
@@ -265,6 +278,8 @@ export function EmailClient() {
       const data = await res.json()
       setConnected(data.connected)
       setEmails(data.emails ?? [])
+      setConnectionError(data.error ?? (res.status === 401 ? 'Please log in again.' : null))
+      setConnectionReason(data.reason ?? null)
     } finally {
       setLoading(false)
       setRefreshing(false)
@@ -277,7 +292,7 @@ export function EmailClient() {
 
   const FOLDERS = [
     { id: 'INBOX', label: 'Inbox', icon: Inbox },
-    { id: 'Sent', label: 'Sent', icon: Send },
+    { id: 'INBOX.Sent', label: 'Sent', icon: Send },
   ]
 
   return (
@@ -340,7 +355,7 @@ export function EmailClient() {
             <Loader2 className="h-6 w-6 animate-spin text-white/30" />
           </div>
         ) : connected === false ? (
-          <NotConnected />
+          <NotConnected error={connectionError} reason={connectionReason} />
         ) : emails.length === 0 ? (
           <div className="flex flex-col items-center justify-center flex-1 gap-2">
             <MailOpen className="h-8 w-8 text-white/20" />

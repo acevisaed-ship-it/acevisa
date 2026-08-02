@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import { getAuthenticatedCounselor } from '@/lib/supabase/server'
 import { getCounselorEmailConfig } from '@/lib/email/config'
 
+export const runtime = 'nodejs'
+export const maxDuration = 60
+
 export async function POST(request: Request) {
   const counselor = await getAuthenticatedCounselor()
   if (!counselor) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

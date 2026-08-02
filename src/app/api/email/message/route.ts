@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server'
 import { getAuthenticatedCounselor } from '@/lib/supabase/server'
 import { getCounselorEmailConfig } from '@/lib/email/config'
+import { createImapClient, downloadMessageBodies } from '@/lib/email/imap'
+
+export const runtime = 'nodejs'
+export const maxDuration = 60
 
 export async function GET(request: Request) {
   const counselor = await getAuthenticatedCounselor()
@@ -16,56 +20,42 @@ export async function GET(request: Request) {
   if (!uid) return NextResponse.json({ error: 'uid required' }, { status: 400 })
 
   try {
-    const { ImapFlow } = await import('imapflow')
-    const client = new ImapFlow({
-      host: config.host,
-      port: config.port,
-      secure: true,
-      auth: { user: config.user, pass: config.password },
-      logger: false,
-    })
-
+    const client = await createImapClient(config)
     await client.connect()
     const lock = await client.getMailboxLock(folder)
 
-    let html = ''
-    let text = ''
     let subject = ''
     let from = ''
     let date = ''
     let to = ''
+    let html = ''
+    let text = ''
 
     try {
-      for await (const msg of client.fetch(String(uid), {
+      const msg = await client.fetchOne(String(uid), {
         uid: true,
         envelope: true,
-        bodyParts: ['', 'TEXT', 'HTML', '1', '1.1', '1.2'],
-      })) {
-        const env = msg.envelope
-        if (!env) continue
+        bodyStructure: true,
+      }, { uid: true })
 
-        subject = env.subject ?? '(no subject)'
-        from = env.from?.[0]
-          ? `${env.from[0].name ?? ''} <${env.from[0].address ?? ''}>`.trim()
-          : 'Unknown'
-        date = env.date?.toISOString() ?? ''
-        to = env.to?.map((t: { name?: string; address?: string }) =>
-          `${t.name ?? ''} <${t.address ?? ''}>`.trim()
-        ).join(', ') ?? ''
-
-        if (msg.bodyParts) {
-          for (const [, buf] of msg.bodyParts) {
-            const str = buf.toString()
-            if (str.includes('<html') || str.includes('<body') || str.includes('<div')) {
-              html = str
-            } else if (!text) {
-              text = str
-            }
-          }
-        }
+      if (!msg?.envelope) {
+        return NextResponse.json({ error: 'Message not found' }, { status: 404 })
       }
 
-      // Mark as read
+      const env = msg.envelope
+      subject = env.subject ?? '(no subject)'
+      from = env.from?.[0]
+        ? `${env.from[0].name ?? ''} <${env.from[0].address ?? ''}>`.trim()
+        : 'Unknown'
+      date = env.date?.toISOString() ?? ''
+      to = env.to?.map((t) =>
+        `${t.name ?? ''} <${t.address ?? ''}>`.trim()
+      ).join(', ') ?? ''
+
+      const bodies = await downloadMessageBodies(client, uid, msg.bodyStructure)
+      html = bodies.html
+      text = bodies.text
+
       await client.messageFlagsAdd({ uid }, ['\\Seen'])
     } finally {
       lock.release()
@@ -75,7 +65,8 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ uid, subject, from, to, date, html, text })
   } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to fetch message'
     console.error('IMAP fetch error:', err)
-    return NextResponse.json({ error: 'Failed to fetch message' }, { status: 500 })
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

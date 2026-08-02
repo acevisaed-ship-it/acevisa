@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server'
 import { getAuthenticatedCounselor } from '@/lib/supabase/server'
 import { getCounselorEmailConfig } from '@/lib/email/config'
+import { createImapClient } from '@/lib/email/imap'
+
+export const runtime = 'nodejs'
+export const maxDuration = 60
 
 export async function GET(request: Request) {
   const counselor = await getAuthenticatedCounselor()
@@ -19,14 +23,7 @@ export async function GET(request: Request) {
   const limit = 30
 
   try {
-    const { ImapFlow } = await import('imapflow')
-    const client = new ImapFlow({
-      host: config.host,
-      port: config.port,
-      secure: true,
-      auth: { user: config.user, pass: config.password },
-      logger: false,
-    })
+    const client = await createImapClient(config)
 
     await client.connect()
     const lock = await client.getMailboxLock(folder)
@@ -50,8 +47,6 @@ export async function GET(request: Request) {
         for await (const msg of client.fetch(`${from}:${to}`, {
           envelope: true,
           flags: true,
-          bodyStructure: true,
-          bodyParts: ['TEXT'],
         })) {
           const env = msg.envelope
           if (!env) continue
@@ -82,9 +77,10 @@ export async function GET(request: Request) {
       connectedAs: config.user,
     })
   } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to connect to mail server'
     console.error('IMAP error:', err)
     return NextResponse.json(
-      { connected: false, error: 'Failed to connect to mail server', emails: [] },
+      { connected: false, error: message, emails: [] },
       { status: 500 }
     )
   }
