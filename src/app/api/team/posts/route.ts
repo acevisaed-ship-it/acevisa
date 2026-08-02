@@ -11,16 +11,20 @@ async function getIdentity() {
   return null
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const identity = await getIdentity()
   if (!identity) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { searchParams } = new URL(request.url)
+  const board = searchParams.get('board') || 'bulletin'
 
   const admin = createAdminClient()
   const { data: posts, error } = await admin
     .from('team_posts')
-    .select('id, author_id, author_name, title, content, pinned, created_at')
+    .select('id, author_id, author_name, title, content, pinned, board, due_date, created_at')
+    .eq('board', board)
     .order('pinned', { ascending: false })
-    .order('created_at', { ascending: false })
+    .order(board === 'deadlines' ? 'due_date' : 'created_at', { ascending: board === 'deadlines' })
     .limit(30)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -45,13 +49,23 @@ export async function POST(request: Request) {
   const identity = await getIdentity()
   if (!identity) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { title, content, pinned } = await request.json() as { title: string; content: string; pinned?: boolean }
+  const { title, content, pinned, board, due_date } = await request.json() as {
+    title: string; content: string; pinned?: boolean; board?: string; due_date?: string
+  }
   if (!title?.trim() || !content?.trim()) return NextResponse.json({ error: 'title and content required' }, { status: 400 })
 
   const admin = createAdminClient()
   const { data, error } = await admin
     .from('team_posts')
-    .insert({ author_id: identity.id, author_name: identity.name, title: title.trim(), content: content.trim(), pinned: pinned ?? false })
+    .insert({
+      author_id: identity.id,
+      author_name: identity.name,
+      title: title.trim(),
+      content: content.trim(),
+      pinned: pinned ?? false,
+      board: board || 'bulletin',
+      due_date: due_date || null,
+    })
     .select()
     .single()
 
