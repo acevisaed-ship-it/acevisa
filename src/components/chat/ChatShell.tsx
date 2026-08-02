@@ -176,7 +176,7 @@ export function ChatShell({ clientId, clientName }: Props) {
           setMessages((prev) => [
             ...prev,
             studentMsg as ChatMessage,
-            aiMsg as ChatMessage,
+            ...(aiMsg ? [aiMsg as ChatMessage] : []),
           ])
         }}
         disabled={isLoading}

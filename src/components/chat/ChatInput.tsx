@@ -345,7 +345,7 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
             </svg>
-            <span className="text-xs text-white/50">Sending voice note…</span>
+            <span className="text-xs text-white/50">Transcribing voice note…</span>
           </div>
         )}
 
@@ -380,7 +380,7 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
             onChange={(e) => onChange(e.target.value)}
             placeholder={
               recording       ? 'Recording…'
-              : voiceUploading ? 'Sending voice note…'
+              : voiceUploading ? 'Transcribing voice note…'
               : pendingFile    ? 'Add a caption (optional)'
               : 'Type your message…'
             }

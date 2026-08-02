@@ -234,7 +234,11 @@ export function ChatLayout({
 
   // ── Attachment sent callback ───────────────────────────────────────────
   const handleAttachmentSent = useCallback((studentMsg: unknown, aiMsg: unknown) => {
-    setMessages((prev) => [...prev, studentMsg as ChatMessage, aiMsg as ChatMessage])
+    setMessages((prev) => [
+      ...prev,
+      studentMsg as ChatMessage,
+      ...(aiMsg ? [aiMsg as ChatMessage] : []),
+    ])
     refocusInput()
   }, [refocusInput])
 

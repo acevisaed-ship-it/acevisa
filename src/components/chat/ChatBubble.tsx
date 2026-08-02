@@ -10,10 +10,12 @@ function AttachmentPreview({
   url,
   name,
   type,
+  transcript,
 }: {
   url: string
   name: string
   type: ChatAttachmentType | 'audio'
+  transcript?: string | null
 }) {
   if (type === 'audio') {
     return (
@@ -28,6 +30,9 @@ function AttachmentPreview({
           className="h-8 w-full max-w-[220px]"
           style={{ colorScheme: 'dark' }}
         />
+        {transcript && (
+          <p className="text-xs leading-relaxed opacity-90">{transcript}</p>
+        )}
       </div>
     )
   }
@@ -96,6 +101,10 @@ export function ChatBubble({ message, counselorName }: Props) {
     message.attachment_url && message.attachment_name && message.attachment_type
 
   const isFilePlaceholder = /^\[File: .+\]$/.test(message.message_text)
+  const isVoicePlaceholder = message.message_text === '[Voice note]'
+  const isVoiceMessage = message.attachment_type === 'audio'
+  const voiceTranscript = isVoiceMessage && !isVoicePlaceholder ? message.message_text : null
+  const hideTextBubble = isFilePlaceholder || isVoiceMessage
 
   const cardStyle = isAi
     ? AI_STYLE
@@ -130,11 +139,12 @@ export function ChatBubble({ message, counselorName }: Props) {
             url={message.attachment_url!}
             name={message.attachment_name!}
             type={message.attachment_type as ChatAttachmentType | 'audio'}
+            transcript={voiceTranscript}
           />
         </div>
       )}
 
-      {!isFilePlaceholder && (
+      {!hideTextBubble && (
         <div
           className={`max-w-[80%] overflow-hidden rounded-2xl px-4 py-3 text-sm leading-relaxed ${textColor}`}
           style={cardStyle}

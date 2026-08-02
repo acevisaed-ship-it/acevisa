@@ -1,5 +1,8 @@
+import { transcribeAudio } from '@/lib/transcribeAudio'
 import { createAdminClient } from '@/lib/supabase/server'
+import { getBaseUrl } from '@/lib/utils'
 import { NextResponse } from 'next/server'
+import type { ChatMessage } from '@/types'
 
 const MAX_BYTES = 5 * 1024 * 1024 // 5 MB
 
@@ -14,24 +17,21 @@ export async function POST(request: Request) {
 
   const supabase = createAdminClient()
 
-  // Verify client
   const { data: client } = await supabase
     .from('clients')
-    .select('id')
+    .select('id, language, counselor_active')
     .eq('id', clientId)
     .single()
   if (!client) return NextResponse.json({ error: 'Client not found' }, { status: 404 })
 
-  // Use the actual mimeType sent by the client (varies by browser/device).
-  // Strip ;codecs=opus etc. — Supabase bucket allowlist matches base types only.
   const mimeType = (formData.get('mimeType') as string | null) || audio.type || 'audio/webm'
   const baseMimeType = mimeType.split(';')[0].trim()
   const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('ogg') ? 'ogg' : 'webm'
 
-  // Upload audio blob to Supabase storage
   const timestamp = Date.now()
   const storagePath = `${clientId}/voice-${timestamp}.${ext}`
   const bytes = await audio.arrayBuffer()
+  const attachmentName = `voice-${timestamp}.${ext}`
 
   const { error: uploadError } = await supabase.storage
     .from('chat-attachments')
@@ -42,43 +42,95 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Voice upload failed' }, { status: 500 })
   }
 
-  // Generate 7-day signed URL for playback
   const { data: signed } = await supabase.storage
     .from('chat-attachments')
     .createSignedUrl(storagePath, 60 * 60 * 24 * 7)
 
   const audioUrl = signed?.signedUrl ?? ''
 
-  // Save student voice message — audio bubble, no transcription
+  const transcript = await transcribeAudio(bytes, baseMimeType, attachmentName, client.language)
+  const messageText = transcript ?? '[Voice note]'
+
   const { data: studentMsg } = await supabase
     .from('conversations')
     .insert({
       client_id: clientId,
-      message_text: '[Voice note]',
+      message_text: messageText,
       sender: 'student',
       stage_tag: 'voice_note',
       attachment_url: audioUrl,
-      attachment_name: `voice-${timestamp}.${ext}`,
+      attachment_name: attachmentName,
       attachment_type: 'audio',
     })
     .select('id, message_text, sender, timestamp, attachment_url, attachment_name, attachment_type')
     .single()
 
-  // AI acknowledgment — generic since we have no transcript
-  const { data: aiMsg } = await supabase
-    .from('conversations')
-    .insert({
-      client_id: clientId,
-      message_text: "I received your voice note! 🎙️ Your counselor will listen to it during your session. If you'd like me to respond now, feel free to type your question and I'll answer right away.",
-      sender: 'ai',
-      stage_tag: 'voice_response',
+  // Counselor is live — save voice note only, AI stays silent
+  if (client.counselor_active) {
+    return NextResponse.json({
+      studentMessage: studentMsg,
+      aiMessage: null,
+      audioUrl,
+      transcript,
     })
-    .select('id, message_text, sender, timestamp, attachment_url, attachment_name, attachment_type')
-    .single()
+  }
 
-  return NextResponse.json({
-    studentMessage: studentMsg,
-    aiMessage: aiMsg,
-    audioUrl,
-  })
+  // Transcription failed — ask student to type instead of a generic non-response
+  if (!transcript) {
+    const fallbackText =
+      "I received your voice note but couldn't make out the words clearly. Could you type your question and I'll answer right away?"
+
+    const { data: aiMsg } = await supabase
+      .from('conversations')
+      .insert({
+        client_id: clientId,
+        message_text: fallbackText,
+        sender: 'ai',
+        stage_tag: 'voice_response',
+      })
+      .select('id, message_text, sender, timestamp, attachment_url, attachment_name, attachment_type')
+      .single()
+
+    return NextResponse.json({
+      studentMessage: studentMsg,
+      aiMessage: aiMsg,
+      audioUrl,
+      transcript: null,
+    })
+  }
+
+  // Transcript available — run full AI chat pipeline
+  try {
+    const chatRes = await fetch(`${getBaseUrl()}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId, message: transcript, voiceNoteAlreadySaved: true }),
+    })
+
+    const chatData = await chatRes.json()
+
+    if (!chatRes.ok) {
+      console.error('[chat/voice] AI chat error:', chatData)
+      return NextResponse.json({ error: 'AI response failed' }, { status: 500 })
+    }
+
+    const aiMessage: ChatMessage | null = chatData.message
+      ? {
+          id: crypto.randomUUID(),
+          sender: 'ai',
+          message_text: chatData.message,
+          timestamp: new Date().toISOString(),
+        }
+      : null
+
+    return NextResponse.json({
+      studentMessage: studentMsg,
+      aiMessage,
+      audioUrl,
+      transcript,
+    })
+  } catch (err) {
+    console.error('[chat/voice] AI chat fetch failed:', err)
+    return NextResponse.json({ error: 'AI response failed' }, { status: 500 })
+  }
 }

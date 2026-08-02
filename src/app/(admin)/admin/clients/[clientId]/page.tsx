@@ -15,7 +15,7 @@ import { PsychologicalReadSection } from '@/components/brief/PsychologicalReadSe
 import { ServicePathwaySection } from '@/components/brief/ServicePathwaySection'
 import { TalkingPointsSection } from '@/components/brief/TalkingPointsSection'
 import { resolveAiProfile } from '@/lib/brief'
-import { createAdminClient, requireAdmin } from '@/lib/supabase/server'
+import { createAdminClient, requireAdmin, isBranchScoped } from '@/lib/supabase/server'
 import type { Client, Conversation, Document } from '@/types'
 import { ClientControls } from '@/app/(counselor)/dashboard/clients/[clientId]/ClientControls'
 import { PendingProfileUpdates } from '@/app/(counselor)/dashboard/clients/[clientId]/PendingProfileUpdates'
@@ -28,13 +28,14 @@ type Props = {
 
 export default async function AdminClientProfilePage({ params }: Props) {
   const { clientId } = await params
-  await requireAdmin()
+  const admin = await requireAdmin()
 
   const supabase = createAdminClient()
 
   const { data: client } = await supabase.from('clients').select('*').eq('id', clientId).single()
 
   if (!client) notFound()
+  if (isBranchScoped(admin) && client.branch_id !== admin.branch_id) notFound()
 
   const typedClient = client as Client
 
@@ -100,7 +101,16 @@ export default async function AdminClientProfilePage({ params }: Props) {
           >
             ← Back to all clients
           </Link>
-          <CopyPortalLink clientId={clientId} />
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={`/admin/clients/${clientId}/chat`}
+              className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ background: 'linear-gradient(145deg, #f5a24e 0%, #E48328 55%, #ca7220 100%)' }}
+            >
+              💬 Chat with Student
+            </Link>
+            <CopyPortalLink clientId={clientId} />
+          </div>
         </div>
 
         <div className="flex items-center justify-between">

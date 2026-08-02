@@ -1,3 +1,4 @@
+import { transcribeAudio } from '@/lib/transcribeAudio'
 import { createAdminClient, getAuthenticatedCounselor } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -16,11 +17,19 @@ export async function POST(request: Request) {
   if (audio.size > MAX_BYTES) return NextResponse.json({ error: 'Voice note too large (max 5 MB)' }, { status: 422 })
 
   const supabase = createAdminClient()
+
+  const { data: client } = await supabase
+    .from('clients')
+    .select('language')
+    .eq('id', clientId)
+    .single()
+
   const mimeType = (formData.get('mimeType') as string | null) || audio.type || 'audio/webm'
   const baseMimeType = mimeType.split(';')[0].trim()
   const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('ogg') ? 'ogg' : 'webm'
   const timestamp = Date.now()
   const storagePath = `${clientId}/voice-${timestamp}.${ext}`
+  const attachmentName = `voice-${timestamp}.${ext}`
   const bytes = await audio.arrayBuffer()
 
   const { error: uploadError } = await supabase.storage
@@ -36,16 +45,18 @@ export async function POST(request: Request) {
     .from('chat-attachments')
     .createSignedUrl(storagePath, 60 * 60 * 24 * 7)
 
+  const transcript = await transcribeAudio(bytes, baseMimeType, attachmentName, client?.language)
+
   const { data: message, error: insertError } = await supabase
     .from('conversations')
     .insert({
       client_id: clientId,
       sender: 'counselor',
       counselor_name: counselor.name,
-      message_text: '[Voice note]',
+      message_text: transcript ?? '[Voice note]',
       stage_tag: 'voice_note',
       attachment_url: signed?.signedUrl ?? '',
-      attachment_name: `voice-${timestamp}.${ext}`,
+      attachment_name: attachmentName,
       attachment_type: 'audio',
       timestamp: new Date().toISOString(),
     })

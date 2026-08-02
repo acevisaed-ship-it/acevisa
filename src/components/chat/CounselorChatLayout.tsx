@@ -14,6 +14,7 @@ type Props = {
   counselorId: string
   counselorName: string
   initialMessages: ChatMessage[]
+  backHref?: string
 }
 
 const ORANGE_GRADIENT = 'linear-gradient(145deg, #f5a24e 0%, #E48328 55%, #ca7220 100%)'
@@ -24,6 +25,7 @@ export function CounselorChatLayout({
   counselorId,
   counselorName,
   initialMessages,
+  backHref,
 }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
   const [inputValue, setInputValue] = useState('')
@@ -142,7 +144,7 @@ export function CounselorChatLayout({
       {/* Header */}
       <div className="flex shrink-0 items-center gap-3 border-b border-white/10 bg-white/5 px-4 py-3">
         <Link
-          href={`/dashboard/clients/${clientId}`}
+          href={backHref ?? `/dashboard/clients/${clientId}`}
           className="flex h-8 w-8 items-center justify-center rounded-full border border-white/15 transition-colors hover:border-white/30"
         >
           <ArrowLeft className="h-4 w-4 text-white/70" />

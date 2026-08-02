@@ -305,7 +305,7 @@ export async function POST(request: Request) {
   const studentMsgTime = new Date()
   let trackingId: string | undefined
 
-  const { clientId, message } = await request.json()
+  const { clientId, message, voiceNoteAlreadySaved } = await request.json()
 
   if (!clientId || !message) {
     return NextResponse.json(
@@ -379,12 +379,14 @@ Use this context to make your opening message highly relevant to their specific 
   }
 
   if (!isInit) {
-    await supabase.from('conversations').insert({
-      client_id: clientId,
-      message_text: message,
-      sender: 'student',
-      stage_tag: 'active',
-    })
+    if (!voiceNoteAlreadySaved) {
+      await supabase.from('conversations').insert({
+        client_id: clientId,
+        message_text: message,
+        sender: 'student',
+        stage_tag: 'active',
+      })
+    }
 
     const { data: trackingRow } = await supabase
       .from('response_tracking')
