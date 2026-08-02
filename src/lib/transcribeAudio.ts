@@ -18,10 +18,7 @@ export async function transcribeAudio(
   language?: string | null
 ): Promise<string | null> {
   const apiKey = process.env.OPENAI_API_KEY
-  if (!apiKey) {
-    console.error('[transcribe] OPENAI_API_KEY not set')
-    return null
-  }
+  if (!apiKey) return null
 
   const formData = new FormData()
   formData.append('file', new Blob([audioBytes], { type: mimeType }), filename)

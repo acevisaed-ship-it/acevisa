@@ -15,7 +15,7 @@ export default async function AdminClientChatPage({ params }: Props) {
 
   const { data: client } = await supabase
     .from('clients')
-    .select('id, name, branch_id')
+    .select('id, name, branch_id, language')
     .eq('id', clientId)
     .single()
 
@@ -34,6 +34,7 @@ export default async function AdminClientChatPage({ params }: Props) {
       clientName={client.name}
       counselorId={admin.id}
       counselorName={admin.name}
+      clientLanguage={client.language ?? null}
       initialMessages={(messages ?? []) as ChatMessage[]}
       backHref={`/admin/clients/${clientId}`}
     />

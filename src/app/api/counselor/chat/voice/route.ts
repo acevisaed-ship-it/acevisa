@@ -11,6 +11,7 @@ export async function POST(request: Request) {
   const formData = await request.formData()
   const clientId = formData.get('clientId') as string | null
   const audio = formData.get('audio') as File | null
+  const clientTranscript = (formData.get('transcript') as string | null)?.trim() || null
 
   if (!clientId) return NextResponse.json({ error: 'clientId required' }, { status: 400 })
   if (!audio) return NextResponse.json({ error: 'audio required' }, { status: 400 })
@@ -45,7 +46,9 @@ export async function POST(request: Request) {
     .from('chat-attachments')
     .createSignedUrl(storagePath, 60 * 60 * 24 * 7)
 
-  const transcript = await transcribeAudio(bytes, baseMimeType, attachmentName, client?.language)
+  const transcript =
+    clientTranscript ||
+    (await transcribeAudio(bytes, baseMimeType, attachmentName, client?.language))
 
   const { data: message, error: insertError } = await supabase
     .from('conversations')

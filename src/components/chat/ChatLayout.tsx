@@ -42,6 +42,7 @@ type Props = {
   counselorName: string | null
   initialMeetings: Meeting[]
   clientAvatarUrl?: string | null
+  clientLanguage?: string | null
 }
 
 // ── Glass panel style ──────────────────────────────────────────────────────
@@ -65,6 +66,7 @@ export function ChatLayout({
   counselorName,
   initialMeetings,
   clientAvatarUrl,
+  clientLanguage,
 }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = useState('')
@@ -233,14 +235,28 @@ export function ChatLayout({
   }, [clientId, isLoading, refocusInput])
 
   // ── Attachment sent callback ───────────────────────────────────────────
-  const handleAttachmentSent = useCallback((studentMsg: unknown, aiMsg: unknown) => {
-    setMessages((prev) => [
-      ...prev,
-      studentMsg as ChatMessage,
-      ...(aiMsg ? [aiMsg as ChatMessage] : []),
-    ])
+  const handleAttachmentSent = useCallback(async (studentMsg: unknown, aiMsg: unknown) => {
+    try {
+      const histRes = await fetch(`/api/chat/history?clientId=${clientId}`)
+      const histData = await histRes.json()
+      if (histData.messages?.length) {
+        setMessages(histData.messages)
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          studentMsg as ChatMessage,
+          ...(aiMsg ? [aiMsg as ChatMessage] : []),
+        ])
+      }
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        studentMsg as ChatMessage,
+        ...(aiMsg ? [aiMsg as ChatMessage] : []),
+      ])
+    }
     refocusInput()
-  }, [refocusInput])
+  }, [clientId, refocusInput])
 
   const handleMeetingSuccess = useCallback(() => {
     setShowMeetingModal(false)
@@ -283,6 +299,7 @@ export function ChatLayout({
       <ChatInput
         ref={inputRef}
         clientId={clientId}
+        clientLanguage={clientLanguage}
         value={inputValue}
         onChange={setInputValue}
         onSend={handleSend}

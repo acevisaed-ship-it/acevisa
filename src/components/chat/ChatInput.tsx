@@ -94,10 +94,11 @@ type Props = {
   onSend?: (message: string) => void
   onAttachmentSent?: (studentMsg: unknown, aiMsg: unknown) => void
   disabled?: boolean
+  clientLanguage?: string | null
 }
 
 export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
-  { clientId, value, onChange, onSend, onAttachmentSent, disabled = false },
+  { clientId, value, onChange, onSend, onAttachmentSent, disabled = false, clientLanguage },
   ref,
 ) {
   // ── Panel state ─────────────────────────────────────────────────────────
@@ -115,13 +116,15 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
 
   const { recording, seconds: recordSeconds, start: startRecording, stop: stopRecording, cancel: cancelRecording } =
     useVoiceRecorder({
-      onRecorded: async (blob, mimeType, ext) => {
+      language: clientLanguage,
+      onRecorded: async (blob, mimeType, ext, transcript) => {
         setVoiceUploading(true)
         try {
           const fd = new FormData()
           fd.append('clientId', clientId)
           fd.append('mimeType', mimeType)
           fd.append('audio', blob, `voice-${Date.now()}.${ext}`)
+          if (transcript) fd.append('transcript', transcript)
           const res = await fetch('/api/chat/voice', { method: 'POST', body: fd })
           const data = await res.json()
           if (!res.ok) throw new Error(data.error || 'Upload failed')

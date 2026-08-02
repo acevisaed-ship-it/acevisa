@@ -10,6 +10,7 @@ export async function POST(request: Request) {
   const formData = await request.formData()
   const clientId = formData.get('clientId') as string | null
   const audio = formData.get('audio') as File | null
+  const clientTranscript = (formData.get('transcript') as string | null)?.trim() || null
 
   if (!clientId) return NextResponse.json({ error: 'clientId required' }, { status: 400 })
   if (!audio) return NextResponse.json({ error: 'audio required' }, { status: 400 })
@@ -47,8 +48,9 @@ export async function POST(request: Request) {
     .createSignedUrl(storagePath, 60 * 60 * 24 * 7)
 
   const audioUrl = signed?.signedUrl ?? ''
-
-  const transcript = await transcribeAudio(bytes, baseMimeType, attachmentName, client.language)
+  const transcript =
+    clientTranscript ||
+    (await transcribeAudio(bytes, baseMimeType, attachmentName, client.language))
   const messageText = transcript ?? '[Voice note]'
 
   const { data: studentMsg } = await supabase
@@ -65,7 +67,6 @@ export async function POST(request: Request) {
     .select('id, message_text, sender, timestamp, attachment_url, attachment_name, attachment_type')
     .single()
 
-  // Counselor is live — save voice note only, AI stays silent
   if (client.counselor_active) {
     return NextResponse.json({
       studentMessage: studentMsg,
@@ -75,7 +76,6 @@ export async function POST(request: Request) {
     })
   }
 
-  // Transcription failed — ask student to type instead of a generic non-response
   if (!transcript) {
     const fallbackText =
       "I received your voice note but couldn't make out the words clearly. Could you type your question and I'll answer right away?"
@@ -99,7 +99,6 @@ export async function POST(request: Request) {
     })
   }
 
-  // Transcript available — run full AI chat pipeline
   try {
     const chatRes = await fetch(`${getBaseUrl()}/api/chat`, {
       method: 'POST',

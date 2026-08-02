@@ -16,7 +16,7 @@ export default async function CounselorChatPage({ params }: Props) {
 
   const { data: client } = await supabase
     .from('clients')
-    .select('id, name')
+    .select('id, name, language')
     .eq('id', clientId)
     .eq('counselor_id', counselor.id)
     .single()
@@ -35,6 +35,7 @@ export default async function CounselorChatPage({ params }: Props) {
       clientName={client.name}
       counselorId={counselor.id}
       counselorName={counselor.name}
+      clientLanguage={client.language ?? null}
       initialMessages={(messages ?? []) as ChatMessage[]}
     />
   )

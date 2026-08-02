@@ -15,9 +15,10 @@ const MEETING_SUCCESS_MSG =
 type Props = {
   clientId: string
   clientName: string
+  clientLanguage?: string | null
 }
 
-export function ChatShell({ clientId, clientName }: Props) {
+export function ChatShell({ clientId, clientName, clientLanguage }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -169,15 +170,30 @@ export function ChatShell({ clientId, clientName }: Props) {
 
       <ChatInput
         clientId={clientId}
+        clientLanguage={clientLanguage}
         value={inputValue}
         onChange={setInputValue}
         onSend={handleSend}
-        onAttachmentSent={(studentMsg, aiMsg) => {
-          setMessages((prev) => [
-            ...prev,
-            studentMsg as ChatMessage,
-            ...(aiMsg ? [aiMsg as ChatMessage] : []),
-          ])
+        onAttachmentSent={async (studentMsg, aiMsg) => {
+          try {
+            const histRes = await fetch(`/api/chat/history?clientId=${clientId}`)
+            const histData = await histRes.json()
+            if (histData.messages?.length) {
+              setMessages(histData.messages)
+            } else {
+              setMessages((prev) => [
+                ...prev,
+                studentMsg as ChatMessage,
+                ...(aiMsg ? [aiMsg as ChatMessage] : []),
+              ])
+            }
+          } catch {
+            setMessages((prev) => [
+              ...prev,
+              studentMsg as ChatMessage,
+              ...(aiMsg ? [aiMsg as ChatMessage] : []),
+            ])
+          }
         }}
         disabled={isLoading}
       />

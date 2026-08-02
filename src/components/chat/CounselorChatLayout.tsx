@@ -15,6 +15,7 @@ type Props = {
   counselorName: string
   initialMessages: ChatMessage[]
   backHref?: string
+  clientLanguage?: string | null
 }
 
 const ORANGE_GRADIENT = 'linear-gradient(145deg, #f5a24e 0%, #E48328 55%, #ca7220 100%)'
@@ -26,6 +27,7 @@ export function CounselorChatLayout({
   counselorName,
   initialMessages,
   backHref,
+  clientLanguage,
 }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
   const [inputValue, setInputValue] = useState('')
@@ -33,13 +35,15 @@ export function CounselorChatLayout({
   const [voiceUploading, setVoiceUploading] = useState(false)
   const { recording, start: startRecording, stop: stopRecording, cancel: cancelRecording } =
     useVoiceRecorder({
-      onRecorded: async (blob, mimeType, ext) => {
+      language: clientLanguage,
+      onRecorded: async (blob, mimeType, ext, transcript) => {
         setVoiceUploading(true)
         try {
           const fd = new FormData()
           fd.append('clientId', clientId)
           fd.append('mimeType', mimeType)
           fd.append('audio', blob, `voice-${Date.now()}.${ext}`)
+          if (transcript) fd.append('transcript', transcript)
           const res = await fetch('/api/counselor/chat/voice', { method: 'POST', body: fd })
           const data = await res.json()
           if (!res.ok) return

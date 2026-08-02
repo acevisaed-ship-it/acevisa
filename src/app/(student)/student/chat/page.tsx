@@ -13,7 +13,7 @@ export default async function StudentChatPage({ searchParams }: Props) {
   const supabase = createAdminClient()
 
   const coreColumns =
-    'name, phone, email, city, counselor_id' as const
+    'name, phone, email, city, counselor_id, language' as const
   const optionalColumns =
     'pipeline_stage, target_country, interested_in, avatar_url' as const
 
@@ -73,6 +73,7 @@ export default async function StudentChatPage({ searchParams }: Props) {
     <ChatLayout
       clientId={clientId}
       clientName={client.name}
+      clientLanguage={client.language ?? null}
       initialStage={client.pipeline_stage ?? 1}
       clientAvatarUrl={client.avatar_url ?? null}
       initialClient={{
