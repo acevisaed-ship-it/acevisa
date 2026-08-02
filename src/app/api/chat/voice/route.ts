@@ -1,12 +1,37 @@
 import { transcribeAudio } from '@/lib/transcribeAudio'
 import { createAdminClient } from '@/lib/supabase/server'
-import { getBaseUrl } from '@/lib/utils'
+import { waitForHumanResponseDelay } from '@/lib/humanResponseDelay'
 import { NextResponse } from 'next/server'
-import type { ChatMessage } from '@/types'
+import { POST as handleChatMessage } from '../route'
 
 const MAX_BYTES = 5 * 1024 * 1024 // 5 MB
 
+const AI_FALLBACK_TEXT =
+  "I received your voice note! I'm having a brief technical issue generating a reply right now. Could you try typing your question, or send another voice note in a moment?"
+
+const MSG_SELECT =
+  'id, message_text, sender, timestamp, attachment_url, attachment_name, attachment_type'
+
+async function insertFallbackAiMessage(
+  supabase: ReturnType<typeof createAdminClient>,
+  clientId: string
+) {
+  const { data: aiMsg } = await supabase
+    .from('conversations')
+    .insert({
+      client_id: clientId,
+      message_text: AI_FALLBACK_TEXT,
+      sender: 'ai',
+      stage_tag: 'voice_response',
+    })
+    .select(MSG_SELECT)
+    .single()
+
+  return aiMsg
+}
+
 export async function POST(request: Request) {
+  const responseStartedAt = Date.now()
   const formData = await request.formData()
   const clientId = formData.get('clientId') as string | null
   const audio = formData.get('audio') as File | null
@@ -64,7 +89,7 @@ export async function POST(request: Request) {
       attachment_name: attachmentName,
       attachment_type: 'audio',
     })
-    .select('id, message_text, sender, timestamp, attachment_url, attachment_name, attachment_type')
+    .select(MSG_SELECT)
     .single()
 
   if (client.counselor_active) {
@@ -88,9 +113,10 @@ export async function POST(request: Request) {
         sender: 'ai',
         stage_tag: 'voice_response',
       })
-      .select('id, message_text, sender, timestamp, attachment_url, attachment_name, attachment_type')
+      .select(MSG_SELECT)
       .single()
 
+    await waitForHumanResponseDelay(responseStartedAt)
     return NextResponse.json({
       studentMessage: studentMsg,
       aiMessage: aiMsg,
@@ -100,36 +126,63 @@ export async function POST(request: Request) {
   }
 
   try {
-    const chatRes = await fetch(`${getBaseUrl()}/api/chat`, {
+    const chatRequest = new Request(`${new URL(request.url).origin}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ clientId, message: transcript, voiceNoteAlreadySaved: true }),
     })
+    const chatRes = await handleChatMessage(chatRequest)
 
-    const chatData = await chatRes.json()
-
-    if (!chatRes.ok) {
-      console.error('[chat/voice] AI chat error:', chatData)
-      return NextResponse.json({ error: 'AI response failed' }, { status: 500 })
+    let chatData: { message?: string; error?: string } = {}
+    try {
+      chatData = await chatRes.json()
+    } catch {
+      chatData = {}
     }
 
-    const aiMessage: ChatMessage | null = chatData.message
-      ? {
-          id: crypto.randomUUID(),
-          sender: 'ai',
-          message_text: chatData.message,
-          timestamp: new Date().toISOString(),
-        }
-      : null
+    if (!chatRes.ok) {
+      console.error('[chat/voice] AI chat error:', chatRes.status, chatData)
+      const aiMsg = await insertFallbackAiMessage(supabase, clientId)
+      await waitForHumanResponseDelay(responseStartedAt)
+      return NextResponse.json({
+        studentMessage: studentMsg,
+        aiMessage: aiMsg,
+        audioUrl,
+        transcript,
+      })
+    }
+
+    const { data: aiMsg } = await supabase
+      .from('conversations')
+      .select(MSG_SELECT)
+      .eq('client_id', clientId)
+      .eq('sender', 'ai')
+      .order('timestamp', { ascending: false })
+      .limit(1)
+      .maybeSingle()
 
     return NextResponse.json({
       studentMessage: studentMsg,
-      aiMessage,
+      aiMessage: aiMsg ?? (chatData.message
+        ? {
+            id: crypto.randomUUID(),
+            sender: 'ai' as const,
+            message_text: chatData.message,
+            timestamp: new Date().toISOString(),
+          }
+        : null),
       audioUrl,
       transcript,
     })
   } catch (err) {
     console.error('[chat/voice] AI chat fetch failed:', err)
-    return NextResponse.json({ error: 'AI response failed' }, { status: 500 })
+    const aiMsg = await insertFallbackAiMessage(supabase, clientId)
+    await waitForHumanResponseDelay(responseStartedAt)
+    return NextResponse.json({
+      studentMessage: studentMsg,
+      aiMessage: aiMsg,
+      audioUrl,
+      transcript,
+    })
   }
 }

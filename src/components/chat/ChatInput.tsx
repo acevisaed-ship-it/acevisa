@@ -93,12 +93,13 @@ type Props = {
   onChange: (value: string) => void
   onSend?: (message: string) => void
   onAttachmentSent?: (studentMsg: unknown, aiMsg: unknown) => void
+  onAiPendingChange?: (pending: boolean) => void
   disabled?: boolean
   clientLanguage?: string | null
 }
 
 export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
-  { clientId, value, onChange, onSend, onAttachmentSent, disabled = false, clientLanguage },
+  { clientId, value, onChange, onSend, onAttachmentSent, onAiPendingChange, disabled = false, clientLanguage },
   ref,
 ) {
   // ── Panel state ─────────────────────────────────────────────────────────
@@ -119,6 +120,7 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
       language: clientLanguage,
       onRecorded: async (blob, mimeType, ext, transcript) => {
         setVoiceUploading(true)
+        onAiPendingChange?.(true)
         try {
           const fd = new FormData()
           fd.append('clientId', clientId)
@@ -133,6 +135,7 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
           setUploadError(err instanceof Error ? err.message : 'Voice upload failed')
         } finally {
           setVoiceUploading(false)
+          onAiPendingChange?.(false)
         }
       },
       onError: (message) => setUploadError(message),

@@ -27,6 +27,7 @@ const ACTION_COLORS: Record<string, string> = {
   profile_updated: 'bg-blue/20 text-white',
   client_assigned: 'bg-blue/20 text-white',
   pipeline_stage_changed: 'bg-blue/20 text-white',
+  walk_in: 'bg-teal-500/20 text-white',
 }
 
 function formatTime(iso: string) {

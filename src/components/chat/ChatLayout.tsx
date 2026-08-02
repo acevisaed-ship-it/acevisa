@@ -304,6 +304,7 @@ export function ChatLayout({
         onChange={setInputValue}
         onSend={handleSend}
         onAttachmentSent={handleAttachmentSent}
+        onAiPendingChange={setIsLoading}
         disabled={isLoading}
       />
     </div>

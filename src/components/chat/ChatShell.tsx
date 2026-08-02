@@ -174,6 +174,7 @@ export function ChatShell({ clientId, clientName, clientLanguage }: Props) {
         value={inputValue}
         onChange={setInputValue}
         onSend={handleSend}
+        onAiPendingChange={setIsLoading}
         onAttachmentSent={async (studentMsg, aiMsg) => {
           try {
             const histRes = await fetch(`/api/chat/history?clientId=${clientId}`)

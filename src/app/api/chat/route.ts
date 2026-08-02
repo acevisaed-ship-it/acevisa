@@ -19,6 +19,7 @@ import { hasMeetingIntent } from '@/lib/meetingIntent'
 import { createNotification } from '@/lib/notifications'
 import { detectProfileUpdates } from '@/lib/profileUpdates'
 import { createAdminClient } from '@/lib/supabase/server'
+import { waitForHumanResponseDelay } from '@/lib/humanResponseDelay'
 import { getBaseUrl } from '@/lib/utils'
 import { NextResponse } from 'next/server'
 
@@ -303,6 +304,7 @@ async function runPostConversationProfile(
 
 export async function POST(request: Request) {
   const studentMsgTime = new Date()
+  const responseStartedAt = Date.now()
   let trackingId: string | undefined
 
   const { clientId, message, voiceNoteAlreadySaved } = await request.json()
@@ -371,6 +373,7 @@ Use this context to make your opening message highly relevant to their specific 
       description: 'AI sent campaign opening message to client',
       metadata: { stage: stageTag },
     })
+    await waitForHumanResponseDelay(responseStartedAt)
     return NextResponse.json({
       type: 'message',
       content: campaignOpeningLine,
@@ -477,6 +480,7 @@ Use this context to make your opening message highly relevant to their specific 
 
           await completeResponseTracking(supabase, trackingId, studentMsgTime)
 
+          await waitForHumanResponseDelay(responseStartedAt)
           return NextResponse.json({
             type: 'message',
             content: booking.responseMessage,
@@ -544,6 +548,7 @@ Use this context to make your opening message highly relevant to their specific 
 
       await completeResponseTracking(supabase, trackingId, studentMsgTime)
 
+      await waitForHumanResponseDelay(responseStartedAt)
       return NextResponse.json({
         type: 'message',
         content: autoMsg,
@@ -627,7 +632,17 @@ Use this context to make your opening message highly relevant to their specific 
         'anthropic-beta': PROMPT_CACHE_BETA,
       },
     }
-  )
+  ).catch((err: unknown) => {
+    console.error('[chat] Anthropic API error:', err)
+    return null
+  })
+
+  if (!response) {
+    return NextResponse.json(
+      { error: 'AI service unavailable. Please try again shortly.' },
+      { status: 503 }
+    )
+  }
 
   const rawContent =
     response.content[0].type === 'text' ? response.content[0].text : ''
@@ -748,6 +763,7 @@ Use this context to make your opening message highly relevant to their specific 
     await completeResponseTracking(supabase, trackingId, studentMsgTime)
   }
 
+  await waitForHumanResponseDelay(responseStartedAt)
   return NextResponse.json({
     type: responseType,
     content: studentMessage,
