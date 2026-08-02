@@ -9,10 +9,7 @@ import {
   type ReactNode,
 } from 'react'
 import { motion } from 'framer-motion'
-import {
-  SECTION_COUNT,
-  useScrollStore,
-} from '@/lib/stores/scrollStore'
+import { useScrollStore } from '@/lib/stores/scrollStore'
 import { useTransitionStore } from '@/lib/stores/transitionStore'
 
 interface ScrollContainerProps {
@@ -20,9 +17,7 @@ interface ScrollContainerProps {
 }
 
 function getSections(children: ReactNode) {
-  return Children.toArray(children)
-    .filter(isValidElement)
-    .slice(0, SECTION_COUNT)
+  return Children.toArray(children).filter(isValidElement).slice(0, 30)
 }
 
 // How long (ms) to lock input after a section change, preventing rapid multi-skip
@@ -30,6 +25,7 @@ const SNAP_COOLDOWN = 750
 
 export function ScrollContainer({ children }: ScrollContainerProps) {
   const sections = getSections(children)
+  const sectionCount = sections.length
   const containerRef = useRef<HTMLDivElement>(null)
   const cooldownRef   = useRef(false)
   const touchStartY   = useRef(0)
@@ -39,11 +35,11 @@ export function ScrollContainer({ children }: ScrollContainerProps) {
 
   const goToSection = useCallback((index: number) => {
     if (cooldownRef.current) return
-    const clamped = Math.max(0, Math.min(SECTION_COUNT - 1, index))
+    const clamped = Math.max(0, Math.min(sectionCount - 1, index))
     useScrollStore.setState({ currentSection: clamped })
     cooldownRef.current = true
     setTimeout(() => { cooldownRef.current = false }, SNAP_COOLDOWN)
-  }, [])
+  }, [sectionCount])
 
   // Expose scrollToSection so other components (nav, buttons) can call it
   useEffect(() => {

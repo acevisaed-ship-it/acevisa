@@ -1,7 +1,5 @@
 import { create } from 'zustand'
 
-export const SECTION_COUNT = 11
-
 export type ServiceOption =
   | 'Study Visa'
   | 'Job Abroad'

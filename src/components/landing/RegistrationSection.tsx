@@ -11,6 +11,23 @@ import {
 import { triggerTransition } from '@/lib/stores/transitionStore'
 import { LandingDecor } from './LandingDecor'
 import { SectionBeeOrangePlane } from './HeroAnimations'
+import { EarthSphere } from './EarthSphere'
+
+// ── Corner globe — same 3D EarthSphere as Hero, sized for this corner slot ──
+function RegistrationGlobe() {
+  const [size, setSize] = useState(0)
+  useEffect(() => {
+    const update = () => {
+      // Mirrors the LAYOUT.earth clamp(180px, 20vw, 380px) this replaces
+      setSize(Math.min(380, Math.max(180, Math.round(window.innerWidth * 0.2))))
+    }
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+  if (!size) return null
+  return <EarthSphere size={size} />
+}
 
 // ── Layout config — tweak sizes & positions here ──────────────────────────
 const LAYOUT = {
@@ -181,22 +198,17 @@ export function RegistrationSection() {
           transition={{ duration: 0.9, ease: 'easeOut', delay: 0.4 }}
         />
 
-        {/* Earth globe — top-right */}
-        <LandingDecor
-          src="/Earth.svg"
-          hideBelowMd
-          opacity={1}
-          style={{
-            width:     LAYOUT.earth.width,
-            top:       LAYOUT.earth.top,
-            right:     LAYOUT.earth.right,
-            animation: 'globe-spin 22s linear infinite',
-          }}
+        {/* Earth globe — top-right — same EarthSphere 3D globe as Hero */}
+        <motion.div
+          className="pointer-events-none absolute hidden md:block"
+          style={{ top: LAYOUT.earth.top, right: LAYOUT.earth.right }}
           initial={{ opacity: 0, y: -10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, delay: 0.7 }}
-        />
+        >
+          <RegistrationGlobe />
+        </motion.div>
 
         {/* Orange paper plane — 60fps bee physics */}
         <SectionBeeOrangePlane />
