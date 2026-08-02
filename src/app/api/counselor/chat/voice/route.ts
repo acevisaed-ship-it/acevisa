@@ -17,6 +17,7 @@ export async function POST(request: Request) {
 
   const supabase = createAdminClient()
   const mimeType = (formData.get('mimeType') as string | null) || audio.type || 'audio/webm'
+  const baseMimeType = mimeType.split(';')[0].trim()
   const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('ogg') ? 'ogg' : 'webm'
   const timestamp = Date.now()
   const storagePath = `${clientId}/voice-${timestamp}.${ext}`
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
 
   const { error: uploadError } = await supabase.storage
     .from('chat-attachments')
-    .upload(storagePath, bytes, { contentType: mimeType, upsert: false })
+    .upload(storagePath, bytes, { contentType: baseMimeType, upsert: false })
 
   if (uploadError) {
     console.error('[counselor/chat/voice] storage error:', uploadError)

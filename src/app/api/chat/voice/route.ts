@@ -22,8 +22,10 @@ export async function POST(request: Request) {
     .single()
   if (!client) return NextResponse.json({ error: 'Client not found' }, { status: 404 })
 
-  // Use the actual mimeType sent by the client (varies by browser/device)
+  // Use the actual mimeType sent by the client (varies by browser/device).
+  // Strip ;codecs=opus etc. — Supabase bucket allowlist matches base types only.
   const mimeType = (formData.get('mimeType') as string | null) || audio.type || 'audio/webm'
+  const baseMimeType = mimeType.split(';')[0].trim()
   const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('ogg') ? 'ogg' : 'webm'
 
   // Upload audio blob to Supabase storage
@@ -33,7 +35,7 @@ export async function POST(request: Request) {
 
   const { error: uploadError } = await supabase.storage
     .from('chat-attachments')
-    .upload(storagePath, bytes, { contentType: mimeType, upsert: false })
+    .upload(storagePath, bytes, { contentType: baseMimeType, upsert: false })
 
   if (uploadError) {
     console.error('[chat/voice] storage error:', uploadError)
