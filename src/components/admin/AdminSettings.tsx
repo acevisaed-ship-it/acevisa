@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Save, Bell, Shield, Database, Palette, MapPin } from 'lucide-react'
+import { Save, Bell, Shield, Database, Palette, MapPin, Mail } from 'lucide-react'
+import { MyEmailSettings } from '@/components/admin/MyEmailSettings'
 
-type Section = 'notifications' | 'security' | 'data' | 'appearance' | 'office'
+type Section = 'notifications' | 'security' | 'data' | 'appearance' | 'office' | 'email'
 
 function SectionTab({ label, icon: Icon, active, onClick }: {
   label: string; icon: React.ElementType; active: boolean; onClick: () => void
@@ -46,7 +47,7 @@ function Toggle({ label, description, checked, onChange }: {
   )
 }
 
-export function AdminSettings() {
+export function AdminSettings({ adminRole }: { adminRole: string }) {
   const [section, setSection] = useState<Section>('office')
   const [saved, setSaved] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -152,6 +153,9 @@ export function AdminSettings() {
             onClick={() => setSection(tab.id)}
           />
         ))}
+        {adminRole === 'ceo' && (
+          <SectionTab label="My Email" icon={Mail} active={section === 'email'} onClick={() => setSection('email')} />
+        )}
       </div>
 
       <div className="mt-4 rounded-2xl glass-card crisp-on-dark p-6">
@@ -324,6 +328,8 @@ export function AdminSettings() {
             </div>
           </div>
         )}
+
+        {section === 'email' && adminRole === 'ceo' && <MyEmailSettings />}
       </div>
     </div>
   )

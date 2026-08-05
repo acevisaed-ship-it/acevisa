@@ -1,14 +1,34 @@
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { createAdminClient } from '@/lib/supabase/server'
 
 type Params = { params: Promise<{ counselorId: string }> }
 
+async function assertCanManageCounselorEmail(admin: { id: string; role: string; branch_id: string | null }, counselorId: string) {
+  if (!isBranchScopedAdmin(admin)) return null
+
+  const supabase = createAdminClient()
+  const { data: target } = await supabase
+    .from('counselors')
+    .select('branch_id, role')
+    .eq('id', counselorId)
+    .maybeSingle()
+
+  if (!target || target.role !== 'counselor' || target.branch_id !== admin.branch_id) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+  return null
+}
+
 export async function GET(_req: Request, { params }: Params) {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
   const { counselorId } = await params
+  const forbidden = await assertCanManageCounselorEmail(admin, counselorId)
+  if (forbidden) return forbidden
+
   const supabase = createAdminClient()
 
   const { data } = await supabase
@@ -22,10 +42,13 @@ export async function GET(_req: Request, { params }: Params) {
 }
 
 export async function POST(req: Request, { params }: Params) {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
   const { counselorId } = await params
+  const forbidden = await assertCanManageCounselorEmail(admin, counselorId)
+  if (forbidden) return forbidden
+
   const body = await req.json()
   const {
     email_address,
@@ -51,9 +74,9 @@ export async function POST(req: Request, { params }: Params) {
         counselor_id: counselorId,
         email_address: email_address.trim(),
         display_name: display_name?.trim() || null,
-        imap_host: imap_host?.trim() || 'mail.bluehost.com',
+        imap_host: imap_host?.trim() || 'box2422.bluehost.com',
         imap_port: Number(imap_port) || 993,
-        smtp_host: smtp_host?.trim() || 'mail.bluehost.com',
+        smtp_host: smtp_host?.trim() || 'box2422.bluehost.com',
         smtp_port: Number(smtp_port) || 465,
         app_password: app_password,
         is_active: is_active !== false,
@@ -71,10 +94,13 @@ export async function POST(req: Request, { params }: Params) {
 }
 
 export async function DELETE(_req: Request, { params }: Params) {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
   const { counselorId } = await params
+  const forbidden = await assertCanManageCounselorEmail(admin, counselorId)
+  if (forbidden) return forbidden
+
   const supabase = createAdminClient()
 
   await supabase
