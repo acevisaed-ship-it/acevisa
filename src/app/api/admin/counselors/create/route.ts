@@ -38,10 +38,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'All fields are required' }, { status: 400 })
   }
 
-  // Enforce @acevisa.co email domain
-  if (!email.toLowerCase().endsWith('@acevisa.co')) {
+  // Enforce company email domain (legacy @acevisa.co still accepted during transition)
+  const emailLower = email.toLowerCase().trim()
+  const allowedDomains = ['@aceyourvisa.com', '@acevisa.co']
+  if (!allowedDomains.some((d) => emailLower.endsWith(d))) {
     return NextResponse.json(
-      { error: 'Counselor email must end with @acevisa.co' },
+      { error: 'Staff email must end with @aceyourvisa.com' },
       { status: 422 }
     )
   }
@@ -59,7 +61,7 @@ export async function POST(request: Request) {
   const { data: existing } = await supabase
     .from('counselors')
     .select('id')
-    .eq('email', email.toLowerCase())
+    .eq('email', emailLower)
     .maybeSingle()
 
   if (existing) {
@@ -68,7 +70,7 @@ export async function POST(request: Request) {
 
   // Create Supabase Auth user
   const { data: authUser, error: authError2 } = await supabase.auth.admin.createUser({
-    email: email.toLowerCase(),
+    email: emailLower,
     password,
     email_confirm: true, // auto-confirm so they can log in immediately
   })
@@ -88,7 +90,7 @@ export async function POST(request: Request) {
     .from('counselors')
     .insert({
       name: fullName,
-      email: email.toLowerCase(),
+      email: emailLower,
       phone: phone?.trim() || null,
       role: requestedRole,
       branch_id: targetBranchId,
@@ -107,7 +109,7 @@ export async function POST(request: Request) {
   // Send account confirmation email via Supabase (magic link for first login)
   await supabase.auth.admin.generateLink({
     type: 'magiclink',
-    email: email.toLowerCase(),
+    email: emailLower,
     options: { redirectTo: `${new URL(request.url).origin}/login` },
   })
 

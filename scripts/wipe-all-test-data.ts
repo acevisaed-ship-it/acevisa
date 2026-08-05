@@ -49,8 +49,8 @@ const KEEP_BUSINESS_CONFIG = process.argv.includes('--keep-business-config')
 
 // Email to recreate as the single surviving CEO account after the wipe.
 // Change this before running --confirm if you want a different address.
-const NEW_CEO_EMAIL = 'hashaamahmed496@gmail.com'
-const NEW_CEO_NAME = 'Hashaam Ahmed'
+const NEW_CEO_EMAIL = 'ceo@aceyourvisa.com'
+const NEW_CEO_NAME = 'CEO'
 
 // Client-scoped operational data (delete children before parents where nested).
 const CLIENT_SCOPED_TABLES = [
@@ -79,9 +79,10 @@ const COUNSELOR_SCOPED_TABLES = [
   'counselor_objectives',
   'attendance_records',
   'leave_applications',
-  'deals',
-  'invoices',
+  // Finance: children before parents (payments → invoices → deals)
   'payments',
+  'invoices',
+  'deals',
   'expenses',
   'notifications',
 ]

@@ -70,8 +70,9 @@ export function CounselorAccountsPanel({ isCeo = false }: { isCeo?: boolean }) {
       return
     }
 
-    if (!form.email.toLowerCase().endsWith('@acevisa.co')) {
-      setCreateError('Email must end with @acevisa.co')
+    const emailLower = form.email.toLowerCase()
+    if (!emailLower.endsWith('@aceyourvisa.com') && !emailLower.endsWith('@acevisa.co')) {
+      setCreateError('Email must end with @aceyourvisa.com')
       return
     }
     if (form.password !== form.confirm) {
@@ -207,7 +208,7 @@ export function CounselorAccountsPanel({ isCeo = false }: { isCeo?: boolean }) {
       <div>
         <h2 className="text-base font-semibold text-white">Add New Counselor</h2>
         <p className="mt-1 text-sm text-white/50">
-          Email must end with <span className="font-mono font-semibold">@acevisa.co</span>.
+          Email must end with <span className="font-mono font-semibold">@aceyourvisa.com</span>.
           The counselor will receive login details.
         </p>
 
@@ -278,14 +279,14 @@ export function CounselorAccountsPanel({ isCeo = false }: { isCeo?: boolean }) {
 
           <div>
             <label className="mb-1 block text-xs font-medium text-white/60">
-              Email address <span className="text-orange">(@acevisa.co only)</span>
+              Email address <span className="text-orange">(@aceyourvisa.com)</span>
             </label>
             <input
               required
               type="email"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              placeholder="sara.khan@acevisa.co"
+              placeholder="name@aceyourvisa.com"
               className={inputCls}
             />
           </div>
