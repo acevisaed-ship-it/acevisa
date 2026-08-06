@@ -93,7 +93,9 @@ export default function CounselorLoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-grad-teal px-4 py-6">
       <div className="w-full rounded-[20px] glass-card-blue p-6 sm:max-w-[400px] sm:p-8">
         <div className="mb-8 flex flex-col items-center gap-2">
-          <img src="/logo.png" alt="ACE Altius Consulting" className="h-16 w-auto" />
+          <div className="inline-flex items-center justify-center rounded-2xl bg-white/95 px-5 py-4 crisp">
+            <img src="/logo.png" alt="ACE Altius Consulting" className="h-16 w-auto" />
+          </div>
         </div>
 
         <h1 className="text-center text-2xl font-semibold text-white">Counselor Portal</h1>

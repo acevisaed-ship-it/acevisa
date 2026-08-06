@@ -77,7 +77,9 @@ export default function StudentLoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-grad-teal px-4 py-8">
       <div className="w-full max-w-sm rounded-[24px] glass-card-blue p-6 sm:p-8">
         <div className="mb-8 flex justify-center">
-          <img src="/logo.png" alt="ACE Altius Consulting" className="h-14 w-auto" />
+          <div className="inline-flex items-center justify-center rounded-2xl bg-white/95 px-4 py-3 crisp">
+            <img src="/logo.png" alt="ACE Altius Consulting" className="h-14 w-auto" />
+          </div>
         </div>
 
         <h1 className="text-center text-2xl font-semibold text-white">Student Portal</h1>
