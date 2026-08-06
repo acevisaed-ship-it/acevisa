@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { SectionOrangePlaneToLogo } from '@/components/landing/HeroAnimations'
 
 type View = 'login' | 'forgot'
 
@@ -74,15 +75,15 @@ export default function ReturnPage() {
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-grad-teal px-4 py-8">
-      <img
-        src="/paper plane Orange 2.svg"
-        alt=""
-        aria-hidden
-        className="landing-decor-plane pointer-events-none absolute right-[8%] top-[12%] -rotate-6 opacity-90 sm:right-[12%] sm:top-[10%]"
-      />
+    <main
+      className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-8"
+      style={{ background: 'var(--grad-blue)' }}
+    >
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+        <SectionOrangePlaneToLogo />
+      </div>
 
-      <div className="relative w-full max-w-sm rounded-[24px] glass-card-blue p-6 sm:p-8">
+      <div className="relative z-10 w-full max-w-sm rounded-[24px] glass-card-blue p-6 sm:p-8">
         <div className="mb-6 flex justify-center">
           <div className="inline-flex items-center justify-center rounded-xl border border-white/40 bg-white/80 px-3 py-2 backdrop-blur-md crisp">
             <img src="/logo.png" alt="ACE Altius Consulting" className="h-14 w-auto" />
