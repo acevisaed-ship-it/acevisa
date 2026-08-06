@@ -1,10 +1,18 @@
-import { Resend } from 'resend'
+import nodemailer from 'nodemailer'
 
-const FROM = 'ACE Altius Consulting <noreply@acevisa.co>'
+const FROM = 'ACE Altius Consulting <noreply@aceyourvisa.com>'
 
-function getResend() {
-  if (!process.env.RESEND_API_KEY) return null
-  return new Resend(process.env.RESEND_API_KEY)
+function getTransporter() {
+  if (!process.env.SES_SMTP_USER || !process.env.SES_SMTP_PASSWORD) return null
+  return nodemailer.createTransport({
+    host: process.env.SES_SMTP_HOST ?? 'email-smtp.us-east-1.amazonaws.com',
+    port: 587,
+    secure: false, // STARTTLS on 587, not implicit TLS
+    auth: {
+      user: process.env.SES_SMTP_USER,
+      pass: process.env.SES_SMTP_PASSWORD,
+    },
+  })
 }
 
 type SendOptions = {
@@ -14,15 +22,15 @@ type SendOptions = {
 }
 
 export async function sendEmail({ to, subject, html }: SendOptions): Promise<void> {
-  const resend = getResend()
-  if (!resend) {
-    console.log('[email] RESEND_API_KEY not set — skipped:', subject)
+  const transporter = getTransporter()
+  if (!transporter) {
+    console.log('[email] SES_SMTP_USER/SES_SMTP_PASSWORD not set — skipped:', subject)
     return
   }
   try {
-    await resend.emails.send({ from: FROM, to, subject, html })
+    await transporter.sendMail({ from: FROM, to, subject, html })
   } catch (err) {
-    // Non-fatal — log and continue
+    // Non-fatal — log and continue, same behavior as before
     console.error('[email] send error:', err)
   }
 }
