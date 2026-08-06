@@ -109,6 +109,31 @@ body {
   min-width: 375px;
 }
 
+/* ── Themed scrollbars — glass-toned thumb instead of the browser default,
+   matching the app's glassmorphism palette (same rgba tones as .glass-card)
+   with the brand orange on hover. Works everywhere because `html`'s own
+   background is always dark teal (see safe-area comment above), regardless
+   of which page's content sits on top. ──────────────────────────────────── */
+html {
+  scrollbar-color: rgba(255, 255, 255, 0.28) transparent; /* Firefox: thumb, track */
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(228, 131, 40, 0.65); /* var(--orange), same brand accent used on hover states elsewhere */
+}
+
 /* Scrollbars hidden only where explicitly opted into via .scrollbar-hidden —
    NOT globally. Admin/dashboard/chat pages keep visible scrollbars so users
    can tell when there's more content. */
