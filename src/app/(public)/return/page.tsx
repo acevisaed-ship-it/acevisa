@@ -84,8 +84,8 @@ export default function ReturnPage() {
 
       <div className="relative w-full max-w-sm rounded-[24px] glass-card-blue p-6 sm:p-8">
         <div className="mb-6 flex justify-center">
-          <div className="inline-flex items-center justify-center rounded-2xl bg-white/95 px-5 py-4 crisp">
-            <img src="/logo.png" alt="ACE Altius Consulting" className="h-16 w-auto" />
+          <div className="inline-flex items-center justify-center rounded-xl border border-white/40 bg-white/80 px-3 py-2 backdrop-blur-md crisp">
+            <img src="/logo.png" alt="ACE Altius Consulting" className="h-14 w-auto" />
           </div>
         </div>
 

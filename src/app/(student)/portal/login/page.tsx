@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { PWAInstallButton } from '@/components/PWAInstallButton'
+import { SectionOrangePlaneToLogo } from '@/components/landing/HeroAnimations'
 
 type View = 'login' | 'forgot'
 
@@ -74,11 +75,15 @@ export default function StudentLoginPage() {
   const inputCls = 'glass-input min-h-[52px] w-full rounded-xl px-4 py-3 text-sm outline-none'
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-grad-teal px-4 py-8">
-      <div className="w-full max-w-sm rounded-[24px] glass-card-blue p-6 sm:p-8">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-8" style={{ background: 'var(--grad-blue)' }}>
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+        <SectionOrangePlaneToLogo />
+      </div>
+
+      <div className="relative z-10 w-full max-w-sm rounded-[24px] glass-card-blue p-6 sm:p-8">
         <div className="mb-8 flex justify-center">
-          <div className="inline-flex items-center justify-center rounded-2xl bg-white/95 px-4 py-3 crisp">
-            <img src="/logo.png" alt="ACE Altius Consulting" className="h-14 w-auto" />
+          <div className="inline-flex items-center justify-center rounded-xl border border-white/40 bg-white/80 px-3 py-2 backdrop-blur-md crisp">
+            <img src="/logo.png" alt="ACE Altius Consulting" className="h-12 w-auto" />
           </div>
         </div>
 
