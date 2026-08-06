@@ -33,6 +33,18 @@ export function DirectChat({ currentUserId, peerId, peerName, onClose }: Props) 
   const [sending, setSending] = useState(false)
   const [voiceUploading, setVoiceUploading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const prevCountRef = useRef(0)
+
+  function isNearBottom() {
+    const el = scrollContainerRef.current
+    if (!el) return true
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 120
+  }
+
+  function scrollToBottom(behavior: ScrollBehavior = 'smooth') {
+    bottomRef.current?.scrollIntoView({ behavior })
+  }
 
   const { recording, seconds: recordSeconds, start: startRecording, stop: stopRecording, cancel: cancelRecording } =
     useVoiceRecorder({
@@ -62,6 +74,10 @@ export function DirectChat({ currentUserId, peerId, peerName, onClose }: Props) 
   useEffect(() => { loadMessages() }, [loadMessages])
 
   useEffect(() => {
+    prevCountRef.current = 0
+  }, [peerId])
+
+  useEffect(() => {
     const supabase = createClient()
     const channel = supabase
       .channel(`dm_${[currentUserId, peerId].sort().join('_')}`)
@@ -82,7 +98,16 @@ export function DirectChat({ currentUserId, peerId, peerName, onClose }: Props) 
     return () => clearInterval(poll)
   }, [loadMessages])
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
+  useEffect(() => {
+    const count = messages.length
+    if (count === 0) return
+    if (prevCountRef.current === 0) {
+      scrollToBottom('instant' as ScrollBehavior)
+    } else if (count > prevCountRef.current && isNearBottom()) {
+      scrollToBottom('smooth')
+    }
+    prevCountRef.current = count
+  }, [messages])
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault()
@@ -107,7 +132,7 @@ export function DirectChat({ currentUserId, peerId, peerName, onClose }: Props) 
         <span className="text-sm font-semibold text-white flex-1">{peerName}</span>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
         {loading ? (
           <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-white/30" /></div>
         ) : messages.length === 0 ? (

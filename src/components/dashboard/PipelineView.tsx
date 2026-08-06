@@ -151,7 +151,7 @@ export function PipelineView({
       </div>
 
       {/* Mobile: stage tabs */}
-      <div className="mb-4 flex gap-2 overflow-x-auto pb-2 lg:hidden">
+      <div className="scrollbar-hidden mb-4 flex gap-2 overflow-x-auto pb-2 lg:hidden">
         {stages.map(({ stage, label }) => {
           const count = filteredByStage[stage]?.length ?? 0
           const isActive = activeStage === stage

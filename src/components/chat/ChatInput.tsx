@@ -270,7 +270,7 @@ export const ChatInput = forwardRef<HTMLInputElement, Props>(function ChatInput(
           </div>
 
           {/* Category tabs */}
-          <div className="flex gap-2 overflow-x-auto px-4 pb-3" style={{ scrollbarWidth: 'none' }}>
+          <div className="scrollbar-hidden flex gap-2 overflow-x-auto px-4 pb-3">
             {EMOJI_CATEGORIES.map((cat, i) => (
               <button
                 key={cat.name}

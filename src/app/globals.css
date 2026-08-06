@@ -109,13 +109,15 @@ body {
   min-width: 375px;
 }
 
-/* ── Hide all scrollbars globally (web + mobile) ──────────────────── */
-* {
-  scrollbar-width: none;       /* Firefox */
-  -ms-overflow-style: none;    /* IE / Edge */
+/* Scrollbars hidden only where explicitly opted into via .scrollbar-hidden —
+   NOT globally. Admin/dashboard/chat pages keep visible scrollbars so users
+   can tell when there's more content. */
+.scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-*::-webkit-scrollbar {
-  display: none;               /* Chrome / Safari / mobile WebKit */
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
 }
 
 /* ── iPhone safe-area: prevent content sliding under home bar / notch ── */

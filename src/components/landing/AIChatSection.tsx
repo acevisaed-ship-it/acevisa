@@ -137,7 +137,7 @@ function StageFlowchart() {
 // ─── Horizontal badge strip (mobile only) ─────────────────────────────────
 function StageBadgeStrip() {
   return (
-    <div className="flex gap-2 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="scrollbar-hidden flex gap-2 overflow-x-auto pb-2">
       {stages.map((stage) => (
         <span
           key={stage.label}
@@ -213,7 +213,7 @@ function ChatContent() {
       </div>
 
       {/* Suggestion chips */}
-      <div className="flex gap-1.5 overflow-x-auto border-t border-white/10 px-3 py-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="scrollbar-hidden flex gap-1.5 overflow-x-auto border-t border-white/10 px-3 py-2">
         {['Study Visa help', 'Best UK unis for me', 'IELTS score tips', 'Scholarship chances'].map((sug) => (
           <button
             key={sug}

@@ -31,7 +31,7 @@ export function HrSection({ counselors }: { counselors: { id: string; name: stri
       </div>
 
       {/* Tab bar — scrollable on mobile */}
-      <div className="flex gap-1 overflow-x-auto rounded-2xl tab-container p-1.5 w-fit max-w-full">
+      <div className="scrollbar-hidden flex gap-1 overflow-x-auto rounded-2xl tab-container p-1.5 w-fit max-w-full">
         {TABS.map((t) => (
           <button
             key={t.id}

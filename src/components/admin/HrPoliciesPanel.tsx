@@ -119,7 +119,7 @@ export function HrPoliciesPanel() {
   return (
     <>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex gap-1 overflow-x-auto rounded-2xl tab-container p-1 w-fit max-w-full">
+        <div className="scrollbar-hidden flex gap-1 overflow-x-auto rounded-2xl tab-container p-1 w-fit max-w-full">
           {ALL_TYPES.map((t) => (
             <button
               key={t}

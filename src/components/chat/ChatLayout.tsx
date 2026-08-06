@@ -75,8 +75,20 @@ export function ChatLayout({
   const [mobileTab, setMobileTab] = useState<MobileTab>('chat')
   const [stage, setStage] = useState(initialStage)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const prevCountRef = useRef(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const layoutRef = useRef<HTMLDivElement>(null)
+
+  function isNearBottom() {
+    const el = scrollContainerRef.current
+    if (!el) return true
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 120
+  }
+
+  function scrollToBottom(behavior: ScrollBehavior = 'smooth') {
+    bottomRef.current?.scrollIntoView({ behavior })
+  }
 
   // ── Visual Viewport — keeps layout pinned to actual visible area on mobile ─
   // iOS Safari: position:fixed doesn't track the visual viewport when the
@@ -105,6 +117,10 @@ export function ChatLayout({
       vv.removeEventListener('scroll', update)
     }
   }, [])
+
+  useEffect(() => {
+    prevCountRef.current = 0
+  }, [clientId])
 
   // ── Load history ───────────────────────────────────────────────────────
   useEffect(() => {
@@ -165,10 +181,17 @@ export function ChatLayout({
     return () => clearInterval(interval)
   }, [clientId])
 
-  // ── Auto-scroll to bottom ──────────────────────────────────────────────
+  // ── Auto-scroll only on new messages when already near bottom ──────────
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, isLoading])
+    const count = messages.length
+    if (count === 0) return
+    if (prevCountRef.current === 0) {
+      scrollToBottom('instant' as ScrollBehavior)
+    } else if (count > prevCountRef.current && isNearBottom()) {
+      scrollToBottom('smooth')
+    }
+    prevCountRef.current = count
+  }, [messages])
 
   // ── Auto-focus input after send ────────────────────────────────────────
   const refocusInput = useCallback(() => {
@@ -276,6 +299,7 @@ export function ChatLayout({
 
       {/* Messages */}
       <div
+        ref={scrollContainerRef}
         className="flex min-h-0 flex-1 flex-col gap-3 px-4 py-4"
         style={{
           overflowY: 'scroll',

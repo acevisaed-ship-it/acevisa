@@ -288,7 +288,7 @@ export function ScheduleShell({ clientId }: Props) {
         <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-text/60">
           Step 1 — Pick a day
         </p>
-        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+        <div className="scrollbar-hidden -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
           {dayOptions.map((day) => {
             const isSelected = selectedDay === day.dateKey
             return (

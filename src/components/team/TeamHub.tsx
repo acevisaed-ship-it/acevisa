@@ -422,7 +422,7 @@ export function TeamHub({ currentUserId }: { currentUserId: string }) {
             'flex-1 min-h-0 flex flex-col',
             mobileView !== 'chat' && 'hidden lg:flex'
           )}>
-            <div className="flex items-center gap-1 border-b border-white/10 px-2 overflow-x-auto shrink-0">
+            <div className="scrollbar-hidden flex items-center gap-1 border-b border-white/10 px-2 overflow-x-auto shrink-0">
               {openTabs.map((tab) => {
                 const key = tabKey(tab)
                 const label = tab.type === 'group' ? 'Team chat' : tab.peerName
