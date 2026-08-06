@@ -20,7 +20,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
   const admin = createAdminClient()
   const { data, error } = await admin
     .from('direct_messages')
-    .select('id, sender_id, sender_name, recipient_id, content, created_at')
+    .select('id, sender_id, sender_name, recipient_id, content, created_at, attachment_url, attachment_name, attachment_type')
     .or(`and(sender_id.eq.${identity.id},recipient_id.eq.${peerId}),and(sender_id.eq.${peerId},recipient_id.eq.${identity.id})`)
     .order('created_at', { ascending: true })
     .limit(200)

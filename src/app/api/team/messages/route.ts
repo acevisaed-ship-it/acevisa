@@ -22,7 +22,7 @@ export async function GET(request: Request) {
   const admin = createAdminClient()
   let query = admin
     .from('team_messages')
-    .select('id, sender_id, sender_name, sender_initials, content, created_at')
+    .select('id, sender_id, sender_name, sender_initials, content, created_at, attachment_url, attachment_name, attachment_type')
     .order('created_at', { ascending: false })
     .limit(50)
 
