@@ -16,27 +16,30 @@ const CARD_COLORS = [
   'linear-gradient(135deg, #cdd94e 0%, #B7C733 100%)',
 ]
 
+// ISO 3166-1 alpha-2 codes — used to pull real flag images from flagcdn.com
+// instead of Unicode flag emoji, which many browsers/fonts (Windows in
+// particular) render as blank boxes or letter pairs instead of an actual flag.
 const countries = [
-  { flag: '🇬🇧', name: 'United Kingdom',  unis: '130+ Universities' },
-  { flag: '🇨🇦', name: 'Canada',           unis: '100+ Universities' },
-  { flag: '🇮🇪', name: 'Ireland',          unis: '40+ Universities'  },
-  { flag: '🇳🇿', name: 'New Zealand',      unis: '25+ Universities'  },
-  { flag: '🇺🇸', name: 'USA',              unis: '200+ Universities' },
-  { flag: '🇦🇺', name: 'Australia',        unis: '90+ Universities'  },
-  { flag: '🇲🇾', name: 'Malaysia',         unis: '30+ Universities'  },
-  { flag: '🇨🇳', name: 'China',            unis: '50+ Universities'  },
-  { flag: '🇧🇾', name: 'Belarus',          unis: '15+ Universities'  },
-  { flag: '🇨🇾', name: 'Cyprus',           unis: '10+ Universities'  },
-  { flag: '🇭🇺', name: 'Hungary',          unis: '20+ Universities'  },
-  { flag: '🇦🇹', name: 'Austria',          unis: '20+ Universities'  },
-  { flag: '🇱🇻', name: 'Latvia',           unis: '12+ Universities'  },
-  { flag: '🇱🇹', name: 'Lithuania',        unis: '12+ Universities'  },
-  { flag: '🇷🇴', name: 'Romania',          unis: '18+ Universities'  },
-  { flag: '🇨🇭', name: 'Switzerland',      unis: '15+ Universities'  },
-  { flag: '🇮🇹', name: 'Italy',            unis: '35+ Universities'  },
-  { flag: '🇧🇪', name: 'Belgium',          unis: '18+ Universities'  },
-  { flag: '🇸🇪', name: 'Sweden',           unis: '22+ Universities'  },
-  { flag: '🇩🇪', name: 'Germany',          unis: '60+ Universities'  },
+  { code: 'gb', name: 'United Kingdom',  unis: '130+ Universities' },
+  { code: 'ca', name: 'Canada',           unis: '100+ Universities' },
+  { code: 'ie', name: 'Ireland',          unis: '40+ Universities'  },
+  { code: 'nz', name: 'New Zealand',      unis: '25+ Universities'  },
+  { code: 'us', name: 'USA',              unis: '200+ Universities' },
+  { code: 'au', name: 'Australia',        unis: '90+ Universities'  },
+  { code: 'my', name: 'Malaysia',         unis: '30+ Universities'  },
+  { code: 'cn', name: 'China',            unis: '50+ Universities'  },
+  { code: 'by', name: 'Belarus',          unis: '15+ Universities'  },
+  { code: 'cy', name: 'Cyprus',           unis: '10+ Universities'  },
+  { code: 'hu', name: 'Hungary',          unis: '20+ Universities'  },
+  { code: 'at', name: 'Austria',          unis: '20+ Universities'  },
+  { code: 'lv', name: 'Latvia',           unis: '12+ Universities'  },
+  { code: 'lt', name: 'Lithuania',        unis: '12+ Universities'  },
+  { code: 'ro', name: 'Romania',          unis: '18+ Universities'  },
+  { code: 'ch', name: 'Switzerland',      unis: '15+ Universities'  },
+  { code: 'it', name: 'Italy',            unis: '35+ Universities'  },
+  { code: 'be', name: 'Belgium',          unis: '18+ Universities'  },
+  { code: 'se', name: 'Sweden',           unis: '22+ Universities'  },
+  { code: 'de', name: 'Germany',          unis: '60+ Universities'  },
 ]
 
 export function CountriesSection() {
@@ -114,8 +117,13 @@ export function CountriesSection() {
               className="overflow-hidden rounded-xl p-2 text-center"
               style={{ background: CARD_COLORS[i % CARD_COLORS.length], opacity: 0.6 }}
             >
-              <div className="mx-auto mb-1 flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-white/25 text-lg">
-                {c.flag}
+              <div className="mx-auto mb-1 flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-white/25">
+                <img
+                  src={`https://flagcdn.com/w80/${c.code}.png`}
+                  alt={`${c.name} flag`}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
               </div>
               <h3 className="text-[9px] font-semibold leading-tight text-white">{c.name}</h3>
             </motion.div>
@@ -134,8 +142,13 @@ export function CountriesSection() {
               className="group relative overflow-hidden rounded-card p-5 text-center transition-transform duration-300 hover:-translate-y-1"
               style={{ background: CARD_COLORS[i % CARD_COLORS.length] }}
             >
-              <div className="mx-auto mb-2.5 flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-white/20 text-3xl">
-                {c.flag}
+              <div className="mx-auto mb-2.5 flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-white/20">
+                <img
+                  src={`https://flagcdn.com/w160/${c.code}.png`}
+                  alt={`${c.name} flag`}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
               </div>
               <h3 className="text-sm font-semibold text-white">{c.name}</h3>
               <p className="mt-0.5 text-xs text-white/70">{c.unis}</p>
