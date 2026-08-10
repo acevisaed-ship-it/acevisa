@@ -294,7 +294,13 @@ function tabKey(tab: Tab) {
 
 type MobileView = 'chat' | 'bulletin' | 'deadlines' | 'highlights'
 
-export function TeamHub({ currentUserId }: { currentUserId: string }) {
+export function TeamHub({
+  currentUserId,
+  canRemovePosts = false,
+}: {
+  currentUserId: string
+  canRemovePosts?: boolean
+}) {
   const [openTabs, setOpenTabs] = useState<Tab[]>([{ type: 'group' }])
   const [activeTabKey, setActiveTabKey] = useState('group')
   const [staff, setStaff] = useState<{ id: string; name: string; role: string }[]>([])
@@ -469,15 +475,15 @@ export function TeamHub({ currentUserId }: { currentUserId: string }) {
 
           {mobileView === 'bulletin' ? (
             <div className="flex-1 min-h-0 flex flex-col lg:hidden">
-              <PostsBoard board="bulletin" title="Bulletin Board" icon={<MessageSquare className="h-4 w-4 text-white/40" />} theme="neutral" />
+              <PostsBoard board="bulletin" title="Bulletin Board" icon={<MessageSquare className="h-4 w-4 text-white/40" />} theme="neutral" canRemovePosts={canRemovePosts} />
             </div>
           ) : mobileView === 'deadlines' ? (
             <div className="flex-1 min-h-0 flex flex-col lg:hidden">
-              <PostsBoard board="deadlines" title="Deadlines & Targets" icon={<Clock className="h-4 w-4 text-orange" />} theme="orange" showDueDate />
+              <PostsBoard board="deadlines" title="Deadlines & Targets" icon={<Clock className="h-4 w-4 text-orange" />} theme="orange" showDueDate canRemovePosts={canRemovePosts} />
             </div>
           ) : mobileView === 'highlights' ? (
             <div className="flex-1 min-h-0 flex flex-col lg:hidden">
-              <PostsBoard board="highlights" title="Highlights" icon={<Star className="h-4 w-4 text-blue" />} theme="blue" />
+              <PostsBoard board="highlights" title="Highlights" icon={<Star className="h-4 w-4 text-blue" />} theme="blue" canRemovePosts={canRemovePosts} />
             </div>
           ) : null}
         </div>
@@ -488,19 +494,19 @@ export function TeamHub({ currentUserId }: { currentUserId: string }) {
           className="flex flex-col rounded-2xl overflow-hidden border border-white/10 glass-card crisp-on-dark"
           style={{ height: '320px', ...BOARD_THEMES.neutral }}
         >
-          <PostsBoard board="bulletin" title="Bulletin Board" icon={<MessageSquare className="h-4 w-4 text-white/40" />} theme="neutral" />
+          <PostsBoard board="bulletin" title="Bulletin Board" icon={<MessageSquare className="h-4 w-4 text-white/40" />} theme="neutral" canRemovePosts={canRemovePosts} />
         </div>
         <div
           className="flex flex-col rounded-2xl overflow-hidden border border-orange/20"
           style={{ height: '320px', ...BOARD_THEMES.orange }}
         >
-          <PostsBoard board="deadlines" title="Deadlines & Targets" icon={<Clock className="h-4 w-4 text-orange" />} theme="orange" showDueDate />
+          <PostsBoard board="deadlines" title="Deadlines & Targets" icon={<Clock className="h-4 w-4 text-orange" />} theme="orange" showDueDate canRemovePosts={canRemovePosts} />
         </div>
         <div
           className="flex flex-col rounded-2xl overflow-hidden border border-blue/20"
           style={{ height: '320px', ...BOARD_THEMES.blue }}
         >
-          <PostsBoard board="highlights" title="Highlights" icon={<Star className="h-4 w-4 text-blue" />} theme="blue" />
+          <PostsBoard board="highlights" title="Highlights" icon={<Star className="h-4 w-4 text-blue" />} theme="blue" canRemovePosts={canRemovePosts} />
         </div>
       </div>
 

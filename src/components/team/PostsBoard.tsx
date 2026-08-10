@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Pin, Send, Plus, X, ChevronLeft, Loader2 } from 'lucide-react'
+import { Pin, Send, Plus, X, ChevronLeft, Loader2, Trash2 } from 'lucide-react'
 import { Avatar, timeAgo } from './TeamHub'
 
 export const BOARD_THEMES: Record<'neutral' | 'orange' | 'blue', React.CSSProperties> = {
@@ -131,11 +131,23 @@ function ComposePost({
   )
 }
 
-function PostThread({ post, onBack }: { post: Post; onBack: () => void }) {
+function PostThread({
+  post,
+  onBack,
+  canRemove,
+  onRemoved,
+}: {
+  post: Post
+  onBack: () => void
+  canRemove?: boolean
+  onRemoved?: () => void
+}) {
   const [replies, setReplies] = useState<Reply[]>([])
   const [loading, setLoading] = useState(true)
   const [content, setContent] = useState('')
   const [sending, setSending] = useState(false)
+  const [removing, setRemoving] = useState(false)
+  const [removeError, setRemoveError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch(`/api/team/posts/${post.id}/replies`)
@@ -143,6 +155,21 @@ function PostThread({ post, onBack }: { post: Post; onBack: () => void }) {
       .then((d) => setReplies(d.replies ?? []))
       .finally(() => setLoading(false))
   }, [post.id])
+
+  async function handleRemove() {
+    if (!canRemove || removing) return
+    if (!confirm('Remove this post? Replies will be deleted too.')) return
+    setRemoving(true)
+    setRemoveError(null)
+    const res = await fetch(`/api/team/posts/${post.id}`, { method: 'DELETE' })
+    setRemoving(false)
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      setRemoveError(data.error || 'Failed to remove post')
+      return
+    }
+    onRemoved?.()
+  }
 
   async function handleReply(e: React.FormEvent) {
     e.preventDefault()
@@ -172,7 +199,23 @@ function PostThread({ post, onBack }: { post: Post; onBack: () => void }) {
           <p className="text-xs text-white/40">{post.author_name} · {timeAgo(post.created_at)}</p>
         </div>
         {post.pinned && <Pin className="h-4 w-4 text-orange shrink-0" />}
+        {canRemove && (
+          <button
+            type="button"
+            onClick={handleRemove}
+            disabled={removing}
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl text-white/40 hover:bg-white/10 hover:text-orange disabled:opacity-50"
+            aria-label="Remove post"
+            title="Remove post"
+          >
+            {removing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+          </button>
+        )}
       </div>
+
+      {removeError && (
+        <p className="px-4 py-2 text-xs text-red-400 border-b border-white/10">{removeError}</p>
+      )}
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         <div className="rounded-xl border border-white/10 glass-card p-4">
@@ -224,13 +267,16 @@ type PostsBoardProps = {
   icon: React.ReactNode
   theme?: 'neutral' | 'orange' | 'blue'
   showDueDate?: boolean
+  canRemovePosts?: boolean
 }
 
-export function PostsBoard({ board, title, icon, showDueDate }: PostsBoardProps) {
+export function PostsBoard({ board, title, icon, showDueDate, canRemovePosts = false }: PostsBoardProps) {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedPost, setSelectedPost] = useState<Post | null>(null)
   const [composing, setComposing] = useState(false)
+  const [removingId, setRemovingId] = useState<string | null>(null)
+  const [removeError, setRemoveError] = useState<string | null>(null)
 
   const loadPosts = useCallback(async () => {
     const res = await fetch(`/api/team/posts?board=${board}`)
@@ -241,8 +287,35 @@ export function PostsBoard({ board, title, icon, showDueDate }: PostsBoardProps)
 
   useEffect(() => { loadPosts() }, [loadPosts])
 
+  async function handleRemovePost(postId: string, e?: React.MouseEvent) {
+    e?.stopPropagation()
+    if (!canRemovePosts || removingId) return
+    if (!confirm('Remove this post? Replies will be deleted too.')) return
+    setRemovingId(postId)
+    setRemoveError(null)
+    const res = await fetch(`/api/team/posts/${postId}`, { method: 'DELETE' })
+    setRemovingId(null)
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      setRemoveError(data.error || 'Failed to remove post')
+      return
+    }
+    setPosts((prev) => prev.filter((p) => p.id !== postId))
+    if (selectedPost?.id === postId) setSelectedPost(null)
+  }
+
   if (selectedPost) {
-    return <PostThread post={selectedPost} onBack={() => { setSelectedPost(null); loadPosts() }} />
+    return (
+      <PostThread
+        post={selectedPost}
+        canRemove={canRemovePosts}
+        onBack={() => { setSelectedPost(null); loadPosts() }}
+        onRemoved={() => {
+          setPosts((prev) => prev.filter((p) => p.id !== selectedPost.id))
+          setSelectedPost(null)
+        }}
+      />
+    )
   }
 
   return (
@@ -259,6 +332,9 @@ export function PostsBoard({ board, title, icon, showDueDate }: PostsBoardProps)
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
+        {removeError && (
+          <p className="mb-3 text-xs text-red-400">{removeError}</p>
+        )}
         {loading ? (
           <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-white/30" /></div>
         ) : posts.length === 0 ? (
@@ -269,28 +345,49 @@ export function PostsBoard({ board, title, icon, showDueDate }: PostsBoardProps)
         ) : (
           <div className="space-y-3">
             {posts.map((post) => (
-              <button
+              <div
                 key={post.id}
-                onClick={() => setSelectedPost(post)}
-                className="w-full text-left rounded-xl border border-white/10 glass-card p-4 hover:border-white/20 transition-colors"
+                className="relative w-full rounded-xl border border-white/10 glass-card p-4 hover:border-white/20 transition-colors"
               >
-                <div className="flex items-start gap-2 mb-1">
-                  {post.pinned && <Pin className="h-3.5 w-3.5 text-orange shrink-0 mt-0.5" />}
-                  <p className="text-sm font-semibold text-white flex-1">{post.title}</p>
-                </div>
-                <p className="text-xs text-white/50 line-clamp-2 mb-2">{post.content}</p>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <span className="text-[11px] text-white/30">{post.author_name} · {timeAgo(post.created_at)}</span>
-                  {post.due_date && (
-                    <span className="rounded-full bg-orange/20 px-2 py-0.5 text-[10px] font-bold text-orange">
-                      Due {new Date(post.due_date).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' })}
-                    </span>
-                  )}
-                  {post.replyCount > 0 && (
-                    <span className="text-[11px] text-blue-400">{post.replyCount} {post.replyCount === 1 ? 'reply' : 'replies'}</span>
-                  )}
-                </div>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPost(post)}
+                  className="w-full text-left"
+                >
+                  <div className="flex items-start gap-2 mb-1 pr-10">
+                    {post.pinned && <Pin className="h-3.5 w-3.5 text-orange shrink-0 mt-0.5" />}
+                    <p className="text-sm font-semibold text-white flex-1">{post.title}</p>
+                  </div>
+                  <p className="text-xs text-white/50 line-clamp-2 mb-2">{post.content}</p>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className="text-[11px] text-white/30">{post.author_name} · {timeAgo(post.created_at)}</span>
+                    {post.due_date && (
+                      <span className="rounded-full bg-orange/20 px-2 py-0.5 text-[10px] font-bold text-orange">
+                        Due {new Date(post.due_date).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' })}
+                      </span>
+                    )}
+                    {post.replyCount > 0 && (
+                      <span className="text-[11px] text-blue-400">{post.replyCount} {post.replyCount === 1 ? 'reply' : 'replies'}</span>
+                    )}
+                  </div>
+                </button>
+                {canRemovePosts && (
+                  <button
+                    type="button"
+                    onClick={(e) => handleRemovePost(post.id, e)}
+                    disabled={removingId === post.id}
+                    className="absolute right-2 top-2 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl text-white/30 hover:bg-white/10 hover:text-orange disabled:opacity-50"
+                    aria-label="Remove post"
+                    title="Remove post"
+                  >
+                    {removingId === post.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         )}
