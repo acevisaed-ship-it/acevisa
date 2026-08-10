@@ -31,6 +31,40 @@ not to.
    faster). The identity's status in the SES console flips from "Pending" to
    "Verified" — refresh that page to check.
 
+### Actual DKIM records for this account (captured from SES)
+
+AWS shows the **full FQDN** as Name. At GoDaddy, enter only the **left-hand
+host** (everything before `.aceyourvisa.com`) — GoDaddy appends the domain
+automatically. Do **not** paste the full `…aceyourvisa.com` into the Host field
+or you'll end up with a doubled domain.
+
+| Type | GoDaddy Host (Name) | GoDaddy Points to (Value) |
+|------|---------------------|---------------------------|
+| CNAME | `3j66dkh7ik3n2zwy2yxaj62uw757qq6q._domainkey` | `3j66dkh7ik3n2zwy2yxaj62uw757qq6q.dkim.amazonses.com` |
+| CNAME | `xl2wecvospbjghknwgsm4jf22lh54x5x._domainkey` | `xl2wecvospbjghknwgsm4jf22lh54x5x.dkim.amazonses.com` |
+| CNAME | `c47rrdp4xa7up6rwpybkjnvbb2s3hez6._domainkey` | `c47rrdp4xa7up6rwpybkjnvbb2s3hez6.dkim.amazonses.com` |
+
+**DMARC** (already shown by SES — add if not present):
+
+| Type | GoDaddy Host | Value |
+|------|--------------|-------|
+| TXT | `_dmarc` | `v=DMARC1; p=none;` |
+
+**MAIL FROM** — SES currently shows none. Optional but recommended for better
+deliverability: on the `aceyourvisa.com` identity → **MAIL FROM domain** → set
+e.g. `bounce.aceyourvisa.com` (prefer a subdomain that is **not** already used
+for Bluehost inbound mail — keep `mail.aceyourvisa.com` for Bluehost MX). SES
+will then give you an MX + TXT to add at GoDaddy the same way.
+
+### GoDaddy add checklist
+
+- [ ] CNAME #1 — host `3j66dkh7ik3n2zwy2yxaj62uw757qq6q._domainkey`
+- [ ] CNAME #2 — host `xl2wecvospbjghknwgsm4jf22lh54x5x._domainkey`
+- [ ] CNAME #3 — host `c47rrdp4xa7up6rwpybkjnvbb2s3hez6._domainkey`
+- [ ] TXT `_dmarc` → `v=DMARC1; p=none;` (skip if already present)
+- [ ] Do **not** change existing Bluehost MX / SPF / mail A records
+- [ ] Wait for propagation, then refresh SES → identity should flip to **Verified**
+
 **Tell me once you've added the records and I'll help sanity-check the DNS is
 propagating correctly if you want** (I can look up the DNS records publicly to
 confirm they resolve, without needing any access to your AWS or GoDaddy account).

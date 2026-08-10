@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getAuthenticatedCounselor } from '@/lib/supabase/server'
 import { getCounselorEmailConfig } from '@/lib/email/config'
-import { createImapClient, downloadMessageBodies } from '@/lib/email/imap'
+import { createImapClient, downloadMessageBodies, type EmailAttachmentMeta } from '@/lib/email/imap'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -31,6 +31,8 @@ export async function GET(request: Request) {
     let cc = ''
     let html = ''
     let text = ''
+    let attachments: EmailAttachmentMeta[] = []
+    let notFound = false
 
     try {
       const msg = await client.fetchOne(String(uid), {
@@ -41,30 +43,31 @@ export async function GET(request: Request) {
 
       // fetchOne returns `false` when the message is missing
       if (msg === false || !msg.envelope) {
-        return NextResponse.json({ error: 'Message not found' }, { status: 404 })
-      }
+        notFound = true
+      } else {
+        const env = msg.envelope
+        subject = env.subject ?? '(no subject)'
+        from = env.from?.[0]
+          ? `${env.from[0].name ?? ''} <${env.from[0].address ?? ''}>`.trim()
+          : 'Unknown'
+        date = env.date?.toISOString() ?? ''
+        to = env.to?.map((t) =>
+          `${t.name ?? ''} <${t.address ?? ''}>`.trim()
+        ).join(', ') ?? ''
+        cc = env.cc?.map((t) =>
+          `${t.name ?? ''} <${t.address ?? ''}>`.trim()
+        ).join(', ') ?? ''
 
-      const env = msg.envelope
-      subject = env.subject ?? '(no subject)'
-      from = env.from?.[0]
-        ? `${env.from[0].name ?? ''} <${env.from[0].address ?? ''}>`.trim()
-        : 'Unknown'
-      date = env.date?.toISOString() ?? ''
-      to = env.to?.map((t) =>
-        `${t.name ?? ''} <${t.address ?? ''}>`.trim()
-      ).join(', ') ?? ''
-      cc = env.cc?.map((t) =>
-        `${t.name ?? ''} <${t.address ?? ''}>`.trim()
-      ).join(', ') ?? ''
+        const bodies = await downloadMessageBodies(client, uid, msg.bodyStructure)
+        html = bodies.html
+        text = bodies.text
+        attachments = bodies.attachments
 
-      const bodies = await downloadMessageBodies(client, uid, msg.bodyStructure)
-      html = bodies.html
-      text = bodies.text
-
-      try {
-        await client.messageFlagsAdd(String(uid), ['\\Seen'], { uid: true })
-      } catch {
-        // Non-fatal — body still returned
+        try {
+          await client.messageFlagsAdd(String(uid), ['\\Seen'], { uid: true })
+        } catch {
+          // Non-fatal — body still returned
+        }
       }
     } finally {
       lock.release()
@@ -72,7 +75,11 @@ export async function GET(request: Request) {
 
     await client.logout()
 
-    return NextResponse.json({ uid, subject, from, to, cc, date, html, text })
+    if (notFound) {
+      return NextResponse.json({ error: 'Message not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ uid, subject, from, to, cc, date, html, text, attachments })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to fetch message'
     console.error('IMAP fetch error:', err)

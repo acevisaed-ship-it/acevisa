@@ -13,6 +13,15 @@ type EmailSummary = {
   preview: string
 }
 
+type EmailAttachment = {
+  index: number
+  filename: string
+  contentType: string
+  size: number
+  contentId: string | null
+  inline: boolean
+}
+
 type EmailDetail = {
   uid: number
   subject: string
@@ -22,7 +31,15 @@ type EmailDetail = {
   date: string
   html: string
   text: string
+  attachments?: EmailAttachment[]
   error?: string
+}
+
+function formatBytes(n: number) {
+  if (!n || n < 0) return ''
+  if (n < 1024) return `${n} B`
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`
 }
 
 function timeAgo(iso: string) {
@@ -335,6 +352,11 @@ function EmailDetailView({
 
   const hasHtml = Boolean(detail.html?.trim())
   const hasText = Boolean(detail.text?.trim())
+  // Inline CID images are embedded into the HTML as data URLs; list the rest for download.
+  // Also list oversized inline parts that were too large to embed.
+  const listedAttachments = (detail.attachments ?? []).filter(
+    (a) => !a.inline || a.size > 1.5 * 1024 * 1024,
+  )
 
   return (
     <div className="flex flex-col h-full">
@@ -360,6 +382,25 @@ function EmailDetailView({
         {detail.cc ? (
           <p className="text-xs text-white/50"><span className="text-white/30">Cc:</span> {detail.cc}</p>
         ) : null}
+        {listedAttachments.length > 0 && (
+          <div className="flex flex-wrap gap-2 pt-2">
+            {listedAttachments.map((att) => (
+              <a
+                key={att.index}
+                href={`/api/email/attachment?uid=${detail.uid}&folder=${encodeURIComponent(folder)}&index=${att.index}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-white/70 transition-colors hover:border-white/30 hover:text-white"
+              >
+                <Paperclip className="h-3.5 w-3.5 shrink-0" />
+                <span className="max-w-[180px] truncate">{att.filename}</span>
+                {att.size > 0 && (
+                  <span className="text-white/35">{formatBytes(att.size)}</span>
+                )}
+              </a>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
