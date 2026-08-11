@@ -1,3 +1,4 @@
+import { sendEmail, passwordChangedEmailHtml } from '@/lib/email'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -17,7 +18,7 @@ export async function POST(request: Request) {
   // Fetch the client record to get auth_user_id and email
   const { data: client, error: fetchErr } = await supabase
     .from('clients')
-    .select('auth_user_id, email')
+    .select('auth_user_id, email, name')
     .eq('id', clientId)
     .single()
 
@@ -82,6 +83,17 @@ export async function POST(request: Request) {
       { error: `Password set but failed to update record: ${pwFlagErr.message} (${pwFlagErr.code})` },
       { status: 500 }
     )
+  }
+
+  if (client.email) {
+    await sendEmail({
+      to: client.email,
+      subject: 'Your password was changed',
+      html: passwordChangedEmailHtml({
+        name: client.name ?? 'there',
+        whenPKT: new Date().toLocaleString('en-PK', { dateStyle: 'medium', timeStyle: 'short' }),
+      }),
+    })
   }
 
   return NextResponse.json({ success: true })

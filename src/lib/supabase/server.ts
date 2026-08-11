@@ -60,6 +60,25 @@ export async function getAuthenticatedCounselor() {
   return counselor
 }
 
+/** Current student/client session — lookup by auth email (same pattern as student avatar API). */
+export async function getAuthenticatedClient() {
+  const supabase = await createServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user?.email) return null
+
+  const admin = createAdminClient()
+  const { data: client } = await admin
+    .from('clients')
+    .select('id, name, email')
+    .eq('email', user.email)
+    .maybeSingle()
+
+  return client
+}
+
 export async function getAuthenticatedAdmin() {
   const supabase = await createServerClient()
   const {

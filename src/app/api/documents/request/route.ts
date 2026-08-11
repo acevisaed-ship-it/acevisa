@@ -1,4 +1,6 @@
 import { createAdminClient, getAuthenticatedCounselor } from '@/lib/supabase/server'
+import { sendEmail, documentRequestedEmailHtml } from '@/lib/email'
+import { getBaseUrl } from '@/lib/utils'
 import { NextResponse } from 'next/server'
 import { logActivity } from '@/lib/activityLog'
 
@@ -16,7 +18,7 @@ export async function POST(request: Request) {
   // Verify the client belongs to this counselor (or counselor is admin)
   const { data: client } = await supabase
     .from('clients')
-    .select('id, name')
+    .select('id, name, email')
     .eq('id', clientId)
     .single()
 
@@ -44,6 +46,18 @@ export async function POST(request: Request) {
     description: `Counselor requested document: "${documentName.trim()}"`,
     metadata: { documentId: doc.id },
   })
+
+  if (client.email) {
+    await sendEmail({
+      to: client.email,
+      subject: 'A document is needed for your application',
+      html: documentRequestedEmailHtml({
+        clientName: client.name,
+        documentName: documentName.trim(),
+        portalUrl: `${getBaseUrl()}/portal/login`,
+      }),
+    })
+  }
 
   return NextResponse.json({ document: doc })
 }

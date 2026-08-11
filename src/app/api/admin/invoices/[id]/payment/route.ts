@@ -2,6 +2,7 @@ import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { PAYMENT_METHODS, type PaymentMethod } from '@/lib/admin/dealTypes'
 import { parseClientJoin, parseCounselorName } from '@/lib/admin/parseCounselorJoin'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { sendEmail, paymentReceiptEmailHtml } from '@/lib/email'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -55,7 +56,7 @@ export async function POST(
 
   const { data: invoice, error: fetchError } = await supabase
     .from('invoices')
-    .select('id, client_id, total, currency, status')
+    .select('id, client_id, total, currency, status, invoice_number, line_items, clients(name, email)')
     .eq('id', id)
     .single()
 
@@ -109,6 +110,30 @@ export async function POST(
   if (updateError) {
     console.error('Invoice paid update error:', updateError)
     return NextResponse.json({ error: 'Failed to update invoice' }, { status: 500 })
+  }
+
+  const clientJoin = invoice.clients as
+    | { name: string; email: string | null }
+    | { name: string; email: string | null }[]
+    | null
+  const clientRow = Array.isArray(clientJoin) ? clientJoin[0] : clientJoin
+  if (clientRow?.email) {
+    const lineItems = (invoice.line_items as { description: string; amount: number }[]) ?? []
+    await sendEmail({
+      to: clientRow.email,
+      subject: `Payment received — invoice ${invoice.invoice_number}`,
+      html: paymentReceiptEmailHtml({
+        clientName: clientRow.name,
+        invoiceNumber: invoice.invoice_number,
+        amount: Number(invoice.total).toLocaleString(),
+        currency: invoice.currency,
+        paidAtPKT: new Date(paidAt).toLocaleString('en-PK', {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        }),
+        lineItems,
+      }),
+    })
   }
 
   return NextResponse.json({ invoice: mapInvoice(updated) })

@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { SectionOrangePlaneToLogo } from '@/components/landing/HeroAnimations'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -45,23 +46,32 @@ export default function ResetPasswordPage() {
 
     setSuccess(true)
     setLoading(false)
+    fetch('/api/auth/notify-password-changed', { method: 'POST' }).catch(() => {})
   }
 
-  const inputClassName =
-    'w-full rounded-xl bg-grad-bg crisp px-4 py-3 text-text outline-none focus:ring-1 focus:ring-blue/40'
+  const inputCls = 'glass-input min-h-[52px] w-full rounded-xl px-4 py-3 text-sm outline-none'
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-grad-teal px-4">
-      <div className="w-full max-w-[400px] rounded-[20px] bg-grad-bg crisp p-8">
-        <div className="mb-8 flex flex-col items-center gap-2">
-          <img src="/logo.png" alt="ACE Altius Consulting" className="h-16 w-auto" />
+    <div
+      className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-8"
+      style={{ background: 'var(--grad-blue)' }}
+    >
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+        <SectionOrangePlaneToLogo />
+      </div>
+
+      <div className="relative z-10 w-full max-w-sm rounded-[24px] glass-card-blue p-6 sm:p-8">
+        <div className="mb-8 flex justify-center">
+          <div className="inline-flex items-center justify-center rounded-xl border border-white/40 bg-white/80 px-3 py-2 backdrop-blur-md crisp">
+            <img src="/logo.png" alt="ACE Altius Consulting" className="h-14 w-auto" />
+          </div>
         </div>
 
-        <h1 className="text-center text-2xl font-semibold text-blue">Reset Password</h1>
-        <p className="mt-1 text-center text-sm text-text">Enter your new password</p>
+        <h1 className="text-center text-2xl font-semibold text-white">Reset Password</h1>
+        <p className="mt-1 text-center text-sm text-white/60">Enter your new password</p>
 
         {success ? (
-          <p className="mt-8 text-center text-sm text-green" role="status">
+          <p className="mt-8 text-center text-sm text-[#B7C733]" role="status">
             Password updated!
           </p>
         ) : (
@@ -78,12 +88,12 @@ export default function ResetPasswordPage() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="New password"
-                className={`${inputClassName} pr-12`}
+                className={`${inputCls} pr-12`}
               />
               <button
                 type="button"
                 onClick={() => setShowNewPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-text/60 hover:text-text"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white"
                 aria-label={showNewPassword ? 'Hide password' : 'Show password'}
               >
                 {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -102,12 +112,12 @@ export default function ResetPasswordPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm password"
-                className={`${inputClassName} pr-12`}
+                className={`${inputCls} pr-12`}
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-text/60 hover:text-text"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white"
                 aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
               >
                 {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}

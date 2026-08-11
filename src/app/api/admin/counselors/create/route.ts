@@ -1,4 +1,5 @@
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { sendEmail, counselorWelcomeEmailHtml } from '@/lib/email'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -106,11 +107,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to create counselor record' }, { status: 500 })
   }
 
-  // Send account confirmation email via Supabase (magic link for first login)
-  await supabase.auth.admin.generateLink({
-    type: 'magiclink',
-    email: emailLower,
-    options: { redirectTo: `${new URL(request.url).origin}/login` },
+  await sendEmail({
+    to: emailLower,
+    subject: 'Welcome to ACE Altius Consulting',
+    html: counselorWelcomeEmailHtml({
+      name: fullName,
+      email: emailLower,
+      loginUrl: `${new URL(request.url).origin}/login`,
+    }),
   })
 
   return NextResponse.json({ success: true, counselor })

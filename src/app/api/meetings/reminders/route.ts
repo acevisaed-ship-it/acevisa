@@ -2,7 +2,14 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { getBaseUrl } from '@/lib/utils'
 import { NextResponse } from 'next/server'
 
-export async function GET() {
+export async function GET(request: Request) {
+  if (process.env.CRON_SECRET) {
+    const auth = request.headers.get('authorization')
+    if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+  }
+
   const supabase = createAdminClient()
   const now = new Date()
 

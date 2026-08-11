@@ -1,6 +1,12 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { getBaseUrl } from '@/lib/utils'
-import { Resend } from 'resend'
+import {
+  sendEmail,
+  meetingConfirmationEmailHtml,
+  meetingReminder24hEmailHtml,
+  meetingReminder2hEmailHtml,
+  escalationEmailHtml,
+} from '@/lib/email'
 import { NextResponse } from 'next/server'
 
 type NotificationType =
@@ -26,16 +32,9 @@ export async function POST(request: Request) {
 
   const supabase = createAdminClient()
 
-  if (!process.env.RESEND_API_KEY) {
-    console.log('RESEND_API_KEY not set — skipping email for type:', type)
-    return NextResponse.json({ skipped: true })
-  }
-
-  const resend = new Resend(process.env.RESEND_API_KEY)
-
   const { data: client } = await supabase
     .from('clients')
-    .select('name, phone')
+    .select('name, phone, email')
     .eq('id', clientId)
     .single()
 
@@ -43,12 +42,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Client not found' }, { status: 404 })
   }
 
-  // clients table has no email field — email is collected in Phase 2.
-  const clientEmail: string | null = null
-
   let subject = ''
   let html = ''
-  let recipient: string | null = clientEmail
+  let recipient: string | null = client.email
   let status: 'sent' | 'skipped' | 'failed' = 'sent'
 
   if (
@@ -68,44 +64,34 @@ export async function POST(request: Request) {
 
     const timeLabel = formatMeetingTimePKT(meeting.scheduled_time)
     const counselorData = meeting.counselors
-    const counselor = Array.isArray(counselorData)
-      ? counselorData[0]
-      : counselorData
+    const counselor = Array.isArray(counselorData) ? counselorData[0] : counselorData
     const counselorName = counselor?.name || 'Your Counselor'
 
     if (type === 'meeting_confirmation') {
-      subject = 'Your meeting is confirmed — AceVisa'
-      html = `
-        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#0A3F3A;background:#E6E8E7;padding:32px;border-radius:16px">
-          <h2 style="color:#2083B9">You're booked, ${client.name}!</h2>
-          <p>Your meeting with <strong>${counselorName}</strong> is confirmed:</p>
-          <p style="font-size:20px;font-weight:bold;color:#E48328;background:#fff;padding:16px;border-radius:12px">${timeLabel} PKT</p>
-          <p>Your counselor will review your case fully before the meeting. Come prepared with any questions you have.</p>
-          <p style="margin-top:32px;color:#0A3F3A">— The AceVisa Team</p>
-        </div>`
+      subject = 'Your meeting is confirmed — ACE Altius'
+      html = meetingConfirmationEmailHtml({
+        clientName: client.name,
+        counselorName,
+        whenPKT: timeLabel,
+      })
     }
 
     if (type === 'meeting_reminder_24h') {
-      subject = 'Reminder: Your AceVisa meeting is tomorrow'
-      html = `
-        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#0A3F3A;background:#E6E8E7;padding:32px;border-radius:16px">
-          <h2 style="color:#2083B9">See you tomorrow, ${client.name}!</h2>
-          <p>Just a reminder — your meeting with <strong>${counselorName}</strong> is:</p>
-          <p style="font-size:20px;font-weight:bold;color:#E48328;background:#fff;padding:16px;border-radius:12px">${timeLabel} PKT</p>
-          <p>If you need to reschedule, reply to this email or contact us directly.</p>
-          <p style="margin-top:32px;color:#0A3F3A">— The AceVisa Team</p>
-        </div>`
+      subject = 'Reminder: Your ACE Altius meeting is tomorrow'
+      html = meetingReminder24hEmailHtml({
+        clientName: client.name,
+        counselorName,
+        whenPKT: timeLabel,
+      })
     }
 
     if (type === 'meeting_reminder_2h') {
-      subject = 'Your meeting starts in 2 hours — AceVisa'
-      html = `
-        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#0A3F3A;background:#E6E8E7;padding:32px;border-radius:16px">
-          <h2 style="color:#2083B9">Almost time, ${client.name}!</h2>
-          <p>Your meeting with <strong>${counselorName}</strong> starts in 2 hours:</p>
-          <p style="font-size:20px;font-weight:bold;color:#E48328;background:#fff;padding:16px;border-radius:12px">${timeLabel} PKT</p>
-          <p style="margin-top:32px;color:#0A3F3A">— The AceVisa Team</p>
-        </div>`
+      subject = 'Your meeting starts in 2 hours — ACE Altius'
+      html = meetingReminder2hEmailHtml({
+        clientName: client.name,
+        counselorName,
+        whenPKT: timeLabel,
+      })
     }
   }
 
@@ -130,39 +116,27 @@ export async function POST(request: Request) {
       .single()
 
     recipient = counselor.email
-    subject = 'Student question needs your input — AceVisa'
-    html = `
-      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#0A3F3A;background:#E6E8E7;padding:32px;border-radius:16px">
-        <h2 style="color:#2083B9">A student asked something the AI couldn't answer</h2>
-        <p><strong>Student:</strong> ${client.name} (${client.phone})</p>
-        <p><strong>Their question:</strong></p>
-        <blockquote style="background:#fff;border-left:4px solid #E48328;padding:12px 16px;border-radius:0 12px 12px 0;margin:0">
-          ${escalation?.question_text || 'See dashboard for details'}
-        </blockquote>
-        <p style="margin-top:24px">
-          <a href="${getBaseUrl()}/admin/escalations"
-             style="background:#B7C733;color:#0A3F3A;padding:12px 24px;border-radius:24px;text-decoration:none;font-weight:bold">
-            Answer on dashboard →
-          </a>
-        </p>
-        <p style="margin-top:32px;color:#0A3F3A;font-size:12px">The student has been told their question is flagged and a counselor will respond.</p>
-      </div>`
+    subject = 'Student question needs your input — ACE Altius'
+    html = escalationEmailHtml({
+      counselorName: counselor.name,
+      clientName: `${client.name} (${client.phone})`,
+      question: escalation?.question_text || 'See dashboard for details',
+      dashboardUrl: `${getBaseUrl()}/admin/escalations`,
+    })
   }
 
   try {
     if (recipient) {
-      await resend.emails.send({
-        from: 'AceVisa <noreply@acevisa.co>',
-        to: recipient,
-        subject,
-        html,
-      })
+      await sendEmail({ to: recipient, subject, html })
+      if (!process.env.SES_SMTP_USER || !process.env.SES_SMTP_PASSWORD) {
+        status = 'skipped'
+      }
     } else {
       console.log(`No recipient email for type ${type} — skipping send, logging only`)
       status = 'skipped'
     }
   } catch (err) {
-    console.error('Resend error:', err)
+    console.error('[notifications/send] error:', err)
     status = 'failed'
   }
 
