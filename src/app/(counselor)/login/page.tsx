@@ -62,7 +62,14 @@ export default function CounselorLoginPage() {
       document.cookie = 'ace_session_token=; path=/; max-age=0'
     }
 
-    router.push(counselor.role === 'admin' ? '/admin' : '/dashboard')
+    // Match middleware homeForRole: admin/ceo → /admin, receptionist → /receptionist, else → /dashboard
+    const home =
+      counselor.role === 'admin' || counselor.role === 'ceo'
+        ? '/admin'
+        : counselor.role === 'receptionist'
+          ? '/receptionist'
+          : '/dashboard'
+    router.push(home)
     router.refresh()
   }
 
