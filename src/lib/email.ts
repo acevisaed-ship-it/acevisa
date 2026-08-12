@@ -1,11 +1,23 @@
 import nodemailer from 'nodemailer'
 
-const FROM = 'ACE Altius Consulting <noreply@aceyourvisa.com>'
+function stripEnvQuotes(v: string | undefined) {
+  if (!v) return v
+  return v.replace(/^["']|["']$/g, '')
+}
+
+// Prefer EMAIL_FROM when set so the envelope matches the Bluehost mailbox we auth as.
+const FROM_ADDRESS =
+  process.env.EMAIL_FROM?.trim() ||
+  process.env.SES_SMTP_USER?.trim() ||
+  'noreply@aceyourvisa.com'
+const FROM = `ACE Altius Consulting <${FROM_ADDRESS}>`
 const LOGO_URL = 'https://aceyourvisa.com/logo.png'
 const PORTAL_URL = 'https://aceyourvisa.com'
 
 function getTransporter() {
-  if (!process.env.SES_SMTP_USER || !process.env.SES_SMTP_PASSWORD) return null
+  const user = stripEnvQuotes(process.env.SES_SMTP_USER)
+  const pass = stripEnvQuotes(process.env.SES_SMTP_PASSWORD)
+  if (!user || !pass) return null
   const port = Number(process.env.SES_SMTP_PORT ?? 587)
   return nodemailer.createTransport({
     host: process.env.SES_SMTP_HOST ?? 'email-smtp.us-east-1.amazonaws.com',
@@ -13,10 +25,7 @@ function getTransporter() {
     secure: process.env.SES_SMTP_SECURE
       ? process.env.SES_SMTP_SECURE === 'true'
       : port === 465, // implicit TLS on 465, STARTTLS on 587/others
-    auth: {
-      user: process.env.SES_SMTP_USER,
-      pass: process.env.SES_SMTP_PASSWORD,
-    },
+    auth: { user, pass },
   })
 }
 
@@ -34,8 +43,18 @@ export async function sendEmail({ to, subject, html }: SendOptions): Promise<boo
     return false
   }
   try {
-    await transporter.sendMail({ from: FROM, to, subject, html })
-    return true
+    const info = await transporter.sendMail({ from: FROM, to, subject, html })
+    console.log('[email] sent', {
+      subject,
+      to,
+      from: FROM_ADDRESS,
+      host: process.env.SES_SMTP_HOST,
+      messageId: info.messageId,
+      accepted: info.accepted,
+      rejected: info.rejected,
+      response: info.response,
+    })
+    return (info.rejected?.length ?? 0) === 0
   } catch (err) {
     // Non-fatal for most callers — log and continue
     console.error('[email] send error:', err)
