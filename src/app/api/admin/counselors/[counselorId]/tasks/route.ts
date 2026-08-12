@@ -17,21 +17,33 @@ async function loadAuthorizedTarget(
     .single()
 
   if (!target || target.status !== 'active') {
-    return { target: null, error: NextResponse.json({ error: 'Staff member not found' }, { status: 404 }) }
+    return {
+      target: null,
+      error: NextResponse.json({ error: 'Staff member not found' }, { status: 404 }),
+      isSelf: false,
+    }
   }
 
+  // Admin/CEO may always create tasks for themselves.
+  const isSelf = target.id === admin.id
   const allowed =
-    admin.role === 'ceo'
-      ? target.role === 'counselor' || target.role === 'admin'
-      : admin.role === 'admin'
-        ? target.role === 'counselor' && target.branch_id === admin.branch_id
-        : false
+    isSelf && (admin.role === 'admin' || admin.role === 'ceo')
+      ? true
+      : admin.role === 'ceo'
+        ? target.role === 'counselor' || target.role === 'admin'
+        : admin.role === 'admin'
+          ? target.role === 'counselor' && target.branch_id === admin.branch_id
+          : false
 
   if (!allowed) {
-    return { target: null, error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
+    return {
+      target: null,
+      error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }),
+      isSelf: false,
+    }
   }
 
-  return { target, error: null }
+  return { target, error: null, isSelf }
 }
 
 export async function GET(_request: Request, { params }: RouteParams) {
@@ -59,7 +71,7 @@ export async function POST(request: Request, { params }: RouteParams) {
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { counselorId } = await params
-  const { target, error } = await loadAuthorizedTarget(admin, counselorId)
+  const { target, error, isSelf } = await loadAuthorizedTarget(admin, counselorId)
   if (error) return error
 
   const body = await request.json() as {
@@ -91,16 +103,21 @@ export async function POST(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Failed to create task' }, { status: 500 })
   }
 
-  await createNotification({
-    counselorId: target!.id,
-    type: 'task_assigned',
-    title: `New task from ${admin.name}`,
-    body: taskText,
-    taskId: newTask.id,
-    clientId: body.client_id || undefined,
-  })
+  // Don't ping yourself for a self-created task.
+  if (!isSelf) {
+    await createNotification({
+      counselorId: target!.id,
+      type: 'task_assigned',
+      title: `New task from ${admin.name}`,
+      body: taskText,
+      taskId: newTask.id,
+      clientId: body.client_id || undefined,
+    })
+  }
 
-  const description = `${admin.name} assigned a task to ${target!.name}: "${taskText.slice(0, 80)}${taskText.length > 80 ? '…' : ''}"`
+  const description = isSelf
+    ? `${admin.name} created a task for themselves: "${taskText.slice(0, 80)}${taskText.length > 80 ? '…' : ''}"`
+    : `${admin.name} assigned a task to ${target!.name}: "${taskText.slice(0, 80)}${taskText.length > 80 ? '…' : ''}"`
   if (body.client_id) {
     await logActivity({
       clientId: body.client_id,
@@ -108,7 +125,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       actorRole: admin.role,
       actionType: 'task_assigned',
       description,
-      metadata: { taskId: newTask.id, assignedTo: target!.id },
+      metadata: { taskId: newTask.id, assignedTo: target!.id, selfCreated: !!isSelf },
     })
   } else {
     await logStaffActivity({
@@ -116,7 +133,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       actorRole: admin.role,
       actionType: 'task_assigned',
       description,
-      metadata: { taskId: newTask.id, assignedTo: target!.id },
+      metadata: { taskId: newTask.id, assignedTo: target!.id, selfCreated: !!isSelf },
     })
   }
 

@@ -6,11 +6,13 @@ import { X } from 'lucide-react'
 type Props = {
   targetId: string
   targetName: string
+  /** When true, copy is "Create task" (self) instead of "Assign task to …". */
+  selfMode?: boolean
   onClose: () => void
   onSuccess: () => void
 }
 
-export function AssignTaskModal({ targetId, targetName, onClose, onSuccess }: Props) {
+export function AssignTaskModal({ targetId, targetName, selfMode = false, onClose, onSuccess }: Props) {
   const [taskText, setTaskText] = useState('')
   const [dueDate, setDueDate] = useState('')
   const [error, setError] = useState('')
@@ -35,7 +37,7 @@ export function AssignTaskModal({ targetId, targetName, onClose, onSuccess }: Pr
       })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error || 'Failed to assign task')
+        setError(data.error || (selfMode ? 'Failed to create task' : 'Failed to assign task'))
         return
       }
       onSuccess()
@@ -60,7 +62,7 @@ export function AssignTaskModal({ targetId, targetName, onClose, onSuccess }: Pr
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <h2 id="assign-task-modal-title" className="text-lg font-bold text-white">
-            Assign task to {targetName}
+            {selfMode ? 'Create a task for yourself' : `Assign task to ${targetName}`}
           </h2>
           <button
             type="button"
@@ -110,7 +112,13 @@ export function AssignTaskModal({ targetId, targetName, onClose, onSuccess }: Pr
               disabled={isSubmitting || !taskText.trim()}
               className="min-h-[52px] w-full rounded-full bg-green py-3 text-sm font-bold text-text transition-opacity disabled:opacity-50"
             >
-              {isSubmitting ? 'Assigning...' : 'Assign task →'}
+              {isSubmitting
+                ? selfMode
+                  ? 'Creating...'
+                  : 'Assigning...'
+                : selfMode
+                  ? 'Create task →'
+                  : 'Assign task →'}
             </button>
             <button
               type="button"

@@ -27,8 +27,10 @@ already work for *any* authenticated `counselors` row regardless of role — the
 - Admin (Branch Manager) → assigns to counselors in their **own branch only**
 - CEO (Super Admin) → assigns to counselors in **any branch**, and to **Admins
   (Branch Managers) in any branch**
-- Nobody can assign to a receptionist or to another admin/CEO — not requested, don't
-  build it
+- Admin and CEO can also **create tasks for themselves** from `/admin/my-tasks`
+  (self-create; no notification to self)
+- Nobody can assign to a receptionist or to another admin/CEO (except self) — not
+  requested, don't build it
 
 ---
 
@@ -616,6 +618,8 @@ you ever want CEOs to be assignable too.
       change its status and add notes as normal
 - [ ] Assigned Branch Manager gets a notification, sees the task on `/admin/my-tasks`,
       can change its status and add notes
+- [ ] Admin/CEO can create a task for themselves from `/admin/my-tasks` → appears in
+      their list immediately, no self-notification
 - [ ] Activity log (`/admin/staff-activity` for CEO) shows the assignment with actor
       and recipient names
 - [ ] `GET /api/admin/counselors/[counselorId]/tasks` — confirm a Branch Manager can no
