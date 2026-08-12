@@ -59,6 +59,9 @@ function SetupPasswordForm() {
       })
     }
 
+    // Security confirmation — same as counselor / student reset flows
+    fetch('/api/auth/notify-password-changed', { method: 'POST' }).catch(() => {})
+
     router.push(`/portal?clientId=${clientId}`)
     router.refresh()
   }

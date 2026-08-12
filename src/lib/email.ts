@@ -26,17 +26,20 @@ type SendOptions = {
   html: string
 }
 
-export async function sendEmail({ to, subject, html }: SendOptions): Promise<void> {
+/** Returns true if the message was handed to SMTP successfully. */
+export async function sendEmail({ to, subject, html }: SendOptions): Promise<boolean> {
   const transporter = getTransporter()
   if (!transporter) {
     console.log('[email] SES_SMTP_USER/SES_SMTP_PASSWORD not set — skipped:', subject)
-    return
+    return false
   }
   try {
     await transporter.sendMail({ from: FROM, to, subject, html })
+    return true
   } catch (err) {
-    // Non-fatal — log and continue, same behavior as before
+    // Non-fatal for most callers — log and continue
     console.error('[email] send error:', err)
+    return false
   }
 }
 
@@ -228,6 +231,24 @@ export function passwordChangedEmailHtml(opts: { name: string; whenPKT: string }
     <p>Hi ${opts.name},</p>
     <p>This is a confirmation that the password for your ACE Altius Consulting account was changed on ${opts.whenPKT} (Pakistan time).</p>
     <p style="margin-top:16px;font-size:13px;color:#0A3F3A99;">If this wasn't you, please contact us immediately so we can secure your account.</p>`)
+}
+
+export function passwordResetEmailHtml(opts: { name: string; resetUrl: string }) {
+  return wrap(`
+    <h2 style="color:#0A3F3A;margin:0 0 16px">Reset your password</h2>
+    <p>Hi ${opts.name},</p>
+    <p>We received a request to reset the password for your ACE Altius Consulting student portal account. Click below to choose a new password.</p>
+    ${ctaButton(opts.resetUrl, 'Reset password →')}
+    <p style="margin-top:24px;font-size:13px;color:#0A3F3A99;">If you didn't request this, you can safely ignore this email — your password won't change.</p>`)
+}
+
+export function accountSetupEmailHtml(opts: { name: string; setupUrl: string }) {
+  return wrap(`
+    <h2 style="color:#0A3F3A;margin:0 0 16px">Set up your portal account</h2>
+    <p>Hi ${opts.name},</p>
+    <p>You're almost in. Click below to set a password and access your ACE Altius Consulting student portal.</p>
+    ${ctaButton(opts.setupUrl, 'Set your password →')}
+    <p style="margin-top:24px;font-size:13px;color:#0A3F3A99;">If you didn't expect this email, you can safely ignore it.</p>`)
 }
 
 export function documentRequestedEmailHtml(opts: {

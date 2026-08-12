@@ -1,3 +1,4 @@
+import { sendStudentAuthLinkEmail } from '@/lib/email/studentAuthLinks'
 import { createNotification } from '@/lib/notifications'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
@@ -77,29 +78,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `Registration failed: ${error.message} (${error.code})` }, { status: 500 })
   }
 
-  // Create Supabase Auth user and send portal setup invite (non-fatal)
+  // Create auth user + send setup link immediately via app SMTP (not Supabase mailer)
   if (emailLower) {
     try {
       const origin = new URL(request.url).origin
-
-      // invite sends a magic link; on click student lands on /portal/setup-password
-      const { data: invited, error: inviteErr } = await supabase.auth.admin.inviteUserByEmail(
-        emailLower,
-        {
-          redirectTo: `${origin}/portal/setup-password?clientId=${newClient.id}`,
-          data: { clientId: newClient.id, name },
-        }
-      )
-
-      if (!inviteErr && invited?.user) {
-        // Link auth user to client record
-        await supabase
-          .from('clients')
-          .update({ auth_user_id: invited.user.id })
-          .eq('id', newClient.id)
+      const result = await sendStudentAuthLinkEmail({
+        supabase,
+        email: emailLower,
+        clientId: newClient.id,
+        name,
+        origin,
+        portalPasswordSet: false,
+        authUserId: null,
+      })
+      if (!result.sent) {
+        console.error('[register] setup email failed (non-fatal):', result.error)
       }
     } catch (inviteEx) {
-      console.error('[register] invite send failed (non-fatal):', inviteEx)
+      console.error('[register] setup email failed (non-fatal):', inviteEx)
     }
   }
 
