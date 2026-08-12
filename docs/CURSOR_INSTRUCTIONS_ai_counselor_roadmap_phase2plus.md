@@ -27,7 +27,7 @@ Per the standing access decision, this whole area is **CEO-only** to manage (not
 
 **Open items — need business input before this is spec-ready:**
 - Real content to seed it with. The schema has ~15 major sections per route; populating this accurately for every country/category ACE offers is a significant data-entry effort, not something to guess at from the chat exports alone. Needs either the business owner's own data, or a scoped first pass (e.g., start with the 4-5 highest-volume routes visible in the chat exports: UK/Germany/Cyprus study, Schengen visit, and expand from there).
-- The visit-visa total fee discrepancy from Phase 1 (150,000 vs 700,000-750,000 PKR) needs resolving — it'll need to go into this structure's `fees` array correctly either way.
+- The visit-visa overall package fee is still unresolved (business said 150,000 PKR; staff chats quoted 700,000–750,000). Phase 1 deliberately does not let the AI state any total — leave that to counselors until confirmed. Once resolved, put the correct figure into this structure's `fees` array.
 - Confirm whether the counselor Strategy tool's existing `knowledge_base` table gets migrated into the new structure or kept running in parallel during transition.
 
 ## Phase 4 — Daily learning loop ("A.R.I.A")
