@@ -115,7 +115,11 @@ export function RegistrationSection() {
       const res  = await fetch('/api/register', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ ...form, ad_source: adSource }),
+        body:    JSON.stringify({
+          ...form,
+          email: form.email.trim() || undefined,
+          ad_source: adSource,
+        }),
       })
       const data = await res.json()
 
@@ -290,8 +294,19 @@ export function RegistrationSection() {
                     <label htmlFor="email" className={labelClass}>
                       Email <span className="font-normal text-text/50">(optional)</span>
                     </label>
-                    <input id="email" type="email" placeholder="yourname@email.com" className={inputClass}
-                      value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                    <input
+                      id="email"
+                      type="text"
+                      inputMode="email"
+                      autoComplete="email"
+                      placeholder="Leave blank if not available"
+                      className={inputClass}
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    />
+                    <p className="mt-1 text-[10px] text-text/40 md:text-xs">
+                      Not required — you can add it later in My Profile.
+                    </p>
                   </div>
 
                   {/* Language + Interested in — 2-col on mobile */}
