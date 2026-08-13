@@ -1,9 +1,11 @@
 import { requireReceptionistApi } from '@/lib/receptionist/requireReceptionistApi'
 import { createAdminClient } from '@/lib/supabase/server'
+import { studentContactEmail, studentLoginAuthEmail } from '@/lib/auth/studentAuthEmail'
 import { sendEmail, studentWelcomeEmailHtml } from '@/lib/email'
 import { logStaffActivity } from '@/lib/activityLog'
 import { createNotification } from '@/lib/notifications'
 import { NextResponse } from 'next/server'
+import { randomUUID } from 'crypto'
 
 function generateTempPassword() {
   // Readable but not-guessable: 3 letters + 4 digits + 2 letters, e.g. "kxp4821qm"
@@ -31,14 +33,14 @@ export async function POST(request: Request) {
 
   const { name, phone, email, city, language, interested_in, target_country, counselorId } = body
 
-  if (!name?.trim() || !phone?.trim() || !email?.trim() || !language?.trim()) {
+  if (!name?.trim() || !phone?.trim() || !language?.trim()) {
     return NextResponse.json(
-      { error: 'Name, phone, email, and language are required' },
+      { error: 'Name, phone, and language are required' },
       { status: 400 }
     )
   }
 
-  const emailLower = email.trim().toLowerCase()
+  const contactEmail = studentContactEmail(email)
   const supabase = createAdminClient()
 
   // Duplicate checks — same rules as the public /api/register flow
@@ -55,17 +57,19 @@ export async function POST(request: Request) {
     )
   }
 
-  const { data: existingByEmail } = await supabase
-    .from('clients')
-    .select('id, client_code')
-    .eq('email', emailLower)
-    .maybeSingle()
+  if (contactEmail) {
+    const { data: existingByEmail } = await supabase
+      .from('clients')
+      .select('id, client_code')
+      .eq('email', contactEmail)
+      .maybeSingle()
 
-  if (existingByEmail) {
-    return NextResponse.json(
-      { error: `A client with this email already exists (${existingByEmail.client_code}).` },
-      { status: 409 }
-    )
+    if (existingByEmail) {
+      return NextResponse.json(
+        { error: `A client with this email already exists (${existingByEmail.client_code}).` },
+        { status: 409 }
+      )
+    }
   }
 
   let referredCounselor: { id: string; name: string } | null = null
@@ -88,13 +92,17 @@ export async function POST(request: Request) {
   }
 
   const tempPassword = generateTempPassword()
+  // Pre-generate id so we can create a synthetic auth email when contact email is omitted
+  const clientId = randomUUID()
+  const authEmail = studentLoginAuthEmail({ email: contactEmail, clientId })
 
   // Create the Supabase Auth user with the preset password directly (no magic-link
   // setup step — receptionist-registered students can log in immediately).
   const { data: authUser, error: authUserError } = await supabase.auth.admin.createUser({
-    email: emailLower,
+    email: authEmail,
     password: tempPassword,
     email_confirm: true,
+    user_metadata: { clientId },
   })
 
   if (authUserError || !authUser.user) {
@@ -108,9 +116,10 @@ export async function POST(request: Request) {
   const { data: newClient, error: insertError } = await supabase
     .from('clients')
     .insert({
+      id: clientId,
       name: name.trim(),
       phone: phone.trim(),
-      email: emailLower,
+      email: contactEmail,
       city: city?.trim() || null,
       language: language.toLowerCase(),
       interested_in: interested_in?.trim() || null,
@@ -124,7 +133,7 @@ export async function POST(request: Request) {
       auth_user_id: authUser.user.id,
       portal_password_set: true, // preset password is already a real, working password
     })
-    .select('id, client_code, name')
+    .select('id, client_code, name, phone')
     .single()
 
   if (insertError || !newClient) {
@@ -135,17 +144,19 @@ export async function POST(request: Request) {
   }
 
   const origin = new URL(request.url).origin
-  await sendEmail({
-    to: emailLower,
-    subject: `Welcome to ACE Altius — your ID is ${newClient.client_code}`,
-    html: studentWelcomeEmailHtml({
-      studentName: newClient.name,
-      clientCode: newClient.client_code,
-      loginEmail: emailLower,
-      tempPassword,
-      portalUrl: `${origin}/portal?clientId=${newClient.id}`,
-    }),
-  })
+  if (contactEmail) {
+    await sendEmail({
+      to: contactEmail,
+      subject: `Welcome to ACE Altius — your ID is ${newClient.client_code}`,
+      html: studentWelcomeEmailHtml({
+        studentName: newClient.name,
+        clientCode: newClient.client_code,
+        loginEmail: contactEmail,
+        tempPassword,
+        portalUrl: `${origin}/portal?clientId=${newClient.id}`,
+      }),
+    })
+  }
 
   if (referredCounselor) {
     await createNotification({
@@ -168,6 +179,7 @@ export async function POST(request: Request) {
       clientId: newClient.id,
       clientCode: newClient.client_code,
       referredCounselorId: referredCounselor?.id ?? null,
+      emailProvided: !!contactEmail,
     },
   })
 
@@ -176,5 +188,13 @@ export async function POST(request: Request) {
     clientId: newClient.id,
     clientCode: newClient.client_code,
     referredCounselorName: referredCounselor?.name ?? null,
+    // When no email was provided, return credentials so reception can share them verbally
+    ...(contactEmail
+      ? { emailSent: true }
+      : {
+          emailSent: false,
+          loginPhone: newClient.phone,
+          tempPassword,
+        }),
   })
 }

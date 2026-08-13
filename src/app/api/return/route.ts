@@ -1,3 +1,4 @@
+import { studentLoginAuthEmail } from '@/lib/auth/studentAuthEmail'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
 
   const { data: client } = await query
 
-  if (!client || !client.email) {
+  if (!client) {
     return NextResponse.json(
       { error: 'No account found with that email or phone number.' },
       { status: 404 }
@@ -35,9 +36,11 @@ export async function POST(request: Request) {
     )
   }
 
+  const authEmail = studentLoginAuthEmail({ email: client.email, clientId: client.id })
+
   // Authenticate with Supabase Auth
   const { data: session, error: signInError } = await supabase.auth.signInWithPassword({
-    email: client.email,
+    email: authEmail,
     password,
   })
 

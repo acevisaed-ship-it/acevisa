@@ -285,10 +285,12 @@ export function RegistrationSection() {
                     </div>
                   </div>
 
-                  {/* Email — full width */}
+                  {/* Email — optional; phone is enough for portal login */}
                   <div>
-                    <label htmlFor="email" className={labelClass}>Email</label>
-                    <input id="email" type="email" required placeholder="yourname@email.com" className={inputClass}
+                    <label htmlFor="email" className={labelClass}>
+                      Email <span className="font-normal text-text/50">(optional)</span>
+                    </label>
+                    <input id="email" type="email" placeholder="yourname@email.com" className={inputClass}
                       value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
                   </div>
 

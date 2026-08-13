@@ -79,19 +79,24 @@ export default function CounselorLoginPage() {
     setResetError(null)
     setResetLoading(true)
 
-    const supabase = createClient()
-    const { error: resetPasswordError } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    })
-
-    if (resetPasswordError) {
-      setResetError(resetPasswordError.message)
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: resetEmail }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setResetError(data.error || 'Failed to send reset link')
+        setResetLoading(false)
+        return
+      }
+      setResetMessage(data.message || 'Check your email for a reset link')
+    } catch {
+      setResetError('Failed to send reset link')
+    } finally {
       setResetLoading(false)
-      return
     }
-
-    setResetMessage('Check your email for a reset link')
-    setResetLoading(false)
   }
 
   const inputCls = 'glass-input min-h-[52px] w-full rounded-xl px-4 py-3 text-sm outline-none'

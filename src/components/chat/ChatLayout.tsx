@@ -15,6 +15,7 @@ import { DocumentsCard } from './DocumentsCard'
 import { ApplicationCard } from './ApplicationCard'
 import { ApplicationsListCard } from './ApplicationsListCard'
 import { ComplaintCard } from './ComplaintCard'
+import { StudentEmailForm } from '@/components/student/StudentEmailForm'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type Meeting = {
@@ -488,6 +489,10 @@ export function ChatLayout({
                   <p className="text-xs text-white/40">Tap photo to update</p>
                 </div>
               </div>
+              <StudentEmailForm
+                initialEmail={initialClient?.email ?? null}
+                variant="dark"
+              />
               <MeetingsPanel
                 clientId={clientId}
                 client={initialClient}

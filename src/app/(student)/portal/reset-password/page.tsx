@@ -19,19 +19,43 @@ function ResetPasswordForm() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [sessionReady, setSessionReady] = useState(false)
+  const [linkError, setLinkError] = useState<string | null>(null)
 
   useEffect(() => {
     const supabase = createClient()
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setSessionReady(true)
-    })
+    let cancelled = false
+
+    async function ensureSession() {
+      const { data } = await supabase.auth.getSession()
+      if (cancelled) return
+      if (data.session) {
+        setSessionReady(true)
+        return
+      }
+
+      await new Promise((r) => setTimeout(r, 400))
+      const again = await supabase.auth.getSession()
+      if (cancelled) return
+      if (again.data.session) {
+        setSessionReady(true)
+        return
+      }
+
+      setLinkError('This reset link is invalid or has expired. Please request a new one.')
+    }
+
+    ensureSession()
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (session && (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
         setSessionReady(true)
+        setLinkError(null)
       }
     })
-    return () => sub.subscription.unsubscribe()
+    return () => {
+      cancelled = true
+      sub.subscription.unsubscribe()
+    }
   }, [])
 
   useEffect(() => {
@@ -104,6 +128,13 @@ function ResetPasswordForm() {
           <p className="mt-8 text-center text-sm text-[#B7C733]" role="status">
             Password updated! Redirecting to login…
           </p>
+        ) : linkError ? (
+          <div className="mt-8 space-y-4 text-center">
+            <p className="text-sm text-orange" role="alert">{linkError}</p>
+            <a href="/portal/login" className="inline-block text-sm text-white/60 hover:text-white hover:underline">
+              Back to login
+            </a>
+          </div>
         ) : !sessionReady ? (
           <p className="mt-8 text-center text-sm text-white/60">Verifying your reset link…</p>
         ) : (

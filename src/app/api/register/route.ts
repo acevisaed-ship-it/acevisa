@@ -1,4 +1,5 @@
 import { sendStudentAuthLinkEmail } from '@/lib/email/studentAuthLinks'
+import { studentContactEmail } from '@/lib/auth/studentAuthEmail'
 import { createNotification } from '@/lib/notifications'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
@@ -13,7 +14,7 @@ export async function POST(request: Request) {
 
   const supabase = createAdminClient()
   const adSource = ad_source || 'direct'
-  const emailLower = email?.trim()?.toLowerCase() || null
+  const emailLower = studentContactEmail(email)
 
   // Return existing client if phone already registered
   const { data: existingByPhone } = await supabase

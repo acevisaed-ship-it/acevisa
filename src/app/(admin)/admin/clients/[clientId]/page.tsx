@@ -136,6 +136,7 @@ export default async function AdminClientProfilePage({ params }: Props) {
               clientId={clientId}
               initialStage={typedClient.pipeline_stage}
               initialNotes={typedClient.notes ?? ''}
+              initialEmail={typedClient.email ?? null}
               initialStatus={typedClient.status ?? 'active'}
               isAdmin
             />

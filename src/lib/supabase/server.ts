@@ -60,23 +60,35 @@ export async function getAuthenticatedCounselor() {
   return counselor
 }
 
-/** Current student/client session — lookup by auth email (same pattern as student avatar API). */
+/** Current student/client session — prefer auth_user_id (supports email-optional students). */
 export async function getAuthenticatedClient() {
   const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user?.email) return null
+  if (!user) return null
 
   const admin = createAdminClient()
-  const { data: client } = await admin
+
+  const { data: byAuth } = await admin
+    .from('clients')
+    .select('id, name, email')
+    .eq('auth_user_id', user.id)
+    .maybeSingle()
+
+  if (byAuth) return byAuth
+
+  if (!user.email) return null
+
+  // Legacy fallback for clients linked only by contact email
+  const { data: byEmail } = await admin
     .from('clients')
     .select('id, name, email')
     .eq('email', user.email)
     .maybeSingle()
 
-  return client
+  return byEmail
 }
 
 export async function getAuthenticatedAdmin() {

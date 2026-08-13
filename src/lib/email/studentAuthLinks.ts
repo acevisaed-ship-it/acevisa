@@ -3,7 +3,7 @@ import {
   passwordResetEmailHtml,
   sendEmail,
 } from '@/lib/email'
-import type { SupabaseClient } from '@supabase/supabase-js'
+import type { EmailOtpType, SupabaseClient } from '@supabase/supabase-js'
 
 type SendStudentAuthLinkOpts = {
   supabase: SupabaseClient
@@ -22,9 +22,22 @@ export type SendStudentAuthLinkResult = {
   error?: string
 }
 
+function buildConfirmLink(
+  origin: string,
+  hashedToken: string,
+  type: EmailOtpType,
+  nextPath: string,
+) {
+  const url = new URL('/auth/confirm', origin)
+  url.searchParams.set('token_hash', hashedToken)
+  url.searchParams.set('type', type)
+  url.searchParams.set('next', nextPath)
+  return url.toString()
+}
+
 /**
- * Generate a Supabase auth action link and deliver it immediately via app SMTP
- * (not Supabase's built-in mailer, which often isn't configured / is delayed).
+ * Generate a Supabase auth token and deliver a PKCE-safe confirm link via app SMTP
+ * (not Supabase's built-in mailer / action_link verify URL, which breaks under SSR).
  */
 export async function sendStudentAuthLinkEmail(
   opts: SendStudentAuthLinkOpts
@@ -32,11 +45,15 @@ export async function sendStudentAuthLinkEmail(
   const { supabase, email, clientId, name, origin, portalPasswordSet } = opts
   let authUserId = opts.authUserId ?? null
 
-  const redirectTo = portalPasswordSet
-    ? `${origin}/portal/reset-password?clientId=${clientId}`
-    : `${origin}/portal/setup-password?clientId=${clientId}`
+  const nextPath = portalPasswordSet
+    ? `/portal/reset-password?clientId=${clientId}`
+    : `/portal/setup-password?clientId=${clientId}`
+
+  // redirectTo is still passed to generateLink for Supabase audit/fallback metadata
+  const redirectTo = `${origin}${nextPath}`
 
   let actionLink: string | null = null
+  let linkType: EmailOtpType = 'recovery'
 
   if (!authUserId && !portalPasswordSet) {
     const { data, error } = await supabase.auth.admin.generateLink({
@@ -48,11 +65,12 @@ export async function sendStudentAuthLinkEmail(
       },
     })
 
-    if (!error && data?.properties?.action_link) {
-      actionLink = data.properties.action_link
+    const hashed = data?.properties?.hashed_token
+    if (!error && hashed) {
+      linkType = 'invite'
+      actionLink = buildConfirmLink(origin, hashed, 'invite', nextPath)
       authUserId = data.user?.id ?? authUserId
     } else if (error) {
-      // User may already exist — fall through to recovery below
       console.warn('[studentAuthLinks] invite generateLink failed, trying recovery:', error.message)
     }
   }
@@ -65,7 +83,6 @@ export async function sendStudentAuthLinkEmail(
         user_metadata: { clientId, name },
       })
       if (createErr || !created?.user) {
-        // Already exists is fine — continue to recovery
         if (createErr && !/already|registered|exists/i.test(createErr.message)) {
           return {
             sent: false,
@@ -84,7 +101,8 @@ export async function sendStudentAuthLinkEmail(
       options: { redirectTo },
     })
 
-    if (error || !data?.properties?.action_link) {
+    const hashed = data?.properties?.hashed_token
+    if (error || !hashed) {
       return {
         sent: false,
         authUserId,
@@ -92,7 +110,8 @@ export async function sendStudentAuthLinkEmail(
       }
     }
 
-    actionLink = data.properties.action_link
+    linkType = 'recovery'
+    actionLink = buildConfirmLink(origin, hashed, 'recovery', nextPath)
     authUserId = data.user?.id ?? authUserId
   }
 
@@ -119,6 +138,9 @@ export async function sendStudentAuthLinkEmail(
       error: 'SMTP send failed or credentials not configured',
     }
   }
+
+  // linkType kept for logging clarity
+  console.log('[studentAuthLinks] sent', { email, linkType, nextPath })
 
   return { sent: true, authUserId }
 }

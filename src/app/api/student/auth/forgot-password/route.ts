@@ -32,12 +32,16 @@ export async function POST(request: Request) {
 
   const { data: client } = await query
 
-  // Always return the same message to prevent email/phone enumeration
+  // No contact email → cannot send a reset link (phone-only accounts).
+  // Still return the same message to prevent email/phone enumeration.
   if (!client?.email) {
     return NextResponse.json(GENERIC_OK)
   }
 
-  const origin = new URL(request.url).origin
+  const origin = (
+    process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') ||
+    new URL(request.url).origin
+  )
   const result = await sendStudentAuthLinkEmail({
     supabase,
     email: client.email,

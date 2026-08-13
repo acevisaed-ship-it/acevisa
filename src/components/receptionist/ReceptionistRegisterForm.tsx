@@ -38,12 +38,21 @@ const emptyForm: FormState = {
   counselorId: '',
 }
 
+type SuccessState = {
+  name: string
+  clientCode: string
+  counselorName: string | null
+  emailSent: boolean
+  loginPhone?: string
+  tempPassword?: string
+}
+
 export function ReceptionistRegisterForm() {
   const [form, setForm] = useState<FormState>(emptyForm)
   const [counselors, setCounselors] = useState<{ id: string; name: string }[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<{ name: string; clientCode: string; counselorName: string | null } | null>(null)
+  const [success, setSuccess] = useState<SuccessState | null>(null)
 
   useEffect(() => {
     fetch('/api/receptionist/branch-counselors')
@@ -62,7 +71,10 @@ export function ReceptionistRegisterForm() {
       const res = await fetch('/api/receptionist/register-client', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          email: form.email.trim() || undefined,
+        }),
       })
       const data = await res.json()
 
@@ -71,7 +83,14 @@ export function ReceptionistRegisterForm() {
         return
       }
 
-      setSuccess({ name: form.name, clientCode: data.clientCode, counselorName: data.referredCounselorName ?? null })
+      setSuccess({
+        name: form.name,
+        clientCode: data.clientCode,
+        counselorName: data.referredCounselorName ?? null,
+        emailSent: !!data.emailSent,
+        loginPhone: data.loginPhone,
+        tempPassword: data.tempPassword,
+      })
       setForm(emptyForm)
     } catch {
       setError('Network error — please try again')
@@ -89,9 +108,18 @@ export function ReceptionistRegisterForm() {
         {success.counselorName && (
           <p className="mt-2 text-sm text-bg/70">Referred to <span className="font-semibold">{success.counselorName}</span></p>
         )}
-        <p className="mt-4 text-sm text-bg/60">
-          A welcome email with their portal ID and login password has been sent.
-        </p>
+        {success.emailSent ? (
+          <p className="mt-4 text-sm text-bg/60">
+            A welcome email with their portal ID and login password has been sent.
+          </p>
+        ) : (
+          <div className="mt-4 rounded-xl bg-white/10 px-4 py-3 text-left text-sm text-bg/80">
+            <p className="mb-2 font-medium text-bg">No email on file — share these login details with the client:</p>
+            <p><span className="text-bg/50">Phone:</span> <span className="font-mono font-semibold">{success.loginPhone}</span></p>
+            <p className="mt-1"><span className="text-bg/50">Temp password:</span> <span className="font-mono font-semibold text-orange">{success.tempPassword}</span></p>
+            <p className="mt-2 text-xs text-bg/50">They can log in at the student portal with their phone number and this password.</p>
+          </div>
+        )}
         <Button className="mt-6" onClick={() => setSuccess(null)}>
           Register another client
         </Button>
@@ -125,15 +153,21 @@ export function ReceptionistRegisterForm() {
           />
         </div>
         <div>
-          <label className={labelCls}>Email address</label>
+          <label className={labelCls}>
+            Email address <span className="font-normal text-white/40">(optional)</span>
+          </label>
           <input
-            required
-            type="email"
+            type="text"
+            inputMode="email"
+            autoComplete="email"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             className={inputCls}
-            placeholder="ayesha@example.com"
+            placeholder="Leave blank if not available"
           />
+          <p className="mt-1 text-[11px] text-white/35">
+            Not required — can be added later on the client profile.
+          </p>
         </div>
       </div>
 

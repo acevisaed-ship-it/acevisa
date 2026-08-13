@@ -32,6 +32,9 @@ export function ProfileSummarySection({
             <span className="font-bold">Phone:</span> {client.phone}
           </p>
           <p>
+            <span className="font-bold">Email:</span> {client.email ?? '—'}
+          </p>
+          <p>
             <span className="font-bold">City:</span> {client.city ?? '—'}
           </p>
           <p>

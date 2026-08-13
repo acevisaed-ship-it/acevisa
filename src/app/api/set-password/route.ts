@@ -1,4 +1,5 @@
 import { sendEmail, passwordChangedEmailHtml } from '@/lib/email'
+import { studentContactEmail, studentLoginAuthEmail } from '@/lib/auth/studentAuthEmail'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -30,6 +31,8 @@ export async function POST(request: Request) {
   }
 
   let authUserId: string | null = client.auth_user_id ?? null
+  const contactEmail = studentContactEmail(client.email)
+  const authEmail = studentLoginAuthEmail({ email: client.email, clientId })
 
   if (authUserId) {
     // Auth user already exists (from invite) — just update the password
@@ -41,10 +44,10 @@ export async function POST(request: Request) {
         { status: 500 }
       )
     }
-  } else if (client.email) {
-    // No auth user yet — create one with a confirmed email + password
+  } else {
+    // No auth user yet — create one (real contact email, or synthetic if email was skipped)
     const { data: created, error } = await supabase.auth.admin.createUser({
-      email: client.email,
+      email: authEmail,
       password,
       email_confirm: true,
       user_metadata: { clientId },
@@ -68,8 +71,6 @@ export async function POST(request: Request) {
         { status: 500 }
       )
     }
-  } else {
-    return NextResponse.json({ error: 'No email on record — cannot create login' }, { status: 400 })
   }
 
   const { error: pwFlagErr } = await supabase
@@ -85,9 +86,9 @@ export async function POST(request: Request) {
     )
   }
 
-  if (client.email) {
+  if (contactEmail) {
     await sendEmail({
-      to: client.email,
+      to: contactEmail,
       subject: 'Your password was changed',
       html: passwordChangedEmailHtml({
         name: client.name ?? 'there',

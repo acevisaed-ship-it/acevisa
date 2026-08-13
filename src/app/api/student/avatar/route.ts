@@ -11,18 +11,29 @@ export async function POST(request: Request) {
     data: { user },
   } = await serverClient.auth.getUser()
 
-  if (!user?.email) {
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const supabase = createAdminClient()
 
-  // Look up the client record by email
-  const { data: client } = await supabase
+  // Prefer auth_user_id so email-optional students still work
+  let client: { id: string } | null = null
+  const { data: byAuth } = await supabase
     .from('clients')
     .select('id')
-    .eq('email', user.email)
+    .eq('auth_user_id', user.id)
     .maybeSingle()
+  client = byAuth
+
+  if (!client && user.email) {
+    const { data: byEmail } = await supabase
+      .from('clients')
+      .select('id')
+      .eq('email', user.email)
+      .maybeSingle()
+    client = byEmail
+  }
 
   if (!client) {
     return NextResponse.json({ error: 'Client not found' }, { status: 404 })

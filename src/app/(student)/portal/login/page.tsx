@@ -97,7 +97,7 @@ export default function StudentLoginPage() {
           <form onSubmit={handleLogin} className="mt-8 space-y-4">
             <div>
               <label htmlFor="identifier" className="mb-1.5 block text-xs font-medium text-white/60">
-                Email address or phone number
+                Phone number or email
               </label>
               <input
                 id="identifier"
@@ -106,7 +106,7 @@ export default function StudentLoginPage() {
                 required
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                placeholder="yourname@email.com or 03XX XXXXXXX"
+                placeholder="03XX XXXXXXX or yourname@email.com"
                 className={inputCls}
               />
             </div>
@@ -157,12 +157,12 @@ export default function StudentLoginPage() {
         ) : (
           <form onSubmit={handleForgotPassword} className="mt-8 space-y-4">
             <p className="text-sm text-white/60">
-              Enter your email address or phone number. If a profile exists, we will send a password reset link.
+              Enter your email or phone. Reset links are emailed when an email is on file. Phone-only accounts: ask reception to reset your password.
             </p>
 
             <div>
               <label htmlFor="fp-identifier" className="mb-1.5 block text-xs font-medium text-white/60">
-                Email or phone number
+                Phone or email
               </label>
               <input
                 id="fp-identifier"
@@ -170,7 +170,7 @@ export default function StudentLoginPage() {
                 required
                 value={fpIdentifier}
                 onChange={(e) => setFpIdentifier(e.target.value)}
-                placeholder="yourname@email.com or 03XX XXXXXXX"
+                placeholder="03XX XXXXXXX or yourname@email.com"
                 className={inputCls}
               />
             </div>

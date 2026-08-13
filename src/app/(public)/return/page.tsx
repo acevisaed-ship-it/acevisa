@@ -100,14 +100,14 @@ export default function ReturnPage() {
             <form onSubmit={handleLogin} className="mt-8 space-y-4">
               <div>
                 <label htmlFor="identifier" className="mb-1.5 block text-xs font-medium text-white/60">
-                  Email address or phone number
+                  Phone number or email
                 </label>
                 <input
                   id="identifier"
                   type="text"
                   autoComplete="username"
                   required
-                  placeholder="yourname@email.com or 03XX XXXXXXX"
+                  placeholder="03XX XXXXXXX or yourname@email.com"
                   className={inputClass}
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}

@@ -17,13 +17,43 @@ function SetupPasswordForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sessionReady, setSessionReady] = useState(false)
+  const [linkError, setLinkError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Supabase redirects back with access_token in the URL hash after invite click
     const supabase = createClient()
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setSessionReady(true)
+    let cancelled = false
+
+    async function ensureSession() {
+      const { data } = await supabase.auth.getSession()
+      if (cancelled) return
+      if (data.session) {
+        setSessionReady(true)
+        return
+      }
+
+      await new Promise((r) => setTimeout(r, 400))
+      const again = await supabase.auth.getSession()
+      if (cancelled) return
+      if (again.data.session) {
+        setSessionReady(true)
+        return
+      }
+
+      setLinkError('This setup link is invalid or has expired. Please request a new one from your counselor.')
+    }
+
+    ensureSession()
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        setSessionReady(true)
+        setLinkError(null)
+      }
     })
+    return () => {
+      cancelled = true
+      sub.subscription.unsubscribe()
+    }
   }, [])
 
   async function handleSubmit(e: FormEvent) {
@@ -81,7 +111,14 @@ function SetupPasswordForm() {
           Choose a password to access your student portal anytime.
         </p>
 
-        {!sessionReady ? (
+        {linkError ? (
+          <div className="mt-8 space-y-3 text-center">
+            <p className="text-sm text-red-600" role="alert">{linkError}</p>
+            <a href="/portal/login" className="inline-block text-sm text-[#2083B9] hover:underline">
+              Back to login
+            </a>
+          </div>
+        ) : !sessionReady ? (
           <p className="mt-8 text-center text-sm text-[#0A3F3A]/50">Verifying your link…</p>
         ) : (
           <form onSubmit={handleSubmit} className="mt-8 space-y-4">

@@ -16,6 +16,47 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
+  const [sessionReady, setSessionReady] = useState(false)
+  const [linkError, setLinkError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const supabase = createClient()
+    let cancelled = false
+
+    async function ensureSession() {
+      const { data } = await supabase.auth.getSession()
+      if (cancelled) return
+      if (data.session) {
+        setSessionReady(true)
+        return
+      }
+
+      // Give the auth client a moment to pick up cookies set by /auth/confirm
+      await new Promise((r) => setTimeout(r, 400))
+      const again = await supabase.auth.getSession()
+      if (cancelled) return
+      if (again.data.session) {
+        setSessionReady(true)
+        return
+      }
+
+      setLinkError('This reset link is invalid or has expired. Please request a new one.')
+    }
+
+    ensureSession()
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+        setSessionReady(true)
+        setLinkError(null)
+      }
+    })
+    return () => {
+      cancelled = true
+      sub.subscription.unsubscribe()
+    }
+  }, [])
+
   useEffect(() => {
     if (!success) return
     const timer = setTimeout(() => {
@@ -28,6 +69,10 @@ export default function ResetPasswordPage() {
     e.preventDefault()
     setError(null)
 
+    if (newPassword.length < 8) {
+      setError('Password must be at least 8 characters')
+      return
+    }
     if (newPassword !== confirmPassword) {
       setError('Passwords do not match')
       return
@@ -72,8 +117,17 @@ export default function ResetPasswordPage() {
 
         {success ? (
           <p className="mt-8 text-center text-sm text-[#B7C733]" role="status">
-            Password updated!
+            Password updated! Redirecting to login…
           </p>
+        ) : linkError ? (
+          <div className="mt-8 space-y-4 text-center">
+            <p className="text-sm text-orange" role="alert">{linkError}</p>
+            <a href="/login" className="inline-block text-sm text-white/60 hover:text-white hover:underline">
+              Back to login
+            </a>
+          </div>
+        ) : !sessionReady ? (
+          <p className="mt-8 text-center text-sm text-white/60">Verifying your reset link…</p>
         ) : (
           <form onSubmit={handleSubmit} className="mt-8 space-y-4">
             <div className="relative">
@@ -85,9 +139,10 @@ export default function ResetPasswordPage() {
                 type={showNewPassword ? 'text' : 'password'}
                 autoComplete="new-password"
                 required
+                minLength={8}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="New password"
+                placeholder="New password (min. 8 characters)"
                 className={`${inputCls} pr-12`}
               />
               <button

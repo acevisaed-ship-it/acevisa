@@ -9,14 +9,25 @@ type Props = {
   clientId: string
   initialStage: PipelineStage
   initialNotes: string
+  initialEmail?: string | null
   initialStatus?: 'active' | 'suspended'
   isAdmin?: boolean
 }
 
-export function ClientControls({ clientId, initialStage, initialNotes, initialStatus = 'active', isAdmin = false }: Props) {
+export function ClientControls({
+  clientId,
+  initialStage,
+  initialNotes,
+  initialEmail = null,
+  initialStatus = 'active',
+  isAdmin = false,
+}: Props) {
   const [stage, setStage] = useState(initialStage)
   const [notes, setNotes] = useState(initialNotes)
-  const [saving, setSaving] = useState<'stage' | 'notes' | null>(null)
+  const [email, setEmail] = useState(initialEmail ?? '')
+  const [saving, setSaving] = useState<'stage' | 'notes' | 'email' | null>(null)
+  const [emailError, setEmailError] = useState<string | null>(null)
+  const [emailSaved, setEmailSaved] = useState(false)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
@@ -53,6 +64,31 @@ export function ClientControls({ clientId, initialStage, initialNotes, initialSt
     setSaving('notes')
     await patchClient({ notes })
     setSaving(null)
+  }
+
+  async function handleSaveEmail() {
+    setEmailError(null)
+    setEmailSaved(false)
+    if (!email.trim()) {
+      setEmailError('Email is required')
+      return
+    }
+    setSaving('email')
+    const res = await fetch('/api/clients/update', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId, email: email.trim() }),
+    })
+    const data = await res.json().catch(() => ({}))
+    setSaving(null)
+    if (!res.ok) {
+      setEmailError(data.error || 'Failed to save email')
+      return
+    }
+    if (data.email) setEmail(data.email)
+    setEmailSaved(true)
+    startTransition(() => router.refresh())
+    setTimeout(() => setEmailSaved(false), 2500)
   }
 
   async function handleToggleSuspension() {
@@ -110,6 +146,35 @@ export function ClientControls({ clientId, initialStage, initialNotes, initialSt
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Contact email */}
+      <div>
+        <label
+          htmlFor="client-email"
+          className="mb-1 block text-sm font-medium text-white/70"
+        >
+          Contact email
+        </label>
+        <input
+          id="client-email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Optional — client can also add this in My Profile"
+          className="min-h-[48px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input"
+        />
+        {emailError && (
+          <p className="mt-1.5 text-xs text-red-300">{emailError}</p>
+        )}
+        <button
+          type="button"
+          disabled={isPending || saving === 'email'}
+          onClick={handleSaveEmail}
+          className="mt-2 min-h-[44px] w-full rounded-full bg-grad-blue crisp-on-dark px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 sm:w-auto"
+        >
+          {saving === 'email' ? 'Saving…' : emailSaved ? '✓ Saved' : 'Save email'}
+        </button>
       </div>
 
       {/* Internal notes (saved to clients.notes) */}
