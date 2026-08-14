@@ -28,10 +28,11 @@ export async function POST(request: Request) {
     language?: string
     interested_in?: string
     target_country?: string
+    language_test_interest?: string
     counselorId?: string
   }
 
-  const { name, phone, email, city, language, interested_in, target_country, counselorId } = body
+  const { name, phone, email, city, language, interested_in, target_country, language_test_interest, counselorId } = body
 
   if (!name?.trim() || !phone?.trim() || !language?.trim()) {
     return NextResponse.json(
@@ -124,6 +125,7 @@ export async function POST(request: Request) {
       language: language.toLowerCase(),
       interested_in: interested_in?.trim() || null,
       target_country: target_country?.trim() || null,
+      language_test_interest: language_test_interest?.trim() || null,
       ad_source: 'receptionist',
       branch_id: receptionist.branch_id,
       registered_by: receptionist.id,

@@ -6,12 +6,21 @@ import { Button } from '@/components/ui/Button'
 
 const languages = ['Urdu', 'English', 'Punjabi', 'Sindhi', 'Pashto'] as const
 const services = ['Study Visa', 'Job Abroad', 'Visit Visa', 'Language & Test Prep'] as const
-const targetCountries = [
+const languageTestOptions = [
+  'IELTS', 'PTE', 'Duolingo', 'TOEFL', 'LanguageCert', 'Oxford ELLT', 'Other',
+] as const
+const popularDestinations = [
   'United Kingdom', 'Canada', 'Australia', 'Ireland', 'New Zealand',
-  'USA', 'Malaysia', 'China', 'Germany', 'Italy',
-  'Switzerland', 'Sweden', 'Belgium', 'Austria', 'Hungary',
-  'Romania', 'Latvia', 'Lithuania', 'Cyprus', 'Belarus',
-]
+  'USA', 'Malaysia', 'China', 'Cyprus',
+] as const
+const schengenCountries = [
+  'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Czechia', 'Denmark', 'Estonia',
+  'Finland', 'France', 'Germany', 'Greece', 'Hungary', 'Iceland', 'Italy',
+  'Latvia', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands',
+  'Norway', 'Poland', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 'Spain',
+  'Sweden', 'Switzerland',
+] as const
+const OTHER = 'Other'
 
 const inputCls = 'min-h-[44px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input'
 const labelCls = 'mb-1 block text-xs font-medium text-white/60'
@@ -23,7 +32,10 @@ interface FormState {
   city: string
   language: (typeof languages)[number]
   interested_in: (typeof services)[number]
+  language_test_interest: string
+  language_test_interest_custom: string
   target_country: string
+  target_country_custom: string
   counselorId: string
 }
 
@@ -34,7 +46,10 @@ const emptyForm: FormState = {
   city: '',
   language: 'Urdu',
   interested_in: 'Study Visa',
+  language_test_interest: '',
+  language_test_interest_custom: '',
   target_country: 'United Kingdom',
+  target_country_custom: '',
   counselorId: '',
 }
 
@@ -67,13 +82,48 @@ export function ReceptionistRegisterForm() {
     setError(null)
     setSuccess(null)
 
+    const resolvedCountry =
+      form.target_country === OTHER
+        ? form.target_country_custom.trim()
+        : form.target_country
+
+    const resolvedLanguageTest =
+      form.interested_in === 'Language & Test Prep'
+        ? form.language_test_interest === OTHER
+          ? form.language_test_interest_custom.trim()
+          : form.language_test_interest
+        : undefined
+
+    if (form.target_country === OTHER && !resolvedCountry) {
+      setError('Please enter the target country')
+      setLoading(false)
+      return
+    }
+
+    if (
+      form.interested_in === 'Language & Test Prep' &&
+      (!form.language_test_interest ||
+        (form.language_test_interest === OTHER && !resolvedLanguageTest))
+    ) {
+      setError('Please select or enter the language test type')
+      setLoading(false)
+      return
+    }
+
     try {
       const res = await fetch('/api/receptionist/register-client', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...form,
+          name: form.name,
+          phone: form.phone,
           email: form.email.trim() || undefined,
+          city: form.city,
+          language: form.language,
+          interested_in: form.interested_in,
+          target_country: resolvedCountry,
+          language_test_interest: resolvedLanguageTest,
+          counselorId: form.counselorId,
         }),
       })
       const data = await res.json()
@@ -200,25 +250,94 @@ export function ReceptionistRegisterForm() {
           <label className={labelCls}>Interested in</label>
           <select
             value={form.interested_in}
-            onChange={(e) => setForm({ ...form, interested_in: e.target.value as FormState['interested_in'] })}
+            onChange={(e) => {
+              const interested_in = e.target.value as FormState['interested_in']
+              setForm({
+                ...form,
+                interested_in,
+                language_test_interest:
+                  interested_in === 'Language & Test Prep' ? form.language_test_interest : '',
+                language_test_interest_custom:
+                  interested_in === 'Language & Test Prep' ? form.language_test_interest_custom : '',
+              })
+            }}
             className={inputCls}
           >
             {services.map((s) => (
               <option key={s} value={s}>{s}</option>
             ))}
           </select>
+          {form.interested_in === 'Language & Test Prep' && (
+            <div className="mt-3">
+              <label className={labelCls}>Language test type</label>
+              <select
+                required
+                value={form.language_test_interest}
+                onChange={(e) => {
+                  const language_test_interest = e.target.value
+                  setForm({
+                    ...form,
+                    language_test_interest,
+                    language_test_interest_custom:
+                      language_test_interest === OTHER ? form.language_test_interest_custom : '',
+                  })
+                }}
+                className={inputCls}
+              >
+                <option value="">Select test type…</option>
+                {languageTestOptions.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+              {form.language_test_interest === OTHER && (
+                <input
+                  required
+                  value={form.language_test_interest_custom}
+                  onChange={(e) =>
+                    setForm({ ...form, language_test_interest_custom: e.target.value })
+                  }
+                  className={`${inputCls} mt-2`}
+                  placeholder="Enter test name"
+                />
+              )}
+            </div>
+          )}
         </div>
         <div>
           <label className={labelCls}>Target country</label>
           <select
             value={form.target_country}
-            onChange={(e) => setForm({ ...form, target_country: e.target.value })}
+            onChange={(e) => {
+              const target_country = e.target.value
+              setForm({
+                ...form,
+                target_country,
+                target_country_custom: target_country === OTHER ? form.target_country_custom : '',
+              })
+            }}
             className={inputCls}
           >
-            {targetCountries.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
+            <optgroup label="Popular Destinations">
+              {popularDestinations.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </optgroup>
+            <optgroup label="Schengen Countries">
+              {schengenCountries.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </optgroup>
+            <option value={OTHER}>{OTHER}</option>
           </select>
+          {form.target_country === OTHER && (
+            <input
+              required
+              value={form.target_country_custom}
+              onChange={(e) => setForm({ ...form, target_country_custom: e.target.value })}
+              className={`${inputCls} mt-2`}
+              placeholder="Enter country name"
+            />
+          )}
         </div>
       </div>
 

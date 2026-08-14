@@ -16,7 +16,7 @@ export default async function StudentProfilePage({ searchParams }: Props) {
   const supabase = createAdminClient()
   const { data: client } = await supabase
     .from('clients')
-    .select('id, name, phone, email, city, language, client_code, interested_in, target_country, avatar_url')
+    .select('id, name, phone, email, city, language, client_code, interested_in, target_country, language_test_interest, avatar_url')
     .eq('id', clientId)
     .maybeSingle()
 
@@ -32,6 +32,9 @@ export default async function StudentProfilePage({ searchParams }: Props) {
     { label: 'City', value: client.city || '—' },
     { label: 'Language', value: client.language || '—' },
     { label: 'Interested in', value: client.interested_in || '—' },
+    ...(client.language_test_interest
+      ? [{ label: 'Language test', value: client.language_test_interest }]
+      : []),
     { label: 'Target country', value: client.target_country || '—' },
   ]
 
