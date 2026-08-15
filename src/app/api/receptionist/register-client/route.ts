@@ -4,17 +4,9 @@ import { studentContactEmail, studentLoginAuthEmail } from '@/lib/auth/studentAu
 import { sendEmail, studentWelcomeEmailHtml } from '@/lib/email'
 import { logStaffActivity } from '@/lib/activityLog'
 import { createNotification } from '@/lib/notifications'
+import { generateTempPassword } from '@/lib/auth/generateTempPassword'
 import { NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
-
-function generateTempPassword() {
-  // Readable but not-guessable: 3 letters + 4 digits + 2 letters, e.g. "kxp4821qm"
-  const letters = 'abcdefghjkmnpqrstuvwxyz' // no i/l/o — avoid visual ambiguity
-  const digits = '23456789' // no 0/1 — avoid visual ambiguity
-  const pick = (chars: string, n: number) =>
-    Array.from({ length: n }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
-  return `${pick(letters, 3)}${pick(digits, 4)}${pick(letters, 2)}`
-}
 
 export async function POST(request: Request) {
   const { receptionist, error: authError } = await requireReceptionistApi()

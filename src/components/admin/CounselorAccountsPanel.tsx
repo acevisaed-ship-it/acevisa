@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Eye, EyeOff, Trash2, UserX } from 'lucide-react'
+import { Eye, EyeOff, Trash2, UserX, KeyRound } from 'lucide-react'
 
 interface Counselor {
   id: string
@@ -9,6 +9,7 @@ interface Counselor {
   email: string
   phone: string | null
   status: string
+  role: string
   created_at: string
 }
 
@@ -42,6 +43,14 @@ export function CounselorAccountsPanel({ isCeo = false }: { isCeo?: boolean }) {
 
   const [actionId, setActionId] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+
+  const [resetOpenId, setResetOpenId] = useState<string | null>(null)
+  const [resetMode, setResetMode] = useState<'generate' | 'custom'>('generate')
+  const [resetCustomPw, setResetCustomPw] = useState('')
+  const [resetShowPw, setResetShowPw] = useState(false)
+  const [resetBusyId, setResetBusyId] = useState<string | null>(null)
+  const [resetError, setResetError] = useState<string | null>(null)
+  const [resetResult, setResetResult] = useState<{ id: string; password: string } | null>(null)
 
   function loadCounselors() {
     setLoadingList(true)
@@ -131,6 +140,52 @@ export function CounselorAccountsPanel({ isCeo = false }: { isCeo?: boolean }) {
     loadCounselors()
   }
 
+  function openReset(id: string) {
+    setResetOpenId(id)
+    setResetMode('generate')
+    setResetCustomPw('')
+    setResetShowPw(false)
+    setResetError(null)
+    setResetResult(null)
+  }
+
+  function closeReset() {
+    setResetOpenId(null)
+    setResetError(null)
+  }
+
+  async function handleResetPassword(id: string) {
+    setResetError(null)
+
+    if (resetMode === 'custom') {
+      if (resetCustomPw.length < 8) {
+        setResetError('Password must be at least 8 characters')
+        return
+      }
+    }
+
+    setResetBusyId(id)
+    const res = await fetch(`/api/admin/counselors/${id}/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(resetMode === 'custom' ? { password: resetCustomPw } : {}),
+    })
+    const data = await res.json()
+    setResetBusyId(null)
+
+    if (!res.ok) {
+      setResetError(data.error || 'Could not reset password')
+      return
+    }
+
+    if (data.generatedPassword) {
+      setResetResult({ id, password: data.generatedPassword })
+    } else {
+      setResetResult({ id, password: '' }) // custom password set, nothing to show
+    }
+    setResetCustomPw('')
+  }
+
   return (
     <div className="space-y-8">
       {/* Existing counselors */}
@@ -147,56 +202,158 @@ export function CounselorAccountsPanel({ isCeo = false }: { isCeo?: boolean }) {
             {counselors.map((c) => (
               <li
                 key={c.id}
-                className="flex flex-wrap items-center gap-3 rounded-xl border border-white/10 glass-card px-4 py-3"
+                className="rounded-xl border border-white/10 glass-card px-4 py-3"
               >
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-white/80">{c.name}</p>
-                  <p className="text-xs text-white/50">{c.email}{c.phone ? ` · ${c.phone}` : ''}</p>
-                </div>
-                <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                  c.status === 'active' ? 'bg-green/20 text-white' : 'glass-card text-white/40'
-                }`}>
-                  {c.status.toUpperCase()}
-                </span>
-
-                {c.status === 'active' && (
-                  <button
-                    onClick={() => handleDeactivate(c.id)}
-                    disabled={actionId === c.id}
-                    title="Deactivate (blocks login)"
-                    className="flex items-center gap-1.5 rounded-full border border-orange/30 px-3 py-1.5 text-xs font-semibold text-orange hover:bg-orange/10 disabled:opacity-40"
-                  >
-                    <UserX className="h-3.5 w-3.5" />
-                    {actionId === c.id ? '…' : 'Deactivate'}
-                  </button>
-                )}
-
-                {confirmDelete === c.id ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-red-500">Sure?</span>
-                    <button
-                      onClick={() => handleDelete(c.id)}
-                      disabled={actionId === c.id}
-                      className="rounded-full bg-red-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-600 disabled:opacity-40"
-                    >
-                      {actionId === c.id ? '…' : 'Yes, delete'}
-                    </button>
-                    <button
-                      onClick={() => setConfirmDelete(null)}
-                      className="rounded-full border border-white/20 px-3 py-1.5 text-xs text-white/60 hover:text-white"
-                    >
-                      Cancel
-                    </button>
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-white/80">{c.name}</p>
+                    <p className="text-xs text-white/50">{c.email}{c.phone ? ` · ${c.phone}` : ''}</p>
                   </div>
-                ) : (
-                  <button
-                    onClick={() => setConfirmDelete(c.id)}
-                    title="Permanently delete (only if no clients)"
-                    className="flex items-center gap-1.5 rounded-full border border-red-400/30 px-3 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-500/10 disabled:opacity-40"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Delete
-                  </button>
+                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                    c.status === 'active' ? 'bg-green/20 text-white' : 'glass-card text-white/40'
+                  }`}>
+                    {c.status.toUpperCase()}
+                  </span>
+
+                  {['counselor', 'receptionist'].includes(c.role) && (
+                    <button
+                      onClick={() => (resetOpenId === c.id ? closeReset() : openReset(c.id))}
+                      title="Reset password"
+                      className="flex items-center gap-1.5 rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-white/70 hover:bg-white/10"
+                    >
+                      <KeyRound className="h-3.5 w-3.5" />
+                      Reset password
+                    </button>
+                  )}
+
+                  {c.status === 'active' && (
+                    <button
+                      onClick={() => handleDeactivate(c.id)}
+                      disabled={actionId === c.id}
+                      title="Deactivate (blocks login)"
+                      className="flex items-center gap-1.5 rounded-full border border-orange/30 px-3 py-1.5 text-xs font-semibold text-orange hover:bg-orange/10 disabled:opacity-40"
+                    >
+                      <UserX className="h-3.5 w-3.5" />
+                      {actionId === c.id ? '…' : 'Deactivate'}
+                    </button>
+                  )}
+
+                  {confirmDelete === c.id ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-red-500">Sure?</span>
+                      <button
+                        onClick={() => handleDelete(c.id)}
+                        disabled={actionId === c.id}
+                        className="rounded-full bg-red-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-red-600 disabled:opacity-40"
+                      >
+                        {actionId === c.id ? '…' : 'Yes, delete'}
+                      </button>
+                      <button
+                        onClick={() => setConfirmDelete(null)}
+                        className="rounded-full border border-white/20 px-3 py-1.5 text-xs text-white/60 hover:text-white"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmDelete(c.id)}
+                      title="Permanently delete (only if no clients)"
+                      className="flex items-center gap-1.5 rounded-full border border-red-400/30 px-3 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-500/10 disabled:opacity-40"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Delete
+                    </button>
+                  )}
+                </div>
+
+                {resetOpenId === c.id && (
+                  <div className="mt-3 rounded-lg border border-white/10 bg-white/5 p-3">
+                    {resetResult?.id === c.id ? (
+                      <div className="space-y-2">
+                        {resetResult.password ? (
+                          <>
+                            <p className="text-xs text-white/60">
+                              New temporary password for <span className="font-semibold text-white/80">{c.name}</span> — share this with them, it won&apos;t be shown again:
+                            </p>
+                            <p className="rounded-lg bg-black/30 px-3 py-2 font-mono text-sm font-bold text-green">
+                              {resetResult.password}
+                            </p>
+                          </>
+                        ) : (
+                          <p className="text-xs text-white/60">
+                            ✓ Password updated for <span className="font-semibold text-white/80">{c.name}</span>. They&apos;ve been notified by email.
+                          </p>
+                        )}
+                        <button
+                          onClick={closeReset}
+                          className="rounded-full border border-white/20 px-3 py-1.5 text-xs text-white/60 hover:text-white"
+                        >
+                          Done
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <p className="text-xs font-semibold text-white/70">
+                          Reset password for {c.name}?
+                        </p>
+                        <div className="flex flex-wrap gap-2 text-xs">
+                          <label className="flex items-center gap-1.5 text-white/60">
+                            <input
+                              type="radio"
+                              checked={resetMode === 'generate'}
+                              onChange={() => setResetMode('generate')}
+                            />
+                            Generate a temporary password
+                          </label>
+                          <label className="flex items-center gap-1.5 text-white/60">
+                            <input
+                              type="radio"
+                              checked={resetMode === 'custom'}
+                              onChange={() => setResetMode('custom')}
+                            />
+                            Set a specific password
+                          </label>
+                        </div>
+                        {resetMode === 'custom' && (
+                          <div className="relative max-w-xs">
+                            <input
+                              type={resetShowPw ? 'text' : 'password'}
+                              value={resetCustomPw}
+                              onChange={(e) => setResetCustomPw(e.target.value)}
+                              placeholder="Min. 8 characters"
+                              className={`${inputCls} pr-10`}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setResetShowPw((v) => !v)}
+                              className="absolute inset-y-0 right-3 text-white/40 hover:text-white"
+                            >
+                              {resetShowPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                          </div>
+                        )}
+                        {resetError && (
+                          <p className="text-xs text-red-400">{resetError}</p>
+                        )}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleResetPassword(c.id)}
+                            disabled={resetBusyId === c.id}
+                            className="rounded-full bg-grad-blue crisp-on-dark px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+                          >
+                            {resetBusyId === c.id ? 'Resetting…' : 'Confirm reset'}
+                          </button>
+                          <button
+                            onClick={closeReset}
+                            className="rounded-full border border-white/20 px-3 py-1.5 text-xs text-white/60 hover:text-white"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
               </li>
             ))}
