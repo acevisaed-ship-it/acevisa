@@ -50,9 +50,19 @@ export async function POST(
   }
 
   // Counselors table has no auth_user_id column — look up the Supabase auth user by
-  // email, same pattern already used by the deactivate/delete routes.
-  const { data: authUsers } = await supabase.auth.admin.listUsers()
-  const authUser = authUsers?.users?.find((u) => u.email === target.email)
+  // email. listUsers() is paginated (default 50/page) and auth.users also contains
+  // every student client, so a bare single-page call can easily miss a real match
+  // once there are more than ~50 total accounts — page through until found.
+  let authUser: { id: string } | undefined
+  for (let page = 1; page <= 50 && !authUser; page++) {
+    const { data: authUsers, error: listError } = await supabase.auth.admin.listUsers({
+      page,
+      perPage: 200,
+    })
+    if (listError) break
+    authUser = authUsers?.users?.find((u) => u.email === target.email)
+    if (!authUsers?.users?.length || authUsers.users.length < 200) break // last page
+  }
 
   if (!authUser) {
     return NextResponse.json({ error: 'No linked login account found for this email' }, { status: 404 })
