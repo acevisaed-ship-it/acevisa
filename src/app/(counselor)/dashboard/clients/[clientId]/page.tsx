@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ActivityHistorySection } from '@/components/brief/ActivityHistorySection'
+import { RecentVisitsSection } from '@/components/brief/RecentVisitsSection'
 import { BehavioralNotesSection } from '@/components/brief/BehavioralNotesSection'
 import { BriefCard } from '@/components/brief/BriefCard'
 import { ConversationDigestSection } from '@/components/brief/ConversationDigestSection'
@@ -138,6 +139,14 @@ export default async function ClientRecordPage({ params }: Props) {
             proposed_changes: u.proposed_changes as Record<string, string>,
             reviewed_fields: (u.reviewed_fields ?? {}) as Record<string, string>,
           }))}
+        />
+
+        <RecentVisitsSection
+          visits={(activityLog ?? []).filter((e) => e.action_type === 'walk_in') as unknown as {
+            id: string
+            created_at: string
+            metadata: { note?: string; loggedByName?: string } | null
+          }[]}
         />
 
         <ProfileSummarySection
