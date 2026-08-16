@@ -16,7 +16,7 @@ import { PsychologicalReadSection } from '@/components/brief/PsychologicalReadSe
 import { ServicePathwaySection } from '@/components/brief/ServicePathwaySection'
 import { TalkingPointsSection } from '@/components/brief/TalkingPointsSection'
 import { resolveAiProfile } from '@/lib/brief'
-import { createAdminClient, requireAdmin, isBranchScoped } from '@/lib/supabase/server'
+import { createAdminClient, requireAdmin } from '@/lib/supabase/server'
 import type { Client, Conversation, Document } from '@/types'
 import { ClientControls } from '@/app/(counselor)/dashboard/clients/[clientId]/ClientControls'
 import { PendingProfileUpdates } from '@/app/(counselor)/dashboard/clients/[clientId]/PendingProfileUpdates'
@@ -36,7 +36,9 @@ export default async function AdminClientProfilePage({ params }: Props) {
   const { data: client } = await supabase.from('clients').select('*').eq('id', clientId).single()
 
   if (!client) notFound()
-  if (isBranchScoped(admin) && client.branch_id !== admin.branch_id) notFound()
+  // CEO and Branch Manager admins can both view any client's full details,
+  // regardless of branch — branch scoping stays in effect for list/count
+  // views elsewhere, this is specifically the detail page.
 
   const typedClient = client as Client
 

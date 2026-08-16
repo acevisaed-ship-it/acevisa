@@ -1,12 +1,13 @@
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
 import { createAdminClient } from '@/lib/supabase/server'
+import { logStaffActivity } from '@/lib/activityLog'
 import { NextResponse } from 'next/server'
 
 export async function PATCH(
   _request: Request,
   { params }: { params: Promise<{ counselorId: string }> }
 ) {
-  const { error: authError } = await requireAdminApi()
+  const { admin, error: authError } = await requireAdminApi()
   if (authError) return authError
 
   const { counselorId } = await params
@@ -15,7 +16,7 @@ export async function PATCH(
   // Fetch counselor to get their email → Supabase auth user
   const { data: counselor } = await supabase
     .from('counselors')
-    .select('id, email, status')
+    .select('id, name, email, role, status')
     .eq('id', counselorId)
     .single()
 
@@ -24,9 +25,14 @@ export async function PATCH(
     return NextResponse.json({ error: 'Already inactive' }, { status: 409 })
   }
 
-  // Find Supabase auth user by email and ban them (blocks login)
-  const { data: authUsers } = await supabase.auth.admin.listUsers()
-  const authUser = authUsers?.users?.find((u) => u.email === counselor.email)
+  // Find Supabase auth user by email and ban them (blocks login) — paginate,
+  // listUsers() defaults to 50/page and auth.users also holds every client.
+  let authUser: { id: string } | undefined
+  for (let page = 1; page <= 50 && !authUser; page++) {
+    const { data: authUsers } = await supabase.auth.admin.listUsers({ page, perPage: 200 })
+    authUser = authUsers?.users?.find((u) => u.email === counselor.email)
+    if (!authUsers?.users?.length || authUsers.users.length < 200) break
+  }
 
   if (authUser) {
     await supabase.auth.admin.updateUserById(authUser.id, { ban_duration: '876600h' }) // ~100 years
@@ -35,6 +41,14 @@ export async function PATCH(
   // Set status inactive in counselors table
   await supabase.from('counselors').update({ status: 'inactive' }).eq('id', counselorId)
 
+  await logStaffActivity({
+    counselorId: admin.id,
+    actorRole: admin.role,
+    actionType: 'account_deactivated',
+    description: `${admin.name} deactivated ${counselor.name}'s account (${counselor.role})`,
+    metadata: { targetId: counselor.id, targetRole: counselor.role },
+  })
+
   return NextResponse.json({ success: true })
 }
 
@@ -42,7 +56,7 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ counselorId: string }> }
 ) {
-  const { error: authError } = await requireAdminApi()
+  const { admin, error: authError } = await requireAdminApi()
   if (authError) return authError
 
   const { counselorId } = await params
@@ -50,7 +64,7 @@ export async function DELETE(
 
   const { data: counselor } = await supabase
     .from('counselors')
-    .select('id, email')
+    .select('id, name, email, role')
     .eq('id', counselorId)
     .single()
 
@@ -69,13 +83,25 @@ export async function DELETE(
     )
   }
 
-  // Delete from Supabase Auth
-  const { data: authUsers } = await supabase.auth.admin.listUsers()
-  const authUser = authUsers?.users?.find((u) => u.email === counselor.email)
+  // Delete from Supabase Auth — paginate, same reasoning as above.
+  let authUser: { id: string } | undefined
+  for (let page = 1; page <= 50 && !authUser; page++) {
+    const { data: authUsers } = await supabase.auth.admin.listUsers({ page, perPage: 200 })
+    authUser = authUsers?.users?.find((u) => u.email === counselor.email)
+    if (!authUsers?.users?.length || authUsers.users.length < 200) break
+  }
   if (authUser) await supabase.auth.admin.deleteUser(authUser.id)
 
   // Delete from counselors table
   await supabase.from('counselors').delete().eq('id', counselorId)
+
+  await logStaffActivity({
+    counselorId: admin.id,
+    actorRole: admin.role,
+    actionType: 'account_deleted',
+    description: `${admin.name} permanently deleted ${counselor.name}'s account (${counselor.role})`,
+    metadata: { targetName: counselor.name, targetRole: counselor.role },
+  })
 
   return NextResponse.json({ success: true })
 }

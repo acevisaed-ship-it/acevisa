@@ -1,6 +1,7 @@
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
 import { sendEmail, counselorWelcomeEmailHtml } from '@/lib/email'
 import { createAdminClient } from '@/lib/supabase/server'
+import { logStaffActivity } from '@/lib/activityLog'
 import { NextResponse } from 'next/server'
 
 const CREATABLE_ROLES_BY_ADMIN = ['counselor', 'receptionist'] as const
@@ -115,6 +116,14 @@ export async function POST(request: Request) {
       email: emailLower,
       loginUrl: `${new URL(request.url).origin}/login`,
     }),
+  })
+
+  await logStaffActivity({
+    counselorId: requester.id,
+    actorRole: requester.role,
+    actionType: 'account_created',
+    description: `${requester.name} created a new ${requestedRole} account for ${fullName} (${emailLower})`,
+    metadata: { targetId: counselor.id, targetRole: requestedRole },
   })
 
   return NextResponse.json({ success: true, counselor })
