@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { sendEmail, passwordChangedEmailHtml } from '@/lib/email'
 import { logStaffActivity } from '@/lib/activityLog'
 import { generateTempPassword } from '@/lib/auth/generateTempPassword'
+import { saveStaffPasswordVault } from '@/lib/auth/passwordVault'
 import { NextResponse } from 'next/server'
 
 export async function POST(
@@ -76,6 +77,8 @@ export async function POST(
     console.error('[reset-password] updateUserById error:', updateError)
     return NextResponse.json({ error: updateError.message }, { status: 500 })
   }
+
+  await saveStaffPasswordVault(supabase, target.id, newPassword)
 
   // Notify the account owner — they should know an admin changed their password,
   // same principle as the existing self-service passwordChangedEmailHtml notification.

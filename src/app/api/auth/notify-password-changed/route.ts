@@ -1,5 +1,7 @@
 import { sendEmail, passwordChangedEmailHtml } from '@/lib/email'
+import { clearStaffPasswordVault } from '@/lib/auth/passwordVault'
 import {
+  createAdminClient,
   getAuthenticatedClient,
   getAuthenticatedCounselor,
 } from '@/lib/supabase/server'
@@ -13,6 +15,8 @@ export async function POST() {
   if (counselor) {
     email = counselor.email
     name = counselor.name
+    // Staff changed their own password — any admin-saved copy is now stale.
+    await clearStaffPasswordVault(createAdminClient(), counselor.id)
   } else {
     const client = await getAuthenticatedClient()
     if (client?.email) {

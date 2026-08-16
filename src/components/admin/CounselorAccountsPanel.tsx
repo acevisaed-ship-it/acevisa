@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Eye, EyeOff, Trash2, UserX, KeyRound } from 'lucide-react'
+import { Eye, EyeOff, Trash2, UserX, KeyRound, Copy, Check } from 'lucide-react'
 
 interface Counselor {
   id: string
@@ -51,6 +51,13 @@ export function CounselorAccountsPanel({ isCeo = false }: { isCeo?: boolean }) {
   const [resetBusyId, setResetBusyId] = useState<string | null>(null)
   const [resetError, setResetError] = useState<string | null>(null)
   const [resetResult, setResetResult] = useState<{ id: string; password: string } | null>(null)
+
+  const [revealOpenId, setRevealOpenId] = useState<string | null>(null)
+  const [revealBusyId, setRevealBusyId] = useState<string | null>(null)
+  const [revealError, setRevealError] = useState<string | null>(null)
+  const [revealPassword, setRevealPassword] = useState<string | null>(null)
+  const [revealVisible, setRevealVisible] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   function loadCounselors() {
     setLoadingList(true)
@@ -141,6 +148,7 @@ export function CounselorAccountsPanel({ isCeo = false }: { isCeo?: boolean }) {
   }
 
   function openReset(id: string) {
+    setRevealOpenId(null)
     setResetOpenId(id)
     setResetMode('generate')
     setResetCustomPw('')
@@ -152,6 +160,50 @@ export function CounselorAccountsPanel({ isCeo = false }: { isCeo?: boolean }) {
   function closeReset() {
     setResetOpenId(null)
     setResetError(null)
+  }
+
+  function closeReveal() {
+    setRevealOpenId(null)
+    setRevealError(null)
+    setRevealPassword(null)
+    setRevealVisible(false)
+    setCopied(false)
+  }
+
+  async function handleRevealPassword(id: string) {
+    if (revealOpenId === id) {
+      closeReveal()
+      return
+    }
+    setResetOpenId(null)
+    setRevealOpenId(id)
+    setRevealError(null)
+    setRevealPassword(null)
+    setRevealVisible(false)
+    setCopied(false)
+    setRevealBusyId(id)
+
+    const res = await fetch(`/api/admin/counselors/${id}/reveal-password`, {
+      method: 'POST',
+    })
+    const data = await res.json()
+    setRevealBusyId(null)
+
+    if (!res.ok) {
+      setRevealError(data.error || 'Could not reveal password')
+      return
+    }
+    setRevealPassword(data.password)
+  }
+
+  async function copyRevealed(password: string) {
+    try {
+      await navigator.clipboard.writeText(password)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setCopied(false)
+    }
   }
 
   async function handleResetPassword(id: string) {
@@ -216,14 +268,24 @@ export function CounselorAccountsPanel({ isCeo = false }: { isCeo?: boolean }) {
                   </span>
 
                   {['counselor', 'receptionist'].includes(c.role) && (
-                    <button
-                      onClick={() => (resetOpenId === c.id ? closeReset() : openReset(c.id))}
-                      title="Reset password"
-                      className="flex items-center gap-1.5 rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-white/70 hover:bg-white/10"
-                    >
-                      <KeyRound className="h-3.5 w-3.5" />
-                      Reset password
-                    </button>
+                    <>
+                      <button
+                        onClick={() => handleRevealPassword(c.id)}
+                        title="Reveal saved password"
+                        className="flex items-center gap-1.5 rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-white/70 hover:bg-white/10"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        Reveal password
+                      </button>
+                      <button
+                        onClick={() => (resetOpenId === c.id ? closeReset() : openReset(c.id))}
+                        title="Reset password"
+                        className="flex items-center gap-1.5 rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-white/70 hover:bg-white/10"
+                      >
+                        <KeyRound className="h-3.5 w-3.5" />
+                        Reset password
+                      </button>
+                    </>
                   )}
 
                   {c.status === 'active' && (
@@ -266,6 +328,63 @@ export function CounselorAccountsPanel({ isCeo = false }: { isCeo?: boolean }) {
                     </button>
                   )}
                 </div>
+
+                {revealOpenId === c.id && (
+                  <div className="mt-3 rounded-lg border border-white/10 bg-white/5 p-3">
+                    {revealBusyId === c.id ? (
+                      <p className="text-xs text-white/50">Looking up saved password…</p>
+                    ) : revealPassword ? (
+                      <div className="space-y-2">
+                        <p className="text-xs text-white/60">
+                          Saved password for <span className="font-semibold text-white/80">{c.name}</span>
+                          {' '}(last set by an admin — stale if they changed it themselves):
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="rounded-lg bg-black/30 px-3 py-2 font-mono text-sm font-bold text-green">
+                            {revealVisible ? revealPassword : '•'.repeat(Math.max(8, revealPassword.length))}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setRevealVisible((v) => !v)}
+                            className="rounded-full border border-white/20 p-1.5 text-white/60 hover:text-white"
+                            title={revealVisible ? 'Hide password' : 'Show password'}
+                          >
+                            {revealVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => copyRevealed(revealPassword)}
+                            className="rounded-full border border-white/20 p-1.5 text-white/60 hover:text-white"
+                            title="Copy password"
+                          >
+                            {copied ? <Check className="h-3.5 w-3.5 text-green" /> : <Copy className="h-3.5 w-3.5" />}
+                          </button>
+                        </div>
+                        <button
+                          onClick={closeReveal}
+                          className="rounded-full border border-white/20 px-3 py-1.5 text-xs text-white/60 hover:text-white"
+                        >
+                          Done
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <p className="text-xs text-red-400">
+                          {revealError || 'No saved password for this account.'}
+                        </p>
+                        <button
+                          onClick={() => {
+                            closeReveal()
+                            openReset(c.id)
+                          }}
+                          className="rounded-full bg-grad-blue crisp-on-dark px-4 py-1.5 text-xs font-semibold text-white"
+                        >
+                          Reset password instead
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {resetOpenId === c.id && (
                   <div className="mt-3 rounded-lg border border-white/10 bg-white/5 p-3">

@@ -2,6 +2,7 @@ import { requireAdminApi } from '@/lib/admin/requireAdminApi'
 import { sendEmail, counselorWelcomeEmailHtml } from '@/lib/email'
 import { createAdminClient } from '@/lib/supabase/server'
 import { logStaffActivity } from '@/lib/activityLog'
+import { saveStaffPasswordVault } from '@/lib/auth/passwordVault'
 import { NextResponse } from 'next/server'
 
 const CREATABLE_ROLES_BY_ADMIN = ['counselor', 'receptionist'] as const
@@ -117,6 +118,8 @@ export async function POST(request: Request) {
       loginUrl: `${new URL(request.url).origin}/login`,
     }),
   })
+
+  await saveStaffPasswordVault(supabase, counselor.id, password)
 
   await logStaffActivity({
     counselorId: requester.id,
