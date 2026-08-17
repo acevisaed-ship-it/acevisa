@@ -1,14 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Download, Share, X, CheckCircle } from 'lucide-react'
+import { Suspense, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { Download, Share, CheckCircle } from 'lucide-react'
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
-export default function InstallPage() {
+function InstallPageInner() {
+  const searchParams = useSearchParams()
+  const forStaff = searchParams.get('for') === 'staff'
+  const loginHref = forStaff ? '/login' : '/portal/login'
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [isIOS, setIsIOS] = useState(false)
   const [isInstalled, setIsInstalled] = useState(false)
@@ -44,7 +48,6 @@ export default function InstallPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#0A3F3A] px-4 py-12">
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="mb-8 flex justify-center">
           <img src="/logo.png" alt="ACE Altius Consulting" className="h-14 w-auto" />
         </div>
@@ -52,12 +55,12 @@ export default function InstallPage() {
         <div className="rounded-[24px] bg-[#E6E8E7] p-6 shadow-2xl sm:p-8">
           <h1 className="text-center text-2xl font-semibold text-[#0A3F3A]">Install ACE Portal</h1>
           <p className="mt-1 text-center text-sm text-[#0A3F3A]/50">
-            Track your application from your home screen
+            {forStaff
+              ? 'Open your dashboard from your home screen'
+              : 'Track your application from your home screen'}
           </p>
 
           <div className="mt-6 space-y-3">
-
-            {/* Already installed */}
             {isInstalled && (
               <div className="flex flex-col items-center gap-3 rounded-2xl bg-[#B7C733]/20 px-4 py-6 text-center">
                 <CheckCircle className="h-10 w-10 text-[#B7C733]" />
@@ -68,7 +71,7 @@ export default function InstallPage() {
                   </p>
                 </div>
                 <a
-                  href="/portal/login"
+                  href={loginHref}
                   className="mt-2 inline-flex items-center rounded-full bg-[#0A3F3A] px-5 py-2.5 text-sm font-semibold text-[#E6E8E7]"
                 >
                   Open App →
@@ -76,7 +79,6 @@ export default function InstallPage() {
               </div>
             )}
 
-            {/* Android — native prompt available */}
             {!isInstalled && deferredPrompt && (
               <div className="flex flex-col items-center gap-4 rounded-2xl bg-[#2083B9]/10 px-4 py-6 text-center">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#2083B9]/20">
@@ -99,7 +101,6 @@ export default function InstallPage() {
               </div>
             )}
 
-            {/* iOS — manual steps */}
             {!isInstalled && isIOS && (
               <div className="rounded-2xl bg-[#0A3F3A]/5 px-4 py-5">
                 <p className="mb-4 text-sm font-semibold text-[#0A3F3A]">Install on iPhone / iPad</p>
@@ -126,7 +127,6 @@ export default function InstallPage() {
               </div>
             )}
 
-            {/* Desktop / unknown — show both sets of instructions */}
             {!isInstalled && !deferredPrompt && !isIOS && (
               <div className="space-y-4">
                 <div className="rounded-2xl bg-[#2083B9]/10 px-4 py-4">
@@ -154,11 +154,25 @@ export default function InstallPage() {
 
         <p className="mt-6 text-center text-sm text-white/40">
           Already have an account?{' '}
-          <a href="/portal/login" className="text-[#B7C733] hover:underline">
+          <a href={loginHref} className="text-[#B7C733] hover:underline">
             Sign in
           </a>
         </p>
       </div>
     </div>
+  )
+}
+
+export default function InstallPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#0A3F3A] text-white/60">
+          Loading…
+        </div>
+      }
+    >
+      <InstallPageInner />
+    </Suspense>
   )
 }
