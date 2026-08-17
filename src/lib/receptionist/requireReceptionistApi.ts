@@ -1,7 +1,8 @@
 import { getAuthenticatedCounselor } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
-// Receptionist accounts have exactly one job via the API: register a new client.
+// Receptionist APIs: register clients, log walk-ins, look up records, and
+// request/apply information corrections after admin/CEO approval.
 // This guard is intentionally separate from requireAdminApi — receptionists must
 // never fall through to admin-only data.
 export async function requireReceptionistApi() {

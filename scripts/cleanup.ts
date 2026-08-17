@@ -98,6 +98,7 @@ async function main() {
       'response_tracking',
       'panic_events',
       'profile_update_requests',
+      'client_correction_requests',
       'counselor_objectives',
       'behavioral_analyses',
     ]

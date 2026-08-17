@@ -65,6 +65,7 @@ const CLIENT_SCOPED_TABLES = [
   'messages_log',
   'complaints',
   'profile_update_requests',
+  'client_correction_requests',
   'panic_events',
   'specialist_outputs',
   'student_activity_log',

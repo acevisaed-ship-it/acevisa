@@ -1,4 +1,5 @@
 import { requireReceptionistApi } from '@/lib/receptionist/requireReceptionistApi'
+import { loadClientForm } from '@/lib/receptionist/clientForm'
 import { createAdminClient } from '@/lib/supabase/server'
 import { studentContactEmail, studentLoginAuthEmail } from '@/lib/auth/studentAuthEmail'
 import { sendEmail, studentWelcomeEmailHtml } from '@/lib/email'
@@ -44,8 +45,12 @@ export async function POST(request: Request) {
     .maybeSingle()
 
   if (existingByPhone) {
+    const duplicateClient = await loadClientForm(supabase, { clientId: existingByPhone.id })
     return NextResponse.json(
-      { error: `A client with this phone already exists (${existingByPhone.client_code}).` },
+      {
+        error: `A client with this phone already exists (${existingByPhone.client_code}).`,
+        duplicateClient,
+      },
       { status: 409 }
     )
   }
@@ -58,8 +63,12 @@ export async function POST(request: Request) {
       .maybeSingle()
 
     if (existingByEmail) {
+      const duplicateClient = await loadClientForm(supabase, { clientId: existingByEmail.id })
       return NextResponse.json(
-        { error: `A client with this email already exists (${existingByEmail.client_code}).` },
+        {
+          error: `A client with this email already exists (${existingByEmail.client_code}).`,
+          duplicateClient,
+        },
         { status: 409 }
       )
     }

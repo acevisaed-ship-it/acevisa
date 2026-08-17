@@ -11,7 +11,7 @@ export function getActivityDotColor(actionType: string): string {
   if (actionType.startsWith('task_')) {
     return '#EA580C'
   }
-  if (actionType.startsWith('profile_update_')) {
+  if (actionType.startsWith('profile_update_') || actionType.startsWith('correction_')) {
     return '#E48328'
   }
   if (actionType === 'counselor_assigned' || actionType === 'counselor_transferred') {

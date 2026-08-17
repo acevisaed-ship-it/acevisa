@@ -224,3 +224,28 @@ export type ProfileUpdateRequest = {
   reviewed_at: string | null
   created_at: string
 }
+
+export type ClientCorrectionRequestStatus =
+  | 'pending'
+  | 'approved'
+  | 'rejected'
+  | 'applied'
+  | 'cancelled'
+
+export type ClientCorrectionRequest = {
+  id: string
+  client_id: string
+  requested_by: string
+  branch_id: string
+  current_values: Record<string, string>
+  proposed_changes: Record<string, string>
+  reason: string | null
+  status: ClientCorrectionRequestStatus
+  reviewed_by: string | null
+  reviewed_at: string | null
+  review_note: string | null
+  applied_at: string | null
+  applied_values: Record<string, string> | null
+  created_at: string
+  updated_at: string
+}

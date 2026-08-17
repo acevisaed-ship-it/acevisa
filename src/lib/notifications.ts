@@ -6,6 +6,7 @@ export type NotificationType =
   | 'escalation'
   | 'panic'
   | 'profile_update'
+  | 'correction_request'
   | 'complaint'
   | 'chat_message'
   | 'task_assigned'

@@ -3,24 +3,16 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-
-const languages = ['Urdu', 'English', 'Punjabi', 'Sindhi', 'Pashto'] as const
-const services = ['Study Visa', 'Job Abroad', 'Visit Visa', 'Language & Test Prep'] as const
-const languageTestOptions = [
-  'IELTS', 'PTE', 'Duolingo', 'TOEFL', 'LanguageCert', 'Oxford ELLT', 'Other',
-] as const
-const popularDestinations = [
-  'United Kingdom', 'Canada', 'Australia', 'Ireland', 'New Zealand',
-  'USA', 'Malaysia', 'China', 'Cyprus',
-] as const
-const schengenCountries = [
-  'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Czechia', 'Denmark', 'Estonia',
-  'Finland', 'France', 'Germany', 'Greece', 'Hungary', 'Iceland', 'Italy',
-  'Latvia', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands',
-  'Norway', 'Poland', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 'Spain',
-  'Sweden', 'Switzerland',
-] as const
-const OTHER = 'Other'
+import { ClientInfoForm } from '@/components/receptionist/ClientInfoForm'
+import type { ClientFormSnapshot } from '@/lib/receptionist/clientForm'
+import {
+  languages,
+  services,
+  languageTestOptions,
+  popularDestinations,
+  schengenCountries,
+  OTHER,
+} from '@/lib/receptionist/intakeOptions'
 
 const inputCls = 'min-h-[44px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input'
 const labelCls = 'mb-1 block text-xs font-medium text-white/60'
@@ -67,6 +59,7 @@ export function ReceptionistRegisterForm() {
   const [counselors, setCounselors] = useState<{ id: string; name: string }[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [duplicateClient, setDuplicateClient] = useState<ClientFormSnapshot | null>(null)
   const [success, setSuccess] = useState<SuccessState | null>(null)
 
   useEffect(() => {
@@ -80,6 +73,7 @@ export function ReceptionistRegisterForm() {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setDuplicateClient(null)
     setSuccess(null)
 
     const resolvedCountry =
@@ -130,6 +124,7 @@ export function ReceptionistRegisterForm() {
 
       if (!res.ok) {
         setError(data.error || 'Failed to register client')
+        if (data.duplicateClient) setDuplicateClient(data.duplicateClient)
         return
       }
 
@@ -357,6 +352,13 @@ export function ReceptionistRegisterForm() {
 
       {error && (
         <p className="rounded-xl bg-red-500/20 px-4 py-2.5 text-sm text-red-400">{error}</p>
+      )}
+
+      {duplicateClient && (
+        <ClientInfoForm
+          client={duplicateClient}
+          title={`Existing client ${duplicateClient.client_code}`}
+        />
       )}
 
       <Button type="submit" disabled={loading} className="w-full sm:w-auto">

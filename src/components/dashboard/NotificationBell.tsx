@@ -34,6 +34,7 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   task_assigned: <ClipboardList size={16} className="text-[#2083B9]" />,
   complaint: <Megaphone size={16} className="text-red-400" />,
   profile_update: <UserCog size={16} className="text-[#B7C733]" />,
+  correction_request: <UserCog size={16} className="text-[#E48328]" />,
   chat_message: <MessageSquare size={16} className="text-[#2083B9]" />,
 }
 
@@ -61,6 +62,8 @@ function getNotificationHref(
       case 'meeting_request':
       case 'profile_update':
         return client_id ? `/admin/clients/${client_id}` : null
+      case 'correction_request':
+        return '/admin/correction-requests'
       case 'complaint':
         return '/admin/complaints'
       case 'task_assigned':

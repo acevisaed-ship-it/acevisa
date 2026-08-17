@@ -9,6 +9,7 @@ import {
   Calendar,
   CheckSquare,
   ClipboardList,
+  FilePenLine,
   Handshake,
   Mail,
   Megaphone,
@@ -24,6 +25,7 @@ import { clearAceSessionCookies } from '@/lib/auth/session-cookies'
 import { createClient } from '@/lib/supabase/client'
 import { ProfilePicture } from '@/components/dashboard/ProfilePicture'
 import { UnassignedCountBadge } from '@/components/admin/UnassignedCountBadge'
+import { CorrectionCountBadge } from '@/components/admin/CorrectionCountBadge'
 import { cn } from '@/lib/utils'
 
 type NavItem = {
@@ -31,13 +33,14 @@ type NavItem = {
   label: string
   icon: typeof Users
   exact?: boolean
-  badge?: 'unassigned'
+  badge?: 'unassigned' | 'corrections'
 }
 
 const navItems: NavItem[] = [
   { href: '/admin/my-tasks', label: 'My Tasks', icon: CheckSquare },
   { href: '/admin/unassigned', label: 'Unassigned', icon: Users, badge: 'unassigned' },
   { href: '/admin/clients', label: 'All Clients', icon: Users },
+  { href: '/admin/correction-requests', label: 'Corrections', icon: FilePenLine, badge: 'corrections' },
   { href: '/admin/team', label: 'Team', icon: Users2 },
   { href: '/admin/meetings', label: 'All Meetings', icon: Calendar },
   { href: '/admin/knowledge-base', label: 'Knowledge Base', icon: BookOpen },
@@ -132,6 +135,7 @@ function SidebarContent({
               {badge === 'unassigned' && (
                 <UnassignedCountBadge initialCount={unassignedCount} />
               )}
+              {badge === 'corrections' && <CorrectionCountBadge />}
             </Link>
           )
         })}

@@ -3,11 +3,18 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { clientCounselorName } from '@/lib/supabase/relations'
 import { NextResponse } from 'next/server'
 
+function sanitizeSearch(q: string) {
+  return q.replace(/[%_,()]/g, ' ').replace(/\s+/g, ' ').trim()
+}
+
 export async function GET(request: Request) {
   const { receptionist, error: authError } = await requireReceptionistApi()
   if (authError) return authError
+  if (!receptionist.branch_id) {
+    return NextResponse.json({ error: 'Receptionist is not assigned to a branch' }, { status: 400 })
+  }
 
-  const q = new URL(request.url).searchParams.get('q')?.trim()
+  const q = sanitizeSearch(new URL(request.url).searchParams.get('q') ?? '')
   if (!q || q.length < 2) {
     return NextResponse.json({ results: [] })
   }
@@ -15,11 +22,11 @@ export async function GET(request: Request) {
   const supabase = createAdminClient()
   const { data: clients, error } = await supabase
     .from('clients')
-    .select(`id, name, client_code, ${clientCounselorName}`)
+    .select(`id, name, client_code, phone, email, ${clientCounselorName}`)
     .eq('branch_id', receptionist.branch_id)
-    .or(`name.ilike.%${q}%,client_code.ilike.%${q}%`)
+    .or(`name.ilike.%${q}%,client_code.ilike.%${q}%,phone.ilike.%${q}%,email.ilike.%${q}%`)
     .order('name')
-    .limit(8)
+    .limit(10)
 
   if (error) {
     console.error('[receptionist/search] query failed:', error.message)
@@ -32,6 +39,8 @@ export async function GET(request: Request) {
       id: c.id,
       name: c.name,
       clientCode: c.client_code,
+      phone: c.phone,
+      email: c.email,
       counselorName: counselor?.name ?? 'Unassigned',
     }
   })
