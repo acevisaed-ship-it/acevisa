@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { CheckSquare, Home, Kanban, Mail, MessageSquareMore, Users, X } from 'lucide-react'
+import { CheckSquare, Download, Home, Kanban, Mail, MessageSquareMore, Users, X } from 'lucide-react'
 import { clearAceSessionCookies } from '@/lib/auth/session-cookies'
 import { createClient } from '@/lib/supabase/client'
 import { ProfilePicture } from '@/components/dashboard/ProfilePicture'
 import { LogoHomeLink } from '@/components/ui/LogoHomeLink'
+import { STAFF_INSTALL_PATH } from '@/components/StaffAppInstallCard'
 import { cn } from '@/lib/utils'
 
 type NavItem = {
@@ -93,6 +94,14 @@ function SidebarContent({
             </Link>
           )
         })}
+        <Link
+          href={STAFF_INSTALL_PATH}
+          onClick={onNavigate}
+          className="flex min-h-[48px] items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-bg transition-colors hover:bg-[rgba(183,199,51,0.15)]"
+        >
+          <Download className="h-4 w-4 shrink-0" />
+          Get the app
+        </Link>
       </nav>
 
       <div className="border-t border-bg/10 px-6 py-5">

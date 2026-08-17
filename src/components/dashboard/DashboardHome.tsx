@@ -6,6 +6,7 @@ import { StatCard } from '@/components/dashboard/StatCard'
 import { CollapsableTasksCard } from '@/components/dashboard/CollapsableTasksCard'
 import { ComplaintRow } from '@/components/dashboard/ComplaintRow'
 import { AttendanceClock } from '@/components/dashboard/AttendanceClock'
+import { StaffAppInstallCard } from '@/components/StaffAppInstallCard'
 
 type MeetingRow = CounselorDashboardData['todayMeetings'][number]
 
@@ -47,6 +48,8 @@ export function DashboardHome({
       <div className="mb-6 max-w-xs">
         <AttendanceClock />
       </div>
+
+      <StaffAppInstallCard className="mb-8 max-w-2xl" />
 
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Meetings today" value={data.meetingsTodayCount} />

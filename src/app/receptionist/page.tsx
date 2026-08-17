@@ -2,6 +2,7 @@ import { ReceptionistLookup } from '@/components/receptionist/ReceptionistLookup
 import { ReceptionistWalkIn } from '@/components/receptionist/ReceptionistWalkIn'
 import { ReceptionistCorrectionRequest } from '@/components/receptionist/ReceptionistCorrectionRequest'
 import { ReceptionistRegisterForm } from '@/components/receptionist/ReceptionistRegisterForm'
+import { StaffAppInstallCard } from '@/components/StaffAppInstallCard'
 
 export default function ReceptionistPage() {
   return (
@@ -12,6 +13,7 @@ export default function ReceptionistPage() {
           Log every walk-in below, request information corrections, or register a brand-new client further down.
         </p>
       </div>
+      <StaffAppInstallCard />
       <ReceptionistWalkIn />
       <ReceptionistLookup />
       <ReceptionistCorrectionRequest />

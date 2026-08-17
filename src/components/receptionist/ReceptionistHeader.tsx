@@ -3,6 +3,8 @@
 import { clearAceSessionCookies } from '@/lib/auth/session-cookies'
 import { createClient } from '@/lib/supabase/client'
 import { LogoHomeLink } from '@/components/ui/LogoHomeLink'
+import { STAFF_INSTALL_PATH } from '@/components/StaffAppInstallCard'
+import Link from 'next/link'
 
 export function ReceptionistHeader({ name }: { name: string }) {
   async function handleSignOut() {
@@ -19,6 +21,12 @@ export function ReceptionistHeader({ name }: { name: string }) {
         <span className="hidden text-sm font-semibold text-bg/70 sm:inline">Reception Desk</span>
       </div>
       <div className="flex items-center gap-4">
+        <Link
+          href={STAFF_INSTALL_PATH}
+          className="text-sm font-medium text-orange hover:underline"
+        >
+          Get the app
+        </Link>
         <span className="text-sm font-medium text-bg">{name}</span>
         <button
           type="button"
