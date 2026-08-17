@@ -119,7 +119,7 @@ export function ChatShell({ clientId, clientName, clientLanguage }: Props) {
     <div className="mx-auto flex h-full max-w-[390px] flex-col bg-bg">
       {/* Hidden on mobile — StudentSidebar already provides the fixed top bar */}
       <div className="hidden lg:block">
-        <ChatHeader clientName={clientName} />
+        <ChatHeader clientName={clientName} homeHref={`/portal?clientId=${clientId}`} />
       </div>
 
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4">

@@ -5,6 +5,7 @@ import { Menu } from 'lucide-react'
 import { DashboardSidebar } from './DashboardSidebar'
 import { ProfilePicture } from './ProfilePicture'
 import { NotificationBell } from './NotificationBell'
+import { LogoHomeLink } from '@/components/ui/LogoHomeLink'
 
 type Props = {
   counselorId: string
@@ -41,9 +42,7 @@ export function DashboardShell({
         >
           <Menu className="h-6 w-6" />
         </button>
-        <div className="inline-flex items-center justify-center rounded-xl bg-white/95 px-2 py-1">
-          <img src="/logo.png" alt="ACE Altius Consulting" className="h-7 w-auto" />
-        </div>
+        <LogoHomeLink href={basePath} size="sm" className="px-2 py-1" />
         <div className="flex items-center gap-2">
           <NotificationBell counselorId={counselorId} variant="dark" />
         </div>

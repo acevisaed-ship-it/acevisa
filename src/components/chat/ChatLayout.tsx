@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { MessageCircle, LayoutList, Bell, User } from 'lucide-react'
+import Link from 'next/link'
 import type { ChatMessage } from '@/types'
 import { ChatBubble } from './ChatBubble'
 import { ChatInput } from './ChatInput'
@@ -342,9 +343,13 @@ export function ChatLayout({
       {/* Left panel */}
       <aside className="flex min-h-0 flex-col overflow-hidden">
         <div className="flex items-center px-4 py-3">
-          <div className="flex items-center justify-center rounded-xl bg-white px-2 py-1">
+          <Link
+            href={`/portal?clientId=${clientId}`}
+            aria-label="Go to dashboard"
+            className="flex items-center justify-center rounded-xl bg-white px-2 py-1 transition-opacity hover:opacity-80"
+          >
             <img src="/logo.png" alt="ACE" className="h-7 w-auto" />
-          </div>
+          </Link>
         </div>
         {/* Client profile picture */}
         <div className="flex flex-col items-center gap-1 px-4 pb-4">
@@ -377,9 +382,13 @@ export function ChatLayout({
           className="mx-3 mt-3 flex shrink-0 items-center gap-3 rounded-2xl px-5 py-3"
           style={glassPanel}
         >
-          <div className="flex items-center justify-center rounded-xl bg-white px-2 py-1">
+          <Link
+            href={`/portal?clientId=${clientId}`}
+            aria-label="Go to dashboard"
+            className="flex items-center justify-center rounded-xl bg-white px-2 py-1 transition-opacity hover:opacity-80"
+          >
             <img src="/logo.png" alt="ACE" className="h-7 w-auto" />
-          </div>
+          </Link>
           <div>
             <p className="text-sm font-semibold text-white">ACE AI Counselor</p>
             <p className="text-[10px] text-green-400">● Online now</p>
@@ -411,7 +420,13 @@ export function ChatLayout({
         className="flex shrink-0 items-center gap-3 px-4 py-3"
         style={{ background: 'rgba(238,238,237,0.08)' }}
       >
-        <img src="/logo.png" alt="ACE" className="h-6 w-auto" />
+        <Link
+          href={`/portal?clientId=${clientId}`}
+          aria-label="Go to dashboard"
+          className="transition-opacity hover:opacity-80"
+        >
+          <img src="/logo.png" alt="ACE" className="h-6 w-auto" />
+        </Link>
         <div className="flex-1">
           <p className="text-sm font-semibold text-white">
             {mobileTab === 'chat' ? 'ACE AI Counselor'

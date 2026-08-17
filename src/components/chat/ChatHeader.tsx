@@ -1,7 +1,10 @@
+import Link from 'next/link'
+
 type Props = {
   clientName: string
   counselorAvatarUrl?: string | null
   counselorName?: string
+  homeHref?: string
 }
 
 function CounselorAvatar({
@@ -30,13 +33,22 @@ function CounselorAvatar({
   )
 }
 
-export function ChatHeader({ clientName, counselorAvatarUrl, counselorName }: Props) {
+export function ChatHeader({
+  clientName,
+  counselorAvatarUrl,
+  counselorName,
+  homeHref = '/dashboard',
+}: Props) {
   return (
     <header className="sticky top-0 z-10 flex items-center justify-between border-b border-text/10 bg-bg px-4 py-3">
       <div className="flex items-center gap-2">
-        <span className="inline-flex items-center justify-center rounded-xl bg-white/95 px-2 py-1">
+        <Link
+          href={homeHref}
+          aria-label="Go to dashboard"
+          className="inline-flex items-center justify-center rounded-xl bg-white/95 px-2 py-1 transition-opacity hover:opacity-80"
+        >
           <img src="/logo.png" alt="ACE Altius Consulting" className="h-8 w-auto" />
-        </span>
+        </Link>
         {counselorName && (
           <CounselorAvatar avatarUrl={counselorAvatarUrl} name={counselorName} />
         )}

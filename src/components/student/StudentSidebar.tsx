@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { LogoHomeLink } from '@/components/ui/LogoHomeLink'
 
 const NAV_ITEMS = [
   { href: '/portal', label: 'Home', icon: Home },
@@ -61,10 +62,7 @@ export function StudentSidebar({ clientId }: { clientId: string }) {
       {/* Desktop sidebar */}
       <aside className="hidden min-h-screen w-60 shrink-0 flex-col bg-[#0A3F3A] lg:flex">
         <div className="flex items-center border-b border-white/10 px-4 py-5">
-          <div className="inline-flex items-center justify-center rounded-xl bg-white/95 px-2.5 py-1.5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="AceVisa" className="h-8 w-auto" />
-          </div>
+          <LogoHomeLink href={`/portal?clientId=${clientId}`} alt="AceVisa" />
         </div>
         <StudentNavLinks clientId={clientId} pathname={pathname} />
       </aside>
@@ -79,10 +77,7 @@ export function StudentSidebar({ clientId }: { clientId: string }) {
         >
           <Menu size={20} />
         </button>
-        <div className="inline-flex items-center justify-center rounded-xl bg-white/95 px-2 py-1">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="AceVisa" className="h-7 w-auto" />
-        </div>
+        <LogoHomeLink href={`/portal?clientId=${clientId}`} size="sm" className="px-2 py-1" alt="AceVisa" />
         <div className="w-9" />
       </div>
 
@@ -96,10 +91,13 @@ export function StudentSidebar({ clientId }: { clientId: string }) {
           />
           <div className="fixed left-0 top-0 z-50 flex h-full w-64 flex-col bg-[#0A3F3A] lg:hidden">
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
-              <div className="inline-flex items-center justify-center rounded-xl bg-white/95 px-2 py-1">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo.png" alt="AceVisa" className="h-7 w-auto" />
-              </div>
+              <LogoHomeLink
+                href={`/portal?clientId=${clientId}`}
+                size="sm"
+                className="px-2 py-1"
+                alt="AceVisa"
+                onClick={() => setOpen(false)}
+              />
               <button
                 type="button"
                 onClick={() => setOpen(false)}
