@@ -40,6 +40,17 @@ export function ProfileSummarySection({
           <p>
             <span className="font-bold">Language:</span> {client.language}
           </p>
+          <p>
+            <span className="font-bold">Interested in:</span> {client.interested_in ?? '—'}
+          </p>
+          <p>
+            <span className="font-bold">Target country:</span> {client.target_country ?? '—'}
+          </p>
+          {client.language_test_interest && (
+            <p>
+              <span className="font-bold">Language test:</span> {client.language_test_interest}
+            </p>
+          )}
           {client.ad_source ? (
             <p>
               <span className="font-bold">Ad Source:</span>{' '}

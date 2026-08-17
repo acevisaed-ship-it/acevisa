@@ -62,6 +62,9 @@ export type Client = {
   phone: string
   language: ClientLanguage
   city: string | null
+  interested_in?: string | null
+  target_country?: string | null
+  language_test_interest?: string | null
   counselor_id: string | null
   previous_counselor_id?: string | null
   assigned_by?: string | null
