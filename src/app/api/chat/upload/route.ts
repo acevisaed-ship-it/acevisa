@@ -1,4 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/server'
+import { isAiClientChatEnabled } from '@/lib/aiClientChat'
+import { createNotification } from '@/lib/notifications'
 import { NextResponse } from 'next/server'
 import type { ChatAttachmentType } from '@/types'
 
@@ -57,7 +59,7 @@ export async function POST(request: Request) {
   // Verify client exists
   const { data: client } = await supabase
     .from('clients')
-    .select('id, name')
+    .select('id, name, counselor_id')
     .eq('id', clientId)
     .single()
   if (!client) return NextResponse.json({ error: 'Client not found' }, { status: 404 })
@@ -99,21 +101,33 @@ export async function POST(request: Request) {
     .select('id, message_text, sender, timestamp, attachment_url, attachment_name, attachment_type')
     .single()
 
-  // Insert AI acknowledgment
-  const aiText = attachmentType === 'image'
-    ? `Thanks for sharing that image! 📎 Your counselor will review it during your session. Is there anything specific you'd like to mention about it?`
-    : `Got it — **${attachmentName}** has been received! 📄 It's been saved and your counselor will review it. Do you need to send any additional documents?`
+  // Insert AI acknowledgment only while client-facing AI replies are enabled
+  let aiMsg = null
+  if (isAiClientChatEnabled()) {
+    const aiText = attachmentType === 'image'
+      ? `Thanks for sharing that image! 📎 Your counselor will review it during your session. Is there anything specific you'd like to mention about it?`
+      : `Got it — **${attachmentName}** has been received! 📄 It's been saved and your counselor will review it. Do you need to send any additional documents?`
 
-  const { data: aiMsg } = await supabase
-    .from('conversations')
-    .insert({
-      client_id: clientId,
-      message_text: aiText,
-      sender: 'ai',
-      stage_tag: 'attachment_ack',
+    const { data } = await supabase
+      .from('conversations')
+      .insert({
+        client_id: clientId,
+        message_text: aiText,
+        sender: 'ai',
+        stage_tag: 'attachment_ack',
+      })
+      .select('id, message_text, sender, timestamp, attachment_url, attachment_name, attachment_type')
+      .single()
+    aiMsg = data
+  } else if (client.counselor_id) {
+    await createNotification({
+      counselorId: client.counselor_id,
+      type: 'chat_message',
+      title: `New file — ${client.name}`,
+      body: attachmentName,
+      clientId,
     })
-    .select('id, message_text, sender, timestamp, attachment_url, attachment_name, attachment_type')
-    .single()
+  }
 
   // Also add to documents table so counselor sees it in the checklist
   await supabase.from('documents').insert({

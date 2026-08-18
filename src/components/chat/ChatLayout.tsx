@@ -313,7 +313,7 @@ export function ChatLayout({
         {messages.length === 0 && !isLoading && (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
             <MessageCircle className="h-10 w-10 text-white/20" />
-            <p className="text-sm text-white/40">Starting your session…</p>
+            <p className="text-sm text-white/40">Send a message and a counselor will reply shortly.</p>
           </div>
         )}
         {messages.map((msg) => <ChatBubble key={msg.id} message={msg} counselorName={counselorName} />)}

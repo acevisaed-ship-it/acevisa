@@ -20,6 +20,7 @@ import { createNotification } from '@/lib/notifications'
 import { detectProfileUpdates } from '@/lib/profileUpdates'
 import { createAdminClient } from '@/lib/supabase/server'
 import { waitForHumanResponseDelay } from '@/lib/humanResponseDelay'
+import { isAiClientChatEnabled } from '@/lib/aiClientChat'
 import { getBaseUrl } from '@/lib/utils'
 import { NextResponse } from 'next/server'
 
@@ -331,9 +332,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Client not found' }, { status: 404 })
   }
 
+  // Persist the student message before any silent-AI path so counselors still see it.
+  if (!isInit && !voiceNoteAlreadySaved) {
+    await supabase.from('conversations').insert({
+      client_id: clientId,
+      message_text: message,
+      sender: 'student',
+      stage_tag: 'active',
+    })
+  }
+
   // ── If counselor is live in chat, AI stays silent ──────────────────────
   if (!isInit && client.counselor_active) {
     return NextResponse.json({ type: 'counselor_active', content: null, message: null })
+  }
+
+  if (!isAiClientChatEnabled() && isInit) {
+    return NextResponse.json({ type: 'ai_disabled', content: null, message: null })
   }
 
   let campaignContext = ''
@@ -359,7 +374,7 @@ Use this context to make your opening message highly relevant to their specific 
     }
   }
 
-  if (isInit && campaignOpeningLine) {
+  if (isInit && campaignOpeningLine && isAiClientChatEnabled()) {
     const stageTag = 'stage_1'
     await supabase.from('conversations').insert({
       client_id: clientId,
@@ -382,15 +397,6 @@ Use this context to make your opening message highly relevant to their specific 
   }
 
   if (!isInit) {
-    if (!voiceNoteAlreadySaved) {
-      await supabase.from('conversations').insert({
-        client_id: clientId,
-        message_text: message,
-        sender: 'student',
-        stage_tag: 'active',
-      })
-    }
-
     const { data: trackingRow } = await supabase
       .from('response_tracking')
       .insert({
@@ -452,7 +458,7 @@ Use this context to make your opening message highly relevant to their specific 
       })
     }
 
-    if (hasMeetingIntent(message)) {
+    if (isAiClientChatEnabled() && hasMeetingIntent(message)) {
       try {
         const autoBookUrl = `${new URL(request.url).origin}/api/meetings/auto-book`
         const bookingResult = await fetch(autoBookUrl, {
@@ -518,6 +524,19 @@ Use this context to make your opening message highly relevant to their specific 
         })
       }
     }
+  }
+
+  if (!isAiClientChatEnabled()) {
+    if (!isInit && client.counselor_id) {
+      await createNotification({
+        counselorId: client.counselor_id,
+        type: 'chat_message',
+        title: `New message — ${client.name}`,
+        body: message.length > 120 ? `${message.slice(0, 120)}…` : message,
+        clientId,
+      })
+    }
+    return NextResponse.json({ type: 'ai_disabled', content: null, message: null })
   }
 
   if (!isInit && client.counselor_id) {

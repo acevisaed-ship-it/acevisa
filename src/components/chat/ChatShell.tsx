@@ -140,7 +140,7 @@ export function ChatShell({ clientId, clientName, clientLanguage }: Props) {
                 strokeLinejoin="round"
               />
             </svg>
-            <p className="text-sm text-text/60">Starting your session...</p>
+            <p className="text-sm text-text/60">Send a message and a counselor will reply shortly.</p>
           </div>
         ) : (
           messages.map((msg) => <ChatBubble key={msg.id} message={msg} />)

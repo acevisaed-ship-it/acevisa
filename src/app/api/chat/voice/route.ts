@@ -1,6 +1,8 @@
 import { transcribeAudio } from '@/lib/transcribeAudio'
 import { createAdminClient } from '@/lib/supabase/server'
 import { waitForHumanResponseDelay } from '@/lib/humanResponseDelay'
+import { isAiClientChatEnabled } from '@/lib/aiClientChat'
+import { createNotification } from '@/lib/notifications'
 import { NextResponse } from 'next/server'
 import { POST as handleChatMessage } from '../route'
 
@@ -45,7 +47,7 @@ export async function POST(request: Request) {
 
   const { data: client } = await supabase
     .from('clients')
-    .select('id, language, counselor_active')
+    .select('id, name, language, counselor_id, counselor_active')
     .eq('id', clientId)
     .single()
   if (!client) return NextResponse.json({ error: 'Client not found' }, { status: 404 })
@@ -92,7 +94,16 @@ export async function POST(request: Request) {
     .select(MSG_SELECT)
     .single()
 
-  if (client.counselor_active) {
+  if (client.counselor_active || !isAiClientChatEnabled()) {
+    if (!isAiClientChatEnabled() && !client.counselor_active && client.counselor_id) {
+      await createNotification({
+        counselorId: client.counselor_id,
+        type: 'chat_message',
+        title: `New voice note — ${client.name}`,
+        body: transcript || 'Sent a voice note',
+        clientId,
+      })
+    }
     return NextResponse.json({
       studentMessage: studentMsg,
       aiMessage: null,
