@@ -1,5 +1,6 @@
 {
   "crons": [
-    { "path": "/api/meetings/reminders", "schedule": "0 9 * * *" }
+    { "path": "/api/meetings/reminders", "schedule": "0 9 * * *" },
+    { "path": "/api/cron/flag-overdue-tasks", "schedule": "0 3 * * *" }
   ]
 }

@@ -20,5 +20,8 @@ export function getActivityDotColor(actionType: string): string {
   if (actionType === 'walk_in') {
     return '#0D9488'
   }
+  if (actionType.startsWith('attendance_')) {
+    return '#4F46E5'
+  }
   return 'rgba(10, 63, 58, 0.4)'
 }

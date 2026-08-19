@@ -1,5 +1,6 @@
 import { ReceptionistLookup } from '@/components/receptionist/ReceptionistLookup'
 import { ReceptionistWalkIn } from '@/components/receptionist/ReceptionistWalkIn'
+import { ReceptionistDailyLog } from '@/components/receptionist/ReceptionistDailyLog'
 import { ReceptionistCorrectionRequest } from '@/components/receptionist/ReceptionistCorrectionRequest'
 import { ReceptionistRegisterForm } from '@/components/receptionist/ReceptionistRegisterForm'
 import { StaffAppInstallCard } from '@/components/StaffAppInstallCard'
@@ -15,6 +16,7 @@ export default function ReceptionistPage() {
       </div>
       <StaffAppInstallCard />
       <ReceptionistWalkIn />
+      <ReceptionistDailyLog />
       <ReceptionistLookup />
       <ReceptionistCorrectionRequest />
       <ReceptionistRegisterForm />

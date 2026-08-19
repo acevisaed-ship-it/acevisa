@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient, createServerClient } from '@/lib/supabase/server'
+import { logStaffActivity } from '@/lib/activityLog'
 
 // Haversine formula — returns distance in metres between two lat/lng points
 function haversineMetres(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -104,7 +105,7 @@ export async function POST(request: Request) {
   // ── Both checks passed — record attendance ───────────────────────────────
   const { data: counselor } = await admin
     .from('counselors')
-    .select('id')
+    .select('id, name, role')
     .eq('email', user.email)
     .single()
 
@@ -112,6 +113,12 @@ export async function POST(request: Request) {
 
   const now = new Date().toISOString()
   const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' })
+  const timeLabel = new Intl.DateTimeFormat('en-PK', {
+    timeZone: 'Asia/Karachi',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }).format(new Date(now))
 
   const upsertQuery =
     action === 'clock_in'
@@ -127,6 +134,17 @@ export async function POST(request: Request) {
   const { data: record, error } = await upsertQuery.select().single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  await logStaffActivity({
+    counselorId: counselor.id,
+    actorRole: counselor.role || 'counselor',
+    actionType: action === 'clock_in' ? 'attendance_clock_in' : 'attendance_clock_out',
+    description:
+      action === 'clock_in'
+        ? `${counselor.name} clocked in at ${timeLabel} PKT`
+        : `${counselor.name} clocked out at ${timeLabel} PKT`,
+    metadata: { date: today, time: now },
+  })
 
   return NextResponse.json({ record, action })
 }

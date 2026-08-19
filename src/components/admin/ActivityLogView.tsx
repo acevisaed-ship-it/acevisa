@@ -32,6 +32,12 @@ const ACTION_COLORS: Record<string, string> = {
   client_assigned: 'bg-blue/20 text-white',
   pipeline_stage_changed: 'bg-blue/20 text-white',
   walk_in: 'bg-teal-500/20 text-white',
+  attendance_clock_in: 'bg-indigo-500/20 text-white',
+  attendance_clock_out: 'bg-indigo-500/10 text-white/70',
+  account_created: 'bg-blue/20 text-white',
+  account_deactivated: 'bg-orange/15 text-orange',
+  account_deleted: 'bg-orange/15 text-orange',
+  password_reset: 'bg-blue/20 text-white',
 }
 
 function formatTime(iso: string) {
