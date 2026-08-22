@@ -75,8 +75,8 @@ export async function POST(request: Request) {
   await notifyStaffExcept({
     exceptId: identity.id,
     type: 'team_message',
-    title: `Team Hub post: ${data.title}`,
-    body: data.content?.slice(0, 140),
+    title: 'New message in team chat',
+    body: `${identity.name} posted: ${data.title}`,
   })
 
   return NextResponse.json({ post: data })

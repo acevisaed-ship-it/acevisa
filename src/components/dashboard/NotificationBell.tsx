@@ -16,8 +16,11 @@ import {
   UserX,
   CheckCircle2,
   PauseCircle,
+  Mail,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { pushAlertToast } from '@/lib/alertToast'
+import { getAlertCopy, getNotificationHref } from '@/lib/notificationCopy'
 import {
   installNotificationSoundUnlock,
   playNotificationSound,
@@ -56,6 +59,8 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   leave_reviewed: <ClipboardList size={16} className="text-[#B7C733]" />,
   daily_followup: <ClipboardList size={16} className="text-[#E48328]" />,
   team_message: <MessageSquare size={16} className="text-[#B7C733]" />,
+  team_dm: <MessageSquare size={16} className="text-[#2083B9]" />,
+  email_update: <Mail size={16} className="text-[#E48328]" />,
 }
 
 function timeAgo(date: string) {
@@ -68,74 +73,21 @@ function timeAgo(date: string) {
   return `${Math.floor(hrs / 24)}d ago`
 }
 
-function getNotificationHref(
-  notification: Notification,
-  context: 'admin' | 'counselor'
-): string | null {
-  const { type, client_id, meeting_id } = notification
-
-  if (context === 'admin') {
-    switch (type) {
-      case 'chat_message':
-        return client_id ? '/admin/unassigned' : null
-      case 'panic':
-      case 'meeting_request':
-      case 'profile_update':
-        return client_id ? `/admin/clients/${client_id}` : null
-      case 'correction_request':
-        return '/admin/correction-requests'
-      case 'complaint':
-        return '/admin/complaints'
-      case 'task_assigned':
-        return '/admin/my-tasks'
-      case 'task_overdue':
-      case 'task_completed':
-      case 'task_pending':
-        return client_id ? `/admin/clients/${client_id}` : null
-      case 'attendance_late':
-      case 'attendance_absent':
-      case 'leave_submitted':
-        return '/admin/hr'
-      case 'client_removed':
-        return client_id ? `/admin/clients/${client_id}` : '/admin/clients'
-      case 'daily_followup':
-        return '/admin/counselors'
-      case 'team_message':
-        return '/admin/hub'
-      default:
-        return null
-    }
-  }
-
-  switch (type) {
-    case 'chat_message':
-    case 'panic':
-    case 'profile_update':
-      return client_id ? `/dashboard/clients/${client_id}` : null
-    case 'meeting_request':
-      if (meeting_id) return `/dashboard/brief/${meeting_id}`
-      return client_id ? `/dashboard/clients/${client_id}` : null
-    case 'complaint':
-      return client_id ? `/dashboard/clients/${client_id}` : null
-    case 'task_assigned':
-    case 'task_overdue':
-      return '/dashboard/tasks'
-    case 'attendance_late':
-    case 'attendance_absent':
-      return '/dashboard/attendance'
-    case 'leave_reviewed':
-      return '/dashboard/attendance'
-    case 'client_removed':
-      return null
-    case 'daily_followup':
-    case 'task_pending':
-    case 'task_completed':
-      return '/dashboard/tasks'
-    case 'team_message':
-      return '/dashboard/hub'
-    default:
-      return null
-  }
+function announceNotification(
+  n: Notification,
+  context: 'admin' | 'counselor',
+  opts?: { silent?: boolean }
+) {
+  const copy = getAlertCopy(n)
+  pushAlertToast(
+    {
+      id: n.id,
+      title: copy.title,
+      body: copy.body,
+      href: getNotificationHref(n, context),
+    },
+    opts
+  )
 }
 
 type Props = {
@@ -160,9 +112,9 @@ export function NotificationBell({ counselorId, context = 'counselor', variant =
 
     // List is ordered newest-first, so list[0] is always the latest arrival.
     if (shouldPlayForNewNotification(list[0]?.id ?? null)) {
-      playNotificationSound(`notif:${list[0].id}`)
+      announceNotification(list[0], context)
     }
-  }, [counselorId])
+  }, [counselorId, context])
 
   useEffect(() => {
     installNotificationSoundUnlock()
@@ -186,7 +138,7 @@ export function NotificationBell({ counselorId, context = 'counselor', variant =
         (payload) => {
           const row = payload.new as Notification
           setNotifications((prev) => (prev.some((n) => n.id === row.id) ? prev : [row, ...prev]))
-          playNotificationSound(`notif:${row.id}`)
+          announceNotification(row, context)
         }
       )
       .on(
@@ -298,7 +250,9 @@ export function NotificationBell({ counselorId, context = 'counselor', variant =
                 No notifications yet
               </div>
             ) : (
-              notifications.map((n) => (
+              notifications.map((n) => {
+                const copy = getAlertCopy(n)
+                return (
                 <div
                   key={n.id}
                   onClick={() => handleNotificationClick(n)}
@@ -313,10 +267,10 @@ export function NotificationBell({ counselorId, context = 'counselor', variant =
                     <p
                       className={`text-sm ${!n.is_read ? 'font-semibold text-white' : 'text-white/70'}`}
                     >
-                      {n.title}
+                      {copy.title}
                     </p>
-                    {n.body && (
-                      <p className="mt-0.5 truncate text-xs text-white/50">{n.body}</p>
+                    {copy.body && (
+                      <p className="mt-0.5 truncate text-xs text-white/50">{copy.body}</p>
                     )}
                     <p className="mt-1 text-[10px] text-white/30">{timeAgo(n.created_at)}</p>
                   </div>
@@ -324,7 +278,8 @@ export function NotificationBell({ counselorId, context = 'counselor', variant =
                     <div className="mt-2 h-2 w-2 shrink-0 rounded-full bg-orange" />
                   )}
                 </div>
-              ))
+                )
+              })
             )}
           </div>
         </div>

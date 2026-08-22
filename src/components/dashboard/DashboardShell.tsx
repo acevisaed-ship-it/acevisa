@@ -5,6 +5,7 @@ import { Menu } from 'lucide-react'
 import { DashboardSidebar } from './DashboardSidebar'
 import { ProfilePicture } from './ProfilePicture'
 import { NotificationBell } from './NotificationBell'
+import { AlertToastHost } from './AlertToastHost'
 import { LogoHomeLink } from '@/components/ui/LogoHomeLink'
 
 type Props = {
@@ -44,10 +45,11 @@ export function DashboardShell({
         </button>
         <LogoHomeLink href={basePath} size="sm" className="px-2 py-1" />
         <div className="flex items-center gap-2">
-          <NotificationBell counselorId={counselorId} variant="dark" />
+          {!adminView && <NotificationBell counselorId={counselorId} variant="dark" />}
         </div>
       </header>
 
+      {!adminView && <AlertToastHost />}
       <DashboardSidebar
         counselorId={counselorId}
         counselorName={counselorName}

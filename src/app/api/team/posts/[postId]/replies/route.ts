@@ -48,8 +48,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ pos
   await notifyStaffExcept({
     exceptId: identity.id,
     type: 'team_message',
-    title: `Team Hub: ${identity.name} replied to a post`,
-    body: data.content?.slice(0, 140),
+    title: 'New message in team chat',
+    body: `${identity.name} replied to a post: ${data.content?.slice(0, 120) ?? ''}`,
   })
 
   return NextResponse.json({ reply: data })

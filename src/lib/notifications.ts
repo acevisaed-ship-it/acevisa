@@ -20,12 +20,20 @@ export type NotificationType =
   | 'client_removed'
   | 'daily_followup'
   | 'team_message'
+  | 'team_dm'
+  | 'email_update'
 
 // Client events that stay counselor-only — too high-frequency to push up the
 // chain to every branch manager and the CEO (routine chat traffic would bury
 // the events that actually need attention). Leadership can still open any
 // client's chat directly at any time; they're just not pinged per-message.
-const NO_FAN_OUT: NotificationType[] = ['chat_message', 'daily_followup', 'team_message']
+const NO_FAN_OUT: NotificationType[] = [
+  'chat_message',
+  'daily_followup',
+  'team_message',
+  'team_dm',
+  'email_update',
+]
 
 // Staff-only events (no client_id) that must still reach the branch manager
 // and CEO — attendance, leave, and task-status changes are accountability
@@ -145,18 +153,19 @@ export async function notifyTeamHubMessage({
 }) {
   const snippet = preview.trim().slice(0, 140) || 'Sent a message'
   if (recipientId) {
+    // Private DM — only the recipient. Never fan out to other counselors.
     await createNotification({
       counselorId: recipientId,
-      type: 'team_message',
-      title: `Team Hub: ${senderName}`,
-      body: snippet,
+      type: 'team_dm',
+      title: 'You received a private message',
+      body: `${senderName}: ${snippet}`,
     })
     return
   }
   await notifyStaffExcept({
     exceptId: senderId,
     type: 'team_message',
-    title: `Team Hub: ${senderName}`,
-    body: snippet,
+    title: 'New message in team chat',
+    body: `${senderName}: ${snippet}`,
   })
 }
