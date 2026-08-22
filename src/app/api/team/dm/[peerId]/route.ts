@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { notifyTeamHubMessage } from '@/lib/notifications'
 import { createAdminClient, createServerClient } from '@/lib/supabase/server'
 
 async function getIdentity() {
@@ -58,5 +59,13 @@ export async function POST(request: Request, { params }: RouteParams) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  await notifyTeamHubMessage({
+    senderId: identity.id,
+    senderName: identity.name,
+    preview: data.content,
+    recipientId: peerId,
+  })
+
   return NextResponse.json({ message: data })
 }

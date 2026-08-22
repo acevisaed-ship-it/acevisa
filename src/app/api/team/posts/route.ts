@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { notifyStaffExcept } from '@/lib/notifications'
 import { createAdminClient, createServerClient } from '@/lib/supabase/server'
 
 async function getIdentity() {
@@ -70,5 +71,13 @@ export async function POST(request: Request) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  await notifyStaffExcept({
+    exceptId: identity.id,
+    type: 'team_message',
+    title: `Team Hub post: ${data.title}`,
+    body: data.content?.slice(0, 140),
+  })
+
   return NextResponse.json({ post: data })
 }

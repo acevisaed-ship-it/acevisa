@@ -1,4 +1,5 @@
 import { transcribeAudio } from '@/lib/transcribeAudio'
+import { notifyTeamHubMessage } from '@/lib/notifications'
 import { createAdminClient, createServerClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -68,6 +69,13 @@ export async function POST(request: Request, { params }: RouteParams) {
     console.error('[team/dm/voice] db error:', insertError)
     return NextResponse.json({ error: 'Failed to save message' }, { status: 500 })
   }
+
+  await notifyTeamHubMessage({
+    senderId: identity.id,
+    senderName: identity.name,
+    preview: message.content || 'Voice note',
+    recipientId: peerId,
+  })
 
   return NextResponse.json({ message })
 }

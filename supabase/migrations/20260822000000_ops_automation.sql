@@ -39,3 +39,14 @@ CREATE INDEX IF NOT EXISTS idx_tasks_client_status ON tasks (client_id, status);
 
 ALTER TABLE attendance_records
   ADD COLUMN IF NOT EXISTS is_auto boolean NOT NULL DEFAULT false;
+
+-- Realtime so the notification bell can play a sound the moment a row lands
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE notifications;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE direct_messages;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;

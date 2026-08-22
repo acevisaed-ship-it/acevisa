@@ -5,6 +5,7 @@ import { ArrowLeft, Send, Loader2, Mic, Square } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { useVoiceRecorder } from '@/hooks/useVoiceRecorder'
+import { playNotificationSound } from '@/lib/notificationSound'
 import { MY_BUBBLE, senderColor, Avatar, timeAgo } from './TeamHub'
 
 type Message = {
@@ -87,6 +88,9 @@ export function DirectChat({ currentUserId, peerId, peerName, onClose }: Props) 
           (m.sender_id === currentUserId && m.recipient_id === peerId) ||
           (m.sender_id === peerId && m.recipient_id === currentUserId)
         if (!belongsToThisPair) return
+        if (m.sender_id !== currentUserId) {
+          playNotificationSound(`dm:${m.id}`)
+        }
         setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]))
       })
       .subscribe()

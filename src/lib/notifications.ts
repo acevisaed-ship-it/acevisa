@@ -19,12 +19,13 @@ export type NotificationType =
   | 'leave_reviewed'
   | 'client_removed'
   | 'daily_followup'
+  | 'team_message'
 
 // Client events that stay counselor-only — too high-frequency to push up the
 // chain to every branch manager and the CEO (routine chat traffic would bury
 // the events that actually need attention). Leadership can still open any
 // client's chat directly at any time; they're just not pinged per-message.
-const NO_FAN_OUT: NotificationType[] = ['chat_message', 'daily_followup']
+const NO_FAN_OUT: NotificationType[] = ['chat_message', 'daily_followup', 'team_message']
 
 // Staff-only events (no client_id) that must still reach the branch manager
 // and CEO — attendance, leave, and task-status changes are accountability
@@ -96,4 +97,66 @@ export async function createNotification({
 
   const { error } = await supabase.from('notifications').insert(rows)
   if (error) console.error('[createNotification] insert failed:', error.message)
+}
+
+/** Ping every other active staff member (Team Hub group chat / board posts). */
+export async function notifyStaffExcept({
+  exceptId,
+  type,
+  title,
+  body,
+}: {
+  exceptId: string
+  type: NotificationType
+  title: string
+  body?: string
+}) {
+  const supabase = createAdminClient()
+  const { data: staff } = await supabase
+    .from('counselors')
+    .select('id')
+    .eq('status', 'active')
+    .neq('id', exceptId)
+
+  const rows = (staff ?? []).map((s) => ({
+    counselor_id: s.id,
+    type,
+    title,
+    body: body || null,
+    client_id: null,
+    task_id: null,
+    meeting_id: null,
+  }))
+  if (rows.length === 0) return
+  const { error } = await supabase.from('notifications').insert(rows)
+  if (error) console.error('[notifyStaffExcept] insert failed:', error.message)
+}
+
+export async function notifyTeamHubMessage({
+  senderId,
+  senderName,
+  preview,
+  recipientId,
+}: {
+  senderId: string
+  senderName: string
+  preview: string
+  recipientId?: string
+}) {
+  const snippet = preview.trim().slice(0, 140) || 'Sent a message'
+  if (recipientId) {
+    await createNotification({
+      counselorId: recipientId,
+      type: 'team_message',
+      title: `Team Hub: ${senderName}`,
+      body: snippet,
+    })
+    return
+  }
+  await notifyStaffExcept({
+    exceptId: senderId,
+    type: 'team_message',
+    title: `Team Hub: ${senderName}`,
+    body: snippet,
+  })
 }

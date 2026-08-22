@@ -5,6 +5,7 @@ import { MessageSquare, Users, Send, X, ChevronLeft, Loader2, Clock, Star, Mic, 
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { useVoiceRecorder } from '@/hooks/useVoiceRecorder'
+import { playNotificationSound } from '@/lib/notificationSound'
 import { PostsBoard, BOARD_THEMES } from './PostsBoard'
 import { DirectChat } from './DirectChat'
 
@@ -140,9 +141,13 @@ function GroupChat({ currentUserId }: { currentUserId: string }) {
     const channel = supabase
       .channel('team_messages_rt')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'team_messages' }, (payload) => {
+        const incoming = payload.new as Message
+        if (incoming.sender_id !== currentUserId) {
+          playNotificationSound(`team:${incoming.id}`)
+        }
         setMessages((prev) => {
-          if (prev.some((m) => m.id === (payload.new as Message).id)) return prev
-          return [...prev, payload.new as Message]
+          if (prev.some((m) => m.id === incoming.id)) return prev
+          return [...prev, incoming]
         })
       })
       .subscribe()

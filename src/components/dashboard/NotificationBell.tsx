@@ -17,7 +17,13 @@ import {
   CheckCircle2,
   PauseCircle,
 } from 'lucide-react'
-import { playNotificationSound, shouldPlayForNewNotification } from '@/lib/notificationSound'
+import { createClient } from '@/lib/supabase/client'
+import {
+  installNotificationSoundUnlock,
+  playNotificationSound,
+  shouldPlayForNewNotification,
+  unlockNotificationSound,
+} from '@/lib/notificationSound'
 
 interface Notification {
   id: string
@@ -48,6 +54,8 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   attendance_absent: <UserX size={16} className="text-red-400" />,
   leave_submitted: <ClipboardList size={16} className="text-[#2083B9]" />,
   leave_reviewed: <ClipboardList size={16} className="text-[#B7C733]" />,
+  daily_followup: <ClipboardList size={16} className="text-[#E48328]" />,
+  team_message: <MessageSquare size={16} className="text-[#B7C733]" />,
 }
 
 function timeAgo(date: string) {
@@ -90,6 +98,10 @@ function getNotificationHref(
         return '/admin/hr'
       case 'client_removed':
         return client_id ? `/admin/clients/${client_id}` : '/admin/clients'
+      case 'daily_followup':
+        return '/admin/counselors'
+      case 'team_message':
+        return '/admin/hub'
       default:
         return null
     }
@@ -115,6 +127,12 @@ function getNotificationHref(
       return '/dashboard/attendance'
     case 'client_removed':
       return null
+    case 'daily_followup':
+    case 'task_pending':
+    case 'task_completed':
+      return '/dashboard/tasks'
+    case 'team_message':
+      return '/dashboard/hub'
     default:
       return null
   }
@@ -142,15 +160,62 @@ export function NotificationBell({ counselorId, context = 'counselor', variant =
 
     // List is ordered newest-first, so list[0] is always the latest arrival.
     if (shouldPlayForNewNotification(list[0]?.id ?? null)) {
-      playNotificationSound()
+      playNotificationSound(`notif:${list[0].id}`)
     }
   }, [counselorId])
 
   useEffect(() => {
+    installNotificationSoundUnlock()
     fetchNotifications()
-    const interval = setInterval(fetchNotifications, 30000)
+    const interval = setInterval(fetchNotifications, 8000)
     return () => clearInterval(interval)
   }, [fetchNotifications])
+
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`staff-alerts-${context}-${variant}-${counselorId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `counselor_id=eq.${counselorId}`,
+        },
+        (payload) => {
+          const row = payload.new as Notification
+          setNotifications((prev) => (prev.some((n) => n.id === row.id) ? prev : [row, ...prev]))
+          playNotificationSound(`notif:${row.id}`)
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'team_messages' },
+        (payload) => {
+          const row = payload.new as { id: string; sender_id: string }
+          if (row.sender_id === counselorId) return
+          playNotificationSound(`team:${row.id}`)
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'direct_messages',
+          filter: `recipient_id=eq.${counselorId}`,
+        },
+        (payload) => {
+          const row = payload.new as { id: string }
+          playNotificationSound(`dm:${row.id}`)
+        }
+      )
+      .subscribe()
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [counselorId, context, variant])
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -192,7 +257,10 @@ export function NotificationBell({ counselorId, context = 'counselor', variant =
   return (
     <div className="relative" ref={ref}>
       <button
-        onClick={() => setOpen(!open)}
+        onClick={() => {
+          unlockNotificationSound()
+          setOpen(!open)
+        }}
         className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-opacity hover:opacity-80 ${
           variant === 'dark'
             ? 'text-white'

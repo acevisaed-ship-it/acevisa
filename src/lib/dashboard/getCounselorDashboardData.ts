@@ -63,6 +63,7 @@ export async function getCounselorDashboardData(
     .from('clients')
     .select('id')
     .eq('counselor_id', counselorId)
+    .neq('status', 'removed')
 
   const clientIds = (counselorClients ?? []).map((c) => c.id)
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -111,7 +112,8 @@ export async function getCounselorDashboardData(
       .from('clients')
       .select('*', { count: 'exact', head: true })
       .eq('counselor_id', counselorId)
-      .eq('pipeline_stage', 2),
+      .eq('pipeline_stage', 2)
+      .neq('status', 'removed'),
     supabase
       .from('tasks')
       .select('*', { count: 'exact', head: true })
