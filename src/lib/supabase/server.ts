@@ -40,11 +40,22 @@ export async function createServerClient() {
 // applies branch filtering; 'ceo' (Super Admin) has branch_id = NULL and sees everything.
 const ADMIN_PANEL_ROLES = ['admin', 'ceo'] as const
 
+async function getAuthUser() {
+  try {
+    const supabase = await createServerClient()
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser()
+    if (error || !user) return null
+    return user
+  } catch {
+    return null
+  }
+}
+
 export async function getAuthenticatedCounselor() {
-  const supabase = await createServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getAuthUser()
 
   if (!user?.email) return null
 
@@ -62,10 +73,7 @@ export async function getAuthenticatedCounselor() {
 
 /** Current student/client session — prefer auth_user_id (supports email-optional students). */
 export async function getAuthenticatedClient() {
-  const supabase = await createServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getAuthUser()
 
   if (!user) return null
 
@@ -92,10 +100,7 @@ export async function getAuthenticatedClient() {
 }
 
 export async function getAuthenticatedAdmin() {
-  const supabase = await createServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getAuthUser()
 
   if (!user?.email) return null
 

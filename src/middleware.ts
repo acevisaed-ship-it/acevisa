@@ -5,6 +5,20 @@ import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+function redirectToLogin(request: NextRequest) {
+  const loginResponse = NextResponse.redirect(new URL('/login', request.url))
+  for (const cookie of request.cookies.getAll()) {
+    if (
+      cookie.name.startsWith('sb-') ||
+      cookie.name === 'ace_session_token' ||
+      cookie.name === 'ace_remember'
+    ) {
+      loginResponse.cookies.set(cookie.name, '', { path: '/', maxAge: 0 })
+    }
+  }
+  return loginResponse
+}
+
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next()
 
@@ -25,9 +39,17 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+  let user: { email?: string | null } | null = null
+  try {
+    const { data, error } = await supabase.auth.getUser()
+    if (error) {
+      // Stale/invalid refresh tokens must not crash the portal — send them to login.
+      return redirectToLogin(request)
+    }
+    user = data.user
+  } catch {
+    return redirectToLogin(request)
+  }
 
   const pathname = request.nextUrl.pathname
   const isProtected =
@@ -35,11 +57,11 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/admin') ||
     pathname.startsWith('/receptionist')
 
-  if (isProtected && !session) {
+  if (isProtected && !user) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  if (session?.user?.email && isProtected) {
+  if (user?.email && isProtected) {
     // Enforce "Remember Me = off" — if user didn't choose remember me,
     // require the session-only cookie (dies when browser closes).
     const rememberMe = request.cookies.get('ace_remember')?.value
@@ -66,7 +88,7 @@ export async function middleware(request: NextRequest) {
     const { data: account } = await adminClient
       .from('counselors')
       .select('role, status')
-      .eq('email', session.user.email)
+      .eq('email', user.email)
       .single()
 
     if (!account || account.status !== 'active') {
