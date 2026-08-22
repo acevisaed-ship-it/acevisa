@@ -63,11 +63,53 @@ export function getPKTGreeting(date: Date = new Date()): string {
   return 'Good evening'
 }
 
+/** Sunday is not a working day for attendance/salary purposes. */
+export function isSundayPKT(dateString: string): boolean {
+  // dateString is a plain YYYY-MM-DD (PKT calendar day) — construct at noon
+  // PKT to avoid any UTC rollover shifting the day-of-week.
+  const date = new Date(`${dateString}T12:00:00+05:00`)
+  return date.getUTCDay() === 0
+}
+
+/** Current time-of-day in PKT as {hour, minute}, 24h. */
+export function getPKTHourMinute(date: Date = new Date()): { hour: number; minute: number } {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: PKT_TIMEZONE,
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: false,
+  }).formatToParts(date)
+  const hour = Number(parts.find((p) => p.type === 'hour')?.value ?? 0)
+  const minute = Number(parts.find((p) => p.type === 'minute')?.value ?? 0)
+  // Intl can return hour === 24 for midnight in some environments
+  return { hour: hour === 24 ? 0 : hour, minute }
+}
+
+/** Count of working days (excludes Sundays) in a given `YYYY-MM` month, PKT calendar. */
+export function workingDaysInPKTMonth(month: string): number {
+  const [y, m] = month.split('-').map(Number)
+  const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate()
+  let count = 0
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateString = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+    if (!isSundayPKT(dateString)) count++
+  }
+  return count
+}
+
 export function isOverdueInPKT(dueDateIso: string | null): boolean {
   if (!dueDateIso) return false
   const today = getTodayPKTDateString()
   const dueDay = getTodayPKTDateString(new Date(dueDateIso))
   return dueDay < today
+}
+
+/** Due today, or overdue from an earlier day — i.e. needs action today. */
+export function isDueTodayOrOverduePKT(dueDateIso: string | null): boolean {
+  if (!dueDateIso) return false
+  const today = getTodayPKTDateString()
+  const dueDay = getTodayPKTDateString(new Date(dueDateIso))
+  return dueDay <= today
 }
 
 export function formatPKTDueDate(dueDateIso: string | null): string | null {

@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { clientsByCounselorCount } from '@/lib/supabase/relations'
+import { isDueTodayOrOverduePKT } from '@/lib/pkt'
 
 export type CounselorWithCounts = {
   id: string
@@ -9,6 +10,7 @@ export type CounselorWithCounts = {
   role: string
   clientCount: number
   openTaskCount: number
+  pendingTodayCount: number
 }
 
 export async function getCounselorsWithCounts(branchId?: string | null): Promise<CounselorWithCounts[]> {
@@ -28,16 +30,23 @@ export async function getCounselorsWithCounts(branchId?: string | null): Promise
 
   const [{ data: counselors }, { data: pendingTasks }] = await Promise.all([
     counselorsQuery,
-    supabase.from('tasks').select('counselor_id').eq('status', 'pending'),
+    supabase.from('tasks').select('counselor_id, due_date').eq('status', 'pending'),
   ])
 
   const openTasksByCounselor = new Map<string, number>()
+  const pendingTodayByCounselor = new Map<string, number>()
   for (const task of pendingTasks ?? []) {
     if (!task.counselor_id) continue
     openTasksByCounselor.set(
       task.counselor_id,
       (openTasksByCounselor.get(task.counselor_id) ?? 0) + 1
     )
+    if (isDueTodayOrOverduePKT(task.due_date)) {
+      pendingTodayByCounselor.set(
+        task.counselor_id,
+        (pendingTodayByCounselor.get(task.counselor_id) ?? 0) + 1
+      )
+    }
   }
 
   return (counselors ?? []).map((counselor) => {
@@ -54,6 +63,7 @@ export async function getCounselorsWithCounts(branchId?: string | null): Promise
       role: counselor.role,
       clientCount,
       openTaskCount: openTasksByCounselor.get(counselor.id) ?? 0,
+      pendingTodayCount: pendingTodayByCounselor.get(counselor.id) ?? 0,
     }
   })
 }

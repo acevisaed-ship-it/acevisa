@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { logActivity } from '@/lib/activityLog'
+import { createNotification } from '@/lib/notifications'
 import { getTodayPKTDateString, getPKTDayBounds, formatPKTDate } from '@/lib/pkt'
 import { NextResponse } from 'next/server'
 
@@ -54,16 +55,30 @@ export async function GET(request: Request) {
 
   for (const task of overdueTasks) {
     const client = task.clients as unknown as { name: string } | null
+    const clientLabel = client?.name ? ` for ${client.name}` : ''
+    const dueLabel = task.due_date ? formatPKTDate(task.due_date) : 'earlier'
+
     await logActivity({
       clientId: task.client_id,
       counselorId: task.counselor_id,
       actorRole: 'system',
       actionType: 'task_overdue',
-      description: `Task overdue${client?.name ? ` for ${client.name}` : ''}: "${task.task_text}" (was due ${
-        task.due_date ? formatPKTDate(task.due_date) : 'earlier'
-      })`,
+      description: `Task overdue${clientLabel}: "${task.task_text}" (was due ${dueLabel})`,
       metadata: { taskId: task.id, dueDate: task.due_date },
     })
+
+    // The counselor whose SOP follow-up is overdue must be alerted directly —
+    // fans out to branch admin + CEO too (client-attached event).
+    if (task.counselor_id) {
+      await createNotification({
+        counselorId: task.counselor_id,
+        type: 'task_overdue',
+        title: `Overdue: SOP follow-up${clientLabel}`,
+        body: `"${task.task_text}" was due ${dueLabel} and is still pending. Please take action or report an update today.`,
+        clientId: task.client_id ?? undefined,
+        taskId: task.id,
+      })
+    }
   }
 
   return NextResponse.json({ success: true, flagged: overdueTasks.length })

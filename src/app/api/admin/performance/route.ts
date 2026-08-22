@@ -73,6 +73,17 @@ export async function GET(request: Request) {
       .lte('actual_close_date', end.slice(0, 10)),
   ])
 
+  // Raw attendance counts — team performance counts every late arrival and
+  // absence regardless of whether a leave/excuse application was later
+  // approved. Approval only affects payroll deduction (HR Analytics), never
+  // this accountability view.
+  const { data: attendanceIssues } = await supabase
+    .from('attendance_records')
+    .select('counselor_id, status')
+    .gte('date', start.slice(0, 10))
+    .lt('date', end.slice(0, 10))
+    .in('status', ['late', 'absent'])
+
   const totalRevenue = (closedDeals ?? []).reduce((s, d) => s + Number(d.deal_value), 0)
 
   const performance = (counselors ?? []).map((counselor) => {
@@ -100,6 +111,12 @@ export async function GET(request: Request) {
     const openTasks = counselorTasks.filter((t) => t.status === 'pending').length
     const negligenceFlags = counselorTasks.filter((t) => t.negligence_flagged).length
 
+    const counselorAttendanceIssues = (attendanceIssues ?? []).filter(
+      (a) => a.counselor_id === counselor.id
+    )
+    const lateDays = counselorAttendanceIssues.filter((a) => a.status === 'late').length
+    const absenceDays = counselorAttendanceIssues.filter((a) => a.status === 'absent').length
+
     // Cost & contribution
     const rule = (commissionRules ?? []).find((r) => r.counselor_id === counselor.id)
     const baseSalary = Number(rule?.base_salary ?? counselor.base_salary ?? 0)
@@ -120,7 +137,9 @@ export async function GET(request: Request) {
       openTasks,
       negligenceFlags,
       conversionRate: Math.round(conversionRate * 10) / 10,
-      needsAttention: negligenceFlags > 0,
+      needsAttention: negligenceFlags > 0 || absenceDays > 0,
+      lateDays,
+      absenceDays,
       baseSalary,
       commissionEarned,
       totalCost,

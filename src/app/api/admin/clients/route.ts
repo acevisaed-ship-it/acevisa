@@ -12,6 +12,7 @@ export async function GET() {
   const { data: clients, error: queryError } = await supabase
     .from('clients')
     .select(`*, ${clientCounselorName}`)
+    .neq('status', 'removed')
     .order('created_at', { ascending: false })
 
   if (queryError) {

@@ -10,6 +10,7 @@ export default async function AllClientsPage() {
   let clientsQuery = supabase
     .from('clients')
     .select(`*, ${clientCounselorName}`)
+    .neq('status', 'removed')
     .order('created_at', { ascending: false })
   let counselorsQuery = supabase
     .from('counselors')

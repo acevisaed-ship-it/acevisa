@@ -21,6 +21,7 @@ export default async function AdminCounselorClientsPage({ params }: Props) {
       .from('clients')
       .select('id, name, client_code, email, phone, city, pipeline_stage, qualification_score, registration_date')
       .eq('counselor_id', counselorId)
+      .neq('status', 'removed')
       .order('registration_date', { ascending: false }),
   ])
 
@@ -51,7 +52,7 @@ export default async function AdminCounselorClientsPage({ params }: Props) {
         </p>
       </div>
 
-      <CounselorClientsList clients={rows} basePath={basePath} />
+      <CounselorClientsList clients={rows} basePath={basePath} allowRemove />
     </main>
   )
 }

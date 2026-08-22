@@ -25,6 +25,8 @@ const LEAVE_TYPES = [
   { value: 'sick', label: 'Sick Leave' },
   { value: 'emergency', label: 'Emergency Leave' },
   { value: 'unpaid', label: 'Unpaid Leave' },
+  { value: 'late_excuse', label: 'Late Arrival Excuse' },
+  { value: 'absence_excuse', label: 'Absence Excuse' },
   { value: 'other', label: 'Other' },
 ]
 

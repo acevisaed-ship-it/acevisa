@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { getScoreBadgeColor, getPipelineStageLabel } from '@/lib/brief'
 import { formatPKTRegistrationDate } from '@/lib/pkt'
+import { RemoveClientModal } from '@/components/admin/RemoveClientModal'
 
 export type CounselorClientRow = {
   id: string
@@ -21,25 +22,51 @@ export type CounselorClientRow = {
 type Props = {
   clients: CounselorClientRow[]
   basePath?: string
+  allowRemove?: boolean
 }
 
-export function CounselorClientsList({ clients, basePath = '/dashboard' }: Props) {
+export function CounselorClientsList({ clients, basePath = '/dashboard', allowRemove = false }: Props) {
   const [search, setSearch] = useState('')
+  const [rows, setRows] = useState(clients)
+  const [removeClient, setRemoveClient] = useState<CounselorClientRow | null>(null)
+  const [toast, setToast] = useState<string | null>(null)
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
-    if (!q) return clients
-    return clients.filter(
+    if (!q) return rows
+    return rows.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
         (c.client_code && c.client_code.toLowerCase().includes(q)) ||
         (c.email && c.email.toLowerCase().includes(q)) ||
         (c.phone && c.phone.toLowerCase().includes(q))
     )
-  }, [search, clients])
+  }, [search, rows])
+
+  function handleRemoveSuccess(clientId: string, clientName: string) {
+    setRows((current) => current.filter((c) => c.id !== clientId))
+    setRemoveClient(null)
+    setToast(`${clientName} removed`)
+    setTimeout(() => setToast(null), 4000)
+  }
 
   return (
     <div>
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-grad-blue crisp-on-dark px-5 py-3 text-sm font-medium text-white shadow-lg">
+          {toast}
+        </div>
+      )}
+
+      {removeClient && (
+        <RemoveClientModal
+          clientId={removeClient.id}
+          clientName={removeClient.name}
+          onClose={() => setRemoveClient(null)}
+          onSuccess={() => handleRemoveSuccess(removeClient.id, removeClient.name)}
+        />
+      )}
+
       {/* Search */}
       <div className="mb-5">
         <input
@@ -115,12 +142,23 @@ export function CounselorClientsList({ clients, basePath = '/dashboard' }: Props
                       {formatPKTRegistrationDate(client.registration_date)}
                     </td>
                     <td className="px-4 py-3">
-                      <Link
-                        href={`${basePath}/clients/${client.id}`}
-                        className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-medium text-white/60 transition-colors hover:text-white"
-                      >
-                        View →
-                      </Link>
+                      <div className="flex flex-wrap gap-2">
+                        <Link
+                          href={`${basePath}/clients/${client.id}`}
+                          className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-medium text-white/60 transition-colors hover:text-white"
+                        >
+                          View →
+                        </Link>
+                        {allowRemove && (
+                          <button
+                            type="button"
+                            onClick={() => setRemoveClient(client)}
+                            className="rounded-full border border-red-500/30 px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-500/10"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 )

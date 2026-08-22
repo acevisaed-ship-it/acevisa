@@ -1,5 +1,6 @@
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
 import { createAdminClient } from '@/lib/supabase/server'
+import { isSundayPKT, workingDaysInPKTMonth } from '@/lib/pkt'
 import { NextResponse } from 'next/server'
 
 // GET /api/admin/hr/analytics?month=2026-06
@@ -42,15 +43,19 @@ export async function GET(request: Request) {
       .select('counselor_id, date, status')
       .gte('date', startDate)
       .lt('date', endDate),
+    // All applications overlapping the month (any status) — needed to check
+    // whether a given late/absent day was excused by an *approved*
+    // application. Rejected, pending, or missing applications still deduct.
     supabase
       .from('leave_applications')
       .select('counselor_id, start_date, end_date, status')
-      .eq('status', 'approved')
-      .gte('start_date', startDate)
-      .lte('start_date', endDate),
+      .lte('start_date', endDate)
+      .gte('end_date', startDate),
   ])
 
   const totalRevenue = (deals ?? []).reduce((s, d) => s + Number(d.deal_value), 0)
+
+  const workingDaysThisMonth = workingDaysInPKTMonth(month)
 
   const result = (counselors ?? []).map((c) => {
     const rule = (commissionRules ?? []).find((r) => r.counselor_id === c.id)
@@ -61,7 +66,6 @@ export async function GET(request: Request) {
     const dealCount = counselorDeals.length
     const revenueGenerated = counselorDeals.reduce((s, d) => s + Number(d.deal_value), 0)
     const commissionEarned = Math.round((revenueGenerated * commissionRate) / 100)
-    const totalCost = baseSalary + commissionEarned
 
     const businessContributionPct =
       totalRevenue > 0 ? Math.round((revenueGenerated / totalRevenue) * 100) : 0
@@ -71,15 +75,36 @@ export async function GET(request: Request) {
     const presentDays = counselorAttendance.filter((a) =>
       ['present', 'remote', 'half_day'].includes(a.status)
     ).length
+    const lateDays = counselorAttendance.filter((a) => a.status === 'late').length
     const absentDays = counselorAttendance.filter((a) => a.status === 'absent').length
-    const leaveDays = (leaveApps ?? [])
-      .filter((l) => l.counselor_id === c.id)
-      .reduce((s, l) => {
-        const diff =
-          (new Date(l.end_date).getTime() - new Date(l.start_date).getTime()) /
-          (1000 * 60 * 60 * 24)
-        return s + Math.round(diff) + 1
-      }, 0)
+
+    const counselorLeaveApps = (leaveApps ?? []).filter((l) => l.counselor_id === c.id)
+    const approvedLeaveApps = counselorLeaveApps.filter((l) => l.status === 'approved')
+    const leaveDays = approvedLeaveApps.reduce((s, l) => {
+      const diff =
+        (new Date(l.end_date).getTime() - new Date(l.start_date).getTime()) /
+        (1000 * 60 * 60 * 24)
+      return s + Math.round(diff) + 1
+    }, 0)
+
+    // Salary deduction: every late/absent day is unpaid unless an *approved*
+    // application covers that date. Sunday is never a working day, so it can
+    // never be deducted (attendance shouldn't have Sunday rows at all, but
+    // guard defensively). Pending or rejected applications still deduct.
+    const isDateApprovedLeave = (date: string) =>
+      approvedLeaveApps.some((l) => l.start_date <= date && date <= l.end_date)
+
+    const unexcusedDays = counselorAttendance.filter(
+      (a) =>
+        (a.status === 'late' || a.status === 'absent') &&
+        !isSundayPKT(a.date) &&
+        !isDateApprovedLeave(a.date)
+    ).length
+
+    const perWorkingDayRate = workingDaysThisMonth > 0 ? baseSalary / workingDaysThisMonth : 0
+    const deductionAmount = Math.round(perWorkingDayRate * unexcusedDays)
+    const netSalary = Math.max(0, Math.round(baseSalary - deductionAmount))
+    const totalCost = netSalary + commissionEarned
 
     // Retention assessment: months since joining
     const joinedMonthsAgo = Math.floor(
@@ -99,6 +124,9 @@ export async function GET(request: Request) {
       baseSalary,
       commissionRate,
       commissionEarned,
+      netSalary,
+      deductionAmount,
+      unexcusedDays,
       totalCost,
       dealCount,
       revenueGenerated,
@@ -106,6 +134,7 @@ export async function GET(request: Request) {
       netContribution: revenueGenerated - totalCost,
       roi: totalCost > 0 ? Math.round((revenueGenerated / totalCost) * 100) : 0,
       presentDays,
+      lateDays,
       absentDays,
       leaveDays,
       joinedMonthsAgo,

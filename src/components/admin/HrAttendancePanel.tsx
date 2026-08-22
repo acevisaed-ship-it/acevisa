@@ -21,12 +21,15 @@ const STATUS_OPTIONS = [
   { value: 'present', label: 'Present', color: 'bg-green/20 text-white' },
   { value: 'remote', label: 'Remote', color: 'bg-blue/20 text-white' },
   { value: 'half_day', label: 'Half Day', color: 'bg-orange/15 text-orange' },
+  { value: 'late', label: 'Late', color: 'bg-orange/25 text-orange' },
   { value: 'absent', label: 'Absent', color: 'bg-red-500/20 text-red-400' },
   { value: 'leave', label: 'On Leave', color: 'glass-card text-white/40' },
 ]
 
+const DEFAULT_BADGE = { value: 'absent', label: 'Absent', color: 'bg-red-500/20 text-red-400' }
+
 function statusBadge(status: string) {
-  return STATUS_OPTIONS.find((s) => s.value === status) ?? STATUS_OPTIONS[3]
+  return STATUS_OPTIONS.find((s) => s.value === status) ?? DEFAULT_BADGE
 }
 
 function formatPKT(dateStr: string | null) {
@@ -128,6 +131,7 @@ export function HrAttendancePanel({ counselors }: { counselors: CounselorOption[
       counselorName: c.name,
       present: cRecords.filter((r) => ['present', 'remote'].includes(r.status)).length,
       halfDay: cRecords.filter((r) => r.status === 'half_day').length,
+      late: cRecords.filter((r) => r.status === 'late').length,
       absent: cRecords.filter((r) => r.status === 'absent').length,
       leave: cRecords.filter((r) => r.status === 'leave').length,
     }
@@ -173,6 +177,7 @@ export function HrAttendancePanel({ counselors }: { counselors: CounselorOption[
               <p className="text-sm font-semibold text-white/80">{s.counselorName}</p>
               <div className="mt-2 grid grid-cols-2 gap-1 text-xs">
                 <span className="text-white/50">Present</span><span className="font-bold text-green">{s.present + s.halfDay}</span>
+                <span className="text-white/50">Late</span><span className="font-bold text-orange">{s.late}</span>
                 <span className="text-white/50">Absent</span><span className="font-bold text-red-400">{s.absent}</span>
                 <span className="text-white/50">On Leave</span><span className="font-bold text-white/50">{s.leave}</span>
               </div>

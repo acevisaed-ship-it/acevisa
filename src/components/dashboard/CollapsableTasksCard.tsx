@@ -14,16 +14,23 @@ type Task = {
 type Props = {
   tasks: Task[]
   tasksHref?: string
+  title?: string
+  emptyLabel?: string
 }
 
-export function CollapsableTasksCard({ tasks, tasksHref = '/dashboard/tasks' }: Props) {
+export function CollapsableTasksCard({
+  tasks,
+  tasksHref = '/dashboard/tasks',
+  title = 'Open tasks',
+  emptyLabel = 'All clear — no pending tasks.',
+}: Props) {
   const [open, setOpen] = useState(true)
 
   if (tasks.length === 0) {
     return (
       <section className="mb-10">
-        <h2 className="mb-4 text-lg font-bold text-white">Open tasks</h2>
-        <p className="text-white/50">All clear — no pending tasks.</p>
+        <h2 className="mb-4 text-lg font-bold text-white">{title}</h2>
+        <p className="text-white/50">{emptyLabel}</p>
       </section>
     )
   }
@@ -38,7 +45,7 @@ export function CollapsableTasksCard({ tasks, tasksHref = '/dashboard/tasks' }: 
           className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
         >
           <div className="flex items-center gap-3">
-            <h2 className="text-base font-bold text-white">Open tasks</h2>
+            <h2 className="text-base font-bold text-white">{title}</h2>
             <span className="rounded-full bg-orange/20 px-2.5 py-0.5 text-xs font-semibold text-orange">
               {tasks.length}
             </span>

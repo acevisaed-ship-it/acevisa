@@ -12,6 +12,7 @@ export default async function ClientsPage() {
     .from('clients')
     .select('id, name, client_code, email, phone, city, pipeline_stage, qualification_score, registration_date, status')
     .eq('counselor_id', counselor.id)
+    .neq('status', 'removed')
     .order('registration_date', { ascending: false })
 
   const rows: CounselorClientRow[] = (clients ?? []).map((c) => ({

@@ -12,7 +12,12 @@ import {
   UserCog,
   ShieldAlert,
   ClipboardList,
+  Clock,
+  UserX,
+  CheckCircle2,
+  PauseCircle,
 } from 'lucide-react'
+import { playNotificationSound, shouldPlayForNewNotification } from '@/lib/notificationSound'
 
 interface Notification {
   id: string
@@ -36,6 +41,13 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   profile_update: <UserCog size={16} className="text-[#B7C733]" />,
   correction_request: <UserCog size={16} className="text-[#E48328]" />,
   chat_message: <MessageSquare size={16} className="text-[#2083B9]" />,
+  task_overdue: <AlertCircle size={16} className="text-red-400" />,
+  task_completed: <CheckCircle2 size={16} className="text-[#B7C733]" />,
+  task_pending: <PauseCircle size={16} className="text-[#E48328]" />,
+  attendance_late: <Clock size={16} className="text-[#E48328]" />,
+  attendance_absent: <UserX size={16} className="text-red-400" />,
+  leave_submitted: <ClipboardList size={16} className="text-[#2083B9]" />,
+  leave_reviewed: <ClipboardList size={16} className="text-[#B7C733]" />,
 }
 
 function timeAgo(date: string) {
@@ -68,6 +80,16 @@ function getNotificationHref(
         return '/admin/complaints'
       case 'task_assigned':
         return '/admin/my-tasks'
+      case 'task_overdue':
+      case 'task_completed':
+      case 'task_pending':
+        return client_id ? `/admin/clients/${client_id}` : null
+      case 'attendance_late':
+      case 'attendance_absent':
+      case 'leave_submitted':
+        return '/admin/hr'
+      case 'client_removed':
+        return client_id ? `/admin/clients/${client_id}` : '/admin/clients'
       default:
         return null
     }
@@ -84,7 +106,15 @@ function getNotificationHref(
     case 'complaint':
       return client_id ? `/dashboard/clients/${client_id}` : null
     case 'task_assigned':
+    case 'task_overdue':
       return '/dashboard/tasks'
+    case 'attendance_late':
+    case 'attendance_absent':
+      return '/dashboard/attendance'
+    case 'leave_reviewed':
+      return '/dashboard/attendance'
+    case 'client_removed':
+      return null
     default:
       return null
   }
@@ -107,7 +137,13 @@ export function NotificationBell({ counselorId, context = 'counselor', variant =
   const fetchNotifications = useCallback(async () => {
     const res = await fetch(`/api/notifications?counselorId=${counselorId}`)
     const data = await res.json()
-    setNotifications(data.notifications || [])
+    const list: Notification[] = data.notifications || []
+    setNotifications(list)
+
+    // List is ordered newest-first, so list[0] is always the latest arrival.
+    if (shouldPlayForNewNotification(list[0]?.id ?? null)) {
+      playNotificationSound()
+    }
   }, [counselorId])
 
   useEffect(() => {

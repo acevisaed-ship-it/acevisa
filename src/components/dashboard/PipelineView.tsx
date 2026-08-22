@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 import { getScoreBadgeColor } from '@/lib/brief'
 import { formatPKTRegistrationDate } from '@/lib/pkt'
 import { TransferModal } from '@/components/admin/TransferModal'
+import { RemoveClientModal } from '@/components/admin/RemoveClientModal'
 import type { Client } from '@/types'
 
 type Stage = {
@@ -48,6 +49,7 @@ export function PipelineView({
 
   const [activeStage, setActiveStage] = useState(defaultStage)
   const [transferClient, setTransferClient] = useState<Client | null>(null)
+  const [removeClient, setRemoveClient] = useState<Client | null>(null)
   const [search, setSearch] = useState('')
 
   const clientBasePath = allowTransfer ? '/admin/clients' : `${basePath}/clients`
@@ -124,6 +126,15 @@ export function PipelineView({
               className="inline-flex min-h-[44px] items-center rounded-full border border-orange/40 px-3 py-1.5 text-xs font-medium text-orange transition-colors hover:border-orange/70"
             >
               Transfer →
+            </button>
+          )}
+          {allowTransfer && (
+            <button
+              type="button"
+              onClick={() => setRemoveClient(client)}
+              className="inline-flex min-h-[44px] items-center rounded-full border border-red-500/40 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:border-red-500/70"
+            >
+              Remove
             </button>
           )}
         </div>
@@ -223,6 +234,18 @@ export function PipelineView({
           onClose={() => setTransferClient(null)}
           onSuccess={() => {
             setTransferClient(null)
+            window.location.reload()
+          }}
+        />
+      )}
+
+      {removeClient && (
+        <RemoveClientModal
+          clientId={removeClient.id}
+          clientName={removeClient.name}
+          onClose={() => setRemoveClient(null)}
+          onSuccess={() => {
+            setRemoveClient(null)
             window.location.reload()
           }}
         />

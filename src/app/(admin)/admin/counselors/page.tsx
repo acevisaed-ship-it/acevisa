@@ -45,6 +45,20 @@ export default async function AdminCounselorsPage() {
                 {counselor.openTaskCount} open task{counselor.openTaskCount === 1 ? '' : 's'}
               </p>
 
+              <p className="mt-1.5">
+                <span
+                  className={
+                    counselor.pendingTodayCount > 0
+                      ? 'inline-flex items-center rounded-full bg-orange/15 px-2.5 py-1 text-xs font-semibold text-orange'
+                      : 'inline-flex items-center rounded-full bg-green/15 px-2.5 py-1 text-xs font-semibold text-green'
+                  }
+                >
+                  {counselor.pendingTodayCount > 0
+                    ? `${counselor.pendingTodayCount} pending today`
+                    : 'Clear for today'}
+                </span>
+              </p>
+
               <CounselorEmailConfig counselorId={counselor.id} />
 
               <Link

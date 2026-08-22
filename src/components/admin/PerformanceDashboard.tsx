@@ -14,6 +14,8 @@ type CounselorPerformance = {
   negligenceFlags: number
   conversionRate: number
   needsAttention: boolean
+  lateDays: number
+  absenceDays: number
   baseSalary: number
   commissionEarned: number
   totalCost: number
@@ -153,6 +155,18 @@ export function PerformanceDashboard() {
                     )}
                   >
                     {c.negligenceFlags}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-white/50">Late arrivals</dt>
+                  <dd className={cn('font-semibold', c.lateDays > 0 ? 'text-orange' : 'text-white')}>
+                    {c.lateDays}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-white/50">Absences</dt>
+                  <dd className={cn('font-semibold', c.absenceDays > 0 ? 'text-red-400' : 'text-white')}>
+                    {c.absenceDays}
                   </dd>
                 </div>
                 <div>

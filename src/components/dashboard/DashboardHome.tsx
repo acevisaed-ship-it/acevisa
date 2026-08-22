@@ -51,8 +51,13 @@ export function DashboardHome({
 
       <StaffAppInstallCard className="mb-8 max-w-2xl" />
 
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <StatCard label="Meetings today" value={data.meetingsTodayCount} />
+        <StatCard
+          label="Pending today"
+          value={data.tasksDueTodayCount}
+          valueColor={data.tasksDueTodayCount > 0 ? 'orange' : 'default'}
+        />
         <StatCard label="Qualified leads" value={data.qualifiedLeadsCount} />
         <StatCard label="Open tasks" value={data.openTasksCount} />
         <StatCard
@@ -101,7 +106,12 @@ export function DashboardHome({
         )}
       </section>
 
-      <CollapsableTasksCard tasks={data.tasks} tasksHref={tasksHref} />
+      <CollapsableTasksCard
+        tasks={data.tasksDueToday}
+        tasksHref={tasksHref}
+        title="Today's pending tasks"
+        emptyLabel="All clear — nothing pending today."
+      />
 
       <section>
         <h2 className="mb-4 text-lg font-bold text-white">Complaints</h2>

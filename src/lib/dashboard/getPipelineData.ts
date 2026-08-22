@@ -24,6 +24,7 @@ export async function getPipelineData(counselorId: string): Promise<PipelineData
       .from('clients')
       .select('*')
       .eq('counselor_id', counselorId)
+      .neq('status', 'removed')
       .order('registration_date', { ascending: false }),
     supabase
       .from('meetings')

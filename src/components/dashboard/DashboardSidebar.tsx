@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { CheckSquare, Download, Home, Kanban, Mail, MessageSquareMore, Users, X } from 'lucide-react'
+import { CalendarCheck, CheckSquare, Download, Home, Kanban, Mail, MessageSquareMore, Users, X } from 'lucide-react'
 import { clearAceSessionCookies } from '@/lib/auth/session-cookies'
 import { createClient } from '@/lib/supabase/client'
 import { ProfilePicture } from '@/components/dashboard/ProfilePicture'
@@ -17,8 +17,8 @@ type NavItem = {
   exact?: boolean
 }
 
-function buildNavItems(basePath: string): NavItem[] {
-  return [
+function buildNavItems(basePath: string, adminView: boolean): NavItem[] {
+  const items: NavItem[] = [
     { href: basePath, label: "Today's Briefing", icon: Home, exact: true },
     { href: `${basePath}/pipeline`, label: 'Pipeline', icon: Kanban },
     { href: `${basePath}/tasks`, label: 'Tasks', icon: CheckSquare },
@@ -26,6 +26,13 @@ function buildNavItems(basePath: string): NavItem[] {
     { href: `${basePath}/hub`, label: 'Team Hub', icon: MessageSquareMore },
     { href: `${basePath}/email`, label: 'Email', icon: Mail },
   ]
+  // Self check-in / leave applications only make sense for the counselor
+  // viewing their own dashboard — not when admin/CEO is viewing a
+  // counselor's panel (that page doesn't exist under /admin/counselors/*).
+  if (!adminView) {
+    items.splice(3, 0, { href: `${basePath}/attendance`, label: 'Attendance', icon: CalendarCheck })
+  }
+  return items
 }
 
 type Props = {
@@ -54,7 +61,7 @@ function SidebarContent({
   onNavigate?: () => void
 }) {
   const pathname = usePathname()
-  const navItems = buildNavItems(basePath)
+  const navItems = buildNavItems(basePath, adminView)
 
   async function handleSignOut() {
     const supabase = createClient()

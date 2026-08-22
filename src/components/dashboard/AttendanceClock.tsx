@@ -17,11 +17,12 @@ const STATUS_STYLE: Record<string, string> = {
   present:  'bg-green/20 text-white',
   remote:   'bg-blue/20 text-white',
   half_day: 'bg-orange/15 text-orange',
+  late:     'bg-orange/25 text-orange',
   absent:   'bg-red-500/20 text-red-400',
   leave:    'glass-card text-white/40',
 }
 const STATUS_LABEL: Record<string, string> = {
-  present: 'Present', remote: 'Remote', half_day: 'Half Day', absent: 'Absent', leave: 'Leave',
+  present: 'Present', remote: 'Remote', half_day: 'Half Day', late: 'Late', absent: 'Absent', leave: 'Leave',
 }
 
 function formatTime(iso: string | null) {

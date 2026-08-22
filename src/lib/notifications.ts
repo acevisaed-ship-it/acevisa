@@ -10,12 +10,33 @@ export type NotificationType =
   | 'complaint'
   | 'chat_message'
   | 'task_assigned'
+  | 'task_overdue'
+  | 'task_completed'
+  | 'task_pending'
+  | 'attendance_late'
+  | 'attendance_absent'
+  | 'leave_submitted'
+  | 'leave_reviewed'
+  | 'client_removed'
+  | 'daily_followup'
 
 // Client events that stay counselor-only — too high-frequency to push up the
 // chain to every branch manager and the CEO (routine chat traffic would bury
 // the events that actually need attention). Leadership can still open any
 // client's chat directly at any time; they're just not pinged per-message.
-const NO_FAN_OUT: NotificationType[] = ['chat_message']
+const NO_FAN_OUT: NotificationType[] = ['chat_message', 'daily_followup']
+
+// Staff-only events (no client_id) that must still reach the branch manager
+// and CEO — attendance, leave, and task-status changes are accountability
+// signals leadership needs regardless of whether a client is attached.
+const STAFF_FAN_OUT: NotificationType[] = [
+  'attendance_late',
+  'attendance_absent',
+  'leave_submitted',
+  'task_overdue',
+  'task_completed',
+  'task_pending',
+]
 
 export async function createNotification({
   counselorId,
@@ -37,9 +58,13 @@ export async function createNotification({
   const supabase = createAdminClient()
   const recipientIds = new Set<string>([counselorId])
 
-  // Client-relevant event (not chat noise) → also notify the branch manager(s)
-  // of this counselor's branch, and the CEO(s), company-wide.
-  if (clientId && !NO_FAN_OUT.includes(type)) {
+  // Client-relevant event (not chat noise), or a staff accountability event
+  // that always escalates → also notify the branch manager(s) of this
+  // counselor's branch, and the CEO(s), company-wide.
+  const shouldFanOut =
+    (!!clientId && !NO_FAN_OUT.includes(type)) || STAFF_FAN_OUT.includes(type)
+
+  if (shouldFanOut) {
     const { data: primary } = await supabase
       .from('counselors')
       .select('branch_id')

@@ -11,6 +11,9 @@ type CounselorAnalytics = {
   baseSalary: number
   commissionRate: number
   commissionEarned: number
+  netSalary: number
+  deductionAmount: number
+  unexcusedDays: number
   totalCost: number
   dealCount: number
   revenueGenerated: number
@@ -18,6 +21,7 @@ type CounselorAnalytics = {
   netContribution: number
   roi: number
   presentDays: number
+  lateDays: number
   absentDays: number
   leaveDays: number
   joinedMonthsAgo: number
@@ -137,6 +141,18 @@ export function HrAnalyticsPanel() {
                   <p className="text-white/50 text-xs">Commission ({c.commissionRate}%)</p>
                   <p className="font-semibold text-white/80">{formatPkr(c.commissionEarned)}</p>
                 </div>
+                {c.deductionAmount > 0 && (
+                  <div>
+                    <p className="text-white/50 text-xs">
+                      Deduction ({c.unexcusedDays} unexcused day{c.unexcusedDays === 1 ? '' : 's'})
+                    </p>
+                    <p className="font-semibold text-red-400">-{formatPkr(c.deductionAmount)}</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-white/50 text-xs">Net Salary</p>
+                  <p className="font-semibold text-white/80">{formatPkr(c.netSalary)}</p>
+                </div>
                 <div>
                   <p className="text-white/50 text-xs">Total Cost</p>
                   <p className="font-semibold text-orange">{formatPkr(c.totalCost)}</p>
@@ -170,11 +186,15 @@ export function HrAnalyticsPanel() {
               </div>
 
               {/* Attendance summary */}
-              {(c.presentDays + c.absentDays + c.leaveDays > 0) && (
-                <div className="mt-3 pt-3 border-t border-white/5 grid grid-cols-3 gap-2 text-xs text-center">
+              {(c.presentDays + c.lateDays + c.absentDays + c.leaveDays > 0) && (
+                <div className="mt-3 pt-3 border-t border-white/5 grid grid-cols-4 gap-2 text-xs text-center">
                   <div>
                     <p className="text-white/40">Present</p>
                     <p className="font-semibold text-white/80">{c.presentDays}</p>
+                  </div>
+                  <div>
+                    <p className="text-white/40">Late</p>
+                    <p className="font-semibold text-orange">{c.lateDays}</p>
                   </div>
                   <div>
                     <p className="text-white/40">Absent</p>

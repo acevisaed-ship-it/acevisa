@@ -3,6 +3,7 @@ import {
   addDaysToDateString,
   getPKTDayBounds,
   getTodayPKTDateString,
+  isDueTodayOrOverduePKT,
 } from '@/lib/pkt'
 
 type MeetingRow = {
@@ -29,9 +30,11 @@ export type CounselorDashboardData = {
   todayMeetings: MeetingRow[]
   upcomingMeetings: MeetingRow[]
   tasks: TaskRowData[]
+  tasksDueToday: TaskRowData[]
   meetingsTodayCount: number
   qualifiedLeadsCount: number
   openTasksCount: number
+  tasksDueTodayCount: number
   avgResponse: number | null
   complaints: ComplaintRowData[]
 }
@@ -141,14 +144,22 @@ export async function getCounselorDashboardData(
       )
     : null
 
+  const allTasks = (tasks ?? []) as TaskRowData[]
+  // "Pending tasks for today" — due today or already overdue, i.e. anything
+  // that needs action right now. Excludes tasks with a future due date and
+  // open-ended tasks with no due date at all.
+  const tasksDueToday = allTasks.filter((t) => isDueTodayOrOverduePKT(t.due_date))
+
   return {
     counselorName: counselor.name,
     todayMeetings: (todayMeetings ?? []) as MeetingRow[],
     upcomingMeetings: (upcomingMeetings ?? []) as MeetingRow[],
-    tasks: (tasks ?? []) as TaskRowData[],
+    tasks: allTasks,
+    tasksDueToday,
     meetingsTodayCount: meetingsTodayCount ?? 0,
     qualifiedLeadsCount: qualifiedLeadsCount ?? 0,
     openTasksCount: openTasksCount ?? 0,
+    tasksDueTodayCount: tasksDueToday.length,
     avgResponse,
     complaints: (complaints ?? []) as ComplaintRowData[],
   }

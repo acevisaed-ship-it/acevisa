@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { TransferModal } from '@/components/admin/TransferModal'
+import { RemoveClientModal } from '@/components/admin/RemoveClientModal'
 import { getPipelineStageLabel } from '@/lib/brief'
 import { cn } from '@/lib/utils'
 
@@ -36,6 +37,7 @@ export function AllClientsTable({ clients, counselors }: Props) {
   const [stageFilter, setStageFilter] = useState('1')
   const [search, setSearch] = useState('')
   const [transferClient, setTransferClient] = useState<AdminClientRow | null>(null)
+  const [removeClient, setRemoveClient] = useState<AdminClientRow | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [rows, setRows] = useState(clients)
 
@@ -85,6 +87,13 @@ export function AllClientsTable({ clients, counselors }: Props) {
     )
     setTransferClient(null)
     setToast(`Client transferred to ${counselorName}`)
+    setTimeout(() => setToast(null), 4000)
+  }
+
+  function handleRemoveSuccess(clientId: string, clientName: string) {
+    setRows((current) => current.filter((c) => c.id !== clientId))
+    setRemoveClient(null)
+    setToast(`${clientName} removed`)
     setTimeout(() => setToast(null), 4000)
   }
 
@@ -242,6 +251,13 @@ export function AllClientsTable({ clients, counselors }: Props) {
                       >
                         View Profile
                       </Link>
+                      <button
+                        type="button"
+                        onClick={() => setRemoveClient(client)}
+                        className="rounded-full border border-red-500/30 px-3 py-1 text-xs font-medium text-red-400 hover:bg-red-500/10"
+                      >
+                        Remove
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -262,6 +278,15 @@ export function AllClientsTable({ clients, counselors }: Props) {
           onSuccess={(counselorName) =>
             handleTransferSuccess(transferClient.id, counselorName)
           }
+        />
+      )}
+
+      {removeClient && (
+        <RemoveClientModal
+          clientId={removeClient.id}
+          clientName={removeClient.name}
+          onClose={() => setRemoveClient(null)}
+          onSuccess={() => handleRemoveSuccess(removeClient.id, removeClient.name)}
         />
       )}
     </>

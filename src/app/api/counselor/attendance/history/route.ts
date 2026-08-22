@@ -1,32 +1,24 @@
+import { addDaysToDateString, getTodayPKTDateString } from '@/lib/pkt'
+import { createAdminClient, getAuthenticatedCounselor } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { createAdminClient, createServerClient } from '@/lib/supabase/server'
 
-// GET — last 30 days of attendance for the logged-in counselor
+// GET /api/counselor/attendance/history — the logged-in staff member's own
+// attendance for the last 30 days.
 export async function GET() {
-  const supabase = await createServerClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const counselor = await getAuthenticatedCounselor()
+  if (!counselor) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
-  const admin = createAdminClient()
-  const { data: counselor } = await admin
-    .from('counselors')
-    .select('id')
-    .eq('email', user.email)
-    .single()
+  const since = addDaysToDateString(getTodayPKTDateString(), -30)
+  const supabase = createAdminClient()
 
-  if (!counselor) return NextResponse.json({ error: 'Counselor not found' }, { status: 404 })
-
-  const since = new Date()
-  since.setDate(since.getDate() - 30)
-  const sinceStr = since.toISOString().slice(0, 10)
-
-  const { data, error } = await admin
+  const { data, error } = await supabase
     .from('attendance_records')
     .select('id, date, check_in, check_out, status, notes')
     .eq('counselor_id', counselor.id)
-    .gte('date', sinceStr)
+    .gte('date', since)
     .order('date', { ascending: false })
-    .limit(30)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 

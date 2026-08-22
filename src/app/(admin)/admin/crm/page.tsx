@@ -11,7 +11,7 @@ export default async function CrmPage() {
       .eq('role', 'counselor')
       .eq('status', 'active')
       .order('name'),
-    supabase.from('clients').select('id, name').order('name'),
+    supabase.from('clients').select('id, name').neq('status', 'removed').order('name'),
   ])
 
   return (
