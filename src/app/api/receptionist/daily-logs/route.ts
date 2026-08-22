@@ -1,5 +1,6 @@
 import { requireReceptionistApi } from '@/lib/receptionist/requireReceptionistApi'
 import { createAdminClient } from '@/lib/supabase/server'
+import { clientCounselorName } from '@/lib/supabase/relations'
 import { getTodayPKTDateString, getPKTDayBounds } from '@/lib/pkt'
 import { NextResponse } from 'next/server'
 
@@ -12,6 +13,9 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 export async function GET(request: Request) {
   const { receptionist, error: authError } = await requireReceptionistApi()
   if (authError) return authError
+  if (!receptionist.branch_id) {
+    return NextResponse.json({ error: 'Receptionist is not assigned to a branch' }, { status: 400 })
+  }
 
   const url = new URL(request.url)
   const rawDate = url.searchParams.get('date')
@@ -23,7 +27,7 @@ export async function GET(request: Request) {
   const [walkInsResult, registrationsResult] = await Promise.all([
     supabase
       .from('activity_logs')
-      .select('id, client_id, description, created_at, metadata, clients(name, client_code, branch_id)')
+      .select('id, client_id, description, created_at, metadata, clients!inner(name, client_code, branch_id)')
       .eq('action_type', 'walk_in')
       .eq('clients.branch_id', receptionist.branch_id)
       .gte('created_at', startUTC)
@@ -31,8 +35,9 @@ export async function GET(request: Request) {
       .order('created_at', { ascending: false }),
     supabase
       .from('clients')
-      .select('id, name, client_code, phone, interested_in, target_country, registration_date, ad_source, counselor_id, counselors(name)')
+      .select(`id, name, client_code, phone, interested_in, target_country, registration_date, ad_source, counselor_id, ${clientCounselorName}`)
       .eq('branch_id', receptionist.branch_id)
+      .neq('status', 'removed')
       .gte('registration_date', startUTC)
       .lte('registration_date', endUTC)
       .order('registration_date', { ascending: false }),

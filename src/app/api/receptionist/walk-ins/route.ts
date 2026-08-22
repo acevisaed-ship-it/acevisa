@@ -7,13 +7,16 @@ import { NextResponse } from 'next/server'
 export async function GET() {
   const { receptionist, error: authError } = await requireReceptionistApi()
   if (authError) return authError
+  if (!receptionist.branch_id) {
+    return NextResponse.json({ error: 'Receptionist is not assigned to a branch' }, { status: 400 })
+  }
 
   const supabase = createAdminClient()
   const { startUTC, endUTC } = getPKTDayBounds(getTodayPKTDateString())
 
   const { data: logs, error } = await supabase
     .from('activity_logs')
-    .select('id, client_id, description, created_at, metadata, clients(name, branch_id)')
+    .select('id, client_id, description, created_at, metadata, clients!inner(name, branch_id)')
     .eq('action_type', 'walk_in')
     .eq('clients.branch_id', receptionist.branch_id)
     .gte('created_at', startUTC)
