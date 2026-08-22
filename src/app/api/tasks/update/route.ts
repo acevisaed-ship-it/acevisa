@@ -20,8 +20,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing taskId or status' }, { status: 400 })
   }
 
-  const update: Record<string, string> = { status }
+  const update: Record<string, string | null> = { status }
   if (due_date) update.due_date = due_date
+  // Track completion time for "tasks completed today" views; clear it if the
+  // task is reopened back to pending.
+  if (status === 'completed') update.completed_at = new Date().toISOString()
+  if (status === 'pending') update.completed_at = null
 
   const supabase = createAdminClient()
 

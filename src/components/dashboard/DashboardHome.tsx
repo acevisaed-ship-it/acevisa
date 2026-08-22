@@ -7,6 +7,7 @@ import { CollapsableTasksCard } from '@/components/dashboard/CollapsableTasksCar
 import { ComplaintRow } from '@/components/dashboard/ComplaintRow'
 import { AttendanceClock } from '@/components/dashboard/AttendanceClock'
 import { StaffAppInstallCard } from '@/components/StaffAppInstallCard'
+import { SendReportCard } from '@/components/dashboard/SendReportCard'
 
 type MeetingRow = CounselorDashboardData['todayMeetings'][number]
 
@@ -20,12 +21,17 @@ type Props = {
   data: CounselorDashboardData
   tasksHref?: string
   briefBasePath?: string
+  /** Hidden when an admin/CEO is viewing another counselor's dashboard — the
+   * report send always applies to whoever is logged in, so it wouldn't send
+   * the viewed counselor's report. */
+  showSendReport?: boolean
 }
 
 export function DashboardHome({
   data,
   tasksHref = '/dashboard/tasks',
   briefBasePath = '/dashboard/brief',
+  showSendReport = true,
 }: Props) {
   const avgResponseColor: 'green' | 'orange' | 'red' | 'default' =
     data.avgResponse === null
@@ -113,6 +119,14 @@ export function DashboardHome({
         emptyLabel="All clear — nothing pending today."
       />
 
+      <CollapsableTasksCard
+        tasks={data.tasksCompletedToday}
+        tasksHref={tasksHref}
+        title="Completed today"
+        emptyLabel="Nothing marked complete yet today."
+        mode="completed"
+      />
+
       <section>
         <h2 className="mb-4 text-lg font-bold text-white">Complaints</h2>
         {data.complaints.length === 0 ? (
@@ -131,6 +145,8 @@ export function DashboardHome({
           </div>
         )}
       </section>
+
+      {showSendReport && <SendReportCard />}
     </main>
   )
 }

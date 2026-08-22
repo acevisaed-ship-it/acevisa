@@ -59,7 +59,13 @@ export async function POST(
     last_action_at: new Date().toISOString(),
     notes_count: (task.notes_count || 0) + (actionType === 'note' ? 1 : 0),
   }
-  if (newStatus) taskUpdate.status = newStatus
+  if (newStatus) {
+    taskUpdate.status = newStatus
+    // Track completion time for "tasks completed today" views; clear it if
+    // the task is reopened back to pending.
+    if (newStatus === 'completed') taskUpdate.completed_at = new Date().toISOString()
+    if (newStatus === 'pending') taskUpdate.completed_at = null
+  }
   if (reminderAt) taskUpdate.reminder_at = reminderAt
 
   await supabase.from('tasks').update(taskUpdate).eq('id', taskId)

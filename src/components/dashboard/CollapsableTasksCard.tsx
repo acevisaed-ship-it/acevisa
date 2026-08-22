@@ -3,12 +3,13 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { ChevronDown, SquareCheck } from 'lucide-react'
-import { formatPKTDueDate, isOverdueInPKT } from '@/lib/pkt'
+import { formatPKTDueDate, formatPKTTime, isOverdueInPKT } from '@/lib/pkt'
 
 type Task = {
   id: string
   task_text: string
-  due_date: string | null
+  due_date?: string | null
+  completed_at?: string | null
 }
 
 type Props = {
@@ -16,6 +17,8 @@ type Props = {
   tasksHref?: string
   title?: string
   emptyLabel?: string
+  /** 'due' shows the due date (+ overdue flag); 'completed' shows when it was finished. */
+  mode?: 'due' | 'completed'
 }
 
 export function CollapsableTasksCard({
@@ -23,6 +26,7 @@ export function CollapsableTasksCard({
   tasksHref = '/dashboard/tasks',
   title = 'Open tasks',
   emptyLabel = 'All clear — no pending tasks.',
+  mode = 'due',
 }: Props) {
   const [open, setOpen] = useState(true)
 
@@ -68,8 +72,10 @@ export function CollapsableTasksCard({
         {open && (
           <div className="divide-y divide-white/5 border-t border-white/10">
             {tasks.slice(0, 5).map((task) => {
-              const overdue = isOverdueInPKT(task.due_date)
-              const dueLabel = formatPKTDueDate(task.due_date)
+              const overdue = mode === 'due' && isOverdueInPKT(task.due_date ?? null)
+              const dueLabel = mode === 'due' ? formatPKTDueDate(task.due_date ?? null) : null
+              const completedLabel =
+                mode === 'completed' && task.completed_at ? formatPKTTime(task.completed_at) : null
               return (
                 <div key={task.id} className="flex items-start gap-3 px-5 py-3.5">
                   <SquareCheck className="mt-0.5 h-5 w-5 shrink-0 text-green" />
@@ -79,6 +85,9 @@ export function CollapsableTasksCard({
                       <p className={`mt-0.5 text-xs ${overdue ? 'text-orange' : 'text-white/50'}`}>
                         Due {dueLabel}{overdue ? ' · overdue' : ''}
                       </p>
+                    )}
+                    {completedLabel && (
+                      <p className="mt-0.5 text-xs text-white/50">Completed {completedLabel}</p>
                     )}
                   </div>
                 </div>

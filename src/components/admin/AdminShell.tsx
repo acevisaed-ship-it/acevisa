@@ -5,6 +5,7 @@ import { Menu } from 'lucide-react'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { NotificationBell } from '@/components/dashboard/NotificationBell'
 import { AlertToastHost } from '@/components/dashboard/AlertToastHost'
+import { PushNotificationOptIn } from '@/components/PushNotificationOptIn'
 import { ProfilePicture } from '@/components/dashboard/ProfilePicture'
 import { LogoHomeLink } from '@/components/ui/LogoHomeLink'
 
@@ -30,6 +31,7 @@ export function AdminShell({
   return (
     <div className="flex min-h-screen min-w-[1280px] bg-grad-teal">
       <AlertToastHost />
+      <PushNotificationOptIn />
       <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center justify-between glass-card-md crisp-on-dark px-4 lg:hidden">
         <button
           type="button"

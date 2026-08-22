@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
+import { sendPushToCounselor } from '@/lib/push'
 
 export type NotificationType =
   | 'task_due'
@@ -105,6 +106,13 @@ export async function createNotification({
 
   const { error } = await supabase.from('notifications').insert(rows)
   if (error) console.error('[createNotification] insert failed:', error.message)
+
+  // Best-effort Web Push so this reaches the recipient even with the tab
+  // closed/minimized. No-ops per-recipient if they have no push subscription,
+  // and no-ops entirely if VAPID keys aren't configured.
+  await Promise.all(
+    Array.from(recipientIds).map((id) => sendPushToCounselor(id, { title, body, tag: type }))
+  )
 }
 
 /** Ping every other active staff member (Team Hub group chat / board posts). */
@@ -138,6 +146,10 @@ export async function notifyStaffExcept({
   if (rows.length === 0) return
   const { error } = await supabase.from('notifications').insert(rows)
   if (error) console.error('[notifyStaffExcept] insert failed:', error.message)
+
+  await Promise.all(
+    (staff ?? []).map((s) => sendPushToCounselor(s.id, { title, body, tag: type }))
+  )
 }
 
 export async function notifyTeamHubMessage({

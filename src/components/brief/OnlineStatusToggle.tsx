@@ -48,13 +48,13 @@ export function OnlineStatusToggle({
   }
 
   return (
-    <div className="flex flex-col items-end gap-2">
+    <>
       <button
         type="button"
         onClick={handleOnlineToggle}
         disabled={saving}
-        className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-colors disabled:opacity-60 ${
-          isOnline ? 'bg-green text-text' : 'bg-text/20 text-text'
+        className={`flex min-h-[40px] items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-colors disabled:opacity-60 ${
+          isOnline ? 'bg-green text-text' : 'bg-white/15 text-white hover:bg-white/25'
         }`}
       >
         {isOnline && (
@@ -73,8 +73,8 @@ export function OnlineStatusToggle({
             onClick={handleAutoReplyToggle}
             disabled={saving}
             title="When ON, AI sends 'I'll get back to you shortly' to students who message while you're online"
-            className={`rounded-full px-3 py-1 text-xs font-bold transition-colors disabled:opacity-60 ${
-              autoReply ? 'bg-orange text-text' : 'bg-text/10 text-text/70'
+            className={`flex min-h-[40px] items-center rounded-full px-3 py-2 text-xs font-bold transition-colors disabled:opacity-60 ${
+              autoReply ? 'bg-orange text-text' : 'bg-white/10 text-white/80 hover:bg-white/20'
             }`}
           >
             Auto-reply: {autoReply ? 'ON' : 'OFF'}
@@ -85,6 +85,6 @@ export function OnlineStatusToggle({
           </span>
         </div>
       )}
-    </div>
+    </>
   )
 }

@@ -19,8 +19,8 @@ export function CopyPortalLink({ clientId }: { clientId: string }) {
       title="Copy client portal link"
       className={`flex min-h-[40px] items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
         copied
-          ? 'bg-green/20 text-text'
-          : 'bg-text/10 text-text hover:bg-text/20'
+          ? 'bg-green/20 text-white'
+          : 'bg-white/10 text-white hover:bg-white/20'
       }`}
     >
       {copied ? (

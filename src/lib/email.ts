@@ -308,3 +308,39 @@ export function paymentReceiptEmailHtml(opts: {
     </table>
     <p style="font-size:13px;color:#0A3F3A99">Paid on ${opts.paidAtPKT}</p>`)
 }
+
+export function counselorProgressReportEmailHtml(opts: {
+  counselorName: string
+  periodLabel: string
+  rangeLabel: string
+  newClients: number
+  qualifiedLeads: number
+  tasksCompleted: number
+  tasksOpen: number
+  meetingsHeld: number
+  meetingsScheduled: number
+  avgResponseTimeSeconds: number | null
+  lateDays: number
+  absentDays: number
+}) {
+  const row = (label: string, value: string | number) =>
+    `<tr><td style="padding:8px 0;color:#0A3F3A99">${label}</td><td style="padding:8px 0;text-align:right;font-weight:bold">${value}</td></tr>`
+
+  const avgResponse =
+    opts.avgResponseTimeSeconds === null ? '—' : `${opts.avgResponseTimeSeconds} sec`
+
+  return wrap(`
+    <h2 style="color:#0A3F3A;margin:0 0 4px">${opts.periodLabel} progress report</h2>
+    <p style="margin:0 0 20px;font-size:13px;color:#0A3F3A99">${opts.counselorName} · ${opts.rangeLabel}</p>
+    <table style="width:100%;border-collapse:collapse;background:#F4F5F4;border-radius:12px;padding:4px 16px">
+      ${row('New / active clients', opts.newClients)}
+      ${row('Qualified leads', opts.qualifiedLeads)}
+      ${row('Tasks completed', opts.tasksCompleted)}
+      ${row('Tasks still open', opts.tasksOpen)}
+      ${row('Meetings held', `${opts.meetingsHeld} / ${opts.meetingsScheduled} scheduled`)}
+      ${row('Avg response time', avgResponse)}
+      ${row('Late days', opts.lateDays)}
+      ${row('Absent days', opts.absentDays)}
+    </table>
+    <p style="margin-top:20px;font-size:13px;color:#0A3F3A99">Sent automatically from the ACE portal at ${opts.counselorName}'s request.</p>`)
+}

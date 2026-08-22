@@ -55,6 +55,11 @@ export type Counselor = {
   created_at: string
 }
 
+export type QualificationFactor = {
+  label: string
+  value: string
+}
+
 export type Client = {
   id: string
   name: string
@@ -78,6 +83,10 @@ export type Client = {
   avatar_url?: string | null
   created_at: string
   updated_at: string
+  manually_qualified?: boolean
+  manually_qualified_at?: string | null
+  manually_qualified_by?: string | null
+  qualification_factors?: QualificationFactor[]
 }
 
 export type Conversation = {

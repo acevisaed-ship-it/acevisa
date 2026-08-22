@@ -161,6 +161,8 @@ export default async function ClientRecordPage({ params }: Props) {
               initialNotes={typedClient.notes ?? ''}
               initialEmail={typedClient.email ?? null}
               initialStatus={typedClient.status ?? 'active'}
+              initialManuallyQualified={typedClient.manually_qualified ?? false}
+              initialQualificationFactors={typedClient.qualification_factors ?? []}
             />
           }
         />

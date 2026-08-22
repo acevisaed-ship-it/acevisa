@@ -18,6 +18,12 @@ type TaskRowData = {
   due_date: string | null
 }
 
+type CompletedTaskRowData = {
+  id: string
+  task_text: string
+  completed_at: string | null
+}
+
 type ComplaintRowData = {
   id: string
   client_name: string | null
@@ -31,6 +37,7 @@ export type CounselorDashboardData = {
   upcomingMeetings: MeetingRow[]
   tasks: TaskRowData[]
   tasksDueToday: TaskRowData[]
+  tasksCompletedToday: CompletedTaskRowData[]
   meetingsTodayCount: number
   qualifiedLeadsCount: number
   openTasksCount: number
@@ -77,6 +84,7 @@ export async function getCounselorDashboardData(
     { count: openTasksCount },
     { data: responseStats },
     { data: complaints },
+    { data: completedTasks },
   ] = await Promise.all([
     supabase
       .from('meetings')
@@ -137,6 +145,14 @@ export async function getCounselorDashboardData(
           .order('created_at', { ascending: false })
           .limit(5)
       : Promise.resolve({ data: [] as ComplaintRowData[] }),
+    supabase
+      .from('tasks')
+      .select('id, task_text, completed_at')
+      .eq('counselor_id', counselorId)
+      .eq('status', 'completed')
+      .gte('completed_at', todayStart)
+      .lte('completed_at', todayEnd)
+      .order('completed_at', { ascending: false }),
   ])
 
   const avgResponse = responseStats?.length
@@ -158,6 +174,7 @@ export async function getCounselorDashboardData(
     upcomingMeetings: (upcomingMeetings ?? []) as MeetingRow[],
     tasks: allTasks,
     tasksDueToday,
+    tasksCompletedToday: (completedTasks ?? []) as CompletedTaskRowData[],
     meetingsTodayCount: meetingsTodayCount ?? 0,
     qualifiedLeadsCount: qualifiedLeadsCount ?? 0,
     openTasksCount: openTasksCount ?? 0,

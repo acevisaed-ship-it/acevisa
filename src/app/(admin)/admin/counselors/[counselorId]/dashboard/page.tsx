@@ -19,6 +19,7 @@ export default async function AdminCounselorDashboardPage({ params }: Props) {
       data={data}
       tasksHref={`${basePath}/tasks`}
       briefBasePath={`${basePath}/brief`}
+      showSendReport={false}
     />
   )
 }
