@@ -49,7 +49,7 @@ export async function GET(request: Request) {
   const { data: pendingTasks, error: tasksError } = await supabase
     .from('tasks')
     .select('client_id')
-    .eq('status', 'pending')
+    .in('status', ['open', 'in_progress'])
     .not('client_id', 'is', null)
 
   if (tasksError) {
@@ -69,7 +69,7 @@ export async function GET(request: Request) {
     client_id: c.id,
     task_text: `Daily SOP follow-up — report an update or advance ${c.name} to the next pipeline stage`,
     due_date: endUTC,
-    status: 'pending',
+    status: 'open',
     source: 'auto_followup',
   }))
 

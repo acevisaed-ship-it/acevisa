@@ -7,6 +7,7 @@ import { ProfilePicture } from './ProfilePicture'
 import { NotificationBell } from './NotificationBell'
 import { AlertToastHost } from './AlertToastHost'
 import { PushNotificationOptIn } from '@/components/PushNotificationOptIn'
+import { PortalHeartbeat } from '@/components/PortalHeartbeat'
 import { LogoHomeLink } from '@/components/ui/LogoHomeLink'
 
 type Props = {
@@ -52,6 +53,7 @@ export function DashboardShell({
 
       {!adminView && <AlertToastHost />}
       {!adminView && <PushNotificationOptIn />}
+      <PortalHeartbeat />
       <DashboardSidebar
         counselorId={counselorId}
         counselorName={counselorName}

@@ -80,7 +80,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       client_id: body.client_id || null,
       task_text: taskText,
       due_date: body.due_date || null,
-      status: 'pending',
+      status: 'open',
       assigned_by: admin.id,
     })
     .select('id, task_text, due_date, status')

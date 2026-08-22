@@ -108,7 +108,7 @@ export async function GET(request: Request) {
         : null
 
     const counselorTasks = (tasks ?? []).filter((t) => t.counselor_id === counselor.id)
-    const openTasks = counselorTasks.filter((t) => t.status === 'pending').length
+    const openTasks = counselorTasks.filter((t) => t.status === 'open' || t.status === 'in_progress').length
     const negligenceFlags = counselorTasks.filter((t) => t.negligence_flagged).length
 
     const counselorAttendanceIssues = (attendanceIssues ?? []).filter(

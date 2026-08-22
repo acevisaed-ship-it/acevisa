@@ -130,7 +130,7 @@ export async function getCounselorProgressReport(
       .from('tasks')
       .select('*', { count: 'exact', head: true })
       .eq('counselor_id', counselorId)
-      .eq('status', 'pending'),
+      .in('status', ['open', 'in_progress']),
     meetingsQuery,
     responseQuery,
     attendanceQuery,

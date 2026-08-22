@@ -28,7 +28,7 @@ export async function GET(request: Request) {
   const { data: overdueTasks, error: fetchError } = await supabase
     .from('tasks')
     .select('id, task_text, due_date, counselor_id, client_id, clients(name)')
-    .eq('status', 'pending')
+    .in('status', ['open', 'in_progress'])
     .eq('negligence_flagged', false)
     .not('due_date', 'is', null)
     .lt('due_date', startUTC)

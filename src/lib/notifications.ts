@@ -14,6 +14,9 @@ export type NotificationType =
   | 'task_overdue'
   | 'task_completed'
   | 'task_pending'
+  | 'task_closed'
+  | 'stage_suggestion'
+  | 'stage_change'
   | 'attendance_late'
   | 'attendance_absent'
   | 'leave_submitted'
@@ -34,6 +37,10 @@ const NO_FAN_OUT: NotificationType[] = [
   'team_message',
   'team_dm',
   'email_update',
+  // A stage suggestion is just a pending proposal awaiting the counselor's
+  // own review — it's not yet a confirmed accountability event, so it stays
+  // counselor-only until they act on it.
+  'stage_suggestion',
 ]
 
 // Staff-only events (no client_id) that must still reach the branch manager
@@ -46,6 +53,7 @@ const STAFF_FAN_OUT: NotificationType[] = [
   'task_overdue',
   'task_completed',
   'task_pending',
+  'task_closed',
 ]
 
 export async function createNotification({

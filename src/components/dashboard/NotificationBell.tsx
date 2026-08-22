@@ -61,6 +61,9 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   team_message: <MessageSquare size={16} className="text-[#B7C733]" />,
   team_dm: <MessageSquare size={16} className="text-[#2083B9]" />,
   email_update: <Mail size={16} className="text-[#E48328]" />,
+  task_closed: <CheckCircle2 size={16} className="text-white/60" />,
+  stage_suggestion: <AlertCircle size={16} className="text-[#B7C733]" />,
+  stage_change: <CheckCircle2 size={16} className="text-[#B7C733]" />,
 }
 
 function timeAgo(date: string) {

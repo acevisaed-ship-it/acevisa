@@ -18,6 +18,7 @@ import {
 import { hasMeetingIntent } from '@/lib/meetingIntent'
 import { createNotification } from '@/lib/notifications'
 import { detectProfileUpdates } from '@/lib/profileUpdates'
+import { suggestStageChange } from '@/lib/stageSuggestions'
 import { createAdminClient } from '@/lib/supabase/server'
 import { waitForHumanResponseDelay } from '@/lib/humanResponseDelay'
 import { isAiClientChatEnabled } from '@/lib/aiClientChat'
@@ -293,14 +294,31 @@ async function runPostConversationProfile(
     { onConflict: 'client_id' }
   )
 
-  const newStage = score >= 7 ? 2 : 1
+  // qualification_score is the AI's own running assessment — safe to keep
+  // auto-updating. pipeline_stage is a counselor-facing pipeline position, so
+  // it no longer gets written silently: propose it instead and let the
+  // counselor sign off (suggestStageChange no-ops if nothing actually changed).
+  const { data: clientRow } = await supabase
+    .from('clients')
+    .select('pipeline_stage, counselor_id')
+    .eq('id', clientId)
+    .single()
+
   await supabase
     .from('clients')
-    .update({
-      qualification_score: score,
-      pipeline_stage: newStage,
-    })
+    .update({ qualification_score: score })
     .eq('id', clientId)
+
+  if (clientRow) {
+    const newStage = score >= 7 ? 2 : 1
+    await suggestStageChange({
+      clientId,
+      counselorId: clientRow.counselor_id,
+      currentStage: clientRow.pipeline_stage ?? 1,
+      suggestedStage: newStage,
+      reason: `AI post-conversation profile scored this lead ${score}/10.`,
+    })
+  }
 }
 
 export async function POST(request: Request) {
@@ -722,12 +740,15 @@ Use this context to make your opening message highly relevant to their specific 
 
   if (conversationComplete && internal && score !== undefined && score >= 7) {
     try {
-      await supabase
-        .from('clients')
-        .update({ pipeline_stage: 2 })
-        .eq('id', clientId)
+      await suggestStageChange({
+        clientId,
+        counselorId: client.counselor_id,
+        currentStage: client.pipeline_stage ?? 1,
+        suggestedStage: 2,
+        reason: `AI marked the conversation complete with a qualification score of ${score}/10.`,
+      })
     } catch {
-      // Non-fatal pipeline update failure
+      // Non-fatal — a missed suggestion just means no proposal was raised this turn.
     }
   }
 

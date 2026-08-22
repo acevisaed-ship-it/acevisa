@@ -19,7 +19,7 @@ export async function getBranchManagersWithCounts(): Promise<BranchManagerWithCo
       .eq('role', 'admin')
       .eq('status', 'active')
       .order('name'),
-    supabase.from('tasks').select('counselor_id').eq('status', 'pending'),
+    supabase.from('tasks').select('counselor_id').in('status', ['open', 'in_progress']),
   ])
 
   const openTasksByStaff = new Map<string, number>()

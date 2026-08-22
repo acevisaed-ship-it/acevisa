@@ -34,7 +34,7 @@ export type DocumentStatus = 'requested' | 'uploaded' | 'verified'
 
 export type MeetingStatus = 'scheduled' | 'completed' | 'cancelled'
 
-export type TaskStatus = 'pending' | 'done' | 'snoozed'
+export type TaskStatus = 'open' | 'in_progress' | 'completed' | 'closed'
 
 export type CounselorAccountStatus = 'active' | 'inactive'
 
@@ -176,6 +176,9 @@ export type Task = {
   due_date: string | null
   status: TaskStatus
   assigned_by?: string | null
+  completed_at?: string | null
+  closed_at?: string | null
+  closed_by?: string | null
   created_at: string
 }
 
@@ -231,6 +234,24 @@ export type ProfileUpdateRequest = {
   status: ProfileUpdateRequestStatus
   reviewed_by: string | null
   reviewed_at: string | null
+  created_at: string
+}
+
+export type ReminderStatus = 'pending' | 'resolved'
+export type ReminderOutcome = 'positive' | 'negative' | 'neutral'
+
+export type Reminder = {
+  id: string
+  client_id: string
+  counselor_id: string
+  task_id: string | null
+  remind_at: string
+  note: string | null
+  status: ReminderStatus
+  outcome: ReminderOutcome | null
+  outcome_note: string | null
+  resolved_at: string | null
+  resolved_by: string | null
   created_at: string
 }
 

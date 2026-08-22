@@ -16,16 +16,25 @@ export async function POST(request: Request) {
     due_date?: string
   }
 
-  if (!taskId || !status) {
-    return NextResponse.json({ error: 'Missing taskId or status' }, { status: 400 })
+  const VALID_STATUSES = ['open', 'in_progress', 'completed', 'closed']
+  if (!taskId || !status || !VALID_STATUSES.includes(status)) {
+    return NextResponse.json({ error: 'Missing taskId or invalid status' }, { status: 400 })
   }
 
   const update: Record<string, string | null> = { status }
   if (due_date) update.due_date = due_date
-  // Track completion time for "tasks completed today" views; clear it if the
-  // task is reopened back to pending.
-  if (status === 'completed') update.completed_at = new Date().toISOString()
-  if (status === 'pending') update.completed_at = null
+  // Track completion/close time for "tasks completed/closed today" views;
+  // clear the relevant timestamp if the task is reopened.
+  if (status === 'completed') {
+    update.completed_at = new Date().toISOString()
+  } else if (status === 'closed') {
+    update.closed_at = new Date().toISOString()
+    update.closed_by = counselor.id
+  } else {
+    update.completed_at = null
+    update.closed_at = null
+    update.closed_by = null
+  }
 
   const supabase = createAdminClient()
 
@@ -47,20 +56,28 @@ export async function POST(request: Request) {
   }
 
   // SOP: leadership (branch admin + CEO) must be notified whenever a
-  // counselor marks a task completed, or pushes it back to pending
-  // (re-opens/defers it) — both are accountability events on client SOP
-  // follow-ups, and must also surface in Staff Activity / Logs.
-  if (existingTask && status !== existingTask.status && (status === 'completed' || status === 'pending')) {
+  // counselor changes a task's status — an accountability signal on client
+  // SOP follow-ups that must also surface in Staff Activity / Logs.
+  if (existingTask && status !== existingTask.status) {
     const client = existingTask.clients as unknown as { name: string } | null
     const clientLabel = client?.name ? ` for ${client.name}` : ''
+    const STATUS_LABEL: Record<string, string> = {
+      open: 'reopened',
+      in_progress: 'marked in progress',
+      completed: 'completed',
+      closed: 'closed',
+    }
+    const NOTIF_TYPE: Record<string, 'task_completed' | 'task_pending' | 'task_closed'> = {
+      open: 'task_pending',
+      in_progress: 'task_pending',
+      completed: 'task_completed',
+      closed: 'task_closed',
+    }
 
     await createNotification({
       counselorId: counselor.id,
-      type: status === 'completed' ? 'task_completed' : 'task_pending',
-      title:
-        status === 'completed'
-          ? `Task completed${clientLabel}`
-          : `Task marked pending${clientLabel}`,
+      type: NOTIF_TYPE[status],
+      title: `Task ${STATUS_LABEL[status]}${clientLabel}`,
       body: `${counselor.name}: "${existingTask.task_text}"`,
       clientId: existingTask.client_id ?? undefined,
       taskId,
@@ -70,8 +87,8 @@ export async function POST(request: Request) {
       clientId: existingTask.client_id,
       counselorId: counselor.id,
       actorRole: counselor.role,
-      actionType: status === 'completed' ? 'task_completed' : 'task_marked_pending',
-      description: `${counselor.name} marked task${clientLabel} as ${status}: "${existingTask.task_text}"`,
+      actionType: `task_${status}`,
+      description: `${counselor.name} ${STATUS_LABEL[status]} task${clientLabel}: "${existingTask.task_text}"`,
       metadata: { taskId, previousStatus: existingTask.status, newStatus: status },
     })
   }

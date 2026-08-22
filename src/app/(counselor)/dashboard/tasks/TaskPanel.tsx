@@ -14,12 +14,13 @@ export type TaskWithClient = {
   clients: { name: string; id?: string } | { name: string; id?: string }[] | null
 }
 
-type Tab = 'pending' | 'in_progress' | 'done'
+type Tab = 'open' | 'in_progress' | 'completed' | 'closed'
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'pending', label: 'Pending' },
+  { id: 'open', label: 'Open' },
   { id: 'in_progress', label: 'In Progress' },
-  { id: 'done', label: 'Done' },
+  { id: 'completed', label: 'Completed' },
+  { id: 'closed', label: 'Closed' },
 ]
 
 function getClientName(clients: TaskWithClient['clients']): string {
@@ -29,9 +30,9 @@ function getClientName(clients: TaskWithClient['clients']): string {
 }
 
 function getAccentColor(status: string, dueDate: string | null): string {
-  if (status === 'done') return '#2083B9'
+  if (status === 'completed' || status === 'closed') return '#2083B9'
   if (status === 'in_progress') return '#2083B9'
-  if (status === 'pending' && isOverdueInPKT(dueDate)) return '#E48328'
+  if (status === 'open' && isOverdueInPKT(dueDate)) return '#E48328'
   return '#B7C733'
 }
 
@@ -41,13 +42,13 @@ type Props = {
 }
 
 export function TaskPanel({ tasks, onTaskClick }: Props) {
-  const [activeTab, setActiveTab] = useState<Tab>('pending')
+  const [activeTab, setActiveTab] = useState<Tab>('open')
 
   const filtered = tasks.filter((t) => t.status === activeTab)
 
   return (
     <>
-      <div className="mb-6 grid grid-cols-3 gap-2">
+      <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {TABS.map((tab) => (
           <button
             key={tab.id}
@@ -69,7 +70,7 @@ export function TaskPanel({ tasks, onTaskClick }: Props) {
       ) : (
         <div className="space-y-3">
           {filtered.map((task) => {
-            const overdue = task.status === 'pending' && isOverdueInPKT(task.due_date)
+            const overdue = task.status === 'open' && isOverdueInPKT(task.due_date)
             const dueLabel = formatPKTDueDate(task.due_date)
             const accent = getAccentColor(task.status, task.due_date)
 

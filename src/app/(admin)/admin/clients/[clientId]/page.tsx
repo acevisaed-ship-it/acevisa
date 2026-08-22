@@ -13,6 +13,7 @@ import {
 } from '@/components/brief/ProfileSummarySection'
 import { MeetingsHistorySection } from '@/components/brief/MeetingsHistorySection'
 import { PsychologicalReadSection } from '@/components/brief/PsychologicalReadSection'
+import { RemindersSection } from '@/components/brief/RemindersSection'
 import { ServicePathwaySection } from '@/components/brief/ServicePathwaySection'
 import { TalkingPointsSection } from '@/components/brief/TalkingPointsSection'
 import { resolveAiProfile } from '@/lib/brief'
@@ -20,6 +21,7 @@ import { createAdminClient, requireAdmin } from '@/lib/supabase/server'
 import type { Client, Conversation, Document } from '@/types'
 import { ClientControls } from '@/app/(counselor)/dashboard/clients/[clientId]/ClientControls'
 import { PendingProfileUpdates } from '@/app/(counselor)/dashboard/clients/[clientId]/PendingProfileUpdates'
+import { PendingStageSuggestion } from '@/app/(counselor)/dashboard/clients/[clientId]/PendingStageSuggestion'
 import { CopyPortalLink } from '@/components/CopyPortalLink'
 import { RegenerateProfileButton } from '@/components/brief/RegenerateProfileButton'
 
@@ -50,6 +52,7 @@ export default async function AdminClientProfilePage({ params }: Props) {
     { data: meetings },
     { data: activityLog },
     { data: pendingUpdates },
+    { data: pendingStageSuggestions },
   ] = await Promise.all([
     typedClient.counselor_id
       ? supabase
@@ -88,15 +91,27 @@ export default async function AdminClientProfilePage({ params }: Props) {
       .eq('client_id', clientId)
       .eq('status', 'pending')
       .order('created_at', { ascending: false }),
+    supabase
+      .from('stage_suggestions')
+      .select('id, current_stage, suggested_stage, reason, created_at')
+      .eq('client_id', clientId)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false }),
   ])
 
   const { profile, isPartial: profilePartial } = resolveAiProfile(aiProfile)
   const score = typedClient.qualification_score ?? profile?.qualification_score ?? null
   const counselorName = assignedCounselor?.name ?? 'Unassigned'
 
+  const recentVisits = (activityLog ?? []).filter((e) => e.action_type === 'walk_in') as unknown as {
+    id: string
+    created_at: string
+    metadata: { note?: string; loggedByName?: string } | null
+  }[]
+
   return (
     <main className="flex-1 p-4 md:p-8">
-      <div className="mx-auto max-w-[900px]">
+      <div className="mx-auto max-w-[1500px]">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <Link
             href="/admin/clients"
@@ -121,52 +136,62 @@ export default async function AdminClientProfilePage({ params }: Props) {
           <RegenerateProfileButton clientId={clientId} />
         </div>
 
-        <PendingProfileUpdates
-          updates={(pendingUpdates ?? []).map((u) => ({
-            ...u,
-            proposed_changes: u.proposed_changes as Record<string, string>,
-            reviewed_fields: (u.reviewed_fields ?? {}) as Record<string, string>,
-          }))}
-        />
-
-        <RecentVisitsSection
-          visits={(activityLog ?? []).filter((e) => e.action_type === 'walk_in') as unknown as {
-            id: string
-            created_at: string
-            metadata: { note?: string; loggedByName?: string } | null
-          }[]}
-        />
-
-        <ProfileSummarySection
-          client={typedClient}
-          profile={profile}
-          profilePartial={profilePartial}
-          counselorName={counselorName}
-          footer={
-            <ClientControls
-              clientId={clientId}
-              initialStage={typedClient.pipeline_stage}
-              initialNotes={typedClient.notes ?? ''}
-              initialEmail={typedClient.email ?? null}
-              initialStatus={typedClient.status ?? 'active'}
-              initialManuallyQualified={typedClient.manually_qualified ?? false}
-              initialQualificationFactors={typedClient.qualification_factors ?? []}
-              isAdmin
+        {/* 3-panel layout, same structure as the student chat / Team Hub
+            views: fixed-height row on desktop with each panel scrolling
+            independently, so no single column ever runs the length of the
+            page — it stacks to one column on mobile. */}
+        <div className="mt-4 grid grid-cols-1 gap-4 lg:h-[calc(100vh-260px)] lg:grid-cols-[28%_44%_28%]">
+          {/* Left panel — approvals + core profile controls */}
+          <div className="flex flex-col gap-4 lg:min-h-0 lg:overflow-y-auto lg:pr-1">
+            <PendingProfileUpdates
+              updates={(pendingUpdates ?? []).map((u) => ({
+                ...u,
+                proposed_changes: u.proposed_changes as Record<string, string>,
+                reviewed_fields: (u.reviewed_fields ?? {}) as Record<string, string>,
+              }))}
             />
-          }
-        />
+            <PendingStageSuggestion suggestions={pendingStageSuggestions ?? []} />
+            <ProfileSummarySection
+              client={typedClient}
+              profile={profile}
+              profilePartial={profilePartial}
+              counselorName={counselorName}
+              footer={
+                <ClientControls
+                  clientId={clientId}
+                  initialStage={typedClient.pipeline_stage}
+                  initialNotes={typedClient.notes ?? ''}
+                  initialEmail={typedClient.email ?? null}
+                  initialStatus={typedClient.status ?? 'active'}
+                  initialManuallyQualified={typedClient.manually_qualified ?? false}
+                  initialQualificationFactors={typedClient.qualification_factors ?? []}
+                  isAdmin
+                />
+              }
+            />
+            <RemindersSection clientId={clientId} />
+          </div>
 
-        <ConversationDigestSection
-          conversations={(conversations ?? []) as Conversation[]}
-          profile={profile}
-        />
-        <ServicePathwaySection profile={profile} />
-        <PsychologicalReadSection profile={profile} />
-        <BehavioralNotesSection clientId={clientId} />
-        <TalkingPointsSection profile={profile} />
-        <DocumentsChecklistSection documents={(documents ?? []) as Document[]} clientId={clientId} />
-        <MeetingsHistorySection clientId={clientId} meetings={meetings ?? []} />
-        <ActivityHistorySection entries={activityLog ?? []} />
+          {/* Center panel — conversation and AI analysis */}
+          <div className="flex flex-col gap-4 lg:min-h-0 lg:overflow-y-auto lg:px-1">
+            <ConversationDigestSection
+              conversations={(conversations ?? []) as Conversation[]}
+              profile={profile}
+            />
+            <ServicePathwaySection profile={profile} />
+            <PsychologicalReadSection profile={profile} />
+            <BehavioralNotesSection clientId={clientId} />
+            <TalkingPointsSection profile={profile} />
+          </div>
+
+          {/* Right panel — documents, meetings, and history */}
+          <div className="flex flex-col gap-4 lg:min-h-0 lg:overflow-y-auto lg:pl-1">
+            <RecentVisitsSection visits={recentVisits} />
+            <DocumentsChecklistSection documents={(documents ?? []) as Document[]} clientId={clientId} />
+            <MeetingsHistorySection clientId={clientId} meetings={meetings ?? []} />
+            <ActivityHistorySection entries={activityLog ?? []} />
+          </div>
+        </div>
       </div>
     </main>
   )

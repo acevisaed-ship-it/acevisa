@@ -30,7 +30,7 @@ export async function getCounselorsWithCounts(branchId?: string | null): Promise
 
   const [{ data: counselors }, { data: pendingTasks }] = await Promise.all([
     counselorsQuery,
-    supabase.from('tasks').select('counselor_id, due_date').eq('status', 'pending'),
+    supabase.from('tasks').select('counselor_id, due_date').in('status', ['open', 'in_progress']),
   ])
 
   const openTasksByCounselor = new Map<string, number>()

@@ -61,10 +61,18 @@ export async function POST(
   }
   if (newStatus) {
     taskUpdate.status = newStatus
-    // Track completion time for "tasks completed today" views; clear it if
-    // the task is reopened back to pending.
-    if (newStatus === 'completed') taskUpdate.completed_at = new Date().toISOString()
-    if (newStatus === 'pending') taskUpdate.completed_at = null
+    // Track completion/close time for "tasks completed/closed today" views;
+    // clear the relevant timestamp when a task is reopened.
+    if (newStatus === 'completed') {
+      taskUpdate.completed_at = new Date().toISOString()
+    } else if (newStatus === 'closed') {
+      taskUpdate.closed_at = new Date().toISOString()
+      taskUpdate.closed_by = counselor.id
+    } else {
+      taskUpdate.completed_at = null
+      taskUpdate.closed_at = null
+      taskUpdate.closed_by = null
+    }
   }
   if (reminderAt) taskUpdate.reminder_at = reminderAt
 

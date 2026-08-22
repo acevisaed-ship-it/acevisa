@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { UserPlus, CheckCircle, XCircle, Pencil, X, Check } from 'lucide-react'
+import { UserPlus, CheckCircle, XCircle, Pencil, X, Check, Clock } from 'lucide-react'
 
 type Counselor = {
   id: string
@@ -13,6 +13,25 @@ type Counselor = {
   avatarUrl: string | null
 }
 
+type TeamPanelMetrics = {
+  counselorId: string
+  openCount: number
+  inProgressCount: number
+  completedTodayCount: number
+  closedTodayCount: number
+  remainingTodayCount: number
+  portalActiveMinutes: number
+  attendanceMinutes: number | null
+}
+
+function formatMinutes(minutes: number | null): string {
+  if (minutes === null) return '—'
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  if (h === 0) return `${m}m`
+  return `${h}h ${m}m`
+}
+
 type NewCounselor = {
   name: string
   email: string
@@ -22,6 +41,7 @@ type NewCounselor = {
 
 export function TeamManagement() {
   const [counselors, setCounselors] = useState<Counselor[]>([])
+  const [metrics, setMetrics] = useState<Map<string, TeamPanelMetrics>>(new Map())
   const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -35,6 +55,17 @@ export function TeamManagement() {
       .then((r) => r.json())
       .then((d) => setCounselors(d.counselors ?? []))
       .finally(() => setLoading(false))
+
+    fetch('/api/admin/team-metrics')
+      .then((r) => r.json())
+      .then((d) => {
+        const map = new Map<string, TeamPanelMetrics>()
+        for (const m of d.metrics ?? []) map.set(m.counselorId, m)
+        setMetrics(map)
+      })
+      .catch(() => {
+        // Non-critical — metrics columns just show placeholders.
+      })
   }, [])
 
   async function addCounselor() {
@@ -182,12 +213,22 @@ export function TeamManagement() {
                 <th className="px-4 py-3">Member</th>
                 <th className="px-4 py-3">Role</th>
                 <th className="px-4 py-3">Clients</th>
+                <th className="px-4 py-3" title="Open tasks">Open</th>
+                <th className="px-4 py-3" title="In-progress tasks">In Progress</th>
+                <th className="px-4 py-3" title="Completed today">Done Today</th>
+                <th className="px-4 py-3" title="Closed today">Closed Today</th>
+                <th className="px-4 py-3" title="Due today or overdue, not yet done">Remaining Today</th>
+                <th className="px-4 py-3" title="Active time on portal today (heartbeat)">
+                  <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />Time Today</span>
+                </th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/8">
-              {counselors.map((c) => (
+              {counselors.map((c) => {
+                const m = metrics.get(c.id)
+                return (
                 <tr key={c.id} className="hover:bg-white/5">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
@@ -224,6 +265,21 @@ export function TeamManagement() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-white/60">{c.clientCount}</td>
+                  <td className="px-4 py-3 text-white/60">{m ? m.openCount : '—'}</td>
+                  <td className="px-4 py-3 text-white/60">{m ? m.inProgressCount : '—'}</td>
+                  <td className="px-4 py-3 text-white/60">{m ? m.completedTodayCount : '—'}</td>
+                  <td className="px-4 py-3 text-white/60">{m ? m.closedTodayCount : '—'}</td>
+                  <td className={`px-4 py-3 font-medium ${m && m.remainingTodayCount > 0 ? 'text-yellow-400' : 'text-white/60'}`}>
+                    {m ? m.remainingTodayCount : '—'}
+                  </td>
+                  <td className="px-4 py-3 text-white/60">
+                    <div className="flex flex-col leading-tight">
+                      <span>{m ? formatMinutes(m.portalActiveMinutes) : '—'}</span>
+                      {m?.attendanceMinutes != null && (
+                        <span className="text-xs text-white/30">clocked {formatMinutes(m.attendanceMinutes)}</span>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                       c.status === 'active'
@@ -258,7 +314,7 @@ export function TeamManagement() {
                     </div>
                   </td>
                 </tr>
-              ))}
+              )})}
             </tbody>
           </table>
         </div>

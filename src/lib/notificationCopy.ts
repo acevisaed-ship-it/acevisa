@@ -33,6 +33,12 @@ export function getAlertCopy(n: Pick<StaffAlert, 'type' | 'title' | 'body'>): {
       return { title: 'A task was completed', body }
     case 'task_pending':
       return { title: 'A task was reopened', body }
+    case 'task_closed':
+      return { title: 'A task was closed', body }
+    case 'stage_suggestion':
+      return { title: 'AI suggests a stage change — confirm?', body }
+    case 'stage_change':
+      return { title: 'Client stage updated', body }
     case 'daily_followup':
       return { title: 'Daily follow-up tasks assigned', body }
     case 'meeting_request':
@@ -73,6 +79,10 @@ export function getNotificationHref(
       case 'task_overdue':
       case 'task_completed':
       case 'task_pending':
+      case 'task_closed':
+        return client_id ? `/admin/clients/${client_id}` : null
+      case 'stage_suggestion':
+      case 'stage_change':
         return client_id ? `/admin/clients/${client_id}` : null
       case 'attendance_late':
       case 'attendance_absent':
@@ -107,7 +117,11 @@ export function getNotificationHref(
     case 'daily_followup':
     case 'task_pending':
     case 'task_completed':
+    case 'task_closed':
       return '/dashboard/tasks'
+    case 'stage_suggestion':
+    case 'stage_change':
+      return client_id ? `/dashboard/clients/${client_id}` : null
     case 'attendance_late':
     case 'attendance_absent':
     case 'leave_reviewed':

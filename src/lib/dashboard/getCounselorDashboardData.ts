@@ -107,7 +107,7 @@ export async function getCounselorDashboardData(
       .from('tasks')
       .select('id, task_text, due_date')
       .eq('counselor_id', counselorId)
-      .eq('status', 'pending')
+      .in('status', ['open', 'in_progress'])
       .order('due_date', { ascending: true, nullsFirst: false }),
     supabase
       .from('meetings')
@@ -126,7 +126,7 @@ export async function getCounselorDashboardData(
       .from('tasks')
       .select('*', { count: 'exact', head: true })
       .eq('counselor_id', counselorId)
-      .eq('status', 'pending'),
+      .in('status', ['open', 'in_progress']),
     clientIds.length > 0
       ? supabase
           .from('response_tracking')

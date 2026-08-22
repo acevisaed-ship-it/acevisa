@@ -6,6 +6,7 @@ import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { NotificationBell } from '@/components/dashboard/NotificationBell'
 import { AlertToastHost } from '@/components/dashboard/AlertToastHost'
 import { PushNotificationOptIn } from '@/components/PushNotificationOptIn'
+import { PortalHeartbeat } from '@/components/PortalHeartbeat'
 import { ProfilePicture } from '@/components/dashboard/ProfilePicture'
 import { LogoHomeLink } from '@/components/ui/LogoHomeLink'
 
@@ -32,6 +33,7 @@ export function AdminShell({
     <div className="flex min-h-screen min-w-[1280px] bg-grad-teal">
       <AlertToastHost />
       <PushNotificationOptIn />
+      <PortalHeartbeat />
       <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center justify-between glass-card-md crisp-on-dark px-4 lg:hidden">
         <button
           type="button"

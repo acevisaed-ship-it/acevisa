@@ -34,9 +34,10 @@ interface Props {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: 'bg-orange/20 text-orange',
+  open: 'bg-orange/20 text-orange',
   in_progress: 'bg-blue/20 text-white',
-  done: 'bg-green/20 text-white',
+  completed: 'bg-green/20 text-white',
+  closed: 'bg-white/15 text-white/70',
 }
 
 export function TaskDetailPanel({
@@ -52,6 +53,11 @@ export function TaskDetailPanel({
   const [reminderInput, setReminderInput] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [tab, setTab] = useState<'update' | 'history'>(readOnly ? 'history' : 'update')
+  const [showFollowUpPrompt, setShowFollowUpPrompt] = useState(false)
+  const [followUpAt, setFollowUpAt] = useState('')
+  const [followUpNote, setFollowUpNote] = useState('')
+  const [followUpSaving, setFollowUpSaving] = useState(false)
+  const [followUpSaved, setFollowUpSaved] = useState(false)
 
   useEffect(() => {
     fetch(`/api/tasks/${task.id}/actions`)
@@ -81,6 +87,30 @@ export function TaskDetailPanel({
     fetch(`/api/tasks/${task.id}/actions`)
       .then((r) => r.json())
       .then((d) => setActions(d.actions || []))
+
+    // Task-completion prompt (one of the two reminder entry points): offer a
+    // follow-up reminder right after marking a task Completed or Closed.
+    if (actionType === 'status_update' && (newStatus === 'completed' || newStatus === 'closed')) {
+      setShowFollowUpPrompt(true)
+      setFollowUpSaved(false)
+    }
+  }
+
+  async function saveFollowUp() {
+    if (!followUpAt || !task.clients?.id) return
+    setFollowUpSaving(true)
+    await fetch('/api/reminders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clientId: task.clients.id,
+        taskId: task.id,
+        remindAt: new Date(followUpAt).toISOString(),
+        note: followUpNote || undefined,
+      }),
+    })
+    setFollowUpSaving(false)
+    setFollowUpSaved(true)
   }
 
   const formatPKT = (iso: string) => {
@@ -103,7 +133,7 @@ export function TaskDetailPanel({
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <span
-                className={`rounded-full px-2 py-0.5 text-xs font-bold ${STATUS_COLORS[task.status] || STATUS_COLORS.pending}`}
+                className={`rounded-full px-2 py-0.5 text-xs font-bold ${STATUS_COLORS[task.status] || STATUS_COLORS.open}`}
               >
                 {task.status.replace('_', ' ').toUpperCase()}
               </span>
@@ -239,19 +269,28 @@ export function TaskDetailPanel({
                       Mark In Progress
                     </button>
                   )}
-                  {task.status !== 'done' && (
+                  {task.status !== 'completed' && (
                     <button
-                      onClick={() => submitAction('status_update', 'done')}
+                      onClick={() => submitAction('status_update', 'completed')}
                       disabled={submitting}
                       className="flex items-center gap-1.5 rounded-full border border-green/40 px-3 py-1.5 text-sm font-semibold text-white/70 transition-colors hover:bg-green/20 hover:text-white"
                     >
                       <CheckCircle size={14} />
-                      Mark Done
+                      Mark Completed
                     </button>
                   )}
-                  {task.status !== 'pending' && (
+                  {task.status !== 'closed' && (
                     <button
-                      onClick={() => submitAction('status_update', 'pending')}
+                      onClick={() => submitAction('status_update', 'closed')}
+                      disabled={submitting}
+                      className="flex items-center gap-1.5 rounded-full border border-white/30 px-3 py-1.5 text-sm font-semibold text-white/70 transition-colors hover:bg-white/20 hover:text-white"
+                    >
+                      Close (verified)
+                    </button>
+                  )}
+                  {task.status !== 'open' && (
+                    <button
+                      onClick={() => submitAction('status_update', 'open')}
                       disabled={submitting}
                       className="flex items-center gap-1.5 rounded-full border border-white/20 px-3 py-1.5 text-sm font-semibold text-white/50 transition-colors hover:text-white"
                     >
@@ -260,6 +299,51 @@ export function TaskDetailPanel({
                   )}
                 </div>
               </div>
+
+              {showFollowUpPrompt && (
+                <div className="rounded-xl border border-blue/30 bg-blue/10 p-4">
+                  {followUpSaved ? (
+                    <p className="text-sm text-white/70">🔔 Follow-up reminder saved.</p>
+                  ) : (
+                    <>
+                      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-white/50">
+                        Set a follow-up reminder for this? (optional)
+                      </label>
+                      <div className="flex flex-col gap-2 sm:flex-row">
+                        <input
+                          type="datetime-local"
+                          value={followUpAt}
+                          onChange={(e) => setFollowUpAt(e.target.value)}
+                          min={new Date().toISOString().slice(0, 16)}
+                          className="flex-1 rounded-xl px-3 py-2 text-sm outline-none glass-input"
+                        />
+                        <input
+                          type="text"
+                          value={followUpNote}
+                          onChange={(e) => setFollowUpNote(e.target.value)}
+                          placeholder="What to follow up about"
+                          className="flex-[2] rounded-xl px-3 py-2 text-sm outline-none glass-input"
+                        />
+                      </div>
+                      <div className="mt-2 flex gap-2">
+                        <button
+                          onClick={saveFollowUp}
+                          disabled={!followUpAt || followUpSaving || !task.clients?.id}
+                          className="rounded-full bg-grad-blue crisp-on-dark px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+                        >
+                          {followUpSaving ? 'Saving…' : 'Set Reminder'}
+                        </button>
+                        <button
+                          onClick={() => setShowFollowUpPrompt(false)}
+                          className="rounded-full glass-card px-4 py-1.5 text-xs font-semibold text-white/60"
+                        >
+                          Skip
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </>
           )}
 
