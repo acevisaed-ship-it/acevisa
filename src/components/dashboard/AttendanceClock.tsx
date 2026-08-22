@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Clock, LogIn, LogOut, MapPin, Loader2 } from 'lucide-react'
+import { Clock, LogIn, LogOut, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type AttendanceRecord = {
@@ -82,31 +82,13 @@ export function AttendanceClock() {
     setSuccess(null)
     setActing(true)
 
-    // Get GPS location first
-    const getPosition = () =>
-      new Promise<GeolocationPosition>((resolve, reject) =>
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 10000,
-        })
-      )
-
-    let lat: number, lng: number
-    try {
-      const pos = await getPosition()
-      lat = pos.coords.latitude
-      lng = pos.coords.longitude
-    } catch {
-      setError('Location access denied. Please enable GPS and try again.')
-      setActing(false)
-      return
-    }
-
+    // Location checks are disabled for now (see api/counselor/attendance) —
+    // clock in/out no longer requires GPS permission or office network.
     try {
       const res = await fetch('/api/counselor/attendance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, lat, lng }),
+        body: JSON.stringify({ action }),
       })
       const data = await res.json()
 
@@ -161,7 +143,7 @@ export function AttendanceClock() {
               className="flex w-full items-center justify-center gap-2 min-h-[48px] rounded-full bg-grad-green crisp-on-dark text-sm font-bold text-text transition-opacity hover:opacity-90 disabled:opacity-50"
             >
               {acting ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogIn className="h-4 w-4" />}
-              {acting ? 'Verifying location…' : 'Clock In'}
+              {acting ? 'Clocking in…' : 'Clock In'}
             </button>
           ) : !hasClockedOut ? (
             <button
@@ -171,20 +153,12 @@ export function AttendanceClock() {
               className="flex w-full items-center justify-center gap-2 min-h-[48px] rounded-full bg-grad-blue crisp-on-dark text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
             >
               {acting ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
-              {acting ? 'Verifying location…' : 'Clock Out'}
+              {acting ? 'Clocking out…' : 'Clock Out'}
             </button>
           ) : (
             <div className="flex items-center justify-center gap-2 min-h-[48px] rounded-full glass-card text-sm text-white/40">
               ✓ Done for today
             </div>
-          )}
-
-          {/* Location hint */}
-          {!hasClockedIn && (
-            <p className="mt-2 flex items-center gap-1 text-[10px] text-white/30">
-              <MapPin className="h-3 w-3" />
-              Must be on office network + within office location
-            </p>
           )}
 
           {/* Feedback */}

@@ -54,55 +54,24 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
-  const { action, lat, lng } = body as { action: 'clock_in' | 'clock_out'; lat: number; lng: number }
+  const { action, lat, lng } = body as { action: 'clock_in' | 'clock_out'; lat?: number; lng?: number }
 
-  if (!action || lat === undefined || lng === undefined) {
-    return NextResponse.json({ error: 'action, lat, and lng are required' }, { status: 400 })
+  if (!action) {
+    return NextResponse.json({ error: 'action is required' }, { status: 400 })
   }
 
   const admin = createAdminClient()
 
-  // Load office location settings
-  const { data: settingRow } = await admin
-    .from('portal_settings')
-    .select('value')
-    .eq('key', 'office_location')
-    .single()
+  // ── Location checks (IP + GPS) are disabled for now — flagged as
+  // unreliable in practice (dynamic office IPs, inaccurate browser GPS).
+  // The office_location setting and haversineMetres/getClientIp helpers are
+  // left in place so this can be re-enabled later without rebuilding it.
+  // See portal_settings.office_location if re-enabling.
+  void lat
+  void lng
+  void haversineMetres
+  void getClientIp
 
-  if (!settingRow?.value) {
-    return NextResponse.json({ error: 'Office location not configured. Ask your admin to set it up in Settings.' }, { status: 503 })
-  }
-
-  const officeSettings = settingRow.value as { ip: string; lat: string; lng: string; radius: string }
-
-  // ── Check 1: IP address ──────────────────────────────────────────────────
-  if (officeSettings.ip) {
-    const clientIp = getClientIp(request)
-    if (clientIp !== officeSettings.ip) {
-      return NextResponse.json({
-        error: 'Clock-in not allowed from this network. You must be connected to the office network.',
-        code: 'WRONG_IP',
-      }, { status: 403 })
-    }
-  }
-
-  // ── Check 2: GPS proximity ───────────────────────────────────────────────
-  if (officeSettings.lat && officeSettings.lng) {
-    const officeLat = parseFloat(officeSettings.lat)
-    const officeLng = parseFloat(officeSettings.lng)
-    const radius = parseFloat(officeSettings.radius || '100')
-    const distance = haversineMetres(lat, lng, officeLat, officeLng)
-
-    if (distance > radius) {
-      return NextResponse.json({
-        error: `You are ${Math.round(distance)}m from the office. Clock-in requires you to be within ${radius}m.`,
-        code: 'WRONG_LOCATION',
-        distance: Math.round(distance),
-      }, { status: 403 })
-    }
-  }
-
-  // ── Both checks passed — record attendance ───────────────────────────────
   const { data: counselor } = await admin
     .from('counselors')
     .select('id, name, role')
