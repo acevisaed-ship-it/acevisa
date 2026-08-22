@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useId } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Bell,
@@ -101,6 +101,15 @@ export function NotificationBell({ counselorId, context = 'counselor', variant =
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  // NotificationBell is mounted twice at once (mobile header + desktop header),
+  // sometimes with identical counselorId/context/variant (e.g. AdminShell uses
+  // variant="dark" for both). Two channel() calls with the same topic on the
+  // same Supabase client collide, and the second instance's .on() calls land
+  // on a channel the first instance already subscribed — which throws
+  // ("cannot add postgres_changes callbacks ... after subscribe()") and takes
+  // down the whole page via the root error boundary. A per-instance id keeps
+  // every mounted bell on its own channel topic.
+  const instanceId = useId()
 
   const unreadCount = notifications.filter((n) => !n.is_read).length
 
@@ -126,7 +135,7 @@ export function NotificationBell({ counselorId, context = 'counselor', variant =
   useEffect(() => {
     const supabase = createClient()
     const channel = supabase
-      .channel(`staff-alerts-${context}-${variant}-${counselorId}`)
+      .channel(`staff-alerts-${context}-${variant}-${counselorId}-${instanceId}`)
       .on(
         'postgres_changes',
         {
@@ -167,7 +176,7 @@ export function NotificationBell({ counselorId, context = 'counselor', variant =
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [counselorId, context, variant])
+  }, [counselorId, context, variant, instanceId])
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
