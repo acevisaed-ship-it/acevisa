@@ -22,7 +22,7 @@ export async function GET() {
     await client.connect()
     const lock = await client.getMailboxLock('INBOX')
     try {
-      const uids = await client.search({ unseen: true }, { uid: true })
+      const uids = await client.search({ seen: false }, { uid: true })
       const list = Array.isArray(uids) ? uids : []
       const latestUid = list.length > 0 ? Math.max(...list.map(Number)) : 0
       if (!latestUid) {
