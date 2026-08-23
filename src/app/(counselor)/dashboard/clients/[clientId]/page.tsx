@@ -10,7 +10,6 @@ import { ConversationDigestSection } from '@/components/brief/ConversationDigest
 import { DocumentsChecklistSection } from '@/components/brief/DocumentsChecklistSection'
 import { ApplicationsSection } from '@/components/brief/ApplicationsSection'
 import { MeetingsHistorySection } from '@/components/brief/MeetingsHistorySection'
-import { OnlineStatusToggle } from '@/components/brief/OnlineStatusToggle'
 import {
   ClientProfileHeader,
   ProfileSummarySection,
@@ -24,9 +23,9 @@ import { resolveAiProfile } from '@/lib/brief'
 import { createAdminClient, getAuthenticatedCounselor } from '@/lib/supabase/server'
 import type { Client, Conversation, Document } from '@/types'
 import { ClientControls } from './ClientControls'
+import { ClientProfileHeaderActions } from './ClientProfileHeaderActions'
 import { PendingProfileUpdates } from './PendingProfileUpdates'
 import { PendingStageSuggestion } from './PendingStageSuggestion'
-import { CopyPortalLink } from '@/components/CopyPortalLink'
 import { RegenerateProfileButton } from '@/components/brief/RegenerateProfileButton'
 
 type Props = {
@@ -126,22 +125,18 @@ export default async function ClientRecordPage({ params }: Props) {
           >
             ← Back to dashboard
           </Link>
-          <div className="flex flex-wrap items-center gap-2">
-            <OnlineStatusToggle
-              counselorId={counselor.id}
-              initialOnline={counselorStatus?.is_online ?? false}
-              initialAutoReply={counselorStatus?.auto_reply_enabled ?? false}
-            />
-            <Link
-              href={`/dashboard/clients/${clientId}/chat`}
-              className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-              style={{ background: 'linear-gradient(145deg, #f5a24e 0%, #E48328 55%, #ca7220 100%)' }}
-            >
-              💬 Chat with Student
-            </Link>
-            <CopyPortalLink clientId={clientId} />
-          </div>
         </div>
+
+        {/* Online toggle / chat / copy-link — portaled into the shared
+            header next to the bell on desktop; rendered inline here on
+            mobile where the shared header has no room. */}
+        <ClientProfileHeaderActions
+          clientId={clientId}
+          chatHref={`/dashboard/clients/${clientId}/chat`}
+          counselorId={counselor.id}
+          initialOnline={counselorStatus?.is_online ?? false}
+          initialAutoReply={counselorStatus?.auto_reply_enabled ?? false}
+        />
 
         <div className="flex items-center justify-between">
           <ClientProfileHeader client={typedClient} score={score} />
@@ -150,11 +145,12 @@ export default async function ClientRecordPage({ params }: Props) {
 
         {/* 3-panel layout, same structure as the student chat / Team Hub
             views: fixed-height row on desktop with each panel scrolling
-            independently, so no single column ever runs the length of the
-            page — it stacks to one column on mobile. */}
-        <div className="mt-4 grid grid-cols-1 gap-4 lg:h-[calc(100vh-260px)] lg:grid-cols-[28%_44%_28%]">
+            independently (scrollbar hidden, scroll still works), so no
+            single column ever runs the length of the page — it stacks to
+            one column on mobile. */}
+        <div className="mt-4 grid grid-cols-1 gap-5 lg:h-[calc(100vh-220px)] lg:grid-cols-[30%_40%_30%]">
           {/* Left panel — approvals + core profile controls */}
-          <div className="flex flex-col gap-4 lg:min-h-0 lg:overflow-y-auto lg:pr-1">
+          <div className="scrollbar-hidden flex flex-col gap-4 lg:min-h-0 lg:overflow-y-auto lg:pr-1">
             <PendingProfileUpdates
               updates={(pendingUpdates ?? []).map((u) => ({
                 ...u,
@@ -184,7 +180,7 @@ export default async function ClientRecordPage({ params }: Props) {
           </div>
 
           {/* Center panel — conversation, strategy, and AI analysis */}
-          <div className="flex flex-col gap-4 lg:min-h-0 lg:overflow-y-auto lg:px-1">
+          <div className="scrollbar-hidden flex flex-col gap-4 lg:min-h-0 lg:overflow-y-auto lg:px-1">
             <ConversationDigestSection
               conversations={(conversations ?? []) as Conversation[]}
               profile={profile}
@@ -201,7 +197,7 @@ export default async function ClientRecordPage({ params }: Props) {
           </div>
 
           {/* Right panel — documents, applications, meetings, and history */}
-          <div className="flex flex-col gap-4 lg:min-h-0 lg:overflow-y-auto lg:pl-1">
+          <div className="scrollbar-hidden flex flex-col gap-4 lg:min-h-0 lg:overflow-y-auto lg:pl-1">
             <RecentVisitsSection visits={recentVisits} />
             <DocumentsChecklistSection documents={(documents ?? []) as Document[]} clientId={clientId} />
             <ApplicationsSection clientId={clientId} applications={applications ?? []} />
