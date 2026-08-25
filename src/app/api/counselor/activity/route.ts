@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
   if (!client) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  await logActivity({
+  const { error } = await logActivity({
     clientId,
     counselorId: counselor.id,
     actionType: vis === 'shared' ? 'counselor_update' : 'counselor_note',
@@ -37,6 +37,10 @@ export async function POST(request: Request) {
     visibility: vis,
     metadata: { addedBy: counselor.name },
   })
+
+  if (error) {
+    return NextResponse.json({ error: 'Failed to save note' }, { status: 500 })
+  }
 
   return NextResponse.json({ success: true })
 }

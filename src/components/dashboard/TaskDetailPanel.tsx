@@ -58,6 +58,7 @@ export function TaskDetailPanel({
   const [followUpNote, setFollowUpNote] = useState('')
   const [followUpSaving, setFollowUpSaving] = useState(false)
   const [followUpSaved, setFollowUpSaved] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch(`/api/tasks/${task.id}/actions`)
@@ -68,31 +69,49 @@ export function TaskDetailPanel({
   const submitAction = async (actionType: string, newStatus?: string) => {
     if (actionType === 'note' && !note.trim()) return
     setSubmitting(true)
-    await fetch(`/api/tasks/${task.id}/actions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        counselorId,
-        actionType,
-        noteText: note || undefined,
-        newStatus: newStatus || undefined,
-        reminderAt: reminderInput || undefined,
-        visibility: noteVisibility,
-      }),
-    })
-    setNote('')
-    setReminderInput('')
-    setSubmitting(false)
-    onUpdated()
-    fetch(`/api/tasks/${task.id}/actions`)
-      .then((r) => r.json())
-      .then((d) => setActions(d.actions || []))
+    setActionError(null)
+    try {
+      const res = await fetch(`/api/tasks/${task.id}/actions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          counselorId,
+          actionType,
+          noteText: note || undefined,
+          newStatus: newStatus || undefined,
+          reminderAt: reminderInput || undefined,
+          visibility: noteVisibility,
+        }),
+      })
 
-    // Task-completion prompt (one of the two reminder entry points): offer a
-    // follow-up reminder right after marking a task Completed or Closed.
-    if (actionType === 'status_update' && (newStatus === 'completed' || newStatus === 'closed')) {
-      setShowFollowUpPrompt(true)
-      setFollowUpSaved(false)
+      if (!res.ok) {
+        // Previously this failed silently — the note field cleared and the
+        // action list refetched as if it had saved, so a failed save looked
+        // identical to a successful one and only showed as "missing" the
+        // next time the task was reopened. Surface the error and keep
+        // whatever the counselor typed so nothing is lost.
+        const data = await res.json().catch(() => ({}))
+        setActionError(data.error || 'Failed to save — please try again.')
+        return
+      }
+
+      setNote('')
+      setReminderInput('')
+      onUpdated()
+      fetch(`/api/tasks/${task.id}/actions`)
+        .then((r) => r.json())
+        .then((d) => setActions(d.actions || []))
+
+      // Task-completion prompt (one of the two reminder entry points): offer a
+      // follow-up reminder right after marking a task Completed or Closed.
+      if (actionType === 'status_update' && (newStatus === 'completed' || newStatus === 'closed')) {
+        setShowFollowUpPrompt(true)
+        setFollowUpSaved(false)
+      }
+    } catch {
+      setActionError('Failed to save — please try again.')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -181,6 +200,11 @@ export function TaskDetailPanel({
           )}
           {tab === 'update' && !readOnly && (
             <>
+              {actionError && (
+                <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+                  {actionError}
+                </div>
+              )}
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-white/50">
                   Add a Note

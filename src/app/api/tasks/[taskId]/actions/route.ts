@@ -44,7 +44,7 @@ export async function POST(
 
   if (!task) return NextResponse.json({ error: 'Task not found' }, { status: 404 })
 
-  await supabase.from('task_actions').insert({
+  const { error: insertError } = await supabase.from('task_actions').insert({
     task_id: taskId,
     counselor_id: counselorId || counselor.id,
     action_type: actionType,
@@ -54,6 +54,10 @@ export async function POST(
     reminder_at: reminderAt || null,
     visibility: actionType === 'note' ? (visibility === 'shared' ? 'shared' : 'internal') : 'internal',
   })
+
+  if (insertError) {
+    return NextResponse.json({ error: insertError.message }, { status: 500 })
+  }
 
   const taskUpdate: Record<string, unknown> = {
     last_action_at: new Date().toISOString(),
@@ -76,7 +80,10 @@ export async function POST(
   }
   if (reminderAt) taskUpdate.reminder_at = reminderAt
 
-  await supabase.from('tasks').update(taskUpdate).eq('id', taskId)
+  const { error: updateError } = await supabase.from('tasks').update(taskUpdate).eq('id', taskId)
+  if (updateError) {
+    return NextResponse.json({ error: updateError.message }, { status: 500 })
+  }
 
   const clientId = task.client_id
   const actionDescriptions: Record<string, string> = {

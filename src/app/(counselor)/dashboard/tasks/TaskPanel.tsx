@@ -43,11 +43,26 @@ type Props = {
 
 export function TaskPanel({ tasks, onTaskClick }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('open')
+  const [search, setSearch] = useState('')
 
-  const filtered = tasks.filter((t) => t.status === activeTab)
+  const byStatus = tasks.filter((t) => t.status === activeTab)
+  const query = search.trim().toLowerCase()
+  const filtered = query
+    ? byStatus.filter((t) => getClientName(t.clients).toLowerCase().includes(query))
+    : byStatus
 
   return (
     <>
+      <div className="mb-4">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search tasks by student name…"
+          className="min-h-[44px] w-full max-w-sm rounded-full px-4 py-2.5 text-sm outline-none glass-input"
+        />
+      </div>
+
       <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {TABS.map((tab) => (
           <button
@@ -66,7 +81,11 @@ export function TaskPanel({ tasks, onTaskClick }: Props) {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-white/50">No {activeTab.replace('_', ' ')} tasks.</p>
+        <p className="text-white/50">
+          {query
+            ? `No ${activeTab.replace('_', ' ')} tasks match "${search}".`
+            : `No ${activeTab.replace('_', ' ')} tasks.`}
+        </p>
       ) : (
         <div className="space-y-3">
           {filtered.map((task) => {

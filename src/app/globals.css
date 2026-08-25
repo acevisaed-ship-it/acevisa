@@ -18,6 +18,14 @@
   --grad-card:   linear-gradient(145deg, #d8dad9 0%, #d0d2d1 55%, #c8cac9 100%);  /* portal cards */
   --grad-hero:   linear-gradient(135deg, #E48328 0%, #2083B9 100%);  /* CTA / accent */
 
+  /* ── Extra bright gradients — activity-log / badge coding ── */
+  --grad-red:    linear-gradient(145deg, #f56565 0%, #DC2626 55%, #b91c1c 100%);
+  --grad-purple: linear-gradient(145deg, #a78bfa 0%, #7C3AED 55%, #6024c4 100%);
+  --grad-indigo: linear-gradient(145deg, #818cf8 0%, #4F46E5 55%, #3730a3 100%);
+  --grad-pink:   linear-gradient(145deg, #f472b6 0%, #DB2777 55%, #b0185f 100%);
+  --grad-cyan:   linear-gradient(145deg, #22d3ee 0%, #0891B2 55%, #0e7490 100%);
+  --grad-yellow: linear-gradient(145deg, #fde047 0%, #EAB308 55%, #a16207 100%);
+
   /* ── Crisp outline — inset box-shadow so it never shifts layout ── */
   /* Use on dark/coloured surfaces  */
   --crisp-light: inset 0 0 0 0.75px rgba(255, 255, 255, 0.18);
@@ -73,6 +81,12 @@ html {
 .bg-grad-bg     { background: var(--grad-bg);     }
 .bg-grad-card   { background: var(--grad-card);   }
 .bg-grad-hero   { background: var(--grad-hero);   }
+.bg-grad-red    { background: var(--grad-red);    }
+.bg-grad-purple { background: var(--grad-purple); }
+.bg-grad-indigo { background: var(--grad-indigo); }
+.bg-grad-pink   { background: var(--grad-pink);   }
+.bg-grad-cyan   { background: var(--grad-cyan);   }
+.bg-grad-yellow { background: var(--grad-yellow); }
 
 /* ── Portal card normalisation ────────────────────────────────────
    All bg-white elements become the darker card gradient.

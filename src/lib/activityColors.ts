@@ -8,6 +8,9 @@ export function getActivityDotColor(actionType: string): string {
   if (actionType === 'brief_viewed') {
     return '#16A34A'
   }
+  if (actionType === 'counselor_note' || actionType === 'counselor_update') {
+    return '#2083B9'
+  }
   if (actionType.startsWith('task_')) {
     return '#EA580C'
   }

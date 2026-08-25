@@ -1,7 +1,7 @@
 'use client'
 
 import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Download, FileSpreadsheet, Paperclip, Plus, Trash2, X } from 'lucide-react'
+import { Download, FileSpreadsheet, Paperclip, Plus, Search, Trash2, X } from 'lucide-react'
 import {
   EXPENSE_CATEGORIES,
   EXPENSE_CATEGORY_LABELS,
@@ -112,6 +112,80 @@ function downloadExport(type: string) {
   document.body.appendChild(a)
   a.click()
   a.remove()
+}
+
+// Searchable client picker — type to filter by name instead of scrolling a
+// long plain <select>. Used wherever an invoice needs a client attached.
+function ClientSearchSelect({
+  clients,
+  value,
+  onChange,
+}: {
+  clients: ClientOption[]
+  value: string
+  onChange: (clientId: string) => void
+}) {
+  const [query, setQuery] = useState(() => clients.find((c) => c.id === value)?.name ?? '')
+  const [open, setOpen] = useState(false)
+
+  // Keep the input text in sync if `value` is reset from outside (e.g. modal close/reopen).
+  useEffect(() => {
+    setQuery(clients.find((c) => c.id === value)?.name ?? '')
+  }, [value, clients])
+
+  const matches = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return clients
+    return clients.filter((c) => c.name.toLowerCase().includes(q))
+  }, [clients, query])
+
+  return (
+    <div className="relative">
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+        <input
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value)
+            setOpen(true)
+            if (!e.target.value) onChange('')
+          }}
+          onFocus={() => setOpen(true)}
+          onBlur={() => setTimeout(() => setOpen(false), 150)}
+          placeholder="Search client by name…"
+          className={cn(inputClass, 'pl-10')}
+          autoComplete="off"
+          required
+        />
+      </div>
+      {open && (
+        <div className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-2xl border border-white/10 dark-modal py-1 shadow-xl">
+          {matches.length === 0 ? (
+            <p className="px-4 py-2.5 text-sm text-white/40">No clients match &ldquo;{query}&rdquo;</p>
+          ) : (
+            matches.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  onChange(c.id)
+                  setQuery(c.name)
+                  setOpen(false)
+                }}
+                className={cn(
+                  'flex w-full items-center px-4 py-2.5 text-left text-sm transition-colors',
+                  c.id === value ? 'bg-green/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
+                )}
+              >
+                {c.name}
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  )
 }
 
 const STATUS_TABS = ['all', ...INVOICE_STATUSES] as const
@@ -388,10 +462,11 @@ function InvoicesTab({ clients, deals }: { clients: ClientOption[]; deals: DealO
             <form className="space-y-4">
               <div>
                 <label className="mb-1.5 block text-sm text-white/70">Client</label>
-                <select value={clientId} onChange={(e) => { setClientId(e.target.value); setDealId('') }} className={inputClass} required>
-                  <option value="">Select client</option>
-                  {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
+                <ClientSearchSelect
+                  clients={clients}
+                  value={clientId}
+                  onChange={(id) => { setClientId(id); setDealId('') }}
+                />
               </div>
 
               {clientId && clientDeals.length > 0 && (

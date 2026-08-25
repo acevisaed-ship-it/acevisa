@@ -16,7 +16,7 @@ export async function logActivity({
   description: string
   visibility?: 'internal' | 'shared'
   metadata?: Record<string, unknown>
-}) {
+}): Promise<{ error: string | null }> {
   const supabase = createAdminClient()
   const { error } = await supabase.from('activity_logs').insert({
     client_id: clientId || null,
@@ -29,7 +29,9 @@ export async function logActivity({
   })
   if (error) {
     console.error('[activityLog] insert failed:', error.message, { actionType, clientId })
+    return { error: error.message }
   }
+  return { error: null }
 }
 
 // Convenience wrapper for staff-only events with no associated client

@@ -32,6 +32,8 @@ export function ClientControls({
   const [saving, setSaving] = useState<'stage' | 'notes' | 'email' | null>(null)
   const [emailError, setEmailError] = useState<string | null>(null)
   const [emailSaved, setEmailSaved] = useState(false)
+  const [notesSaved, setNotesSaved] = useState(false)
+  const [notesError, setNotesError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
@@ -40,6 +42,7 @@ export function ClientControls({
   const [updateVisibility, setUpdateVisibility] = useState<'internal' | 'shared'>('internal')
   const [sendingUpdate, setSendingUpdate] = useState(false)
   const [updateSent, setUpdateSent] = useState(false)
+  const [updateError, setUpdateError] = useState<string | null>(null)
 
   // Suspension
   const [status, setStatus] = useState(initialStatus)
@@ -73,8 +76,21 @@ export function ClientControls({
 
   async function handleSaveNotes() {
     setSaving('notes')
-    await patchClient({ notes })
-    setSaving(null)
+    setNotesError(null)
+    setNotesSaved(false)
+    try {
+      const ok = await patchClient({ notes })
+      if (ok) {
+        setNotesSaved(true)
+        setTimeout(() => setNotesSaved(false), 2500)
+      } else {
+        setNotesError('Failed to save — please try again.')
+      }
+    } catch {
+      setNotesError('Failed to save — please try again.')
+    } finally {
+      setSaving(null)
+    }
   }
 
   async function handleSaveEmail() {
@@ -147,16 +163,29 @@ export function ClientControls({
   async function handleSendUpdate() {
     if (!updateText.trim()) return
     setSendingUpdate(true)
-    const res = await fetch('/api/counselor/activity', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clientId, text: updateText.trim(), visibility: updateVisibility }),
-    })
-    setSendingUpdate(false)
-    if (res.ok) {
-      setUpdateText('')
-      setUpdateSent(true)
-      setTimeout(() => setUpdateSent(false), 3000)
+    setUpdateError(null)
+    try {
+      const res = await fetch('/api/counselor/activity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId, text: updateText.trim(), visibility: updateVisibility }),
+      })
+      if (res.ok) {
+        setUpdateText('')
+        setUpdateSent(true)
+        // The saved note only shows up in Activity History after a fresh
+        // server render — without this it looked "saved" (button flashed
+        // success) but then appeared gone on next visit/refresh.
+        startTransition(() => router.refresh())
+        setTimeout(() => setUpdateSent(false), 3000)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setUpdateError(data.error || 'Failed to save — please try again.')
+      }
+    } catch {
+      setUpdateError('Failed to save — please try again.')
+    } finally {
+      setSendingUpdate(false)
     }
   }
 
@@ -314,8 +343,11 @@ export function ClientControls({
           onClick={handleSaveNotes}
           className="mt-2 min-h-[44px] w-full rounded-full bg-grad-blue crisp-on-dark px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 sm:w-auto"
         >
-          {saving === 'notes' ? 'Saving…' : 'Save internal notes'}
+          {saving === 'notes' ? 'Saving…' : notesSaved ? '✓ Saved' : 'Save internal notes'}
         </button>
+        {notesError && (
+          <p className="mt-1.5 text-xs text-red-300">{notesError}</p>
+        )}
       </div>
 
       {/* Add update / note with visibility toggle */}
@@ -363,6 +395,9 @@ export function ClientControls({
         >
           {sendingUpdate ? 'Saving…' : updateSent ? '✓ Saved!' : 'Save update'}
         </button>
+        {updateError && (
+          <p className="mt-1.5 text-xs text-red-300">{updateError}</p>
+        )}
       </div>
       {/* Suspension */}
       <div className="rounded-xl border border-white/10 glass-card p-4">
