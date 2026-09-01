@@ -71,17 +71,6 @@ export function CountriesSection() {
           opacity={LAYOUT.starOpacity}
           hideBelowMd
         />
-        <LandingDecor
-          src="/Earth.svg"
-          hideBelowLg
-          opacity={1}
-          style={{
-            width: 'clamp(220px, 22vw, 420px)',
-            bottom: '-5%',
-            right: '-3%',
-            animation: 'globe-spin 30s linear infinite',
-          }}
-        />
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-5xl">

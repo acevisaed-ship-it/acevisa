@@ -275,7 +275,7 @@ function CloudLayer({ vw }: { vw: number }) {
 // ════════════════════════════════════════════════════════════════════════════
 // 2. FREE-ROAMING PAPER PLANES (directed)
 //    From right → diagonally toward logo (top-left).
-//    From left  → diagonally toward Earth (right-centre).
+//    From left  → diagonally toward Earth (bottom-right corner).
 //    2–3 planes; 2 s gap between appearances.
 // ════════════════════════════════════════════════════════════════════════════
 
@@ -327,9 +327,11 @@ function FreeRoamingPaperPlanes({ vw, vh, isMobile }: { vw: number; vh: number; 
   useEffect(() => {
     if (!vw || !vh) return
 
-    // Approximate targets
-    const LOGO_X  = 120,       LOGO_Y  = 60
-    const EARTH_X = vw * 0.85, EARTH_Y = vh * 0.5
+    // Approximate targets — logo stays top-left; Earth is now the globe
+    // pinned to the bottom-right corner (moved 2026-09-02), so both
+    // offsets track the viewport edge rather than a fixed mid-height point.
+    const LOGO_X  = 120,      LOGO_Y  = 60
+    const EARTH_X = vw - 100, EARTH_Y = vh - 100
 
     const count  = ri(2, 3)
     const result: DirPlaneData[] = []
@@ -588,7 +590,7 @@ function BeeBluePlane({ vw, vh, isMobile }: { vw: number; vh: number; isMobile?:
 // ════════════════════════════════════════════════════════════════════════════
 // 3. LARGE COMMERCIAL PLANES (exactly 2, directed)
 //    Plane A: right → toward logo (top-left) → exits left.
-//    Plane B: left  → toward Earth (right-centre) → exits right.
+//    Plane B: left  → toward Earth (bottom-right corner) → exits right.
 //    2 s gap between passes. 80–140 s crossing time.
 // ════════════════════════════════════════════════════════════════════════════
 
@@ -634,8 +636,10 @@ function AirplaneLayer({ vw, vh, isMobile }: { vw: number; vh: number; isMobile?
   useEffect(() => {
     if (!vw || !vh) return
 
-    const LOGO_X  = 120,       LOGO_Y  = 60
-    const EARTH_X = vw * 0.85, EARTH_Y = vh * 0.5
+    // Earth target is now the globe pinned to the bottom-right corner
+    // (moved 2026-09-02) — offsets track the viewport edge, like the logo.
+    const LOGO_X  = 120,      LOGO_Y  = 60
+    const EARTH_X = vw - 100, EARTH_Y = vh - 100
 
     // Plane A — from right, heading toward logo
     const aStartX = vw + 130
@@ -803,7 +807,8 @@ export function HeroAnimations() {
         <CloudLayer vw={vw} />
       </div>
 
-      {/* z-4 Globe on stand — decorative, bottom-left */}
+      {/* z-4 Globe on stand — decorative, bottom-left (opposite the real
+          globe, which now sits bottom-right — keeps them apart) */}
       <div
         className="absolute bottom-[5%] left-[1%] z-[4] hidden md:block"
         style={{ animation: 'float-bob 14s ease-in-out infinite' }}

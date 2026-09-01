@@ -169,7 +169,8 @@ export function HeroSection() {
       {/* ═══════════════════════════════════════════════════════════
           DESKTOP LAYOUT  (md+)
           Left: copy + CTAs
-          Right: stats card with globe overlapping its right edge
+          Right: stats card (globe no longer overlaps it — pinned to
+                 the bottom-right corner of the page instead, 2026-09-02)
           Man: bottom-left, sitting on the section floor
       ════════════════════════════════════════════════════════════ */}
 
@@ -183,6 +184,17 @@ export function HeroSection() {
           className="w-auto object-contain object-bottom"
           style={{ height: 'clamp(220px, 34vh, 380px)' }}
         />
+      </div>
+
+      {/* Globe — pinned to the bottom-right corner of the page, clear of
+          the stats card and the copy on the left. Flush against the
+          corner like the man-pointing figure on the opposite side — the
+          outer wrapper clips overflow, so nothing here bleeds off-screen. */}
+      <div
+        className="pointer-events-none absolute bottom-0 right-0 z-[6] hidden md:block"
+        aria-hidden="true"
+      >
+        <EarthSphereDesktop />
       </div>
 
       <div className="relative z-10 mx-auto hidden h-full w-full max-w-6xl items-center md:flex md:flex-row md:gap-6 md:px-10 md:py-20 lg:gap-16 lg:py-24">
@@ -249,23 +261,14 @@ export function HeroSection() {
           transition={{ duration: 0.8, delay: 0.15, ease: 'easeInOut' }}
           className="flex shrink-0 items-center justify-center lg:justify-end"
         >
-          {/* Card in front, globe overlapping the right edge so ~half stays visible */}
-          <div className="relative flex items-center">
-            <Card variant="glass" className="relative z-10 w-[260px] shrink-0 space-y-4 p-6">
-              {stats.map((stat) => (
-                <div key={stat.label} className="border-b border-text/10 pb-4 last:border-0 last:pb-0">
-                  <p className="text-3xl font-semibold text-blue md:text-4xl">{stat.value}</p>
-                  <p className="mt-1 text-sm text-text/70 md:text-base">{stat.label}</p>
-                </div>
-              ))}
-            </Card>
-            <div
-              className="pointer-events-none relative z-0 -ml-16 shrink-0 lg:-ml-12"
-              aria-hidden="true"
-            >
-              <EarthSphereDesktop />
-            </div>
-          </div>
+          <Card variant="glass" className="relative z-10 w-[260px] shrink-0 space-y-4 p-6">
+            {stats.map((stat) => (
+              <div key={stat.label} className="border-b border-text/10 pb-4 last:border-0 last:pb-0">
+                <p className="text-3xl font-semibold text-blue md:text-4xl">{stat.value}</p>
+                <p className="mt-1 text-sm text-text/70 md:text-base">{stat.label}</p>
+              </div>
+            ))}
+          </Card>
         </motion.div>
       </div>
     </div>
