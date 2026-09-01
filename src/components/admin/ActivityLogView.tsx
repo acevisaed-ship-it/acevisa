@@ -200,19 +200,22 @@ export function ActivityLogView() {
     setLoadingMore(false)
   }
 
-  if (loading) return <p className="text-sm text-white/50">Loading activity log...</p>
+  if (loading) return <p className="text-sm text-white/50">Loading staff log...</p>
 
   return (
     <div>
       <div>
-        <h1 className="text-2xl font-semibold text-white md:text-3xl">Activity Log</h1>
-        <p className="mt-1 text-sm text-white/60">{total} events recorded</p>
+        <h1 className="text-2xl font-semibold text-white md:text-3xl">Staff Log and Activity</h1>
+        <p className="mt-1 text-sm text-white/60">
+          {total} action{total === 1 ? '' : 's'} recorded
+          {total > 0 ? ' — creates, edits, assignments, approvals, and other portal actions' : ''}
+        </p>
       </div>
 
       {logs.length === 0 ? (
         <div className="mt-12 flex flex-col items-center gap-2 text-center">
           <Activity className="h-10 w-10 text-white/20" />
-          <p className="text-white/50">No activity recorded yet</p>
+          <p className="text-white/50">No staff actions recorded yet</p>
         </div>
       ) : (
         <>

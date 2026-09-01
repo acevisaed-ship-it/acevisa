@@ -35,8 +35,8 @@ export async function logActivity({
 }
 
 // Convenience wrapper for staff-only events with no associated client
-// (logins, account creation, settings changes) — feeds the CEO's global
-// staff activity feed at /admin/staff-activity.
+// (account creation, settings changes). Same activity_logs table as
+// client-linked actions; shown on /admin/activity (Staff Log and Activity).
 export async function logStaffActivity({
   counselorId,
   actorRole,

@@ -82,8 +82,16 @@ export async function GET(request: Request) {
   const { data, error: fetchError } = await query
 
   if (fetchError) {
-    console.error('Invoices fetch error:', fetchError)
-    return NextResponse.json({ error: 'Failed to fetch invoices' }, { status: 500 })
+    console.error('[invoices GET] fetch failed:', {
+      message: fetchError.message,
+      code: fetchError.code,
+      details: fetchError.details,
+      hint: fetchError.hint,
+    })
+    return NextResponse.json(
+      { error: `Failed to fetch invoices: ${fetchError.message}` },
+      { status: 500 }
+    )
   }
 
   const today = new Date().toISOString().slice(0, 10)
@@ -133,31 +141,56 @@ export async function POST(request: Request) {
 
   const invoice_number = await generateInvoiceNumber(supabase)
 
+  const insertPayload = {
+    invoice_number,
+    client_id,
+    deal_id: deal_id || null,
+    counselor_id: counselor_id || null,
+    ...(product_id ? { product_id } : {}),
+    line_items: validItems,
+    subtotal,
+    tax_rate: 0,
+    tax_amount: 0,
+    total: subtotal,
+    status: invoiceStatus,
+    due_date: due_date || null,
+    notes: notes?.trim() || null,
+  }
+
+  console.info('[invoices POST] inserting', {
+    invoice_number,
+    client_id,
+    deal_id: insertPayload.deal_id,
+    counselor_id: insertPayload.counselor_id,
+    product_id: product_id || null,
+    itemCount: validItems.length,
+    subtotal,
+    status: invoiceStatus,
+  })
+
   const { data, error: insertError } = await supabase
     .from('invoices')
-    .insert({
-      invoice_number,
-      client_id,
-      deal_id: deal_id || null,
-      counselor_id: counselor_id || null,
-      ...(product_id ? { product_id } : {}),
-      line_items: validItems,
-      subtotal,
-      tax_rate: 0,
-      tax_amount: 0,
-      total: subtotal,
-      status: invoiceStatus,
-      due_date: due_date || null,
-      notes: notes?.trim() || null,
-    })
+    .insert(insertPayload)
     .select(
       'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors(name), products(name)'
     )
     .single()
 
   if (insertError) {
-    console.error('Invoice insert error:', insertError)
-    return NextResponse.json({ error: 'Failed to create invoice' }, { status: 500 })
+    console.error('[invoices POST] insert failed:', {
+      message: insertError.message,
+      code: insertError.code,
+      details: insertError.details,
+      hint: insertError.hint,
+      invoice_number,
+      client_id,
+      product_id: product_id || null,
+      counselor_id: counselor_id || null,
+    })
+    return NextResponse.json(
+      { error: `Failed to create invoice: ${insertError.message}` },
+      { status: 500 }
+    )
   }
 
   // ── Auto-create expense records for fixed-amount product vendors ──────────────
@@ -179,7 +212,7 @@ export async function POST(request: Request) {
     if (vendors && vendors.length > 0) {
       const today = new Date().toISOString().slice(0, 10)
       const productName = productRow?.name ?? 'Product'
-      await supabase.from('expenses').insert(
+      const { error: expenseError } = await supabase.from('expenses').insert(
         vendors.map((v) => ({
           category: 'other',
           description: `${v.vendor_name} — ${productName} (${invoice_number})`,
@@ -189,6 +222,15 @@ export async function POST(request: Request) {
           notes: `Auto-created from invoice ${invoice_number}`,
         }))
       )
+      if (expenseError) {
+        console.error('[invoices POST] vendor expense insert failed:', {
+          message: expenseError.message,
+          code: expenseError.code,
+          details: expenseError.details,
+          invoice_number,
+          product_id,
+        })
+      }
     }
   }
 

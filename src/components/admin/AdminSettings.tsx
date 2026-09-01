@@ -285,7 +285,7 @@ export function AdminSettings({ adminRole }: { adminRole: string }) {
                 </button>
               </div>
               <div className="rounded-xl border border-white/10 glass-card p-4">
-                <p className="text-sm font-medium text-white/80">Activity Log Retention</p>
+                <p className="text-sm font-medium text-white/80">Staff Log and Activity Retention</p>
                 <p className="mt-1 text-xs text-white/50">Logs older than this are archived</p>
                 <select className="mt-2 rounded-xl px-3 py-2 text-sm outline-none glass-input">
                   <option>90 days</option>

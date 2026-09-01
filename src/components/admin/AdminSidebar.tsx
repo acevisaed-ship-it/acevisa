@@ -63,14 +63,13 @@ const navItems: NavItem[] = [
   { href: '/admin/email', label: 'Email', icon: Mail },
   { href: '/admin/accounts', label: 'Accounts', icon: Wallet },
   { href: '/admin/hr', label: 'HR', icon: ShieldCheck },
-  { href: '/admin/activity', label: 'Activity Log', icon: ClipboardList },
+  { href: '/admin/activity', label: 'Staff Log and Activity', icon: ClipboardList },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
 // Visible to 'ceo' (Super Admin) only.
 const ceoOnlyNavItems: NavItem[] = [
   { href: '/admin/branches', label: 'Branches', icon: Building2 },
-  { href: '/admin/staff-activity', label: 'Staff Activity', icon: ShieldCheck },
 ]
 
 const roleLabels: Record<string, string> = {

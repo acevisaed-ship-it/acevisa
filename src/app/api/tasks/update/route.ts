@@ -76,7 +76,7 @@ export async function POST(request: Request) {
 
   // SOP: leadership (branch admin + CEO) must be notified whenever a
   // counselor changes a task's status — an accountability signal on client
-  // SOP follow-ups that must also surface in Staff Activity / Logs.
+  // SOP follow-ups that must also surface in Staff Log and Activity.
   if (existingTask && status !== existingTask.status) {
     const clientLabel = linkedName ? ` for ${linkedName}` : ''
     const STATUS_LABEL: Record<string, string> = {
