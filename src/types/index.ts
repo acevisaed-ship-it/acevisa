@@ -67,6 +67,14 @@ export type Client = {
   phone: string
   language: ClientLanguage
   city: string | null
+  age?: number | null
+  last_education?: string | null
+  education_percentage?: number | null
+  education_completion_year?: number | null
+  travel_history?: Array<{ country: string; year: number; duration: string }> | null
+  visa_rejection_history?: Array<{ applicationCountry: string; visaCategory: string; reason: string }> | null
+  language_test_scores?: Array<{ test: string; score: string }> | null
+  budget?: string | null
   interested_in?: string | null
   target_country?: string | null
   language_test_interest?: string | null

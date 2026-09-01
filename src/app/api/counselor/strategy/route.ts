@@ -109,10 +109,18 @@ CLIENT PROFILE:
   Name: ${client?.name ?? 'Unknown'}
   Pipeline Stage: ${PIPELINE_STAGES[client?.pipeline_stage ?? 1] ?? 'Unknown'} (Stage ${client?.pipeline_stage ?? 1})
   City: ${client?.city ?? 'Unknown'}
+  Age: ${client?.age ?? 'Unknown'}
   Phone: ${client?.phone ?? 'Unknown'}
   Email: ${client?.email ?? 'Unknown'}
   Target Country: ${client?.target_country ?? 'Unknown'}
   Interested In: ${client?.interested_in ?? 'Unknown'}
+  Last Education: ${client?.last_education ?? 'Unknown'}
+  Education Percentage: ${client?.education_percentage ?? 'Unknown'}
+  Completion Year: ${client?.education_completion_year ?? 'Unknown'}
+  Budget: ${client?.budget ?? 'Unknown'}
+  Travel History: ${JSON.stringify(client?.travel_history ?? [])}
+  Visa Rejections: ${JSON.stringify(client?.visa_rejection_history ?? [])}
+  Language Test Scores: ${JSON.stringify(client?.language_test_scores ?? [])}
   Registration Date: ${client?.registration_date ?? 'Unknown'}
 
 AI PSYCHOLOGICAL PROFILE:

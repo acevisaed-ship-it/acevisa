@@ -57,7 +57,7 @@ export function HeroSection() {
   const navigate = useNavigateWithTransition()
 
   return (
-    <div className="bg-texture relative flex h-full overflow-hidden bg-bg">
+    <div className="bg-texture relative flex h-full overflow-hidden bg-grad-teal">
 
       {/* Animated background */}
       <HeroAnimations />
@@ -113,14 +113,14 @@ export function HeroSection() {
           className="flex flex-col px-4 pb-4"
         >
           <h1
-            className="font-semibold leading-[0.95] tracking-tight text-blue"
+            className="font-semibold leading-[0.95] tracking-tight text-white"
             style={{ fontSize: 'clamp(1.5rem, 6vw, 2.2rem)' }}
           >
             Ace Your
             <br />
             Future Here
           </h1>
-          <p className="mt-4 text-xs leading-snug text-text/70">
+          <p className="mt-4 text-xs leading-snug text-white/70">
             AI-Powered Guidance. Real Counselors. Real Results.
           </p>
           <div className="mt-8 flex flex-col items-stretch gap-4">
@@ -136,7 +136,7 @@ export function HeroSection() {
             </Button>
             <Link
               href="/return"
-              className="block text-xs text-text/60 underline-offset-2 hover:underline"
+              className="block text-xs text-white/60 underline-offset-2 hover:text-white hover:underline"
             >
               Already Registered? Return here →
             </Link>
@@ -153,7 +153,7 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2, ease: 'easeInOut' }}
-          className="mx-4 mb-4 rounded-2xl border border-text/10 bg-bg/80 px-4 py-4 backdrop-blur-sm"
+          className="mx-4 mb-4 rounded-2xl border border-white/10 bg-bg/80 px-4 py-4 backdrop-blur-sm"
         >
           <div className="flex justify-between">
             {stats.map((stat) => (
@@ -215,13 +215,13 @@ export function HeroSection() {
             Pakistan&apos;s First AI Consultancy Platform
           </p>
 
-          <h1 className="mt-6 text-[clamp(2rem,5vw,4rem)] font-semibold leading-[0.95] tracking-tight text-blue">
+          <h1 className="mt-6 text-[clamp(2rem,5vw,4rem)] font-semibold leading-[0.95] tracking-tight text-white">
             Ace Your
             <br />
             Future Here
           </h1>
 
-          <p className="mt-4 max-w-sm text-sm text-text/70 md:text-base">
+          <p className="mt-4 max-w-sm text-sm text-white/70 md:text-base">
             AI-Powered Guidance. Real Counselors. Real Results.
           </p>
 
@@ -239,7 +239,7 @@ export function HeroSection() {
 
             <Link
               href="/return"
-              className="max-w-full text-sm text-text/70 underline-offset-2 transition-all duration-200 hover:text-text hover:underline md:text-base"
+              className="max-w-full text-sm text-white/70 underline-offset-2 transition-all duration-200 hover:text-white hover:underline md:text-base"
             >
               Already Registered? → Return To Your Session
             </Link>
@@ -251,7 +251,7 @@ export function HeroSection() {
               Student Portal
             </Link>
 
-            <PWAInstallButton className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-text/20 px-4 py-2 text-sm font-medium text-text/70 transition-colors hover:border-text/40 hover:text-text" />
+            <PWAInstallButton className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white/70 transition-colors hover:border-white/40 hover:text-white" />
           </div>
         </motion.div>
 

@@ -4,6 +4,10 @@ import { useState, useEffect, type FormEvent } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { ClientInfoForm } from '@/components/receptionist/ClientInfoForm'
+import {
+  WalkInIntakeExtras,
+  type WalkInIntakeFormValues,
+} from '@/components/receptionist/WalkInIntakeExtras'
 import type { ClientFormSnapshot } from '@/lib/receptionist/clientForm'
 import {
   languages,
@@ -12,13 +16,33 @@ import {
   popularDestinations,
   schengenCountries,
   OTHER,
+  STUDY_VISA,
 } from '@/lib/receptionist/intakeOptions'
+import {
+  draftsToLanguageTestPayload,
+  draftsToRejectionPayload,
+  draftsToTravelPayload,
+  isStudyVisa,
+  parseAndValidateWalkInIntake,
+} from '@/lib/receptionist/walkInIntake'
 
 const inputCls = 'min-h-[44px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input'
 const labelCls = 'mb-1 block text-xs font-medium text-white/60'
 
+const emptyIntake = (): WalkInIntakeFormValues => ({
+  lastEducation: '',
+  lastEducationCustom: '',
+  educationPercentage: '',
+  educationCompletionYear: '',
+  travelHistory: [],
+  visaRejections: [],
+  languageTests: [],
+  budget: '',
+})
+
 interface FormState {
   name: string
+  age: string
   phone: string
   email: string
   city: string
@@ -29,20 +53,25 @@ interface FormState {
   target_country: string
   target_country_custom: string
   counselorId: string
+  intake: WalkInIntakeFormValues
 }
 
-const emptyForm: FormState = {
-  name: '',
-  phone: '',
-  email: '',
-  city: '',
-  language: 'Urdu',
-  interested_in: 'Study Visa',
-  language_test_interest: '',
-  language_test_interest_custom: '',
-  target_country: 'United Kingdom',
-  target_country_custom: '',
-  counselorId: '',
+function emptyForm(): FormState {
+  return {
+    name: '',
+    age: '',
+    phone: '',
+    email: '',
+    city: '',
+    language: 'Urdu',
+    interested_in: STUDY_VISA,
+    language_test_interest: '',
+    language_test_interest_custom: '',
+    target_country: 'United Kingdom',
+    target_country_custom: '',
+    counselorId: '',
+    intake: emptyIntake(),
+  }
 }
 
 type SuccessState = {
@@ -55,7 +84,7 @@ type SuccessState = {
 }
 
 export function ReceptionistRegisterForm() {
-  const [form, setForm] = useState<FormState>(emptyForm)
+  const [form, setForm] = useState<FormState>(emptyForm())
   const [counselors, setCounselors] = useState<{ id: string; name: string }[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -90,6 +119,12 @@ export function ReceptionistRegisterForm() {
           : form.language_test_interest
         : undefined
 
+    if (!form.city.trim()) {
+      setError('City is required')
+      setLoading(false)
+      return
+    }
+
     if (form.target_country === OTHER && !resolvedCountry) {
       setError('Please enter the target country')
       setLoading(false)
@@ -102,6 +137,35 @@ export function ReceptionistRegisterForm() {
         (form.language_test_interest === OTHER && !resolvedLanguageTest))
     ) {
       setError('Please select or enter the language test type')
+      setLoading(false)
+      return
+    }
+
+    const lastEducation =
+      form.intake.lastEducation === OTHER
+        ? form.intake.lastEducationCustom.trim()
+        : form.intake.lastEducation
+
+    if (isStudyVisa(form.interested_in) && form.intake.lastEducation === OTHER && !lastEducation) {
+      setError('Please enter the last education')
+      setLoading(false)
+      return
+    }
+
+    const intakeResult = parseAndValidateWalkInIntake({
+      interestedIn: form.interested_in,
+      age: form.age,
+      lastEducation: isStudyVisa(form.interested_in) ? lastEducation : '',
+      educationPercentage: isStudyVisa(form.interested_in) ? form.intake.educationPercentage : '',
+      educationCompletionYear: isStudyVisa(form.interested_in) ? form.intake.educationCompletionYear : '',
+      travelHistory: draftsToTravelPayload(form.intake.travelHistory),
+      visaRejectionHistory: draftsToRejectionPayload(form.intake.visaRejections),
+      languageTestScores: draftsToLanguageTestPayload(form.intake.languageTests),
+      budget: form.intake.budget,
+    })
+
+    if (!intakeResult.ok) {
+      setError(intakeResult.error)
       setLoading(false)
       return
     }
@@ -121,6 +185,14 @@ export function ReceptionistRegisterForm() {
           target_country: resolvedCountry,
           language_test_interest: resolvedLanguageTest,
           counselorId: form.counselorId,
+          age: intakeResult.data.age,
+          lastEducation: intakeResult.data.lastEducation,
+          educationPercentage: intakeResult.data.educationPercentage,
+          educationCompletionYear: intakeResult.data.educationCompletionYear,
+          travelHistory: intakeResult.data.travelHistory,
+          visaRejectionHistory: intakeResult.data.visaRejectionHistory,
+          languageTestScores: intakeResult.data.languageTestScores,
+          budget: intakeResult.data.budget,
         }),
       })
       const data = await res.json()
@@ -144,7 +216,7 @@ export function ReceptionistRegisterForm() {
         loginPhone: data.loginPhone,
         tempPassword: data.tempPassword,
       })
-      setForm(emptyForm)
+      setForm(emptyForm())
     } catch {
       setError('Network error — please try again')
     } finally {
@@ -183,7 +255,17 @@ export function ReceptionistRegisterForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl glass-card-md crisp-on-dark p-5 md:p-6">
       <div>
-        <label className={labelCls}>Full name</label>
+        <p className="text-sm font-medium text-white">Register a new client</p>
+        <p className="mt-1 text-[11px] text-white/40">
+          Name, age, and city are always required. Email and history fields may be skipped.
+          Education details appear only for Study Visa inquiries.
+        </p>
+      </div>
+
+      <div>
+        <label className={labelCls}>
+          Name <span className="font-normal text-orange">(required)</span>
+        </label>
         <input
           required
           value={form.name}
@@ -207,7 +289,7 @@ export function ReceptionistRegisterForm() {
         </div>
         <div>
           <label className={labelCls}>
-            Email address <span className="font-normal text-white/40">(optional)</span>
+            Email <span className="font-normal text-white/40">(optional)</span>
           </label>
           <input
             type="text"
@@ -226,14 +308,37 @@ export function ReceptionistRegisterForm() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className={labelCls}>City</label>
+          <label className={labelCls}>
+            Age <span className="font-normal text-orange">(required)</span>
+          </label>
           <input
+            required
+            type="number"
+            inputMode="numeric"
+            min={1}
+            max={100}
+            step="1"
+            value={form.age}
+            onChange={(e) => setForm({ ...form, age: e.target.value })}
+            className={inputCls}
+            placeholder="e.g. 22"
+          />
+        </div>
+        <div>
+          <label className={labelCls}>
+            City <span className="font-normal text-orange">(required)</span>
+          </label>
+          <input
+            required
             value={form.city}
             onChange={(e) => setForm({ ...form, city: e.target.value })}
             className={inputCls}
             placeholder="Lahore"
           />
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className={labelCls}>Preferred language</label>
           <select
@@ -255,6 +360,7 @@ export function ReceptionistRegisterForm() {
             value={form.interested_in}
             onChange={(e) => {
               const interested_in = e.target.value as FormState['interested_in']
+              const keepEducation = isStudyVisa(interested_in)
               setForm({
                 ...form,
                 interested_in,
@@ -262,6 +368,15 @@ export function ReceptionistRegisterForm() {
                   interested_in === 'Language & Test Prep' ? form.language_test_interest : '',
                 language_test_interest_custom:
                   interested_in === 'Language & Test Prep' ? form.language_test_interest_custom : '',
+                intake: keepEducation
+                  ? form.intake
+                  : {
+                      ...form.intake,
+                      lastEducation: '',
+                      lastEducationCustom: '',
+                      educationPercentage: '',
+                      educationCompletionYear: '',
+                    },
               })
             }}
             className={inputCls}
@@ -357,6 +472,12 @@ export function ReceptionistRegisterForm() {
           ))}
         </select>
       </div>
+
+      <WalkInIntakeExtras
+        isStudyVisa={isStudyVisa(form.interested_in)}
+        values={form.intake}
+        onChange={(patch) => setForm({ ...form, intake: { ...form.intake, ...patch } })}
+      />
 
       {error && (
         <p className="rounded-xl bg-red-500/20 px-4 py-2.5 text-sm text-red-400">

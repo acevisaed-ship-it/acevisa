@@ -3,6 +3,20 @@ import { getPipelineStageLabel, getScoreBadgeColor } from '@/lib/brief'
 import { formatPKTRegistrationDate } from '@/lib/pkt'
 import { BriefCard } from './BriefCard'
 
+function IntakeHistoryList({ label, items }: { label: string; items: string[] }) {
+  if (items.length === 0) return null
+  return (
+    <div>
+      <p className="font-bold">{label}:</p>
+      <ul className="mt-1 list-disc space-y-0.5 pl-5">
+        {items.map((item, index) => (
+          <li key={`${label}-${index}`}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 type Props = {
   client: Client
   profile: AIProfileData | null
@@ -38,6 +52,9 @@ export function ProfileSummarySection({
             <span className="font-bold">City:</span> {client.city ?? '—'}
           </p>
           <p>
+            <span className="font-bold">Age:</span> {client.age ?? '—'}
+          </p>
+          <p>
             <span className="font-bold">Language:</span> {client.language}
           </p>
           <p>
@@ -51,6 +68,39 @@ export function ProfileSummarySection({
               <span className="font-bold">Language test:</span> {client.language_test_interest}
             </p>
           )}
+          {(client.last_education || client.education_percentage != null || client.education_completion_year != null) && (
+            <p>
+              <span className="font-bold">Last education:</span>{' '}
+              {[
+                client.last_education,
+                client.education_percentage != null ? `${client.education_percentage}%` : null,
+                client.education_completion_year != null ? String(client.education_completion_year) : null,
+              ]
+                .filter(Boolean)
+                .join(' · ') || '—'}
+            </p>
+          )}
+          {client.budget && (
+            <p>
+              <span className="font-bold">Budget:</span> {client.budget}
+            </p>
+          )}
+          <IntakeHistoryList
+            label="Travel history"
+            items={(client.travel_history ?? []).map(
+              (trip) => `${trip.country}, ${trip.year} — ${trip.duration}`
+            )}
+          />
+          <IntakeHistoryList
+            label="Visa rejections"
+            items={(client.visa_rejection_history ?? []).map(
+              (row) => `${row.applicationCountry} · ${row.visaCategory} — ${row.reason}`
+            )}
+          />
+          <IntakeHistoryList
+            label="Language test scores"
+            items={(client.language_test_scores ?? []).map((row) => `${row.test}: ${row.score}`)}
+          />
           {client.ad_source ? (
             <p>
               <span className="font-bold">Ad Source:</span>{' '}

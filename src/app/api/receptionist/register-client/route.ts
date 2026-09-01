@@ -6,6 +6,7 @@ import { sendEmail, studentWelcomeEmailHtml } from '@/lib/email'
 import { logStaffActivity } from '@/lib/activityLog'
 import { createNotification } from '@/lib/notifications'
 import { generateTempPassword } from '@/lib/auth/generateTempPassword'
+import { parseAndValidateWalkInIntake } from '@/lib/receptionist/walkInIntake'
 import { NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
 
@@ -23,15 +24,39 @@ export async function POST(request: Request) {
     target_country?: string
     language_test_interest?: string
     counselorId?: string
+    age?: unknown
+    lastEducation?: unknown
+    educationPercentage?: unknown
+    educationCompletionYear?: unknown
+    travelHistory?: unknown
+    visaRejectionHistory?: unknown
+    languageTestScores?: unknown
+    budget?: unknown
   }
 
   const { name, phone, email, city, language, interested_in, target_country, language_test_interest, counselorId } = body
 
-  if (!name?.trim() || !phone?.trim() || !language?.trim()) {
+  if (!name?.trim() || !phone?.trim() || !language?.trim() || !city?.trim()) {
     return NextResponse.json(
-      { error: 'Name, phone, and language are required' },
+      { error: 'Name, phone, language, and city are required' },
       { status: 400 }
     )
+  }
+
+  const intakeResult = parseAndValidateWalkInIntake({
+    interestedIn: interested_in?.trim() || '',
+    age: body.age,
+    lastEducation: body.lastEducation,
+    educationPercentage: body.educationPercentage,
+    educationCompletionYear: body.educationCompletionYear,
+    travelHistory: body.travelHistory,
+    visaRejectionHistory: body.visaRejectionHistory,
+    languageTestScores: body.languageTestScores,
+    budget: body.budget,
+  })
+
+  if (!intakeResult.ok) {
+    return NextResponse.json({ error: intakeResult.error }, { status: 400 })
   }
 
   const contactEmail = studentContactEmail(email)
@@ -133,6 +158,14 @@ export async function POST(request: Request) {
       interested_in: interested_in?.trim() || null,
       target_country: target_country?.trim() || null,
       language_test_interest: language_test_interest?.trim() || null,
+      age: intakeResult.data.age,
+      last_education: intakeResult.data.lastEducation,
+      education_percentage: intakeResult.data.educationPercentage,
+      education_completion_year: intakeResult.data.educationCompletionYear,
+      travel_history: intakeResult.data.travelHistory,
+      visa_rejection_history: intakeResult.data.visaRejectionHistory,
+      language_test_scores: intakeResult.data.languageTestScores,
+      budget: intakeResult.data.budget,
       ad_source: 'receptionist',
       branch_id: receptionist.branch_id,
       registered_by: receptionist.id,
