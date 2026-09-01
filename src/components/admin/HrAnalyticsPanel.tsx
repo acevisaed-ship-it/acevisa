@@ -39,7 +39,11 @@ function currentMonthValue() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
 }
 
-export function HrAnalyticsPanel() {
+export function HrAnalyticsPanel({
+  onViewAttendance,
+}: {
+  onViewAttendance?: (counselorId: string, month: string) => void
+} = {}) {
   const [month, setMonth] = useState(currentMonthValue)
   const [data, setData] = useState<{
     totalRevenue: number
@@ -185,9 +189,11 @@ export function HrAnalyticsPanel() {
                 <span className={cn('font-bold', c.roi >= 100 ? 'text-white' : 'text-red-400')}>{c.roi}%</span>
               </div>
 
-              {/* Attendance summary */}
-              {(c.presentDays + c.lateDays + c.absentDays + c.leaveDays > 0) && (
-                <div className="mt-3 pt-3 border-t border-white/5 grid grid-cols-4 gap-2 text-xs text-center">
+              {/* Attendance summary — always shown (even all-zero) so a
+                  counselor never silently vanishes from this view; see B3
+                  if real records exist but every count here reads 0. */}
+              <div className="mt-3 pt-3 border-t border-white/5">
+                <div className="grid grid-cols-4 gap-2 text-xs text-center">
                   <div>
                     <p className="text-white/40">Present</p>
                     <p className="font-semibold text-white/80">{c.presentDays}</p>
@@ -205,7 +211,16 @@ export function HrAnalyticsPanel() {
                     <p className="font-semibold text-white/60">{c.leaveDays}</p>
                   </div>
                 </div>
-              )}
+                {onViewAttendance && (
+                  <button
+                    type="button"
+                    onClick={() => onViewAttendance(c.counselorId, month)}
+                    className="mt-2 text-xs font-medium text-blue hover:underline"
+                  >
+                    View in Attendance →
+                  </button>
+                )}
+              </div>
             </article>
           ))}
         </div>

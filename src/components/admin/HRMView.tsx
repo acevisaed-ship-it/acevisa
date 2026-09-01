@@ -29,18 +29,34 @@ function currentMonth() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
 }
 
-export function HRMView() {
+type BranchOption = { id: string; name: string }
+
+export function HRMView({ showBranchFilter = false }: { showBranchFilter?: boolean }) {
   const [data, setData] = useState<FinanceSummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [month, setMonth] = useState(currentMonth())
+  const [branches, setBranches] = useState<BranchOption[]>([])
+  const [branchId, setBranchId] = useState('all')
+
+  // Branch list only needed for CEO/unscoped admins — Branch Managers are
+  // already locked server-side (Idea #4, extended to Payroll).
+  useEffect(() => {
+    if (!showBranchFilter) return
+    fetch('/api/admin/branches')
+      .then((r) => r.json())
+      .then((d) => setBranches((d.branches ?? []).map((b: { id: string; name: string }) => ({ id: b.id, name: b.name }))))
+      .catch(() => setBranches([]))
+  }, [showBranchFilter])
 
   useEffect(() => {
     setLoading(true)
-    fetch(`/api/admin/finance/summary?month=${month}`)
+    const params = new URLSearchParams({ month })
+    if (branchId !== 'all') params.set('branchId', branchId)
+    fetch(`/api/admin/finance/summary?${params}`)
       .then((r) => r.json())
       .then(setData)
       .finally(() => setLoading(false))
-  }, [month])
+  }, [month, branchId])
 
   const salaryExpenses = data?.expenseBreakdown.find((e) => e.category === 'salary')
   const totalSalaries = salaryExpenses?.amount ?? 0
@@ -54,12 +70,27 @@ export function HRMView() {
           <h1 className="text-2xl font-semibold text-white md:text-3xl">HRM — Payroll</h1>
           <p className="mt-1 text-sm text-white/60">Salary and commission summary</p>
         </div>
-        <input
-          type="month"
-          value={month}
-          onChange={(e) => setMonth(e.target.value)}
-          className="rounded-xl px-3 py-2 text-sm outline-none glass-input"
-        />
+        <div className="flex items-center gap-2">
+          <input
+            type="month"
+            value={month}
+            onChange={(e) => setMonth(e.target.value)}
+            className="rounded-xl px-3 py-2 text-sm outline-none glass-input"
+          />
+          {showBranchFilter && (
+            <select
+              value={branchId}
+              onChange={(e) => setBranchId(e.target.value)}
+              className="rounded-xl px-3 py-2 text-sm outline-none glass-input"
+              aria-label="Branch"
+            >
+              <option value="all">All branches</option>
+              {branches.map((b) => (
+                <option key={b.id} value={b.id}>{b.name}</option>
+              ))}
+            </select>
+          )}
+        </div>
       </div>
 
       {loading ? (

@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { TeamCommissionSection } from './TeamCommissionSection'
 
 type CounselorOption = { id: string; name: string }
+type BranchOption = { id: string; name: string }
 
 type CounselorPolicy = {
   counselorId: string
@@ -20,29 +21,48 @@ type CounselorPolicy = {
 const inputClass =
   'min-h-[44px] w-full rounded-full px-4 py-2 text-sm outline-none glass-input'
 
-export function IncentivePolicyPanel({ counselors }: { counselors: CounselorOption[] }) {
+export function IncentivePolicyPanel({
+  counselors,
+  showBranchFilter = false,
+}: {
+  counselors: CounselorOption[]
+  showBranchFilter?: boolean
+}) {
   const [policies, setPolicies] = useState<CounselorPolicy[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [editing, setEditing] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [branches, setBranches] = useState<BranchOption[]>([])
+  const [branchId, setBranchId] = useState('all')
 
   // Edit state
   const [editBaseSalary, setEditBaseSalary] = useState('')
   const [editDefaultRate, setEditDefaultRate] = useState('')
   const [editServiceRates, setEditServiceRates] = useState<Record<string, string>>({})
 
+  // Branch list only needed for CEO/unscoped admins — Branch Managers are
+  // already locked server-side (Idea #4, extended to Incentive Policy).
+  useEffect(() => {
+    if (!showBranchFilter) return
+    fetch('/api/admin/branches')
+      .then((r) => r.json())
+      .then((d) => setBranches((d.branches ?? []).map((b: { id: string; name: string }) => ({ id: b.id, name: b.name }))))
+      .catch(() => setBranches([]))
+  }, [showBranchFilter])
+
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/admin/incentive')
+      const qs = branchId !== 'all' ? `?branchId=${branchId}` : ''
+      const res = await fetch(`/api/admin/incentive${qs}`)
       const data = await res.json()
       if (res.ok) setPolicies(data.counselors ?? [])
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [branchId])
 
   useEffect(() => {
     load()
@@ -103,6 +123,19 @@ export function IncentivePolicyPanel({ counselors }: { counselors: CounselorOpti
           Set base salary, default commission rate, and per-service commission rates for each counselor.
           Changes take effect immediately for future commission calculations.
         </p>
+        {showBranchFilter && (
+          <select
+            value={branchId}
+            onChange={(e) => setBranchId(e.target.value)}
+            className="min-h-[40px] shrink-0 rounded-full px-3 text-sm outline-none glass-input"
+            aria-label="Branch"
+          >
+            <option value="all">All branches</option>
+            {branches.map((b) => (
+              <option key={b.id} value={b.id}>{b.name}</option>
+            ))}
+          </select>
+        )}
       </div>
 
       {policies.length === 0 ? (

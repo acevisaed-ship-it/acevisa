@@ -4,11 +4,23 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 // GET /api/admin/incentive — returns all counselors with their base_salary, commission_rate, and per-service rates
-export async function GET() {
+export async function GET(request: Request) {
   const { admin, error: authError } = await requireAdminApi()
   if (authError) return authError
 
   const branchScoped = isBranchScopedAdmin(admin)
+  // Branch Manager stays locked to their own branch; CEO/unscoped admin can
+  // optionally pick one branch via ?branchId= ('all'/omitted = every branch)
+  // — Idea #4 universal branch filtering, extended to Incentive Policy.
+  // (No date dimension here — a policy is current-state config, not a
+  // time-series record, so only branch filtering applies to this section.)
+  const requestedBranchId = new URL(request.url).searchParams.get('branchId')
+  const effectiveBranchId = branchScoped
+    ? admin.branch_id
+    : requestedBranchId && requestedBranchId !== 'all'
+      ? requestedBranchId
+      : null
+
   const supabase = createAdminClient()
 
   let counselorsQuery = supabase
@@ -17,8 +29,8 @@ export async function GET() {
     .eq('role', 'counselor')
     .order('name')
 
-  if (branchScoped) {
-    counselorsQuery = counselorsQuery.eq('branch_id', admin.branch_id)
+  if (effectiveBranchId) {
+    counselorsQuery = counselorsQuery.eq('branch_id', effectiveBranchId)
   }
 
   const [{ data: counselors }, { data: rules }, { data: policyRules }] = await Promise.all([

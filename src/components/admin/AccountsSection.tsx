@@ -27,11 +27,13 @@ export function AccountsSection({
   deals,
   counselors,
   canManageEntries,
+  showBranchFilter = false,
 }: {
   clients: ClientOption[]
   deals: DealOption[]
   counselors: CounselorOption[]
   canManageEntries: boolean
+  showBranchFilter?: boolean
 }) {
   const [tab, setTab] = useState<Tab>('invoices')
 
@@ -65,10 +67,17 @@ export function AccountsSection({
       <div>
         {tab === 'pl' && <FinanceSummary />}
         {tab === 'invoices' && (
-          <InvoiceManager clients={clients} deals={deals} canManageEntries={canManageEntries} />
+          <InvoiceManager
+            clients={clients}
+            deals={deals}
+            canManageEntries={canManageEntries}
+            showBranchFilter={showBranchFilter}
+          />
         )}
-        {tab === 'payroll' && <HRMView />}
-        {tab === 'incentive' && <IncentivePolicyPanel counselors={counselors} />}
+        {tab === 'payroll' && <HRMView showBranchFilter={showBranchFilter} />}
+        {tab === 'incentive' && (
+          <IncentivePolicyPanel counselors={counselors} showBranchFilter={showBranchFilter} />
+        )}
         {tab === 'products' && <ProductsPanel counselors={counselors} />}
       </div>
     </div>

@@ -13,16 +13,27 @@ export async function GET(request: Request) {
   const { admin, error } = await requireAdminApi()
   if (error) return error
 
-  const monthParam = new URL(request.url).searchParams.get('month')
+  const params = new URL(request.url).searchParams
+  const monthParam = params.get('month')
   const { month, start, end, startDate, endDate } = parseMonth(monthParam)
 
   const branchScoped = isBranchScopedAdmin(admin)
+  // Branch Manager stays locked to their own branch; CEO/unscoped admin can
+  // optionally pick one branch via ?branchId= ('all'/omitted = every branch)
+  // — Idea #4 universal branch filtering, extended to Payroll.
+  const requestedBranchId = params.get('branchId')
+  const effectiveBranchId = branchScoped
+    ? admin.branch_id
+    : requestedBranchId && requestedBranchId !== 'all'
+      ? requestedBranchId
+      : null
+
   const supabase = createAdminClient()
 
   let invoicesQuery = supabase
     .from('invoices')
     .select(
-      branchScoped
+      effectiveBranchId
         ? 'id, invoice_number, total, status, created_at, paid_at, clients!inner(name, branch_id)'
         : 'id, invoice_number, total, status, created_at, paid_at, clients(name)'
     )
@@ -39,13 +50,17 @@ export async function GET(request: Request) {
 
   let closedDealsQuery = supabase
     .from('deals')
-    .select('id, counselor_id, deal_value, stage, signed_at, actual_close_date, counselors(name, branch_id)')
+    .select(
+      effectiveBranchId
+        ? 'id, counselor_id, deal_value, stage, signed_at, actual_close_date, counselors!inner(name, branch_id)'
+        : 'id, counselor_id, deal_value, stage, signed_at, actual_close_date, counselors(name, branch_id)'
+    )
     .in('stage', ['completed', 'agreement_signed'])
 
-  if (branchScoped) {
-    invoicesQuery = invoicesQuery.eq('clients.branch_id', admin.branch_id)
-    counselorsQuery = counselorsQuery.eq('branch_id', admin.branch_id)
-    closedDealsQuery = closedDealsQuery.eq('counselors.branch_id', admin.branch_id)
+  if (effectiveBranchId) {
+    invoicesQuery = invoicesQuery.eq('clients.branch_id', effectiveBranchId)
+    counselorsQuery = counselorsQuery.eq('branch_id', effectiveBranchId)
+    closedDealsQuery = closedDealsQuery.eq('counselors.branch_id', effectiveBranchId)
   }
 
   const [

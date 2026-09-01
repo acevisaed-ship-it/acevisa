@@ -37,17 +37,30 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url)
   const category = url.searchParams.get('category')
-  const month = url.searchParams.get('month') // YYYY-MM
+  const month = url.searchParams.get('month') // YYYY-MM (legacy, still supported)
+  const from = url.searchParams.get('from') // YYYY-MM-DD
+  const to = url.searchParams.get('to') // YYYY-MM-DD, exclusive
+  // Expenses have no branch_id of their own — they're attributed to a
+  // counselor, so branch filtering goes through counselor_id (same join
+  // Branch Managers already get automatically; CEO can opt into one branch
+  // via ?branchId=, or 'all'/omitted for every branch — Idea #4).
+  const requestedBranchId = url.searchParams.get('branchId')
 
   const branchScoped = isBranchScopedAdmin(admin)
   const supabase = createAdminClient()
 
+  const effectiveBranchId = branchScoped
+    ? admin.branch_id
+    : requestedBranchId && requestedBranchId !== 'all'
+      ? requestedBranchId
+      : null
+
   let branchCounselorIds: string[] | null = null
-  if (branchScoped) {
+  if (effectiveBranchId) {
     const { data: branchCounselors } = await supabase
       .from('counselors')
       .select('id')
-      .eq('branch_id', admin.branch_id)
+      .eq('branch_id', effectiveBranchId)
     branchCounselorIds = (branchCounselors ?? []).map((c) => c.id)
   }
 
@@ -65,7 +78,12 @@ export async function GET(request: Request) {
     query = query.eq('category', category)
   }
 
-  if (month && /^\d{4}-\d{2}$/.test(month)) {
+  if (from && /^\d{4}-\d{2}-\d{2}$/.test(from)) {
+    query = query.gte('paid_at', from)
+    if (to && /^\d{4}-\d{2}-\d{2}$/.test(to)) {
+      query = query.lt('paid_at', to)
+    }
+  } else if (month && /^\d{4}-\d{2}$/.test(month)) {
     const start = `${month}-01`
     const [y, m] = month.split('-').map(Number)
     const next = m === 12 ? `${y + 1}-01-01` : `${y}-${String(m + 1).padStart(2, '0')}-01`

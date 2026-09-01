@@ -20,6 +20,10 @@ const TABS: { id: Tab; label: string }[] = [
 
 export function HrSection({ counselors }: { counselors: { id: string; name: string }[] }) {
   const [tab, setTab] = useState<Tab>('flags')
+  // Deep-link from HR Analytics -> Attendance tab, scoped to one
+  // counselor/month (B2 fix). Keyed so HrAttendancePanel remounts and
+  // picks up the new initial filter each time this changes.
+  const [attendanceDeepLink, setAttendanceDeepLink] = useState<{ counselorId: string; month: string } | null>(null)
 
   return (
     <div className="flex flex-col gap-6">
@@ -49,10 +53,24 @@ export function HrSection({ counselors }: { counselors: { id: string; name: stri
 
       <div>
         {tab === 'flags' && <HrFlagsPanel />}
-        {tab === 'attendance' && <HrAttendancePanel counselors={counselors} />}
+        {tab === 'attendance' && (
+          <HrAttendancePanel
+            key={attendanceDeepLink ? `${attendanceDeepLink.counselorId}-${attendanceDeepLink.month}` : 'default'}
+            counselors={counselors}
+            initialMonth={attendanceDeepLink?.month}
+            initialCounselorId={attendanceDeepLink?.counselorId}
+          />
+        )}
         {tab === 'leave' && <HrLeavePanel counselors={counselors} />}
         {tab === 'policies' && <HrPoliciesPanel />}
-        {tab === 'analytics' && <HrAnalyticsPanel />}
+        {tab === 'analytics' && (
+          <HrAnalyticsPanel
+            onViewAttendance={(counselorId, month) => {
+              setAttendanceDeepLink({ counselorId, month })
+              setTab('attendance')
+            }}
+          />
+        )}
       </div>
     </div>
   )

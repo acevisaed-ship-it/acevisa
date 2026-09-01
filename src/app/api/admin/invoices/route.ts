@@ -59,25 +59,47 @@ export async function GET(request: Request) {
   const { admin, error } = await requireAdminApi()
   if (error) return error
 
-  const status = new URL(request.url).searchParams.get('status')
+  const params = new URL(request.url).searchParams
+  const status = params.get('status')
+  const from = params.get('from') // YYYY-MM-DD, filters created_at
+  const to = params.get('to') // YYYY-MM-DD, exclusive upper bound
+  // Branch Managers are always locked to their own branch. CEO/unscoped
+  // admins may optionally pick one branch via ?branchId=; omitted or 'all'
+  // means every branch (Idea #4 — universal branch filtering).
+  const requestedBranchId = params.get('branchId')
 
   const branchScoped = isBranchScopedAdmin(admin)
+  // Any branch filter at all (forced, or CEO-selected) requires the inner
+  // join so `.eq('clients.branch_id', ...)` has something to filter on.
+  const effectiveBranchId = branchScoped
+    ? admin.branch_id
+    : requestedBranchId && requestedBranchId !== 'all'
+      ? requestedBranchId
+      : null
+
   const supabase = createAdminClient()
   let query = supabase
     .from('invoices')
     .select(
-      branchScoped
+      effectiveBranchId
         ? 'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients!inner(name, id, branch_id), counselors(name), products(name)'
         : 'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors(name), products(name)'
     )
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
 
-  if (branchScoped) {
-    query = query.eq('clients.branch_id', admin.branch_id)
+  if (effectiveBranchId) {
+    query = query.eq('clients.branch_id', effectiveBranchId)
   }
   if (status && INVOICE_STATUSES.includes(status as InvoiceStatus)) {
     query = query.eq('status', status)
+  }
+  if (from && /^\d{4}-\d{2}-\d{2}$/.test(from)) {
+    query = query.gte('created_at', from)
+  }
+  if (to && /^\d{4}-\d{2}-\d{2}$/.test(to)) {
+    // Exclusive: caller passes the day *after* the last day they want included.
+    query = query.lt('created_at', to)
   }
 
   const { data, error: fetchError } = await query

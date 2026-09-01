@@ -31,6 +31,7 @@ async function uploadReceipt(file: File): Promise<string | null> {
 
 type ClientOption = { id: string; name: string; counselor_id: string | null }
 type DealOption = { id: string; client_id: string; deal_value: number; service_type: string }
+type BranchOption = { id: string; name: string }
 
 type ProductStage = {
   stage_order: number
@@ -191,6 +192,80 @@ function ClientSearchSelect({
   )
 }
 
+// "to" is picked inclusive in the UI ("through Aug 31") but the API wants an
+// exclusive upper bound — bump it forward one day when building the query.
+function dayAfter(dateStr: string) {
+  const d = new Date(`${dateStr}T00:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + 1)
+  return d.toISOString().slice(0, 10)
+}
+
+// Date-range + branch filter bar shared by the Invoices and Expenses tabs
+// (Idea #4 — universal date/branch filtering). Branch selector only shows
+// for CEO/unscoped admins; Branch Managers are already locked server-side.
+function DateBranchFilters({
+  from,
+  to,
+  onFromChange,
+  onToChange,
+  branchId,
+  onBranchChange,
+  branches,
+  showBranchFilter,
+}: {
+  from: string
+  to: string
+  onFromChange: (v: string) => void
+  onToChange: (v: string) => void
+  branchId: string
+  onBranchChange: (v: string) => void
+  branches: BranchOption[]
+  showBranchFilter: boolean
+}) {
+  const filterInputClass = 'min-h-[40px] rounded-full px-3 text-sm outline-none glass-input'
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <input
+        type="date"
+        value={from}
+        onChange={(e) => onFromChange(e.target.value)}
+        className={filterInputClass}
+        aria-label="From date"
+      />
+      <span className="text-xs text-white/30">to</span>
+      <input
+        type="date"
+        value={to}
+        onChange={(e) => onToChange(e.target.value)}
+        className={filterInputClass}
+        aria-label="To date"
+      />
+      {(from || to) && (
+        <button
+          type="button"
+          onClick={() => { onFromChange(''); onToChange('') }}
+          className="text-xs text-white/40 hover:text-white hover:underline"
+        >
+          Clear
+        </button>
+      )}
+      {showBranchFilter && (
+        <select
+          value={branchId}
+          onChange={(e) => onBranchChange(e.target.value)}
+          className={filterInputClass}
+          aria-label="Branch"
+        >
+          <option value="all">All branches</option>
+          {branches.map((b) => (
+            <option key={b.id} value={b.id}>{b.name}</option>
+          ))}
+        </select>
+      )}
+    </div>
+  )
+}
+
 const STATUS_TABS = ['all', ...INVOICE_STATUSES] as const
 
 function statusBadgeClass(status: string) {
@@ -215,14 +290,21 @@ function InvoicesTab({
   clients,
   deals,
   canManageEntries,
+  branches,
+  showBranchFilter,
 }: {
   clients: ClientOption[]
   deals: DealOption[]
   canManageEntries: boolean
+  branches: BranchOption[]
+  showBranchFilter: boolean
 }) {
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loading, setLoading] = useState(true)
   const [statusTab, setStatusTab] = useState<string>('all')
+  const [fromDate, setFromDate] = useState('')
+  const [toDate, setToDate] = useState('')
+  const [branchId, setBranchId] = useState('all')
   const [modalOpen, setModalOpen] = useState(false)
   const [paymentModal, setPaymentModal] = useState<Invoice | null>(null)
   const [saving, setSaving] = useState(false)
@@ -250,14 +332,19 @@ function InvoicesTab({
   const loadInvoices = useCallback(async () => {
     setLoading(true)
     try {
-      const qs = statusTab !== 'all' ? `?status=${statusTab}` : ''
-      const res = await fetch(`/api/admin/invoices${qs}`)
+      const params = new URLSearchParams()
+      if (statusTab !== 'all') params.set('status', statusTab)
+      if (fromDate) params.set('from', fromDate)
+      if (toDate) params.set('to', dayAfter(toDate))
+      if (branchId !== 'all') params.set('branchId', branchId)
+      const qs = params.toString()
+      const res = await fetch(`/api/admin/invoices${qs ? `?${qs}` : ''}`)
       const data = await res.json()
       if (res.ok) setInvoices(data.invoices ?? [])
     } finally {
       setLoading(false)
     }
-  }, [statusTab])
+  }, [statusTab, fromDate, toDate, branchId])
 
   useEffect(() => { loadInvoices() }, [loadInvoices])
 
@@ -430,14 +517,26 @@ function InvoicesTab({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        {STATUS_TABS.map((tab) => (
-          <button key={tab} type="button" onClick={() => setStatusTab(tab)}
-            className={cn('min-h-[40px] rounded-full px-4 text-sm font-medium transition-colors',
-              statusTab === tab ? 'bg-green text-[#0A3F3A]' : 'glass-card text-white/50 hover:text-white')}>
-            {tab === 'all' ? 'All' : INVOICE_STATUS_LABELS[tab as InvoiceStatus]}
-          </button>
-        ))}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-2">
+          {STATUS_TABS.map((tab) => (
+            <button key={tab} type="button" onClick={() => setStatusTab(tab)}
+              className={cn('min-h-[40px] rounded-full px-4 text-sm font-medium transition-colors',
+                statusTab === tab ? 'bg-green text-[#0A3F3A]' : 'glass-card text-white/50 hover:text-white')}>
+              {tab === 'all' ? 'All' : INVOICE_STATUS_LABELS[tab as InvoiceStatus]}
+            </button>
+          ))}
+        </div>
+        <DateBranchFilters
+          from={fromDate}
+          to={toDate}
+          onFromChange={setFromDate}
+          onToChange={setToDate}
+          branchId={branchId}
+          onBranchChange={setBranchId}
+          branches={branches}
+          showBranchFilter={showBranchFilter}
+        />
       </div>
 
       {loading ? (
@@ -817,7 +916,15 @@ function InvoicesTab({
 // ─────────────────────────────────────────────────────────────────────────────
 // Expenses tab
 // ─────────────────────────────────────────────────────────────────────────────
-function ExpensesTab({ canManageEntries }: { canManageEntries: boolean }) {
+function ExpensesTab({
+  canManageEntries,
+  branches,
+  showBranchFilter,
+}: {
+  canManageEntries: boolean
+  branches: BranchOption[]
+  showBranchFilter: boolean
+}) {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
@@ -825,6 +932,9 @@ function ExpensesTab({ canManageEntries }: { canManageEntries: boolean }) {
   const [deleting, setDeleting] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
+  const [fromDate, setFromDate] = useState('')
+  const [toDate, setToDate] = useState('')
+  const [branchId, setBranchId] = useState('all')
 
   // Form state
   const [category, setCategory] = useState<ExpenseCategory>('other')
@@ -841,14 +951,19 @@ function ExpensesTab({ canManageEntries }: { canManageEntries: boolean }) {
   const loadExpenses = useCallback(async () => {
     setLoading(true)
     try {
-      const qs = categoryFilter !== 'all' ? `?category=${categoryFilter}` : ''
-      const res = await fetch(`/api/admin/expenses${qs}`)
+      const params = new URLSearchParams()
+      if (categoryFilter !== 'all') params.set('category', categoryFilter)
+      if (fromDate) params.set('from', fromDate)
+      if (toDate) params.set('to', dayAfter(toDate))
+      if (branchId !== 'all') params.set('branchId', branchId)
+      const qs = params.toString()
+      const res = await fetch(`/api/admin/expenses${qs ? `?${qs}` : ''}`)
       const data = await res.json()
       if (res.ok) setExpenses(data.expenses ?? [])
     } finally {
       setLoading(false)
     }
-  }, [categoryFilter])
+  }, [categoryFilter, fromDate, toDate, branchId])
 
   useEffect(() => { loadExpenses() }, [loadExpenses])
 
@@ -962,14 +1077,26 @@ function ExpensesTab({ canManageEntries }: { canManageEntries: boolean }) {
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        {CATEGORY_TABS.map((tab) => (
-          <button key={tab} type="button" onClick={() => setCategoryFilter(tab)}
-            className={cn('min-h-[40px] rounded-full px-4 text-sm font-medium transition-colors',
-              categoryFilter === tab ? 'bg-orange text-white' : 'glass-card text-white/50 hover:text-white')}>
-            {tab === 'all' ? 'All categories' : EXPENSE_CATEGORY_LABELS[tab as ExpenseCategory]}
-          </button>
-        ))}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-2">
+          {CATEGORY_TABS.map((tab) => (
+            <button key={tab} type="button" onClick={() => setCategoryFilter(tab)}
+              className={cn('min-h-[40px] rounded-full px-4 text-sm font-medium transition-colors',
+                categoryFilter === tab ? 'bg-orange text-white' : 'glass-card text-white/50 hover:text-white')}>
+              {tab === 'all' ? 'All categories' : EXPENSE_CATEGORY_LABELS[tab as ExpenseCategory]}
+            </button>
+          ))}
+        </div>
+        <DateBranchFilters
+          from={fromDate}
+          to={toDate}
+          onFromChange={setFromDate}
+          onToChange={setToDate}
+          branchId={branchId}
+          onBranchChange={setBranchId}
+          branches={branches}
+          showBranchFilter={showBranchFilter}
+        />
       </div>
 
       {loading ? (
@@ -1166,12 +1293,25 @@ export function InvoiceManager({
   clients,
   deals,
   canManageEntries,
+  showBranchFilter = false,
 }: {
   clients: ClientOption[]
   deals: DealOption[]
   canManageEntries: boolean
+  showBranchFilter?: boolean
 }) {
   const [activeTab, setActiveTab] = useState<'invoices' | 'expenses'>('invoices')
+  const [branches, setBranches] = useState<BranchOption[]>([])
+
+  // Branch list only needed for CEO/unscoped admins (Branch Managers are
+  // already locked server-side, so the selector never renders for them).
+  useEffect(() => {
+    if (!showBranchFilter) return
+    fetch('/api/admin/branches')
+      .then((r) => r.json())
+      .then((d) => setBranches((d.branches ?? []).map((b: { id: string; name: string }) => ({ id: b.id, name: b.name }))))
+      .catch(() => setBranches([]))
+  }, [showBranchFilter])
 
   return (
     <>
@@ -1212,9 +1352,19 @@ export function InvoiceManager({
       </div>
 
       {activeTab === 'invoices' ? (
-        <InvoicesTab clients={clients} deals={deals} canManageEntries={canManageEntries} />
+        <InvoicesTab
+          clients={clients}
+          deals={deals}
+          canManageEntries={canManageEntries}
+          branches={branches}
+          showBranchFilter={showBranchFilter}
+        />
       ) : (
-        <ExpensesTab canManageEntries={canManageEntries} />
+        <ExpensesTab
+          canManageEntries={canManageEntries}
+          branches={branches}
+          showBranchFilter={showBranchFilter}
+        />
       )}
     </>
   )

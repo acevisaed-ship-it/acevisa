@@ -44,9 +44,17 @@ function formatPKT(dateStr: string | null) {
 const inputClass = 'min-h-[44px] w-full rounded-full px-4 py-2 text-sm outline-none glass-input'
 const selectClass = 'min-h-[44px] w-full rounded-full px-4 py-2 text-sm outline-none glass-input'
 
-export function HrAttendancePanel({ counselors }: { counselors: CounselorOption[] }) {
-  const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7))
-  const [filterCounselorId, setFilterCounselorId] = useState('')
+export function HrAttendancePanel({
+  counselors,
+  initialMonth,
+  initialCounselorId,
+}: {
+  counselors: CounselorOption[]
+  initialMonth?: string
+  initialCounselorId?: string
+}) {
+  const [month, setMonth] = useState(() => initialMonth ?? new Date().toISOString().slice(0, 7))
+  const [filterCounselorId, setFilterCounselorId] = useState(() => initialCounselorId ?? '')
   const [records, setRecords] = useState<AttendanceRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)

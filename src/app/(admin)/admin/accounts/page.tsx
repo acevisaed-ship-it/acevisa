@@ -1,5 +1,6 @@
 import { AccountsSection } from '@/components/admin/AccountsSection'
 import { canMutateAccountEntries } from '@/lib/admin/accountEntries'
+import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { createAdminClient, requireAdmin } from '@/lib/supabase/server'
 
 export default async function AccountsPage() {
@@ -24,6 +25,7 @@ export default async function AccountsPage() {
         deals={deals ?? []}
         counselors={counselors ?? []}
         canManageEntries={canMutateAccountEntries(admin.role)}
+        showBranchFilter={!isBranchScopedAdmin(admin)}
       />
     </main>
   )
