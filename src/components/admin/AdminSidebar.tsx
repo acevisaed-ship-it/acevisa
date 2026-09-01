@@ -20,6 +20,7 @@ import {
   MessageSquareMore,
   Settings,
   ShieldCheck,
+  Sparkles,
   Users,
   Users2,
   Wallet,
@@ -70,6 +71,7 @@ const navItems: NavItem[] = [
 // Visible to 'ceo' (Super Admin) only.
 const ceoOnlyNavItems: NavItem[] = [
   { href: '/admin/branches', label: 'Branches', icon: Building2 },
+  { href: '/admin/ceo-agent', label: 'CEO Agent', icon: Sparkles },
 ]
 
 const roleLabels: Record<string, string> = {

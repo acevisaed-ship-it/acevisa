@@ -17,6 +17,7 @@ export type NotificationType =
   | 'task_closed'
   | 'stage_suggestion'
   | 'stage_change'
+  | 'agent_draft'
   | 'attendance_late'
   | 'attendance_absent'
   | 'leave_submitted'

@@ -1,4 +1,5 @@
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { computeRetentionRisk } from '@/lib/admin/retentionRisk'
 import { createAdminClient } from '@/lib/supabase/server'
 import { isSundayPKT, workingDaysInPKTMonth } from '@/lib/pkt'
 import { NextResponse } from 'next/server'
@@ -110,12 +111,7 @@ export async function GET(request: Request) {
     const joinedMonthsAgo = Math.floor(
       (Date.now() - new Date(c.created_at).getTime()) / (1000 * 60 * 60 * 24 * 30)
     )
-    const retentionRisk =
-      dealCount === 0 && joinedMonthsAgo > 3
-        ? 'high'
-        : businessContributionPct < 5 && joinedMonthsAgo > 6
-          ? 'medium'
-          : 'low'
+    const retentionRisk = computeRetentionRisk(dealCount, businessContributionPct, joinedMonthsAgo)
 
     return {
       counselorId: c.id,
