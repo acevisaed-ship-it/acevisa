@@ -19,12 +19,17 @@ export async function GET(request: Request) {
   const branchScoped = isBranchScopedAdmin(admin)
   const supabase = createAdminClient()
 
+  // attendance_records has two FKs to counselors (counselor_id, and
+  // created_by — the admin who recorded it) — a bare counselors(...) embed
+  // is ambiguous and Supabase rejects the whole query with "more than one
+  // relationship was found" instead of guessing. Hint by column name to
+  // pick counselor_id (the person the record is about, not who logged it).
   let query = supabase
     .from('attendance_records')
     .select(
       branchScoped
-        ? 'id, counselor_id, date, check_in, check_out, status, notes, counselors!inner(name, branch_id)'
-        : 'id, counselor_id, date, check_in, check_out, status, notes, counselors(name)'
+        ? 'id, counselor_id, date, check_in, check_out, status, notes, counselors!counselor_id!inner(name, branch_id)'
+        : 'id, counselor_id, date, check_in, check_out, status, notes, counselors!counselor_id(name)'
     )
     .gte('date', start)
     .lt('date', end)
