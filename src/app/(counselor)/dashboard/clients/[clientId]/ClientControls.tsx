@@ -5,6 +5,13 @@ import { useState, useTransition } from 'react'
 import { PIPELINE_STAGES } from '@/lib/brief'
 import type { PipelineStage, QualificationFactor } from '@/types'
 
+export type PendingInactiveRequest = {
+  id: string
+  requestedActive: boolean
+  reason: string | null
+  createdAt: string
+}
+
 type Props = {
   clientId: string
   initialStage: PipelineStage
@@ -12,8 +19,11 @@ type Props = {
   initialEmail?: string | null
   initialStatus?: 'active' | 'suspended'
   isAdmin?: boolean
+  isCeo?: boolean
   initialManuallyQualified?: boolean
   initialQualificationFactors?: QualificationFactor[]
+  initialPipelineActive?: boolean
+  pendingInactiveRequest?: PendingInactiveRequest | null
 }
 
 export function ClientControls({
@@ -23,8 +33,11 @@ export function ClientControls({
   initialEmail = null,
   initialStatus = 'active',
   isAdmin = false,
+  isCeo = false,
   initialManuallyQualified = false,
   initialQualificationFactors = [],
+  initialPipelineActive = true,
+  pendingInactiveRequest = null,
 }: Props) {
   const [stage, setStage] = useState(initialStage)
   const [notes, setNotes] = useState(initialNotes)
@@ -47,6 +60,12 @@ export function ClientControls({
   // Suspension
   const [status, setStatus] = useState(initialStatus)
   const [suspending, setSuspending] = useState(false)
+
+  // Pipeline active/inactive request (counselor requests, CEO approves)
+  const [pipelineActive, setPipelineActive] = useState(initialPipelineActive)
+  const [inactiveRequest, setInactiveRequest] = useState(pendingInactiveRequest)
+  const [inactiveBusy, setInactiveBusy] = useState(false)
+  const [inactiveError, setInactiveError] = useState<string | null>(null)
 
   // Manual lead qualification (counselor's own judgment, separate from the AI score)
   const [manuallyQualified, setManuallyQualified] = useState(initialManuallyQualified)
@@ -160,6 +179,64 @@ export function ClientControls({
     }
   }
 
+  async function handleRequestInactive() {
+    const wantActive = !pipelineActive
+    const reason = window.prompt(
+      `Reason for ${wantActive ? 'reactivating' : 'marking this client inactive'}? (optional, sent to the CEO for review)`
+    )
+    if (reason === null) return // cancelled
+    setInactiveBusy(true)
+    setInactiveError(null)
+    try {
+      const res = await fetch('/api/clients/inactive-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId, reason: reason.trim() || undefined }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setInactiveError(data.error || 'Failed to submit request')
+        return
+      }
+      setInactiveRequest({
+        id: data.id,
+        requestedActive: data.requestedActive,
+        reason: reason.trim() || null,
+        createdAt: new Date().toISOString(),
+      })
+    } catch {
+      setInactiveError('Network error — please try again.')
+    } finally {
+      setInactiveBusy(false)
+    }
+  }
+
+  async function handleReviewInactiveRequest(next: 'approved' | 'rejected') {
+    if (!inactiveRequest) return
+    const note =
+      next === 'rejected' ? window.prompt('Optional note for the counselor (why this was rejected):') ?? '' : ''
+    setInactiveBusy(true)
+    setInactiveError(null)
+    try {
+      const res = await fetch(`/api/admin/inactive-requests/${inactiveRequest.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: next, note }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setInactiveError(data.error || 'Failed to update request')
+        return
+      }
+      if (next === 'approved') setPipelineActive(inactiveRequest.requestedActive)
+      setInactiveRequest(null)
+    } catch {
+      setInactiveError('Network error — please try again.')
+    } finally {
+      setInactiveBusy(false)
+    }
+  }
+
   async function handleSendUpdate() {
     if (!updateText.trim()) return
     setSendingUpdate(true)
@@ -212,6 +289,70 @@ export function ClientControls({
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Pipeline active/inactive — separate from the stage above. A
+          counselor can request a change here; only the CEO can approve it
+          (see /admin/inactive-requests). */}
+      <div className="rounded-xl border border-white/10 glass-card p-4">
+        <div className="mb-2 flex items-center justify-between">
+          <p className="text-sm font-medium text-white/70">Pipeline status</p>
+          <span
+            className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+              pipelineActive ? 'bg-green/20 text-green' : 'bg-red-500/20 text-red-300'
+            }`}
+          >
+            {pipelineActive ? 'Active' : 'Inactive'}
+          </span>
+        </div>
+
+        {inactiveRequest ? (
+          isCeo ? (
+            <div className="mt-1">
+              <p className="text-xs text-white/60">
+                Requested {inactiveRequest.requestedActive ? 'reactivation' : 'to mark inactive'}
+                {inactiveRequest.reason ? ` — ${inactiveRequest.reason}` : ''}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  disabled={inactiveBusy}
+                  onClick={() => handleReviewInactiveRequest('approved')}
+                  className="min-h-[36px] rounded-full bg-grad-blue crisp-on-dark px-4 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  {inactiveBusy ? '…' : 'Approve'}
+                </button>
+                <button
+                  type="button"
+                  disabled={inactiveBusy}
+                  onClick={() => handleReviewInactiveRequest('rejected')}
+                  className="min-h-[36px] rounded-full border border-white/20 glass-card px-4 py-1.5 text-xs font-medium text-white/60 transition-colors hover:text-white disabled:opacity-50"
+                >
+                  {inactiveBusy ? '…' : 'Reject'}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-white/50">
+              {inactiveRequest.requestedActive ? 'Reactivation' : 'Inactive'} request pending CEO review
+              {inactiveRequest.reason ? ` — ${inactiveRequest.reason}` : ''}.
+            </p>
+          )
+        ) : isAdmin ? (
+          !isCeo && (
+            <p className="text-xs text-white/40">Only the CEO can change this.</p>
+          )
+        ) : (
+          <button
+            type="button"
+            disabled={inactiveBusy}
+            onClick={handleRequestInactive}
+            className="min-h-[40px] w-full rounded-full border border-white/20 glass-card px-4 py-2 text-xs font-medium text-white/70 transition-colors hover:text-white disabled:opacity-50"
+          >
+            {inactiveBusy ? '…' : pipelineActive ? 'Request mark inactive' : 'Request reactivation'}
+          </button>
+        )}
+        {inactiveError && <p className="mt-1.5 text-xs text-red-300">{inactiveError}</p>}
       </div>
 
       {/* Manual lead qualification — counselor's own judgment call, separate

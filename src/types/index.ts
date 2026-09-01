@@ -86,6 +86,11 @@ export type Client = {
   registration_date: string
   qualification_score: number | null
   pipeline_stage: PipelineStage
+  // Separate from pipeline_stage (1-7) on purpose — a counselor can request
+  // marking a client inactive at any stage; CEO approval flips this flag.
+  // Existing stage logic (board views, progress bars, stage_suggestions)
+  // doesn't need to know this exists.
+  pipeline_active?: boolean
   notes: string | null
   status: 'active' | 'suspended'
   avatar_url?: string | null

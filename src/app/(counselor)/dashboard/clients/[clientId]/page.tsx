@@ -63,6 +63,7 @@ export default async function ClientRecordPage({ params }: Props) {
     { data: applications },
     { data: pendingStageSuggestions },
     { data: clientTasks, error: clientTasksError },
+    { data: pendingInactiveRequest },
   ] = await Promise.all([
     supabase
       .from('ai_profiles')
@@ -113,6 +114,12 @@ export default async function ClientRecordPage({ params }: Props) {
       )
       .eq('client_id', clientId)
       .order('created_at', { ascending: false }),
+    supabase
+      .from('client_inactive_requests')
+      .select('id, requested_active, reason, created_at')
+      .eq('client_id', clientId)
+      .eq('status', 'pending')
+      .maybeSingle(),
   ])
 
   if (clientTasksError) {
@@ -187,6 +194,17 @@ export default async function ClientRecordPage({ params }: Props) {
                   initialStatus={typedClient.status ?? 'active'}
                   initialManuallyQualified={typedClient.manually_qualified ?? false}
                   initialQualificationFactors={typedClient.qualification_factors ?? []}
+                  initialPipelineActive={typedClient.pipeline_active ?? true}
+                  pendingInactiveRequest={
+                    pendingInactiveRequest
+                      ? {
+                          id: pendingInactiveRequest.id,
+                          requestedActive: pendingInactiveRequest.requested_active,
+                          reason: pendingInactiveRequest.reason,
+                          createdAt: pendingInactiveRequest.created_at,
+                        }
+                      : null
+                  }
                 />
               }
             />

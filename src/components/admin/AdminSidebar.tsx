@@ -21,6 +21,7 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
+  UserX,
   Users,
   Users2,
   Wallet,
@@ -31,6 +32,7 @@ import { createClient } from '@/lib/supabase/client'
 import { ProfilePicture } from '@/components/dashboard/ProfilePicture'
 import { UnassignedCountBadge } from '@/components/admin/UnassignedCountBadge'
 import { CorrectionCountBadge } from '@/components/admin/CorrectionCountBadge'
+import { InactiveRequestCountBadge } from '@/components/admin/InactiveRequestCountBadge'
 import { LogoHomeLink } from '@/components/ui/LogoHomeLink'
 import { cn } from '@/lib/utils'
 
@@ -46,7 +48,7 @@ type NavItem = {
   label: string
   icon: typeof Users
   exact?: boolean
-  badge?: 'unassigned' | 'corrections'
+  badge?: 'unassigned' | 'corrections' | 'inactiveRequests'
 }
 
 const navItems: NavItem[] = [
@@ -72,6 +74,12 @@ const navItems: NavItem[] = [
 const ceoOnlyNavItems: NavItem[] = [
   { href: '/admin/branches', label: 'Branches', icon: Building2 },
   { href: '/admin/ceo-agent', label: 'CEO Agent', icon: Sparkles },
+  {
+    href: '/admin/inactive-requests',
+    label: 'Inactive Requests',
+    icon: UserX,
+    badge: 'inactiveRequests',
+  },
 ]
 
 const roleLabels: Record<string, string> = {
@@ -166,6 +174,7 @@ function SidebarContent({
                 <UnassignedCountBadge initialCount={unassignedCount} />
               )}
               {!collapsed && badge === 'corrections' && <CorrectionCountBadge />}
+              {!collapsed && badge === 'inactiveRequests' && <InactiveRequestCountBadge />}
             </Link>
           )
         })}

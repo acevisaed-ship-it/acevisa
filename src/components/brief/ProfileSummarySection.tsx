@@ -195,6 +195,11 @@ export function ClientProfileHeader({
       <span className="rounded-full border border-white/20 glass-card px-3 py-1 text-xs font-medium text-white/70">
         Stage {client.pipeline_stage} — {getPipelineStageLabel(client.pipeline_stage)}
       </span>
+      {client.pipeline_active === false && (
+        <span className="rounded-full border border-red-500/30 bg-red-500/20 px-3 py-1 text-xs font-semibold text-red-300">
+          Inactive
+        </span>
+      )}
     </div>
   )
 }

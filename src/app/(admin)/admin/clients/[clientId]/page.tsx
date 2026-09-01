@@ -56,6 +56,7 @@ export default async function AdminClientProfilePage({ params }: Props) {
     { data: pendingUpdates },
     { data: pendingStageSuggestions },
     { data: clientTasks, error: clientTasksError },
+    { data: pendingInactiveRequest },
   ] = await Promise.all([
     typedClient.counselor_id
       ? supabase
@@ -107,6 +108,12 @@ export default async function AdminClientProfilePage({ params }: Props) {
       )
       .eq('client_id', clientId)
       .order('created_at', { ascending: false }),
+    supabase
+      .from('client_inactive_requests')
+      .select('id, requested_active, reason, created_at')
+      .eq('client_id', clientId)
+      .eq('status', 'pending')
+      .maybeSingle(),
   ])
 
   if (clientTasksError) {
@@ -177,7 +184,19 @@ export default async function AdminClientProfilePage({ params }: Props) {
                   initialStatus={typedClient.status ?? 'active'}
                   initialManuallyQualified={typedClient.manually_qualified ?? false}
                   initialQualificationFactors={typedClient.qualification_factors ?? []}
+                  initialPipelineActive={typedClient.pipeline_active ?? true}
+                  pendingInactiveRequest={
+                    pendingInactiveRequest
+                      ? {
+                          id: pendingInactiveRequest.id,
+                          requestedActive: pendingInactiveRequest.requested_active,
+                          reason: pendingInactiveRequest.reason,
+                          createdAt: pendingInactiveRequest.created_at,
+                        }
+                      : null
+                  }
                   isAdmin
+                  isCeo={admin.role === 'ceo'}
                 />
               }
             />
