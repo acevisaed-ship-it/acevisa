@@ -168,7 +168,7 @@ export function ServicesSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, ease: 'easeInOut' }}
-          className="px-5 pb-2 pt-4 text-center"
+          className="px-4 pb-2 pt-4 text-center"
         >
           <p className="text-[10px] font-medium uppercase tracking-widest text-orange">
             what we do
@@ -239,7 +239,7 @@ export function ServicesSection() {
           DESKTOP LAYOUT  (md+)
           Two rows of [SVG | card + card | SVG]
       ═════════════════════════════════════════════════════════ */}
-      <div className="relative z-10 mx-auto hidden h-full w-full max-w-6xl flex-col justify-center px-5 py-10 md:flex md:px-10 md:py-24">
+      <div className="relative z-10 mx-auto hidden h-full w-full max-w-6xl flex-col justify-center px-4 py-10 md:flex md:px-10 md:py-24">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

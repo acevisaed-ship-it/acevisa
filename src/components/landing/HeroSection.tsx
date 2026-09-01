@@ -10,15 +10,17 @@ import { useNavigateWithTransition } from './ScrollContainer'
 import { HeroAnimations } from './HeroAnimations'
 import { EarthSphere } from './EarthSphere'
 
-// ── Desktop globe: fills right half of viewport ──────────────────────────────
+// Previous desktop formula: Math.min(780, Math.max(520, Math.min(vw * 0.55, vh * 0.78)))
+// Reduced to 30% of that size (~70% smaller) so the globe is an accent, not the layout.
+function desktopGlobeSize(vw: number, vh: number) {
+  const previous = Math.min(780, Math.max(520, Math.min(vw * 0.55, vh * 0.78)))
+  return Math.round(previous * 0.3)
+}
+
 function EarthSphereDesktop() {
   const [size, setSize] = useState(0)
   useEffect(() => {
-    const update = () => {
-      const vw = window.innerWidth
-      const vh = window.innerHeight
-      setSize(Math.min(780, Math.max(520, Math.min(vw * 0.55, vh * 0.78))))
-    }
+    const update = () => setSize(desktopGlobeSize(window.innerWidth, window.innerHeight))
     update()
     window.addEventListener('resize', update)
     return () => window.removeEventListener('resize', update)
@@ -27,13 +29,12 @@ function EarthSphereDesktop() {
   return <EarthSphere size={size} />
 }
 
-// ── Mobile globe: compact, fits in narrow left column ────────────────────────
 function EarthSphereMobile() {
   const [size, setSize] = useState(0)
   useEffect(() => {
     const update = () => {
-      // ~44 % of viewport width, capped between 120 px and 200 px
-      setSize(Math.min(200, Math.max(120, Math.round(window.innerWidth * 0.44))))
+      // Mobile globe was already compact; keep it readable (~32% vw, 96–148px).
+      setSize(Math.min(148, Math.max(96, Math.round(window.innerWidth * 0.32))))
     }
     update()
     window.addEventListener('resize', update)
@@ -48,6 +49,9 @@ const stats = [
   { value: '4',    label: 'Countries' },
   { value: '9.2/10', label: 'Satisfaction' },
 ]
+
+const ctaButtonClass =
+  'inline-flex min-h-[44px] w-[280px] items-center justify-center rounded-full py-3.5 text-base font-semibold text-white transition-all duration-200 ease-out hover:scale-105 hover:shadow-lg hover:brightness-110 active:scale-95'
 
 export function HeroSection() {
   const navigate = useNavigateWithTransition()
@@ -65,15 +69,14 @@ export function HeroSection() {
       ════════════════════════════════════════════════════════════ */}
       <div className="relative z-10 flex h-full w-full flex-col md:hidden">
 
-        {/* Top area — ACE logo (left) + globe + man (right), fills available space */}
-        <div className="grid flex-1 grid-cols-[54%_46%] items-start pt-16">
+        {/* Top area — ACE logo (left) + globe + man (right) */}
+        <div className="grid flex-1 grid-cols-[54%_46%] items-start pt-20">
 
-          {/* Left col — ACE logo + tagline */}
           <motion.div
             initial={{ opacity: 0, x: -16 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, ease: 'easeInOut' }}
-            className="flex flex-col gap-2 pl-3 pt-4"
+            className="flex flex-col gap-2 px-4 pt-2"
           >
             <img
               src="/Hero Page LOGO.svg"
@@ -85,80 +88,78 @@ export function HeroSection() {
             </p>
           </motion.div>
 
-          {/* Right col — globe + man (flipped so he faces left toward logo) */}
           <div className="relative flex h-full flex-col items-center">
-            <div className="mt-4 flex items-center justify-center">
+            <div className="mt-2 flex items-center justify-center">
               <EarthSphereMobile />
             </div>
-            {/* Man pointing — scaleX(-1) so he faces left toward the ACE logo */}
             <div
-              className="pointer-events-none absolute bottom-0 right-0 w-full"
+              className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-center"
               aria-hidden="true"
             >
               <img
                 src="/man pointing to ace.svg"
                 alt=""
                 className="w-full object-contain object-bottom"
-                style={{ maxHeight: '57vh', transform: 'scaleX(-1)' }}
+                style={{ maxHeight: '48vh', transform: 'scaleX(-1)' }}
               />
             </div>
           </div>
         </div>
 
-        {/* Heading + CTA — above stats bar */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1, ease: 'easeInOut' }}
-          className="px-4 pb-3"
+          className="flex flex-col px-4 pb-4"
         >
           <h1
-            className="font-semibold leading-[0.92] tracking-tight text-blue"
+            className="font-semibold leading-[0.95] tracking-tight text-blue"
             style={{ fontSize: 'clamp(1.5rem, 6vw, 2.2rem)' }}
           >
             Ace Your
             <br />
             Future Here
           </h1>
-          <p className="mt-1.5 text-[11px] leading-snug text-text/70">
+          <p className="mt-4 text-xs leading-snug text-text/70">
             AI-Powered Guidance. Real Counselors. Real Results.
           </p>
-          <Button
-            onClick={() => navigate(1)}
-            className="mt-3 w-full py-3 text-sm font-semibold text-white"
-            style={{
-              background: 'linear-gradient(135deg, #E48328 0%, #2083B9 100%)',
-              border: 'none',
-            }}
-          >
-            Start Your Journey →
-          </Button>
-          <Link
-            href="/return"
-            className="mt-2 block text-[11px] text-text/60 underline-offset-2 hover:underline"
-          >
-            Already Registered? Return here →
-          </Link>
-          <Link
-            href="/portal/login"
-            className="mt-2 inline-flex min-h-[44px] w-full items-center justify-center rounded-full bg-grad-blue py-3 text-sm font-semibold text-white transition-all duration-200 ease-out hover:scale-105 hover:shadow-lg hover:brightness-110 active:scale-95"
-          >
-            Student Portal
-          </Link>
+          <div className="mt-8 flex flex-col items-stretch gap-4">
+            <Button
+              onClick={() => navigate(1)}
+              className="w-full py-3 text-sm font-semibold text-white"
+              style={{
+                background: 'linear-gradient(135deg, #E48328 0%, #2083B9 100%)',
+                border: 'none',
+              }}
+            >
+              Start Your Journey →
+            </Button>
+            <Link
+              href="/return"
+              className="block text-xs text-text/60 underline-offset-2 hover:underline"
+            >
+              Already Registered? Return here →
+            </Link>
+            <Link
+              href="/portal/login"
+              className="inline-flex min-h-[44px] w-full items-center justify-center rounded-full bg-grad-blue py-3 text-sm font-semibold text-white transition-all duration-200 ease-out hover:scale-105 hover:shadow-lg hover:brightness-110 active:scale-95"
+            >
+              Student Portal
+            </Link>
+          </div>
         </motion.div>
 
-        {/* Stats strip — very bottom */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2, ease: 'easeInOut' }}
-          className="mx-3 mb-3 rounded-2xl border border-text/10 bg-bg/80 px-4 py-3 backdrop-blur-sm"
+          className="mx-4 mb-4 rounded-2xl border border-text/10 bg-bg/80 px-4 py-4 backdrop-blur-sm"
         >
           <div className="flex justify-between">
             {stats.map((stat) => (
               <div key={stat.label} className="flex flex-col items-center text-center">
                 <p className="text-base font-semibold text-blue">{stat.value}</p>
-                <p className="mt-0.5 text-[9px] leading-tight text-text/60">{stat.label}</p>
+                <p className="mt-1 text-[10px] leading-tight text-text/60">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -167,67 +168,55 @@ export function HeroSection() {
 
       {/* ═══════════════════════════════════════════════════════════
           DESKTOP LAYOUT  (md+)
-          Globe: absolutely positioned right side
-          Man:   absolutely positioned bottom-left
-          Content: centred grid, weighted left
+          Left: copy + CTAs
+          Right: stats card with globe overlapping its right edge
+          Man: bottom-left, sitting on the section floor
       ════════════════════════════════════════════════════════════ */}
 
-      {/* Globe — desktop only */}
       <div
-        className="pointer-events-none absolute right-[1%] top-1/2 z-[4] hidden md:block"
-        style={{ transform: 'translateY(-50%)' }}
-      >
-        <EarthSphereDesktop />
-      </div>
-
-      {/* Man pointing — desktop only */}
-      <div
-        className="pointer-events-none absolute bottom-0 z-[6] hidden md:block"
+        className="pointer-events-none absolute bottom-0 left-0 z-[6] hidden md:block"
         aria-hidden="true"
-        style={{ left: '-4%' }}
       >
         <img
           src="/man pointing to ace.svg"
           alt=""
-          className="w-auto"
-          style={{ height: 'clamp(360px, 56vh, 640px)' }}
+          className="w-auto object-contain object-bottom"
+          style={{ height: 'clamp(220px, 34vh, 380px)' }}
         />
       </div>
 
-      {/* Desktop content grid */}
-      <div className="relative z-10 mx-auto hidden w-full max-w-5xl items-center md:grid md:grid-cols-1 md:gap-8 md:px-12 md:py-24 lg:grid-cols-2 lg:gap-10 lg:px-16 lg:pr-[8%]">
+      <div className="relative z-10 mx-auto hidden h-full w-full max-w-6xl items-center md:flex md:flex-row md:gap-6 md:px-10 md:py-20 lg:gap-16 lg:py-24">
 
-        {/* Content column — logo, text, CTA */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: 'easeInOut' }}
-          className="flex flex-col gap-5"
+          className="flex min-w-0 flex-1 flex-col items-start"
         >
           <img
             src="/Hero Page LOGO.svg"
             alt="ACE Altius Consulting"
-            className="h-auto w-full max-w-[280px] md:max-w-[420px]"
+            className="h-auto w-full max-w-[280px] md:max-w-[360px]"
           />
 
-          <p className="text-xs font-bold uppercase tracking-widest text-orange md:text-base">
+          <p className="mt-4 text-xs font-bold uppercase tracking-widest text-orange md:text-sm">
             Pakistan&apos;s First AI Consultancy Platform
           </p>
 
-          <h1 className="pl-3 text-[clamp(2rem,6vw,5rem)] font-semibold leading-[0.95] tracking-tight text-blue md:pl-8">
+          <h1 className="mt-6 text-[clamp(2rem,5vw,4rem)] font-semibold leading-[0.95] tracking-tight text-blue">
             Ace Your
             <br />
             Future Here
           </h1>
 
-          <p className="max-w-sm text-sm text-text/70 md:text-base md:text-lg">
+          <p className="mt-4 max-w-sm text-sm text-text/70 md:text-base">
             AI-Powered Guidance. Real Counselors. Real Results.
           </p>
 
-          <div className="flex flex-col gap-3 sm:block">
+          <div className="mt-8 flex flex-col items-start gap-4">
             <Button
               onClick={() => navigate(1)}
-              className="mt-2 w-full py-4 text-base font-semibold text-white sm:w-auto sm:px-10 sm:py-5 sm:text-lg"
+              className={ctaButtonClass}
               style={{
                 background: 'linear-gradient(135deg, #E48328 0%, #2083B9 100%)',
                 border: 'none',
@@ -236,41 +225,47 @@ export function HeroSection() {
               Start Your Journey →
             </Button>
 
-            <p className="mt-4">
-              <Link
-                href="/return"
-                className="inline-block text-sm text-text underline-offset-2 transition-all duration-200 hover:underline hover:scale-105 md:text-base"
-              >
-                Already Registered? → Return To Your Session
-              </Link>
-            </p>
+            <Link
+              href="/return"
+              className="max-w-full text-sm text-text/70 underline-offset-2 transition-all duration-200 hover:text-text hover:underline md:text-base"
+            >
+              Already Registered? → Return To Your Session
+            </Link>
 
             <Link
               href="/portal/login"
-              className="mt-3 inline-flex min-h-[44px] w-full items-center justify-center rounded-full bg-grad-blue py-4 text-base font-semibold text-white transition-all duration-200 ease-out hover:scale-105 hover:shadow-lg hover:brightness-110 active:scale-95 sm:w-auto sm:px-10 sm:py-5 sm:text-lg"
+              className={`${ctaButtonClass} bg-grad-blue`}
             >
               Student Portal
             </Link>
 
-            <PWAInstallButton className="mt-3 inline-flex items-center gap-2 rounded-full border border-text/20 px-4 py-2 text-sm font-medium text-text/70 transition-colors hover:border-text/40 hover:text-text md:text-base" />
+            <PWAInstallButton className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-text/20 px-4 py-2 text-sm font-medium text-text/70 transition-colors hover:border-text/40 hover:text-text" />
           </div>
         </motion.div>
 
-        {/* Stats card column — desktop */}
         <motion.div
           initial={{ opacity: 0, y: 32 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.15, ease: 'easeInOut' }}
-          className="flex w-full justify-center lg:justify-end"
+          className="flex shrink-0 items-center justify-center lg:justify-end"
         >
-          <Card variant="glass" className="w-full max-w-sm space-y-6 p-8">
-            {stats.map((stat) => (
-              <div key={stat.label} className="border-b border-text/10 pb-4 last:border-0 last:pb-0">
-                <p className="text-4xl font-semibold text-blue md:text-5xl">{stat.value}</p>
-                <p className="mt-1 text-base text-text/70 md:text-lg">{stat.label}</p>
-              </div>
-            ))}
-          </Card>
+          {/* Card in front, globe overlapping the right edge so ~half stays visible */}
+          <div className="relative flex items-center">
+            <Card variant="glass" className="relative z-10 w-[260px] shrink-0 space-y-4 p-6">
+              {stats.map((stat) => (
+                <div key={stat.label} className="border-b border-text/10 pb-4 last:border-0 last:pb-0">
+                  <p className="text-3xl font-semibold text-blue md:text-4xl">{stat.value}</p>
+                  <p className="mt-1 text-sm text-text/70 md:text-base">{stat.label}</p>
+                </div>
+              ))}
+            </Card>
+            <div
+              className="pointer-events-none relative z-0 -ml-16 shrink-0 lg:-ml-12"
+              aria-hidden="true"
+            >
+              <EarthSphereDesktop />
+            </div>
+          </div>
         </motion.div>
       </div>
     </div>

@@ -45,7 +45,7 @@ const countries = [
 export function CountriesSection() {
   return (
     <div
-      className="bg-texture relative flex h-full flex-col justify-center overflow-hidden px-5 py-10 md:px-10 md:py-24"
+      className="bg-texture relative flex h-full flex-col justify-center overflow-hidden px-4 py-10 md:px-10 md:py-24"
       style={{ background: 'var(--grad-orange)' }}
     >
 

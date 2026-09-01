@@ -67,7 +67,10 @@ export function EarthSphere({ size }: EarthSphereProps) {
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
       renderer.setClearColor(0x000000, 0)   // fully transparent background
 
-      mountRef.current!.appendChild(renderer.domElement)
+      const mount = mountRef.current
+      if (!mount) return
+      mount.querySelector('canvas')?.remove()
+      mount.appendChild(renderer.domElement)
 
       // ── Earth texture ────────────────────────────────────────────────────
       const texture = await new THREE.TextureLoader().loadAsync('/Earth2.png')

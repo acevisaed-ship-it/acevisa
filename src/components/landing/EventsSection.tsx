@@ -47,7 +47,7 @@ const events = [
 
 export function EventsSection() {
   return (
-    <div className="bg-texture relative flex h-full flex-col justify-center overflow-hidden bg-bg px-5 py-[20vh] md:px-10 md:py-24">
+    <div className="bg-texture relative flex h-full flex-col justify-center overflow-hidden bg-bg px-4 py-[20vh] md:px-10 md:py-24">
 
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
         <LandingDecor

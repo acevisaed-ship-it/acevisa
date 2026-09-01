@@ -33,7 +33,7 @@ const benefits = [
 export function BecomeAPartnerSection() {
   return (
     <div
-      className="bg-texture relative flex h-full flex-col justify-center overflow-hidden px-5 py-[20vh] md:px-10 md:py-24"
+      className="bg-texture relative flex h-full flex-col justify-center overflow-hidden px-4 py-[20vh] md:px-10 md:py-24"
       style={{ background: 'var(--grad-blue)' }}
     >
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
