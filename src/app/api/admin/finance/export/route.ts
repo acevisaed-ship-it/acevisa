@@ -159,11 +159,13 @@ export async function GET(request: Request) {
       supabase
         .from('invoices')
         .select('invoice_number, total, status, paid_at, clients(name, id)')
+        .is('deleted_at', null)
         .gte('created_at', start)
         .lt('created_at', end),
       supabase
         .from('expenses')
         .select('category, description, amount, paid_at')
+        .is('deleted_at', null)
         .gte('paid_at', startDate)
         .lt('paid_at', endDate),
     ])
@@ -200,6 +202,7 @@ export async function GET(request: Request) {
     const { data } = await supabase
       .from('invoices')
       .select('invoice_number, total, status, due_date, paid_at, created_at, clients(name, id), counselors(name)')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false })
 
     const rows = (data ?? []).map((i) => {
@@ -224,6 +227,7 @@ export async function GET(request: Request) {
     const { data } = await supabase
       .from('expenses')
       .select('category, description, amount, paid_at, notes')
+      .is('deleted_at', null)
       .gte('paid_at', startDate)
       .lt('paid_at', endDate)
       .order('paid_at', { ascending: false })

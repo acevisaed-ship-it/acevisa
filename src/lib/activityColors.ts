@@ -26,5 +26,11 @@ export function getActivityDotColor(actionType: string): string {
   if (actionType.startsWith('attendance_')) {
     return '#4F46E5'
   }
+  if (actionType.includes('deleted') || actionType.includes('removed')) {
+    return '#DC2626'
+  }
+  if (actionType.startsWith('invoice_') || actionType.startsWith('expense_')) {
+    return '#CA8A04'
+  }
   return 'rgba(10, 63, 58, 0.4)'
 }

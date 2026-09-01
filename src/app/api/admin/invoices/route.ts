@@ -70,6 +70,7 @@ export async function GET(request: Request) {
         ? 'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients!inner(name, id, branch_id), counselors(name), products(name)'
         : 'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors(name), products(name)'
     )
+    .is('deleted_at', null)
     .order('created_at', { ascending: false })
 
   if (branchScoped) {

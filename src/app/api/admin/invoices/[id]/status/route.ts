@@ -58,6 +58,7 @@ export async function PATCH(
       .from('invoices')
       .select('id, clients!inner(branch_id)')
       .eq('id', id)
+      .is('deleted_at', null)
       .eq('clients.branch_id', admin.branch_id)
       .maybeSingle()
     if (!row) {
@@ -74,6 +75,7 @@ export async function PATCH(
     .from('invoices')
     .update(updates)
     .eq('id', id)
+    .is('deleted_at', null)
     .select(
       'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors(name), products(name)'
     )

@@ -26,10 +26,12 @@ export function AccountsSection({
   clients,
   deals,
   counselors,
+  canManageEntries,
 }: {
   clients: ClientOption[]
   deals: DealOption[]
   counselors: CounselorOption[]
+  canManageEntries: boolean
 }) {
   const [tab, setTab] = useState<Tab>('invoices')
 
@@ -62,7 +64,9 @@ export function AccountsSection({
       {/* Tab panels */}
       <div>
         {tab === 'pl' && <FinanceSummary />}
-        {tab === 'invoices' && <InvoiceManager clients={clients} deals={deals} />}
+        {tab === 'invoices' && (
+          <InvoiceManager clients={clients} deals={deals} canManageEntries={canManageEntries} />
+        )}
         {tab === 'payroll' && <HRMView />}
         {tab === 'incentive' && <IncentivePolicyPanel counselors={counselors} />}
         {tab === 'products' && <ProductsPanel counselors={counselors} />}

@@ -26,6 +26,7 @@ export async function GET(request: Request) {
         ? 'id, invoice_number, total, status, created_at, paid_at, clients!inner(name, branch_id)'
         : 'id, invoice_number, total, status, created_at, paid_at, clients(name)'
     )
+    .is('deleted_at', null)
     .gte('created_at', start)
     .lt('created_at', end)
 
@@ -58,6 +59,7 @@ export async function GET(request: Request) {
     supabase
       .from('expenses')
       .select('id, category, description, amount, paid_at')
+      .is('deleted_at', null)
       .gte('paid_at', startDate)
       .lt('paid_at', endDate),
     supabase.from('commission_rules').select('counselor_id, commission_rate, base_salary'),

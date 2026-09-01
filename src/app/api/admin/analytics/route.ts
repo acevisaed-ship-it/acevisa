@@ -31,7 +31,7 @@ export async function GET() {
     supabase.from('tasks').select('*', { count: 'exact', head: true }).in('status', ['open', 'in_progress']),
     supabase.from('tasks').select('*', { count: 'exact', head: true }).in('status', ['open', 'in_progress']).eq('negligence_flagged', true),
     supabase.from('meetings').select('id, status').gte('scheduled_time', monthStart),
-    supabase.from('invoices').select('total, status, paid_at').gte('paid_at', monthStart).eq('status', 'paid'),
+    supabase.from('invoices').select('total, status, paid_at').is('deleted_at', null).gte('paid_at', monthStart).eq('status', 'paid'),
     supabase.from('deals').select('stage, deal_value'),
   ])
 

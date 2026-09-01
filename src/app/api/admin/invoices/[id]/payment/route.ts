@@ -56,8 +56,9 @@ export async function POST(
 
   const { data: invoice, error: fetchError } = await supabase
     .from('invoices')
-    .select('id, client_id, total, currency, status, invoice_number, line_items, clients(name, email)')
+    .select('id, client_id, total, currency, status, invoice_number, line_items, deleted_at, clients(name, email)')
     .eq('id', id)
+    .is('deleted_at', null)
     .single()
 
   if (fetchError || !invoice) {
@@ -102,6 +103,7 @@ export async function POST(
     .from('invoices')
     .update({ status: 'paid', paid_at: paidAt, receipt_url: receipt_url || null })
     .eq('id', id)
+    .is('deleted_at', null)
     .select(
       'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors(name), products(name)'
     )

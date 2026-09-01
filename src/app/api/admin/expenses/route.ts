@@ -1,8 +1,35 @@
+import { logStaffActivity } from '@/lib/activityLog'
+import { changedFields, formatFieldChanges } from '@/lib/admin/accountEntries'
 import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { EXPENSE_CATEGORIES, type ExpenseCategory } from '@/lib/admin/dealTypes'
-import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { requireAdminApi, requireCeoApi } from '@/lib/admin/requireAdminApi'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+
+const EXPENSE_SELECT =
+  'id, category, subcategory, description, amount, currency, paid_at, notes, receipt_url, created_at, counselor_id'
+
+function expenseSnapshot(row: {
+  category: string
+  subcategory?: string | null
+  description: string
+  amount: number
+  paid_at: string
+  notes: string | null
+  receipt_url?: string | null
+  counselor_id?: string | null
+}) {
+  return {
+    category: row.category,
+    subcategory: row.subcategory ?? null,
+    description: row.description,
+    amount: Number(row.amount),
+    paid_at: row.paid_at,
+    notes: row.notes,
+    receipt_url: row.receipt_url ?? null,
+    counselor_id: row.counselor_id ?? null,
+  }
+}
 
 export async function GET(request: Request) {
   const { admin, error } = await requireAdminApi()
@@ -26,7 +53,8 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from('expenses')
-    .select('id, category, description, amount, currency, paid_at, notes, created_at, counselor_id')
+    .select(EXPENSE_SELECT)
+    .is('deleted_at', null)
     .order('paid_at', { ascending: false })
 
   if (branchCounselorIds) {
@@ -100,7 +128,7 @@ export async function POST(request: Request) {
       counselor_id: counselor_id || null,
       receipt_url: receipt_url || null,
     })
-    .select('id, category, subcategory, description, amount, currency, paid_at, notes, receipt_url, created_at')
+    .select(EXPENSE_SELECT)
     .single()
 
   if (insertError) {
@@ -111,20 +139,138 @@ export async function POST(request: Request) {
   return NextResponse.json({ expense: data })
 }
 
+export async function PATCH(request: Request) {
+  const { admin, error } = await requireCeoApi()
+  if (error) return error
+
+  const body = await request.json()
+  const {
+    id,
+    category,
+    description,
+    amount,
+    paid_at,
+    notes,
+    subcategory,
+    counselor_id,
+    receipt_url,
+  } = body
+
+  if (!id) {
+    return NextResponse.json({ error: 'id is required' }, { status: 400 })
+  }
+  if (!category || !EXPENSE_CATEGORIES.includes(category as ExpenseCategory)) {
+    return NextResponse.json({ error: 'Valid category is required' }, { status: 400 })
+  }
+  if (!description?.trim()) {
+    return NextResponse.json({ error: 'Description is required' }, { status: 400 })
+  }
+  if (!amount || Number(amount) <= 0) {
+    return NextResponse.json({ error: 'Amount must be greater than 0' }, { status: 400 })
+  }
+  if (!paid_at) {
+    return NextResponse.json({ error: 'Date is required' }, { status: 400 })
+  }
+
+  const supabase = createAdminClient()
+  const { data: existing, error: fetchError } = await supabase
+    .from('expenses')
+    .select(EXPENSE_SELECT)
+    .eq('id', id)
+    .is('deleted_at', null)
+    .maybeSingle()
+
+  if (fetchError || !existing) {
+    return NextResponse.json({ error: 'Expense not found' }, { status: 404 })
+  }
+
+  const { data, error: updateError } = await supabase
+    .from('expenses')
+    .update({
+      category,
+      subcategory: subcategory?.trim() || null,
+      description: description.trim(),
+      amount: Number(amount),
+      paid_at,
+      notes: notes?.trim() || null,
+      counselor_id: counselor_id || null,
+      receipt_url: receipt_url === undefined ? existing.receipt_url : receipt_url || null,
+    })
+    .eq('id', id)
+    .is('deleted_at', null)
+    .select(EXPENSE_SELECT)
+    .single()
+
+  if (updateError || !data) {
+    console.error('Expense update error:', updateError)
+    return NextResponse.json({ error: 'Failed to update expense' }, { status: 500 })
+  }
+
+  const before = expenseSnapshot(existing)
+  const after = expenseSnapshot(data)
+  const changes = changedFields(before, after)
+
+  if (Object.keys(changes).length > 0) {
+    await logStaffActivity({
+      counselorId: admin.id,
+      actorRole: admin.role,
+      actionType: 'expense_updated',
+      description: `${admin.name} edited expense "${existing.description}": ${formatFieldChanges(changes)}`,
+      metadata: {
+        entity: 'expense',
+        entityId: id,
+        before,
+        after,
+        changes,
+      },
+    })
+  }
+
+  return NextResponse.json({ expense: data })
+}
+
 export async function DELETE(request: Request) {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireCeoApi()
   if (error) return error
 
   const id = new URL(request.url).searchParams.get('id')
   if (!id) return NextResponse.json({ error: 'id is required' }, { status: 400 })
 
   const supabase = createAdminClient()
-  const { error: deleteError } = await supabase.from('expenses').delete().eq('id', id)
+  const { data: existing, error: fetchError } = await supabase
+    .from('expenses')
+    .select(EXPENSE_SELECT)
+    .eq('id', id)
+    .is('deleted_at', null)
+    .maybeSingle()
+
+  if (fetchError || !existing) {
+    return NextResponse.json({ error: 'Expense not found' }, { status: 404 })
+  }
+
+  const { error: deleteError } = await supabase
+    .from('expenses')
+    .update({ deleted_at: new Date().toISOString(), deleted_by: admin.id })
+    .eq('id', id)
+    .is('deleted_at', null)
 
   if (deleteError) {
     console.error('Expense delete error:', deleteError)
     return NextResponse.json({ error: 'Failed to delete expense' }, { status: 500 })
   }
+
+  await logStaffActivity({
+    counselorId: admin.id,
+    actorRole: admin.role,
+    actionType: 'expense_deleted',
+    description: `${admin.name} deleted expense "${existing.description}" (PKR ${Number(existing.amount).toLocaleString('en-PK')})`,
+    metadata: {
+      entity: 'expense',
+      entityId: id,
+      before: expenseSnapshot(existing),
+      after: null,
+    },
+  })
 
   return NextResponse.json({ ok: true })
 }

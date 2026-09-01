@@ -1,7 +1,9 @@
 import { AccountsSection } from '@/components/admin/AccountsSection'
-import { createAdminClient } from '@/lib/supabase/server'
+import { canMutateAccountEntries } from '@/lib/admin/accountEntries'
+import { createAdminClient, requireAdmin } from '@/lib/supabase/server'
 
 export default async function AccountsPage() {
+  const admin = await requireAdmin()
   const supabase = createAdminClient()
 
   const [{ data: clients }, { data: deals }, { data: counselors }] = await Promise.all([
@@ -21,6 +23,7 @@ export default async function AccountsPage() {
         clients={clients ?? []}
         deals={deals ?? []}
         counselors={counselors ?? []}
+        canManageEntries={canMutateAccountEntries(admin.role)}
       />
     </main>
   )

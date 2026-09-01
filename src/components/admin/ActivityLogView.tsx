@@ -106,6 +106,10 @@ const ACTION_COLORS: Record<string, string> = {
   progress_report_sent: 'bg-grad-yellow text-white',
   leave_submitted: 'bg-grad-yellow text-white',
   brief_viewed: 'bg-grad-yellow text-white',
+  invoice_updated: 'bg-grad-yellow text-white',
+  expense_updated: 'bg-grad-yellow text-white',
+  invoice_deleted: 'bg-grad-red text-white',
+  expense_deleted: 'bg-grad-red text-white',
 }
 
 // Safety net for any actionType not covered above (e.g. a future addition) —
