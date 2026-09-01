@@ -10,6 +10,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url)
   const limit = Math.min(Number(url.searchParams.get('limit') ?? 100), 200)
   const offset = Number(url.searchParams.get('offset') ?? 0)
+  const counselorId = url.searchParams.get('counselorId')
 
   const branchScoped = isBranchScopedAdmin(admin)
   const supabase = createAdminClient()
@@ -30,6 +31,13 @@ export async function GET(request: Request) {
     query = query.or(
       `clients.branch_id.eq.${admin.branch_id},and(client_id.is.null,counselors.branch_id.eq.${admin.branch_id})`
     )
+  }
+
+  // Single-counselor view (Team card -> "Activity Log"). Still respects the
+  // branch-scoping filter above for a Branch Manager, so they can't view a
+  // counselor outside their own branch by guessing an id.
+  if (counselorId) {
+    query = query.eq('counselor_id', counselorId)
   }
 
   const { data: logs, error: fetchError, count } = await query

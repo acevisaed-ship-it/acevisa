@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Activity, ChevronDown } from 'lucide-react'
+import { Activity, ArrowLeft, ChevronDown } from 'lucide-react'
 
 type LogEntry = {
   id: string
@@ -170,7 +170,16 @@ function ActionBadge({ type }: { type: string }) {
 
 const PAGE_SIZE = 50
 
-export function ActivityLogView() {
+// counselorId/counselorName narrow this to one counselor's history — used
+// by the Team page's per-counselor "Activity Log" view. Omitted, this is
+// the full company-wide staff log (Staff Log and Activity in the sidebar).
+export function ActivityLogView({
+  counselorId,
+  counselorName,
+}: {
+  counselorId?: string
+  counselorName?: string
+} = {}) {
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -178,7 +187,9 @@ export function ActivityLogView() {
   const [offset, setOffset] = useState(0)
 
   async function fetchLogs(off: number, append = false) {
-    const res = await fetch(`/api/admin/activity?limit=${PAGE_SIZE}&offset=${off}`)
+    const qs = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(off) })
+    if (counselorId) qs.set('counselorId', counselorId)
+    const res = await fetch(`/api/admin/activity?${qs}`)
     const data = await res.json()
     if (!res.ok) {
       console.error('[ActivityLogView] API error:', res.status, data)
@@ -209,7 +220,18 @@ export function ActivityLogView() {
   return (
     <div>
       <div>
-        <h1 className="text-2xl font-semibold text-white md:text-3xl">Staff Log and Activity</h1>
+        {counselorId && (
+          <Link
+            href="/admin/team"
+            className="mb-2 inline-flex items-center gap-1.5 text-sm text-white/50 hover:text-white"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Team
+          </Link>
+        )}
+        <h1 className="text-2xl font-semibold text-white md:text-3xl">
+          {counselorId ? `Activity Log — ${counselorName ?? 'Counselor'}` : 'Staff Log and Activity'}
+        </h1>
         <p className="mt-1 text-sm text-white/60">
           {total} action{total === 1 ? '' : 's'} recorded
           {total > 0 ? ' — creates, edits, assignments, approvals, and other portal actions' : ''}
@@ -219,7 +241,9 @@ export function ActivityLogView() {
       {logs.length === 0 ? (
         <div className="mt-12 flex flex-col items-center gap-2 text-center">
           <Activity className="h-10 w-10 text-white/20" />
-          <p className="text-white/50">No staff actions recorded yet</p>
+          <p className="text-white/50">
+            {counselorId ? 'No actions recorded for this counselor yet' : 'No staff actions recorded yet'}
+          </p>
         </div>
       ) : (
         <>
