@@ -19,19 +19,23 @@ export async function POST(request: Request) {
   const vis = visibility === 'shared' ? 'shared' : 'internal'
 
   const supabase = createAdminClient()
-  // Verify counselor owns this client
   const { data: client } = await supabase
     .from('clients')
-    .select('id')
+    .select('id, counselor_id')
     .eq('id', clientId)
-    .eq('counselor_id', counselor.id)
-    .single()
+    .maybeSingle()
 
-  if (!client) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  if (!client) return NextResponse.json({ error: 'Student not found' }, { status: 404 })
+
+  const isLeadership = counselor.role === 'admin' || counselor.role === 'ceo'
+  if (client.counselor_id !== counselor.id && !isLeadership) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
 
   const { error } = await logActivity({
     clientId,
     counselorId: counselor.id,
+    actorRole: counselor.role,
     actionType: vis === 'shared' ? 'counselor_update' : 'counselor_note',
     description: text.trim(),
     visibility: vis,

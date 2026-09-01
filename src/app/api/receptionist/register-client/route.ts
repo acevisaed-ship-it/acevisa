@@ -109,8 +109,14 @@ export async function POST(request: Request) {
 
   if (authUserError || !authUser.user) {
     console.error('[receptionist/register-client] auth error:', authUserError)
+    const raw = authUserError?.message ?? 'Failed to create login account'
+    const isAuthz = /not allowed|forbidden|unauthorized|not_admin|service role/i.test(raw)
     return NextResponse.json(
-      { error: authUserError?.message ?? 'Failed to create login account' },
+      {
+        error: isAuthz
+          ? 'Could not create the student login account. Please try again, or sign out and sign back in.'
+          : raw,
+      },
       { status: 500 }
     )
   }

@@ -237,7 +237,12 @@ export function ActivityLogView() {
                       </Link>
                     )}
                   </div>
-                  <p className="mt-1 text-sm text-white/60">{log.description}</p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm text-white/60">{log.description}</p>
+                  {typeof log.metadata?.note === 'string' &&
+                    log.metadata.note.trim() &&
+                    !log.description.includes(log.metadata.note.trim()) && (
+                      <p className="mt-1 whitespace-pre-wrap text-sm text-white/80">{log.metadata.note}</p>
+                    )}
                 </div>
                 <span className="shrink-0 text-xs text-white/40">{formatTime(log.createdAt)}</span>
               </div>

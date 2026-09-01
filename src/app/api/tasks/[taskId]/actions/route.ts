@@ -1,5 +1,6 @@
 import { logActivity } from '@/lib/activityLog'
 import { createAdminClient, getAuthenticatedCounselor } from '@/lib/supabase/server'
+import { resolveTaskClient } from '@/lib/tasks/resolveTaskClient'
 import { NextResponse } from 'next/server'
 
 export async function GET(
@@ -13,11 +14,16 @@ export async function GET(
 
   const { taskId } = await params
   const supabase = createAdminClient()
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('task_actions')
     .select('*, counselors(name)')
     .eq('task_id', taskId)
     .order('created_at', { ascending: true })
+
+  if (error) {
+    console.error('[task actions GET]', error.message)
+    return NextResponse.json({ error: 'Failed to load task history' }, { status: 500 })
+  }
 
   return NextResponse.json({ actions: data || [] })
 }
@@ -31,7 +37,7 @@ export async function POST(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { counselorId, actionType, noteText, newStatus, reminderAt, visibility } = await request.json()
+  const { actionType, noteText, newStatus, reminderAt, visibility } = await request.json()
   const { taskId } = await params
   const supabase = createAdminClient()
 
@@ -39,14 +45,18 @@ export async function POST(
     .from('tasks')
     .select('*, clients(name, counselor_id)')
     .eq('id', taskId)
-    .eq('counselor_id', counselor.id)
-    .single()
+    .maybeSingle()
 
   if (!task) return NextResponse.json({ error: 'Task not found' }, { status: 404 })
 
+  const isLeadership = counselor.role === 'admin' || counselor.role === 'ceo'
+  if (task.counselor_id !== counselor.id && !isLeadership) {
+    return NextResponse.json({ error: 'Task not found' }, { status: 404 })
+  }
+
   const { error: insertError } = await supabase.from('task_actions').insert({
     task_id: taskId,
-    counselor_id: counselorId || counselor.id,
+    counselor_id: counselor.id,
     action_type: actionType,
     note_text: noteText || null,
     old_status: task.status,
@@ -56,6 +66,7 @@ export async function POST(
   })
 
   if (insertError) {
+    console.error('[task actions POST] insert failed:', insertError.message)
     return NextResponse.json({ error: insertError.message }, { status: 500 })
   }
 
@@ -80,28 +91,57 @@ export async function POST(
   }
   if (reminderAt) taskUpdate.reminder_at = reminderAt
 
+  let clientId = (task.client_id as string | null) ?? null
+  let linkedClient: { id: string; name: string; client_code: string | null } | null = null
+  const existingClient = task.clients as { name?: string } | { name?: string }[] | null
+  const existingName = Array.isArray(existingClient)
+    ? existingClient[0]?.name
+    : existingClient?.name
+  if (clientId && existingName) {
+    linkedClient = { id: clientId, name: existingName, client_code: null }
+  } else if (!clientId) {
+    linkedClient = await resolveTaskClient(supabase, {
+      taskText: String(task.task_text ?? ''),
+      counselorId: task.counselor_id,
+    })
+    if (linkedClient) {
+      clientId = linkedClient.id
+      taskUpdate.client_id = linkedClient.id
+    }
+  }
+
   const { error: updateError } = await supabase.from('tasks').update(taskUpdate).eq('id', taskId)
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 })
   }
 
-  const clientId = task.client_id
+  const taskLabel = String(task.task_text ?? '')
+  const shortTask = `${taskLabel.substring(0, 60)}${taskLabel.length > 60 ? '…' : ''}`
+  const noteSnippet = typeof noteText === 'string' ? noteText.trim() : ''
+
   const actionDescriptions: Record<string, string> = {
-    note: `Counselor added note to task: "${task.task_text?.substring(0, 60)}${task.task_text?.length > 60 ? '…' : ''}"`,
-    status_update: `Task status changed from ${task.status} to ${newStatus}: "${task.task_text?.substring(0, 40)}…"`,
-    reminder_set: `Reminder set for task: "${task.task_text?.substring(0, 60)}…"`,
+    note: noteSnippet
+      ? `${counselor.name}: ${noteSnippet}`
+      : `${counselor.name} added a note on task: "${shortTask}"`,
+    status_update: `${counselor.name} changed task from ${task.status} to ${newStatus}: "${shortTask}"`,
+    reminder_set: `${counselor.name} set a reminder on task: "${shortTask}"`,
   }
 
   const noteVisibility = visibility === 'shared' ? 'shared' : 'internal'
 
-  await logActivity({
+  const { error: logError } = await logActivity({
     clientId,
-    counselorId: counselorId || counselor.id,
+    counselorId: counselor.id,
+    actorRole: counselor.role,
     actionType: `task_${actionType}`,
     description: actionDescriptions[actionType] || `Task action: ${actionType}`,
     visibility: actionType === 'note' ? noteVisibility : 'internal',
-    metadata: { task_id: taskId, note: noteText, new_status: newStatus },
+    metadata: { task_id: taskId, task_text: taskLabel, note: noteSnippet || null, new_status: newStatus },
   })
 
-  return NextResponse.json({ success: true })
+  if (logError) {
+    console.error('[task actions POST] activity log failed:', logError)
+  }
+
+  return NextResponse.json({ success: true, linkedClient })
 }

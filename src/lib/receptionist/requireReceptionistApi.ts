@@ -10,13 +10,19 @@ export async function requireReceptionistApi() {
   if (!counselor) {
     return {
       receptionist: null as null,
-      error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),
+      error: NextResponse.json(
+        { error: 'Your session expired. Please sign in again.', code: 'SESSION_EXPIRED' },
+        { status: 401 }
+      ),
     }
   }
   if (counselor.role !== 'receptionist') {
     return {
       receptionist: null as null,
-      error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }),
+      error: NextResponse.json(
+        { error: 'Only reception staff can do this.', code: 'FORBIDDEN_ROLE' },
+        { status: 403 }
+      ),
     }
   }
   return { receptionist: counselor, error: null as null }

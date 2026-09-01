@@ -7,6 +7,7 @@ import { RecentVisitsSection } from '@/components/brief/RecentVisitsSection'
 import { BehavioralNotesSection } from '@/components/brief/BehavioralNotesSection'
 import { ConversationDigestSection } from '@/components/brief/ConversationDigestSection'
 import { DocumentsChecklistSection } from '@/components/brief/DocumentsChecklistSection'
+import { ClientTasksSection, type ClientTask } from '@/components/brief/ClientTasksSection'
 import {
   ClientProfileHeader,
   ProfileSummarySection,
@@ -18,6 +19,7 @@ import { ServicePathwaySection } from '@/components/brief/ServicePathwaySection'
 import { TalkingPointsSection } from '@/components/brief/TalkingPointsSection'
 import { resolveAiProfile } from '@/lib/brief'
 import { createAdminClient, requireAdmin } from '@/lib/supabase/server'
+import { taskAssigneeName } from '@/lib/supabase/relations'
 import type { Client, Conversation, Document } from '@/types'
 import { ClientControls } from '@/app/(counselor)/dashboard/clients/[clientId]/ClientControls'
 import { ClientProfileHeaderActions } from '@/app/(counselor)/dashboard/clients/[clientId]/ClientProfileHeaderActions'
@@ -53,6 +55,7 @@ export default async function AdminClientProfilePage({ params }: Props) {
     { data: activityLog },
     { data: pendingUpdates },
     { data: pendingStageSuggestions },
+    { data: clientTasks, error: clientTasksError },
   ] = await Promise.all([
     typedClient.counselor_id
       ? supabase
@@ -97,7 +100,18 @@ export default async function AdminClientProfilePage({ params }: Props) {
       .eq('client_id', clientId)
       .eq('status', 'pending')
       .order('created_at', { ascending: false }),
+    supabase
+      .from('tasks')
+      .select(
+        `id, task_text, due_date, status, notes_count, negligence_flagged, counselor_id, ${taskAssigneeName}, task_actions(id, action_type, note_text, visibility, created_at, new_status, old_status, counselors(name))`
+      )
+      .eq('client_id', clientId)
+      .order('created_at', { ascending: false }),
   ])
+
+  if (clientTasksError) {
+    console.error('[admin client profile] tasks fetch failed:', clientTasksError.message)
+  }
 
   const { profile, isPartial: profilePartial } = resolveAiProfile(aiProfile)
   const score = typedClient.qualification_score ?? profile?.qualification_score ?? null
@@ -187,6 +201,12 @@ export default async function AdminClientProfilePage({ params }: Props) {
             <RecentVisitsSection visits={recentVisits} />
             <DocumentsChecklistSection documents={(documents ?? []) as Document[]} clientId={clientId} />
             <MeetingsHistorySection clientId={clientId} meetings={meetings ?? []} />
+            <ClientTasksSection
+              clientId={clientId}
+              clientName={typedClient.name}
+              currentStaffId={admin.id}
+              tasks={(clientTasks ?? []) as ClientTask[]}
+            />
             <ActivityHistorySection entries={activityLog ?? []} />
           </div>
         </div>

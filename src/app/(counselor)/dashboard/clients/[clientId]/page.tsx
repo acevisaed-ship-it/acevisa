@@ -10,6 +10,7 @@ import { ConversationDigestSection } from '@/components/brief/ConversationDigest
 import { DocumentsChecklistSection } from '@/components/brief/DocumentsChecklistSection'
 import { ApplicationsSection } from '@/components/brief/ApplicationsSection'
 import { MeetingsHistorySection } from '@/components/brief/MeetingsHistorySection'
+import { ClientTasksSection, type ClientTask } from '@/components/brief/ClientTasksSection'
 import {
   ClientProfileHeader,
   ProfileSummarySection,
@@ -21,6 +22,7 @@ import { StrategyChat } from '@/components/brief/StrategyChat'
 import { TalkingPointsSection } from '@/components/brief/TalkingPointsSection'
 import { resolveAiProfile } from '@/lib/brief'
 import { createAdminClient, getAuthenticatedCounselor } from '@/lib/supabase/server'
+import { taskAssigneeName } from '@/lib/supabase/relations'
 import type { Client, Conversation, Document } from '@/types'
 import { ClientControls } from './ClientControls'
 import { ClientProfileHeaderActions } from './ClientProfileHeaderActions'
@@ -60,6 +62,7 @@ export default async function ClientRecordPage({ params }: Props) {
     { data: counselorStatus },
     { data: applications },
     { data: pendingStageSuggestions },
+    { data: clientTasks, error: clientTasksError },
   ] = await Promise.all([
     supabase
       .from('ai_profiles')
@@ -103,7 +106,18 @@ export default async function ClientRecordPage({ params }: Props) {
       .eq('client_id', clientId)
       .eq('status', 'pending')
       .order('created_at', { ascending: false }),
+    supabase
+      .from('tasks')
+      .select(
+        `id, task_text, due_date, status, notes_count, negligence_flagged, counselor_id, ${taskAssigneeName}, task_actions(id, action_type, note_text, visibility, created_at, new_status, old_status, counselors(name))`
+      )
+      .eq('client_id', clientId)
+      .order('created_at', { ascending: false }),
   ])
+
+  if (clientTasksError) {
+    console.error('[counselor client profile] tasks fetch failed:', clientTasksError.message)
+  }
 
   const { profile, isPartial: profilePartial } = resolveAiProfile(aiProfile)
   const score = typedClient.qualification_score ?? profile?.qualification_score ?? null
@@ -202,6 +216,12 @@ export default async function ClientRecordPage({ params }: Props) {
             <DocumentsChecklistSection documents={(documents ?? []) as Document[]} clientId={clientId} />
             <ApplicationsSection clientId={clientId} applications={applications ?? []} />
             <MeetingsHistorySection clientId={clientId} meetings={meetings ?? []} />
+            <ClientTasksSection
+              clientId={clientId}
+              clientName={typedClient.name}
+              currentStaffId={counselor.id}
+              tasks={(clientTasks ?? []) as ClientTask[]}
+            />
             <ActivityHistorySection entries={activityLog ?? []} />
           </div>
         </div>

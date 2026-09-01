@@ -139,6 +139,12 @@ export function HeroSection() {
           >
             Already Registered? Return here →
           </Link>
+          <Link
+            href="/portal/login"
+            className="mt-2 inline-flex min-h-[44px] w-full items-center justify-center rounded-full bg-grad-blue py-3 text-sm font-semibold text-white transition-all duration-200 ease-out hover:scale-105 hover:shadow-lg hover:brightness-110 active:scale-95"
+          >
+            Student Portal
+          </Link>
         </motion.div>
 
         {/* Stats strip — very bottom */}
@@ -238,6 +244,13 @@ export function HeroSection() {
                 Already Registered? → Return To Your Session
               </Link>
             </p>
+
+            <Link
+              href="/portal/login"
+              className="mt-3 inline-flex min-h-[44px] w-full items-center justify-center rounded-full bg-grad-blue py-4 text-base font-semibold text-white transition-all duration-200 ease-out hover:scale-105 hover:shadow-lg hover:brightness-110 active:scale-95 sm:w-auto sm:px-10 sm:py-5 sm:text-lg"
+            >
+              Student Portal
+            </Link>
 
             <PWAInstallButton className="mt-3 inline-flex items-center gap-2 rounded-full border border-text/20 px-4 py-2 text-sm font-medium text-text/70 transition-colors hover:border-text/40 hover:text-text md:text-base" />
           </div>

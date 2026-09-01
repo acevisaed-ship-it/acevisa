@@ -79,13 +79,16 @@ export async function POST(request: Request) {
   }
 
   if (client?.counselor_id) {
-    await supabase.from('tasks').insert({
+    const { error: taskError } = await supabase.from('tasks').insert({
       counselor_id: client.counselor_id,
       client_id: clientId,
       task_text: `${client.name} requested a meeting on ${preferredDate} (${preferredTimeOfDay}). Confirm or reschedule.`,
       due_date: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(),
-      status: 'pending',
+      status: 'open',
     })
+    if (taskError) {
+      console.error('[meetings/request] task insert failed:', taskError.message)
+    }
   }
 
   try {

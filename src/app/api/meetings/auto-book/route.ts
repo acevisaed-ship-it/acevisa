@@ -279,13 +279,16 @@ Respond with ONLY the JSON. No explanation.`
     .eq('id', clientId)
 
   if (counselorId) {
-    await supabase.from('tasks').insert({
+    const { error: taskError } = await supabase.from('tasks').insert({
       counselor_id: counselorId,
       client_id: clientId,
       task_text: `Meeting auto-booked by student for ${confirmedLabel} PKT. Review and confirm.`,
       due_date: new Date(requestedUTC.getTime() - 2 * 60 * 60 * 1000).toISOString(),
-      status: 'pending',
+      status: 'open',
     })
+    if (taskError) {
+      console.error('[meetings/auto-book] task insert failed:', taskError.message)
+    }
 
     await createNotification({
       counselorId,

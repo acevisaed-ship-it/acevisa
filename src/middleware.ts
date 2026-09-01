@@ -21,6 +21,8 @@ function redirectToLogin(request: NextRequest) {
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next()
+  const pathname = request.nextUrl.pathname
+  const isApi = pathname.startsWith('/api/')
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -43,15 +45,17 @@ export async function middleware(request: NextRequest) {
   try {
     const { data, error } = await supabase.auth.getUser()
     if (error) {
-      // Stale/invalid refresh tokens must not crash the portal — send them to login.
+      // Stale/invalid refresh tokens must not crash the portal.
+      // Pages go to login; API callers expect JSON, not an HTML redirect.
+      if (isApi) return response
       return redirectToLogin(request)
     }
     user = data.user
   } catch {
+    if (isApi) return response
     return redirectToLogin(request)
   }
 
-  const pathname = request.nextUrl.pathname
   const isProtected =
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/admin') ||
@@ -118,5 +122,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*', '/receptionist/:path*'],
+  // Include /api so expired access tokens are refreshed before Route Handlers
+  // run. Front desk keeps /receptionist open for hours; without this, register
+  // and other receptionist APIs return 401/403 after the JWT expires.
+  matcher: ['/dashboard/:path*', '/admin/:path*', '/receptionist/:path*', '/api/:path*'],
 }

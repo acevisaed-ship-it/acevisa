@@ -59,11 +59,12 @@ export function ReceptionistRegisterForm() {
   const [counselors, setCounselors] = useState<{ id: string; name: string }[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [sessionExpired, setSessionExpired] = useState(false)
   const [duplicateClient, setDuplicateClient] = useState<ClientFormSnapshot | null>(null)
   const [success, setSuccess] = useState<SuccessState | null>(null)
 
   useEffect(() => {
-    fetch('/api/receptionist/branch-counselors')
+    fetch('/api/receptionist/branch-counselors', { credentials: 'include' })
       .then((res) => res.json())
       .then((data) => setCounselors(data.counselors ?? []))
       .catch(() => {})
@@ -73,6 +74,7 @@ export function ReceptionistRegisterForm() {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setSessionExpired(false)
     setDuplicateClient(null)
     setSuccess(null)
 
@@ -107,6 +109,7 @@ export function ReceptionistRegisterForm() {
     try {
       const res = await fetch('/api/receptionist/register-client', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: form.name,
@@ -123,6 +126,11 @@ export function ReceptionistRegisterForm() {
       const data = await res.json()
 
       if (!res.ok) {
+        if (res.status === 401) {
+          setSessionExpired(true)
+          setError(data.error || 'Your session expired. Please sign in again.')
+          return
+        }
         setError(data.error || 'Failed to register client')
         if (data.duplicateClient) setDuplicateClient(data.duplicateClient)
         return
@@ -351,7 +359,17 @@ export function ReceptionistRegisterForm() {
       </div>
 
       {error && (
-        <p className="rounded-xl bg-red-500/20 px-4 py-2.5 text-sm text-red-400">{error}</p>
+        <p className="rounded-xl bg-red-500/20 px-4 py-2.5 text-sm text-red-400">
+          {error}
+          {sessionExpired && (
+            <>
+              {' '}
+              <a href="/login" className="font-semibold underline">
+                Sign in
+              </a>
+            </>
+          )}
+        </p>
       )}
 
       {duplicateClient && (

@@ -1,6 +1,7 @@
 import { logActivity, logStaffActivity } from '@/lib/activityLog'
 import { createNotification } from '@/lib/notifications'
 import { createAdminClient, getAuthenticatedAdmin } from '@/lib/supabase/server'
+import { resolveTaskClient } from '@/lib/tasks/resolveTaskClient'
 import { NextResponse } from 'next/server'
 
 type RouteParams = { params: Promise<{ counselorId: string }> }
@@ -34,7 +35,7 @@ async function loadAuthorizedTarget(
   return { target, error: null }
 }
 
-export async function GET(_request: Request, { params }: RouteParams) {
+export async function GET(request: Request, { params }: RouteParams) {
   const admin = await getAuthenticatedAdmin()
   if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -43,6 +44,16 @@ export async function GET(_request: Request, { params }: RouteParams) {
   if (error) return error
 
   const supabase = createAdminClient()
+  const resolveText = new URL(request.url).searchParams.get('resolveText')
+  if (resolveText != null) {
+    const client = await resolveTaskClient(supabase, {
+      taskText: resolveText,
+      counselorId: target!.id,
+      branchId: target!.branch_id,
+    })
+    return NextResponse.json({ client })
+  }
+
   const { data: tasks } = await supabase
     .from('tasks')
     .select(
@@ -66,6 +77,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     task_text?: string
     due_date?: string
     client_id?: string
+    auto_link?: boolean
   }
   const taskText = body.task_text?.trim()
   if (!taskText) {
@@ -73,14 +85,37 @@ export async function POST(request: Request, { params }: RouteParams) {
   }
 
   const supabase = createAdminClient()
+  let linkedClient: { id: string; name: string; client_code: string | null } | null = null
+  if (body.client_id) {
+    const { data: picked } = await supabase
+      .from('clients')
+      .select('id, name, client_code')
+      .eq('id', body.client_id)
+      .neq('status', 'removed')
+      .maybeSingle()
+    if (!picked) {
+      return NextResponse.json({ error: 'Student not found' }, { status: 400 })
+    }
+    linkedClient = picked
+  } else if (body.auto_link !== false) {
+    linkedClient = await resolveTaskClient(supabase, {
+      taskText,
+      counselorId: target!.id,
+      branchId: target!.branch_id,
+    })
+  }
+
+  const clientId = linkedClient?.id ?? null
+
   const { data: newTask, error: insertError } = await supabase
     .from('tasks')
     .insert({
       counselor_id: target!.id,
-      client_id: body.client_id || null,
+      client_id: clientId,
       task_text: taskText,
       due_date: body.due_date || null,
       status: 'open',
+      source: 'assigned',
       assigned_by: admin.id,
     })
     .select('id, task_text, due_date, status')
@@ -97,13 +132,13 @@ export async function POST(request: Request, { params }: RouteParams) {
     title: `New task from ${admin.name}`,
     body: taskText,
     taskId: newTask.id,
-    clientId: body.client_id || undefined,
+    clientId: clientId || undefined,
   })
 
   const description = `${admin.name} assigned a task to ${target!.name}: "${taskText.slice(0, 80)}${taskText.length > 80 ? '…' : ''}"`
-  if (body.client_id) {
+  if (clientId) {
     await logActivity({
-      clientId: body.client_id,
+      clientId,
       counselorId: admin.id,
       actorRole: admin.role,
       actionType: 'task_assigned',
@@ -120,5 +155,10 @@ export async function POST(request: Request, { params }: RouteParams) {
     })
   }
 
-  return NextResponse.json({ success: true, task: newTask, assignedToName: target!.name })
+  return NextResponse.json({
+    success: true,
+    task: newTask,
+    assignedToName: target!.name,
+    linkedClient,
+  })
 }

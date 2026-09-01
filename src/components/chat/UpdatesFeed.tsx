@@ -18,8 +18,11 @@ const ACTION_ICONS: Record<string, React.ElementType> = {
   document_uploaded:   FileText,
   document_verified:   CheckCircle2,
   stage_changed:       ArrowUpCircle,
+  stage_change:        ArrowUpCircle,
   meeting_scheduled:   Calendar,
   note_shared:         MessageSquare,
+  counselor_update:    MessageSquare,
+  task_note:           MessageSquare,
   escalation_answered: CheckCircle2,
   complaint_resolved:  CheckCircle2,
   profile_updated:     RefreshCw,
@@ -29,8 +32,11 @@ const ACTION_COLORS: Record<string, string> = {
   document_uploaded:   'text-blue-300',
   document_verified:   'text-green-300',
   stage_changed:       'text-teal-300',
+  stage_change:        'text-teal-300',
   meeting_scheduled:   'text-purple-300',
   note_shared:         'text-yellow-300',
+  counselor_update:    'text-yellow-300',
+  task_note:           'text-yellow-300',
   escalation_answered: 'text-green-300',
   complaint_resolved:  'text-green-300',
   profile_updated:     'text-white/60',
@@ -109,7 +115,11 @@ export function UpdatesFeed({ clientId }: Props) {
 
                   {/* Content */}
                   <div className={`pb-3 ${isLast ? '' : ''}`}>
-                    <p className="text-[11px] leading-snug text-white/80">{u.description}</p>
+                    <p className="whitespace-pre-wrap text-[11px] leading-snug text-white/80">
+                      {typeof u.metadata?.note === 'string' && u.metadata.note.trim()
+                        ? u.metadata.note
+                        : u.description}
+                    </p>
                     <p className="mt-0.5 text-[10px] text-white/30">{timeAgo(u.created_at)}</p>
                   </div>
                 </div>

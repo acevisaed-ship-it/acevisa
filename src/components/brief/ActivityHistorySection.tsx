@@ -11,6 +11,7 @@ export type ActivityLogEntry = {
   action_type: string
   description: string
   created_at: string
+  metadata?: Record<string, unknown> | null
 }
 
 type Props = {
@@ -76,7 +77,14 @@ export function ActivityHistorySection({ entries }: Props) {
                         {entry.action_type.replace(/_/g, ' ')}
                       </span>
                     </div>
-                    <p className="text-sm text-white/80">{entry.description}</p>
+                    <p className="whitespace-pre-wrap text-sm text-white/80">{entry.description}</p>
+                    {typeof entry.metadata?.note === 'string' &&
+                      entry.metadata.note.trim() &&
+                      !entry.description.includes(entry.metadata.note.trim()) && (
+                        <p className="mt-1 whitespace-pre-wrap rounded-xl glass-card px-3 py-2 text-sm text-white/80">
+                          {entry.metadata.note}
+                        </p>
+                      )}
                   </div>
                 </li>
               ))}

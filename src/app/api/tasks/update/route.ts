@@ -1,6 +1,7 @@
 import { logActivity } from '@/lib/activityLog'
 import { createNotification } from '@/lib/notifications'
 import { createAdminClient, getAuthenticatedCounselor } from '@/lib/supabase/server'
+import { resolveTaskClient } from '@/lib/tasks/resolveTaskClient'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
@@ -40,10 +41,28 @@ export async function POST(request: Request) {
 
   const { data: existingTask } = await supabase
     .from('tasks')
-    .select('task_text, client_id, status, clients(name)')
+    .select('task_text, client_id, status, counselor_id, clients(name)')
     .eq('id', taskId)
     .eq('counselor_id', counselor.id)
     .maybeSingle()
+
+  let clientId = existingTask?.client_id ?? null
+  const existingClients = existingTask?.clients as { name?: string } | { name?: string }[] | null | undefined
+  let linkedName = Array.isArray(existingClients)
+    ? existingClients[0]?.name ?? null
+    : existingClients?.name ?? null
+
+  if (existingTask && !clientId) {
+    const resolved = await resolveTaskClient(supabase, {
+      taskText: existingTask.task_text,
+      counselorId: existingTask.counselor_id,
+    })
+    if (resolved) {
+      clientId = resolved.id
+      linkedName = resolved.name
+      update.client_id = resolved.id
+    }
+  }
 
   const { error } = await supabase
     .from('tasks')
@@ -59,8 +78,7 @@ export async function POST(request: Request) {
   // counselor changes a task's status — an accountability signal on client
   // SOP follow-ups that must also surface in Staff Activity / Logs.
   if (existingTask && status !== existingTask.status) {
-    const client = existingTask.clients as unknown as { name: string } | null
-    const clientLabel = client?.name ? ` for ${client.name}` : ''
+    const clientLabel = linkedName ? ` for ${linkedName}` : ''
     const STATUS_LABEL: Record<string, string> = {
       open: 'reopened',
       in_progress: 'marked in progress',
@@ -79,12 +97,12 @@ export async function POST(request: Request) {
       type: NOTIF_TYPE[status],
       title: `Task ${STATUS_LABEL[status]}${clientLabel}`,
       body: `${counselor.name}: "${existingTask.task_text}"`,
-      clientId: existingTask.client_id ?? undefined,
+      clientId: clientId ?? undefined,
       taskId,
     })
 
     await logActivity({
-      clientId: existingTask.client_id,
+      clientId,
       counselorId: counselor.id,
       actorRole: counselor.role,
       actionType: `task_${status}`,

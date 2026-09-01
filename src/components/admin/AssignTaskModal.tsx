@@ -1,6 +1,6 @@
 'use client'
 
-import { type FormEvent, useState } from 'react'
+import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 
 type Props = {
@@ -10,11 +10,76 @@ type Props = {
   onSuccess: () => void
 }
 
+type ClientHit = {
+  id: string
+  name: string
+  client_code: string | null
+  phone: string | null
+}
+
 export function AssignTaskModal({ targetId, targetName, onClose, onSuccess }: Props) {
   const [taskText, setTaskText] = useState('')
   const [dueDate, setDueDate] = useState('')
+  const [clientQuery, setClientQuery] = useState('')
+  const [clientHits, setClientHits] = useState<ClientHit[]>([])
+  const [selectedClient, setSelectedClient] = useState<ClientHit | null>(null)
+  const [autoLinked, setAutoLinked] = useState(false)
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const selectedRef = useRef(selectedClient)
+  const autoLinkedRef = useRef(autoLinked)
+  const dismissedForText = useRef('')
+  selectedRef.current = selectedClient
+  autoLinkedRef.current = autoLinked
+
+  useEffect(() => {
+    if (selectedClient) return
+    const q = clientQuery.trim()
+    if (q.length < 2) {
+      setClientHits([])
+      return
+    }
+    const handle = setTimeout(() => {
+      fetch(`/api/admin/clients?q=${encodeURIComponent(q)}`)
+        .then((r) => r.json())
+        .then((d) => setClientHits(d.clients ?? []))
+        .catch(() => setClientHits([]))
+    }, 250)
+    return () => clearTimeout(handle)
+  }, [clientQuery, selectedClient])
+
+  useEffect(() => {
+    const text = taskText.trim()
+    if (text.length < 4) {
+      if (autoLinkedRef.current) {
+        setSelectedClient(null)
+        setAutoLinked(false)
+      }
+      return
+    }
+    if (selectedRef.current && !autoLinkedRef.current) return
+    if (dismissedForText.current === text) return
+
+    const handle = setTimeout(() => {
+      fetch(`/api/admin/counselors/${targetId}/tasks?resolveText=${encodeURIComponent(text)}`)
+        .then((r) => r.json())
+        .then((d: { client?: ClientHit | null }) => {
+          if (selectedRef.current && !autoLinkedRef.current) return
+          if (d.client) {
+            setSelectedClient(d.client)
+            setAutoLinked(true)
+            setClientHits([])
+          } else if (autoLinkedRef.current) {
+            setSelectedClient(null)
+            setAutoLinked(false)
+          }
+        })
+        .catch(() => {
+          /* keep whatever is currently selected */
+        })
+    }, 400)
+    return () => clearTimeout(handle)
+  }, [taskText, targetId])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -31,6 +96,10 @@ export function AssignTaskModal({ targetId, targetName, onClose, onSuccess }: Pr
         body: JSON.stringify({
           task_text: taskText.trim(),
           due_date: dueDate || undefined,
+          client_id: selectedClient?.id,
+          auto_link: selectedClient
+            ? true
+            : dismissedForText.current !== taskText.trim(),
         }),
       })
       const data = await res.json()
@@ -87,6 +156,70 @@ export function AssignTaskModal({ targetId, targetName, onClose, onSuccess }: Pr
               className="w-full resize-none rounded-2xl px-4 py-2.5 text-sm outline-none glass-input"
               required
             />
+          </div>
+
+          <div>
+            <label htmlFor="task-client" className="mb-1.5 block text-sm text-white/70">
+              Link to student (recommended)
+            </label>
+            {selectedClient ? (
+              <div className="flex items-center justify-between gap-2 rounded-2xl glass-card px-4 py-2.5">
+                <p className="min-w-0 truncate text-sm text-white">
+                  {selectedClient.name}
+                  {selectedClient.client_code ? ` · ${selectedClient.client_code}` : ''}
+                  {autoLinked ? ' · auto-linked' : ''}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    dismissedForText.current = taskText.trim()
+                    setSelectedClient(null)
+                    setAutoLinked(false)
+                    setClientQuery('')
+                    setClientHits([])
+                  }}
+                  className="shrink-0 text-xs font-semibold text-white/50 hover:text-white"
+                >
+                  Change
+                </button>
+              </div>
+            ) : (
+              <>
+                <input
+                  id="task-client"
+                  type="search"
+                  value={clientQuery}
+                  onChange={(e) => setClientQuery(e.target.value)}
+                  placeholder="Search by name, phone, or client ID"
+                  className="min-h-[48px] w-full rounded-full px-4 py-2.5 text-sm outline-none glass-input"
+                />
+                {clientHits.length > 0 && (
+                  <ul className="mt-2 overflow-hidden rounded-2xl border border-white/10">
+                    {clientHits.map((hit) => (
+                      <li key={hit.id}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedClient(hit)
+                            setAutoLinked(false)
+                            setClientHits([])
+                          }}
+                          className="flex min-h-[44px] w-full flex-col items-start px-4 py-2 text-left hover:bg-white/10"
+                        >
+                          <span className="text-sm text-white">{hit.name}</span>
+                          <span className="text-xs text-white/50">
+                            {[hit.client_code, hit.phone].filter(Boolean).join(' · ')}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
+            )}
+            <p className="mt-1.5 text-xs text-white/40">
+              If the task names a student, they are linked automatically. Completions and notes then show on their profile.
+            </p>
           </div>
 
           <div>

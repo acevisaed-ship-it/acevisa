@@ -24,8 +24,8 @@ const TABS: { id: Tab; label: string }[] = [
 ]
 
 function getClientName(clients: TaskWithClient['clients']): string {
-  if (!clients) return 'Unknown client'
-  if (Array.isArray(clients)) return clients[0]?.name ?? 'Unknown client'
+  if (!clients) return 'Not linked to a student'
+  if (Array.isArray(clients)) return clients[0]?.name ?? 'Not linked to a student'
   return clients.name
 }
 

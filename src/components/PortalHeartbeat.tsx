@@ -6,8 +6,8 @@ const PING_INTERVAL_MS = 60_000
 
 /** Pings the server every 60s while this tab is visible/focused, so "time
  * spent on portal" reflects real activity rather than just a clocked-in
- * window. Mounted once in the staff shells (Admin/Dashboard) — safe to
- * mount from multiple tabs, each just contributes its own visible time. */
+ * window. Also keeps the Supabase session from going stale on long-lived
+ * pages (front desk). Mounted in staff shells — safe across multiple tabs. */
 export function PortalHeartbeat() {
   useEffect(() => {
     function ping() {

@@ -59,6 +59,11 @@ export function TaskDetailPanel({
   const [followUpSaving, setFollowUpSaving] = useState(false)
   const [followUpSaved, setFollowUpSaved] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
+  const [linkedClient, setLinkedClient] = useState(task.clients ?? null)
+
+  useEffect(() => {
+    setLinkedClient(task.clients ?? null)
+  }, [task.clients])
 
   useEffect(() => {
     fetch(`/api/tasks/${task.id}/actions`)
@@ -95,6 +100,13 @@ export function TaskDetailPanel({
         return
       }
 
+      const data = (await res.json().catch(() => ({}))) as {
+        linkedClient?: { id: string; name: string } | null
+      }
+      if (data.linkedClient?.id) {
+        setLinkedClient({ name: data.linkedClient.name, id: data.linkedClient.id })
+      }
+
       setNote('')
       setReminderInput('')
       onUpdated()
@@ -116,13 +128,13 @@ export function TaskDetailPanel({
   }
 
   async function saveFollowUp() {
-    if (!followUpAt || !task.clients?.id) return
+    if (!followUpAt || !linkedClient?.id) return
     setFollowUpSaving(true)
     await fetch('/api/reminders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        clientId: task.clients.id,
+        clientId: linkedClient.id,
         taskId: task.id,
         remindAt: new Date(followUpAt).toISOString(),
         note: followUpNote || undefined,
@@ -164,7 +176,7 @@ export function TaskDetailPanel({
             </div>
             <p className="mt-2 text-sm font-semibold leading-snug text-white">{task.task_text}</p>
             <div className="mt-1 flex items-center gap-3 text-xs text-white/50">
-              {task.clients?.name && <span>👤 {task.clients.name}</span>}
+              {linkedClient?.name && <span>👤 {linkedClient.name}</span>}
               <span>Due: {formatPKT(task.due_date)}</span>
             </div>
           </div>
@@ -352,7 +364,7 @@ export function TaskDetailPanel({
                       <div className="mt-2 flex gap-2">
                         <button
                           onClick={saveFollowUp}
-                          disabled={!followUpAt || followUpSaving || !task.clients?.id}
+                          disabled={!followUpAt || followUpSaving || !linkedClient?.id}
                           className="rounded-full bg-grad-blue crisp-on-dark px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
                         >
                           {followUpSaving ? 'Saving…' : 'Set Reminder'}
