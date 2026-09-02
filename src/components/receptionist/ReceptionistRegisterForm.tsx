@@ -33,6 +33,12 @@ import {
 const inputCls =
   'min-h-[44px] w-full rounded-xl border border-green/50 bg-white/15 px-3 py-2 text-sm text-white outline-none placeholder:text-white/50 transition-colors focus:border-green focus:bg-white/20'
 const labelCls = 'mb-1 block text-xs font-medium text-white/80'
+// <select>'s own box picks up inputCls fine, but the dropdown *popup* list is
+// rendered by the browser/OS, not by our CSS — it ignores the translucent
+// bg-white/15 and falls back to a plain white list unless each <option> (and
+// <optgroup>) is given its own solid, explicit background. bg-text/text-bg
+// are the app's solid dark-teal-on-cream pair, closest match to this panel.
+const optionCls = 'bg-text text-bg'
 
 const emptyIntake = (): WalkInIntakeFormValues => ({
   lastEducation: '',
@@ -352,7 +358,7 @@ export function ReceptionistRegisterForm() {
             className={inputCls}
           >
             {languages.map((l) => (
-              <option key={l} value={l}>{l}</option>
+              <option key={l} value={l} className={optionCls}>{l}</option>
             ))}
           </select>
         </div>
@@ -387,7 +393,7 @@ export function ReceptionistRegisterForm() {
             className={inputCls}
           >
             {services.map((s) => (
-              <option key={s} value={s}>{s}</option>
+              <option key={s} value={s} className={optionCls}>{s}</option>
             ))}
           </select>
           {form.interested_in === 'Language & Test Prep' && (
@@ -407,9 +413,9 @@ export function ReceptionistRegisterForm() {
                 }}
                 className={inputCls}
               >
-                <option value="">Select test type…</option>
+                <option value="" className={optionCls}>Select test type…</option>
                 {languageTestOptions.map((t) => (
-                  <option key={t} value={t}>{t}</option>
+                  <option key={t} value={t} className={optionCls}>{t}</option>
                 ))}
               </select>
               {form.language_test_interest === OTHER && (
@@ -440,17 +446,17 @@ export function ReceptionistRegisterForm() {
             }}
             className={inputCls}
           >
-            <optgroup label="Popular Destinations">
+            <optgroup label="Popular Destinations" className={optionCls}>
               {popularDestinations.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c} value={c} className={optionCls}>{c}</option>
               ))}
             </optgroup>
-            <optgroup label="Schengen Countries">
+            <optgroup label="Schengen Countries" className={optionCls}>
               {schengenCountries.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c} value={c} className={optionCls}>{c}</option>
               ))}
             </optgroup>
-            <option value={OTHER}>{OTHER}</option>
+            <option value={OTHER} className={optionCls}>{OTHER}</option>
           </select>
           {form.target_country === OTHER && (
             <input
@@ -471,9 +477,9 @@ export function ReceptionistRegisterForm() {
           onChange={(e) => setForm({ ...form, counselorId: e.target.value })}
           className={inputCls}
         >
-          <option value="">Leave unassigned (Admin will assign)</option>
+          <option value="" className={optionCls}>Leave unassigned (Admin will assign)</option>
           {counselors.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
+            <option key={c.id} value={c.id} className={optionCls}>{c.name}</option>
           ))}
         </select>
       </div>

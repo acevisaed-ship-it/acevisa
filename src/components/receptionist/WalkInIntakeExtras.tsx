@@ -27,6 +27,7 @@ const inputCls =
 const labelCls = 'mb-1 block text-xs font-medium text-white/80'
 const hintCls = 'mt-1 text-[11px] text-white/55'
 const sectionCls = 'rounded-xl border border-white/20 p-4 space-y-3'
+const optionCls = 'bg-text text-bg'
 
 export type WalkInIntakeFormValues = {
   lastEducation: string
@@ -98,18 +99,18 @@ function CountrySelect({
         }}
         className={inputCls}
       >
-        <option value="">{placeholder}</option>
-        <optgroup label="Popular Destinations">
+        <option value="" className={optionCls}>{placeholder}</option>
+        <optgroup label="Popular Destinations" className={optionCls}>
           {popularDestinations.map((c) => (
-            <option key={c} value={c}>{c}</option>
+            <option key={c} value={c} className={optionCls}>{c}</option>
           ))}
         </optgroup>
-        <optgroup label="Schengen Countries">
+        <optgroup label="Schengen Countries" className={optionCls}>
           {schengenCountries.map((c) => (
-            <option key={c} value={c}>{c}</option>
+            <option key={c} value={c} className={optionCls}>{c}</option>
           ))}
         </optgroup>
-        <option value={OTHER}>{OTHER}</option>
+        <option value={OTHER} className={optionCls}>{OTHER}</option>
       </select>
       {selectValue === OTHER && (
         <input
@@ -160,11 +161,11 @@ function LanguageCertScoreInput({
         }}
         className={inputCls}
       >
-        <option value="">Select CEFR or Academic…</option>
+        <option value="" className={optionCls}>Select CEFR or Academic…</option>
         {cefrLevels.map((level) => (
-          <option key={level} value={level}>{level}</option>
+          <option key={level} value={level} className={optionCls}>{level}</option>
         ))}
-        <option value="__academic__">Academic score (0–100)</option>
+        <option value="__academic__" className={optionCls}>Academic score (0–100)</option>
       </select>
       {mode === 'academic' && (
         <input
@@ -250,9 +251,9 @@ export function WalkInIntakeExtras({ isStudyVisa, values, onChange }: Props) {
                 }
                 className={inputCls}
               >
-                <option value="">Select last education…</option>
+                <option value="" className={optionCls}>Select last education…</option>
                 {educationLevels.map((level) => (
-                  <option key={level} value={level}>{level}</option>
+                  <option key={level} value={level} className={optionCls}>{level}</option>
                 ))}
               </select>
               {values.lastEducation === OTHER && (
@@ -403,9 +404,9 @@ export function WalkInIntakeExtras({ isStudyVisa, values, onChange }: Props) {
                   }
                   className={inputCls}
                 >
-                  <option value="">Select category…</option>
+                  <option value="" className={optionCls}>Select category…</option>
                   {visaCategories.map((cat) => (
-                    <option key={cat} value={cat}>{cat}</option>
+                    <option key={cat} value={cat} className={optionCls}>{cat}</option>
                   ))}
                 </select>
                 {row.visaCategory === OTHER && (
@@ -465,9 +466,9 @@ export function WalkInIntakeExtras({ isStudyVisa, values, onChange }: Props) {
                     onChange={(e) => patchTest(row.id, { test: e.target.value, score: '' })}
                     className={inputCls}
                   >
-                    <option value="">Select test…</option>
+                    <option value="" className={optionCls}>Select test…</option>
                     {scoredLanguageTests.map((test) => (
-                      <option key={test} value={test}>{test}</option>
+                      <option key={test} value={test} className={optionCls}>{test}</option>
                     ))}
                   </select>
                 </div>
