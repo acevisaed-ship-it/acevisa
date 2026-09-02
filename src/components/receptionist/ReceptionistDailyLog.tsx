@@ -69,12 +69,12 @@ export function ReceptionistDailyLog() {
     <Card variant="blue" className="p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-green/20 text-orange">
             <DailyLogIcon className="h-5 w-5" />
           </span>
           <div>
-            <p className="text-sm font-semibold">Daily logs</p>
-            <p className="mt-0.5 text-xs text-bg/75">
+            <p className="text-sm font-semibold text-grad-orange">Daily logs</p>
+            <p className="mt-0.5 text-xs text-green">
               Every office visit and every client registered, by day.
             </p>
           </div>
@@ -83,7 +83,7 @@ export function ReceptionistDailyLog() {
           <Button
             type="button"
             variant="secondary"
-            className="border border-white/25 px-3 py-1.5 text-xs text-white hover:bg-white/10"
+            className="border border-green/40 px-3 py-1.5 text-xs text-green hover:bg-green/10"
             onClick={() => setDate(addDaysToDateString(date, -1))}
           >
             ← Prev day
@@ -98,7 +98,7 @@ export function ReceptionistDailyLog() {
           <Button
             type="button"
             variant="secondary"
-            className="border border-white/25 px-3 py-1.5 text-xs text-white hover:bg-white/10 disabled:hover:bg-transparent"
+            className="border border-green/40 px-3 py-1.5 text-xs text-green hover:bg-green/10 disabled:hover:bg-transparent"
             disabled={isToday}
             onClick={() => setDate(addDaysToDateString(date, 1))}
           >
@@ -112,31 +112,31 @@ export function ReceptionistDailyLog() {
         </div>
       </div>
 
-      {loading && <p className="mt-4 text-sm text-bg/75">Loading…</p>}
+      {loading && <p className="mt-4 text-sm text-green">Loading…</p>}
       {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
 
       {!loading && !error && (
         <div className="mt-4 grid gap-6 md:grid-cols-2">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-bg/65">
+            <p className="text-xs font-medium uppercase tracking-wide text-orange">
               Office visits ({walkIns.length})
             </p>
             {walkIns.length === 0 ? (
-              <p className="mt-2 text-sm text-bg/65">No walk-ins logged this day.</p>
+              <p className="mt-2 text-sm text-green">No walk-ins logged this day.</p>
             ) : (
               <ul className="mt-2 space-y-1.5">
                 {walkIns.map((w) => (
-                  <li key={w.id} className="rounded-lg border border-bg/25 px-3 py-2 text-sm">
+                  <li key={w.id} className="rounded-lg border border-green/30 px-3 py-2 text-sm">
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold">
+                      <span className="font-semibold text-green">
                         {w.clientName}
-                        {w.clientCode && <span className="text-bg/65"> · {w.clientCode}</span>}
+                        {w.clientCode && <span className="text-orange"> · {w.clientCode}</span>}
                       </span>
-                      <span className="text-xs text-bg/65">{timeOnly(w.createdAt)}</span>
+                      <span className="text-xs text-orange">{timeOnly(w.createdAt)}</span>
                     </div>
-                    {w.note && <p className="mt-0.5 text-xs text-bg/75">{w.note}</p>}
+                    {w.note && <p className="mt-0.5 text-xs text-green">{w.note}</p>}
                     {w.loggedByName && (
-                      <p className="mt-0.5 text-xs text-bg/55">Logged by {w.loggedByName}</p>
+                      <p className="mt-0.5 text-xs text-orange">Logged by {w.loggedByName}</p>
                     )}
                   </li>
                 ))}
@@ -145,26 +145,26 @@ export function ReceptionistDailyLog() {
           </div>
 
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-bg/65">
+            <p className="text-xs font-medium uppercase tracking-wide text-orange">
               New clients registered ({registrations.length})
             </p>
             {registrations.length === 0 ? (
-              <p className="mt-2 text-sm text-bg/65">No clients registered this day.</p>
+              <p className="mt-2 text-sm text-green">No clients registered this day.</p>
             ) : (
               <ul className="mt-2 space-y-1.5">
                 {registrations.map((r) => (
-                  <li key={r.id} className="rounded-lg border border-bg/25 px-3 py-2 text-sm">
+                  <li key={r.id} className="rounded-lg border border-green/30 px-3 py-2 text-sm">
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold">
-                        {r.name} <span className="text-bg/65">· {r.clientCode}</span>
+                      <span className="font-semibold text-green">
+                        {r.name} <span className="text-orange">· {r.clientCode}</span>
                       </span>
-                      <span className="text-xs text-bg/65">{timeOnly(r.registrationDate)}</span>
+                      <span className="text-xs text-orange">{timeOnly(r.registrationDate)}</span>
                     </div>
-                    <p className="mt-0.5 text-xs text-bg/75">
+                    <p className="mt-0.5 text-xs text-green">
                       {r.interestedIn ?? '—'}
                       {r.targetCountry ? ` · ${r.targetCountry}` : ''}
                     </p>
-                    <p className="mt-0.5 text-xs text-bg/55">
+                    <p className="mt-0.5 text-xs text-orange">
                       {r.counselorName ? `Assigned to ${r.counselorName}` : 'Unassigned'}
                       {r.adSource ? ` · via ${r.adSource}` : ''}
                     </p>

@@ -15,7 +15,7 @@ import {
 } from '@/lib/receptionist/intakeOptions'
 
 const inputCls = 'min-h-[44px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input disabled:opacity-50'
-const labelCls = 'mb-1 block text-xs font-medium text-white/60'
+const labelCls = 'mb-1 block text-xs font-medium text-green'
 
 export type IntakeValues = Record<CorrectableField, string>
 
@@ -109,7 +109,7 @@ export function ClientIntakeEditor({ values, onChange, editableFields }: Props) 
         </div>
         <div>
           <label className={labelCls}>
-            Email address <span className="font-normal text-white/40">(optional)</span>
+            Email address <span className="font-normal text-orange">(optional)</span>
           </label>
           <input
             type="text"

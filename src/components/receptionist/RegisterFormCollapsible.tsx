@@ -17,7 +17,7 @@ export function RegisterFormCollapsible() {
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="overflow-hidden rounded-card bg-grad-green text-text crisp">
+    <div className="overflow-hidden rounded-card bg-grad-green text-blue crisp">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -25,12 +25,12 @@ export function RegisterFormCollapsible() {
         aria-controls="register-form-panel"
         className="flex w-full items-center gap-3.5 p-5 text-left"
       >
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-bg shadow-sm shadow-black/10">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-bg shadow-sm shadow-black/10 text-blue">
           <RegisterIcon className="h-6 w-6" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-sm font-bold">Register a new client</span>
-          <span className="mt-0.5 block text-xs text-text/65">
+          <span className="block text-sm font-bold text-grad-teal">Register a new client</span>
+          <span className="mt-0.5 block text-xs text-blue">
             Full intake — starts their file and pipeline stage.
           </span>
         </span>

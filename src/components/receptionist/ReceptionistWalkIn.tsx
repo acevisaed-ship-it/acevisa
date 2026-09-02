@@ -79,12 +79,12 @@ export function ReceptionistWalkIn() {
   return (
     <Card variant="green" className="p-5">
       <div className="flex items-start gap-3.5">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-bg shadow-sm shadow-black/10">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-bg shadow-sm shadow-black/10 text-blue">
           <WalkInIcon className="h-6 w-6" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold">Record a walk-in</p>
-          <p className="mt-0.5 text-xs text-text/65">
+          <p className="text-sm font-bold text-grad-teal">Record a walk-in</p>
+          <p className="mt-0.5 text-xs text-blue">
             Every client visit — new or already registered — should be logged here.
           </p>
         </div>
@@ -98,7 +98,7 @@ export function ReceptionistWalkIn() {
             placeholder="Search by name or AV-code"
             className="min-h-[44px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input-dark"
           />
-          {searching && <p className="mt-1 text-xs text-text/50">Searching…</p>}
+          {searching && <p className="mt-1 text-xs text-blue/80">Searching…</p>}
           {results.length > 0 && (
             <ul className="mt-2 divide-y divide-text/10 rounded-xl border border-text/15">
               {results.map((r) => (
@@ -109,10 +109,10 @@ export function ReceptionistWalkIn() {
                     className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-text/5"
                   >
                     <span>
-                      <span className="font-semibold">{r.name}</span>{' '}
-                      <span className="text-text/50">· {r.clientCode}</span>
+                      <span className="font-semibold text-text">{r.name}</span>{' '}
+                      <span className="text-blue">· {r.clientCode}</span>
                     </span>
-                    <span className="text-xs text-text/50">{r.counselorName}</span>
+                    <span className="text-xs text-blue">{r.counselorName}</span>
                   </button>
                 </li>
               ))}
@@ -123,13 +123,13 @@ export function ReceptionistWalkIn() {
         <form onSubmit={handleLog} className="mt-3 space-y-3">
           <div className="flex items-center justify-between rounded-xl border border-text/15 px-3 py-2">
             <span className="text-sm">
-              <span className="font-semibold">{selected.name}</span>{' '}
-              <span className="text-text/50">· {selected.clientCode}</span>
+              <span className="font-semibold text-text">{selected.name}</span>{' '}
+              <span className="text-blue">· {selected.clientCode}</span>
             </span>
             <button
               type="button"
               onClick={() => setSelected(null)}
-              className="text-xs text-text/50 hover:text-text"
+              className="text-xs text-blue hover:text-text"
             >
               Change
             </button>
@@ -155,17 +155,17 @@ export function ReceptionistWalkIn() {
 
       {todayList.length > 0 && (
         <div className="mt-5 border-t border-text/15 pt-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-text/50">
+          <p className="text-xs font-medium uppercase tracking-wide text-blue">
             Today&apos;s walk-ins ({todayList.length})
           </p>
           <ul className="mt-2 space-y-1.5">
             {todayList.map((w) => (
-              <li key={w.id} className="flex items-center justify-between text-sm">
+              <li key={w.id} className="flex items-center justify-between text-sm text-text">
                 <span>
                   {w.clientName}
-                  {w.note && <span className="text-text/50"> — {w.note}</span>}
+                  {w.note && <span className="text-blue"> — {w.note}</span>}
                 </span>
-                <span className="text-xs text-text/50">{timeOnly(w.createdAt)}</span>
+                <span className="text-xs text-blue">{timeOnly(w.createdAt)}</span>
               </li>
             ))}
           </ul>

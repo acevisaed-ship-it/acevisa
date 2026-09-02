@@ -1,7 +1,7 @@
 // Small duotone-line icons for the front-desk action/tool cards — a step
 // warmer than a stock icon set, simple enough to read at 20-24px sitting
 // directly on a gradient card. All use currentColor so they inherit the
-// card's text color (text-text on green cards, text-white/text-bg on blue).
+// card's text color (text-blue on lime cards, text-orange/text-green on blue).
 
 type IconProps = { className?: string }
 

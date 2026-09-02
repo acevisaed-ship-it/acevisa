@@ -36,10 +36,10 @@ export function ReceptionistLookup() {
   return (
     <Card variant="blue" className="p-5">
       <div className="flex items-center gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-green/20 text-orange">
           <LookupIcon className="h-5 w-5" />
         </span>
-        <p className="text-sm font-semibold">Look up a client</p>
+        <p className="text-sm font-semibold text-grad-orange">Look up a client</p>
       </div>
 
       <div className="relative mt-3">
@@ -52,9 +52,9 @@ export function ReceptionistLookup() {
           placeholder="Search by name, phone, email, or AV-code"
           className="min-h-[44px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input"
         />
-        {searching && <p className="mt-1 text-xs text-bg/70">Searching…</p>}
+        {searching && <p className="mt-1 text-xs text-green/80">Searching…</p>}
         {results.length > 0 && (
-          <ul className="mt-2 divide-y divide-bg/25 rounded-xl border border-bg/25">
+          <ul className="mt-2 divide-y divide-green/25 rounded-xl border border-green/30">
             {results.map((r) => (
               <li key={r.id}>
                 <button
@@ -64,13 +64,13 @@ export function ReceptionistLookup() {
                     setResults([])
                     setQuery('')
                   }}
-                  className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-bg/10"
+                  className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-green/10"
                 >
                   <span>
-                    <span className="font-semibold">{r.name}</span>{' '}
-                    <span className="text-bg/65">· {r.clientCode}</span>
+                    <span className="font-semibold text-green">{r.name}</span>{' '}
+                    <span className="text-orange">· {r.clientCode}</span>
                   </span>
-                  <span className="text-xs text-bg/65">{r.counselorName}</span>
+                  <span className="text-xs text-orange">{r.counselorName}</span>
                 </button>
               </li>
             ))}
@@ -79,16 +79,16 @@ export function ReceptionistLookup() {
       </div>
 
       {selected && (
-        <div className="mt-3 flex items-center justify-between rounded-xl border border-bg/25 px-3 py-2 text-sm">
+        <div className="mt-3 flex items-center justify-between rounded-xl border border-green/30 px-3 py-2 text-sm">
           <span>
-            <span className="font-semibold">{selected.name}</span>{' '}
-            <span className="text-bg/65">· {selected.clientCode}</span>
-            <span className="block text-xs text-bg/65">Counselor: {selected.counselorName}</span>
+            <span className="font-semibold text-green">{selected.name}</span>{' '}
+            <span className="text-orange">· {selected.clientCode}</span>
+            <span className="block text-xs text-orange">Counselor: {selected.counselorName}</span>
           </span>
           <button
             type="button"
             onClick={() => setSelected(null)}
-            className="text-xs text-bg/65 hover:text-bg"
+            className="text-xs text-orange hover:text-green"
           >
             Clear
           </button>
