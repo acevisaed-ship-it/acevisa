@@ -2,6 +2,7 @@ import { ReceptionistLookup } from '@/components/receptionist/ReceptionistLookup
 import { ReceptionistWalkIn } from '@/components/receptionist/ReceptionistWalkIn'
 import { ReceptionistDailyLog } from '@/components/receptionist/ReceptionistDailyLog'
 import { ReceptionistCorrectionRequest } from '@/components/receptionist/ReceptionistCorrectionRequest'
+import { ReceptionistClassAttendance } from '@/components/receptionist/ReceptionistClassAttendance'
 import { RegisterFormCollapsible } from '@/components/receptionist/RegisterFormCollapsible'
 import { StaffAppInstallCard } from '@/components/StaffAppInstallCard'
 
@@ -22,6 +23,7 @@ export default function ReceptionistPage() {
         <div className="flex flex-col gap-5 lg:order-2">
           <p className="px-1 text-xs font-semibold uppercase tracking-wide text-bg/40">Do this now</p>
           <ReceptionistWalkIn />
+          <ReceptionistClassAttendance />
           <RegisterFormCollapsible />
           {/* .glass-card's own background rule wins the cascade over a
               Tailwind bg-* override here, so only the border is themed —

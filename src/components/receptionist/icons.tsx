@@ -71,6 +71,23 @@ export function DailyLogIcon({ className }: IconProps) {
   )
 }
 
+export function ClassAttendanceIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 48 48" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M24 8L6 16l18 8 18-8-18-8z"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinejoin="round"
+      />
+      <path d="M13 20v9c0 2.8 5 5 11 5s11-2.2 11-5v-9" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M40 17v11" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+      <circle cx="34" cy="35" r="7.5" fill="currentColor" />
+      <path d="M31 35l2 2 4-4.5" stroke="#E6E8E7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 export function ChevronIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">

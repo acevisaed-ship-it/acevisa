@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ActivityHistorySection } from '@/components/brief/ActivityHistorySection'
 import { RecentVisitsSection } from '@/components/brief/RecentVisitsSection'
+import { ClassAttendanceSection, type ClassEnrollmentEntry } from '@/components/brief/ClassAttendanceSection'
 import { BehavioralNotesSection } from '@/components/brief/BehavioralNotesSection'
 import { ConversationDigestSection } from '@/components/brief/ConversationDigestSection'
 import { DocumentsChecklistSection } from '@/components/brief/DocumentsChecklistSection'
@@ -57,6 +58,8 @@ export default async function AdminClientProfilePage({ params }: Props) {
     { data: pendingStageSuggestions },
     { data: clientTasks, error: clientTasksError },
     { data: pendingInactiveRequest },
+    { data: classEnrollments },
+    { data: classAttendanceRows },
   ] = await Promise.all([
     typedClient.counselor_id
       ? supabase
@@ -114,6 +117,16 @@ export default async function AdminClientProfilePage({ params }: Props) {
       .eq('client_id', clientId)
       .eq('status', 'pending')
       .maybeSingle(),
+    supabase
+      .from('class_enrollments')
+      .select('id, status, classes(name, subject)')
+      .eq('client_id', clientId)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('class_attendance')
+      .select('enrollment_id, attended_on')
+      .eq('client_id', clientId)
+      .order('attended_on', { ascending: false }),
   ])
 
   if (clientTasksError) {
@@ -129,6 +142,23 @@ export default async function AdminClientProfilePage({ params }: Props) {
     created_at: string
     metadata: { note?: string; loggedByName?: string } | null
   }[]
+
+  const attendanceByEnrollment = new Map<string, string[]>()
+  for (const row of classAttendanceRows ?? []) {
+    const list = attendanceByEnrollment.get(row.enrollment_id) ?? []
+    list.push(row.attended_on)
+    attendanceByEnrollment.set(row.enrollment_id, list)
+  }
+  const classAttendanceEntries: ClassEnrollmentEntry[] = (classEnrollments ?? []).map((e) => {
+    const cls = e.classes as unknown as { name: string; subject: string | null } | null
+    return {
+      enrollmentId: e.id,
+      className: cls?.name ?? 'Class',
+      subject: cls?.subject ?? null,
+      status: e.status,
+      attendanceDates: attendanceByEnrollment.get(e.id) ?? [],
+    }
+  })
 
   return (
     <main className="flex-1 p-4 md:p-8">
@@ -218,6 +248,7 @@ export default async function AdminClientProfilePage({ params }: Props) {
           {/* Right panel — documents, meetings, and history */}
           <div className="scrollbar-hidden flex flex-col gap-4 lg:min-h-0 lg:overflow-y-auto lg:pl-1">
             <RecentVisitsSection visits={recentVisits} />
+            <ClassAttendanceSection enrollments={classAttendanceEntries} />
             <DocumentsChecklistSection documents={(documents ?? []) as Document[]} clientId={clientId} />
             <MeetingsHistorySection clientId={clientId} meetings={meetings ?? []} />
             <ClientTasksSection
