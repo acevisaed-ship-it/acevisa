@@ -26,8 +26,13 @@ import {
   parseAndValidateWalkInIntake,
 } from '@/lib/receptionist/walkInIntake'
 
-const inputCls = 'min-h-[44px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input'
-const labelCls = 'mb-1 block text-xs font-medium text-white/60'
+// Distinct from the shared .glass-input class on purpose — this form only
+// ever renders inside RegisterFormCollapsible's dark panel now, so it gets
+// its own tuned treatment (richer fill, lime focus ring tying back to the
+// card's own header) rather than the generic dark-bg default used app-wide.
+const inputCls =
+  'min-h-[44px] w-full rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-sm text-white outline-none placeholder:text-white/45 transition-colors focus:border-green/70 focus:bg-white/[0.14]'
+const labelCls = 'mb-1 block text-xs font-medium text-white/80'
 
 const emptyIntake = (): WalkInIntakeFormValues => ({
   lastEducation: '',
@@ -254,13 +259,13 @@ export function ReceptionistRegisterForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl glass-card-md crisp-on-dark p-5 md:p-6">
-      <div>
-        <p className="text-sm font-medium text-white">Register a new client</p>
-        <p className="mt-1 text-[11px] text-white/40">
-          Name, age, and city are always required. Email and history fields may be skipped.
-          Education details appear only for Study Visa inquiries.
-        </p>
-      </div>
+      {/* No repeated "Register a new client" title here — the collapsible
+          shell above already announces it; this just adds the how-to-fill-
+          it-out detail. */}
+      <p className="text-xs text-white/65">
+        Name, age, and city are always required. Email and history fields may be skipped. Education details
+        appear only for Study Visa inquiries.
+      </p>
 
       <div>
         <label className={labelCls}>
@@ -289,7 +294,7 @@ export function ReceptionistRegisterForm() {
         </div>
         <div>
           <label className={labelCls}>
-            Email <span className="font-normal text-white/40">(optional)</span>
+            Email <span className="font-normal text-white/60">(optional)</span>
           </label>
           <input
             type="text"
@@ -300,7 +305,7 @@ export function ReceptionistRegisterForm() {
             className={inputCls}
             placeholder="Leave blank if not available"
           />
-          <p className="mt-1 text-[11px] text-white/35">
+          <p className="mt-1 text-[11px] text-white/55">
             Not required — can be added later on the client profile.
           </p>
         </div>
