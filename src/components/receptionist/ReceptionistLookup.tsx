@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { LookupIcon } from '@/components/receptionist/icons'
 
 export function ReceptionistLookup() {
   const [code, setCode] = useState('')
@@ -31,8 +32,13 @@ export function ReceptionistLookup() {
   }
 
   return (
-    <Card variant="dark" className="p-5">
-      <p className="text-sm font-medium text-bg/70">Look up a client by ID</p>
+    <Card variant="blue" className="p-5">
+      <div className="flex items-center gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15">
+          <LookupIcon className="h-5 w-5" />
+        </span>
+        <p className="text-sm font-semibold">Look up a client by ID</p>
+      </div>
       <form onSubmit={handleSubmit} className="mt-3 flex gap-2">
         <input
           value={code}

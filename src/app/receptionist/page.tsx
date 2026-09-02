@@ -2,7 +2,7 @@ import { ReceptionistLookup } from '@/components/receptionist/ReceptionistLookup
 import { ReceptionistWalkIn } from '@/components/receptionist/ReceptionistWalkIn'
 import { ReceptionistDailyLog } from '@/components/receptionist/ReceptionistDailyLog'
 import { ReceptionistCorrectionRequest } from '@/components/receptionist/ReceptionistCorrectionRequest'
-import { ReceptionistRegisterForm } from '@/components/receptionist/ReceptionistRegisterForm'
+import { RegisterFormCollapsible } from '@/components/receptionist/RegisterFormCollapsible'
 import { StaffAppInstallCard } from '@/components/StaffAppInstallCard'
 
 export default function ReceptionistPage() {
@@ -15,11 +15,25 @@ export default function ReceptionistPage() {
         </p>
       </div>
       <StaffAppInstallCard />
-      <ReceptionistWalkIn />
-      <ReceptionistDailyLog />
-      <ReceptionistLookup />
-      <ReceptionistCorrectionRequest />
-      <ReceptionistRegisterForm />
+
+      {/* Actions rail (lime) is first in the DOM so it stacks first on
+          mobile — walk-in/register are the two things front desk does all
+          day. lg:order pins it to the wide right column on desktop; the
+          tools rail (blue) takes the narrower left column. */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(280px,360px)_1fr] lg:items-start">
+        <div className="flex flex-col gap-5 lg:order-2">
+          <p className="px-1 text-xs font-semibold uppercase tracking-wide text-bg/40">Do this now</p>
+          <ReceptionistWalkIn />
+          <RegisterFormCollapsible />
+        </div>
+
+        <div className="flex flex-col gap-4 lg:order-1">
+          <p className="px-1 text-xs font-semibold uppercase tracking-wide text-bg/40">Find &amp; reference</p>
+          <ReceptionistLookup />
+          <ReceptionistCorrectionRequest />
+          <ReceptionistDailyLog />
+        </div>
+      </div>
     </div>
   )
 }

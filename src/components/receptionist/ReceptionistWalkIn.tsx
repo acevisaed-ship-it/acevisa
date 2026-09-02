@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { WalkInIcon } from '@/components/receptionist/icons'
 
 type SearchResult = { id: string; name: string; clientCode: string; counselorName: string }
 type WalkIn = { id: string; clientId: string; clientName: string; note: string | null; createdAt: string }
@@ -76,11 +77,18 @@ export function ReceptionistWalkIn() {
   }
 
   return (
-    <Card variant="dark" className="p-5">
-      <p className="text-sm font-medium text-bg/70">Record a walk-in</p>
-      <p className="mt-1 text-xs text-bg/50">
-        Every client visit — new or already registered — should be logged here.
-      </p>
+    <Card variant="green" className="p-5">
+      <div className="flex items-start gap-3.5">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-text/10">
+          <WalkInIcon className="h-6 w-6" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-bold">Record a walk-in</p>
+          <p className="mt-0.5 text-xs text-text/65">
+            Every client visit — new or already registered — should be logged here.
+          </p>
+        </div>
+      </div>
 
       {!selected ? (
         <div className="relative mt-3">
@@ -88,23 +96,23 @@ export function ReceptionistWalkIn() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name or AV-code"
-            className="min-h-[44px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input"
+            className="min-h-[44px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input-dark"
           />
-          {searching && <p className="mt-1 text-xs text-bg/40">Searching…</p>}
+          {searching && <p className="mt-1 text-xs text-text/50">Searching…</p>}
           {results.length > 0 && (
-            <ul className="mt-2 divide-y divide-bg/10 rounded-xl border border-bg/10">
+            <ul className="mt-2 divide-y divide-text/10 rounded-xl border border-text/15">
               {results.map((r) => (
                 <li key={r.id}>
                   <button
                     type="button"
                     onClick={() => { setSelected(r); setResults([]); setQuery('') }}
-                    className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-bg/5"
+                    className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-text/5"
                   >
                     <span>
                       <span className="font-semibold">{r.name}</span>{' '}
-                      <span className="text-bg/40">· {r.clientCode}</span>
+                      <span className="text-text/50">· {r.clientCode}</span>
                     </span>
-                    <span className="text-xs text-bg/40">{r.counselorName}</span>
+                    <span className="text-xs text-text/50">{r.counselorName}</span>
                   </button>
                 </li>
               ))}
@@ -113,15 +121,15 @@ export function ReceptionistWalkIn() {
         </div>
       ) : (
         <form onSubmit={handleLog} className="mt-3 space-y-3">
-          <div className="flex items-center justify-between rounded-xl border border-bg/10 px-3 py-2">
+          <div className="flex items-center justify-between rounded-xl border border-text/15 px-3 py-2">
             <span className="text-sm">
               <span className="font-semibold">{selected.name}</span>{' '}
-              <span className="text-bg/40">· {selected.clientCode}</span>
+              <span className="text-text/50">· {selected.clientCode}</span>
             </span>
             <button
               type="button"
               onClick={() => setSelected(null)}
-              className="text-xs text-bg/40 hover:text-bg/70"
+              className="text-xs text-text/50 hover:text-text"
             >
               Change
             </button>
@@ -130,7 +138,7 @@ export function ReceptionistWalkIn() {
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Reason (optional) — e.g. document drop-off, payment"
-            className="min-h-[44px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input"
+            className="min-h-[44px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input-dark"
           />
           <Button type="submit" disabled={logging}>
             {logging ? 'Logging…' : 'Log walk-in'}
@@ -139,14 +147,15 @@ export function ReceptionistWalkIn() {
       )}
 
       {message && (
-        <p className={`mt-3 text-sm ${message.type === 'error' ? 'text-red-400' : 'text-green-400'}`}>
+        <p className={`mt-3 text-sm font-medium ${message.type === 'error' ? 'text-red-700' : 'text-text'}`}>
+          {message.type === 'success' ? '✓ ' : ''}
           {message.text}
         </p>
       )}
 
       {todayList.length > 0 && (
-        <div className="mt-5 border-t border-bg/10 pt-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-bg/40">
+        <div className="mt-5 border-t border-text/15 pt-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-text/50">
             Today&apos;s walk-ins ({todayList.length})
           </p>
           <ul className="mt-2 space-y-1.5">
@@ -154,9 +163,9 @@ export function ReceptionistWalkIn() {
               <li key={w.id} className="flex items-center justify-between text-sm">
                 <span>
                   {w.clientName}
-                  {w.note && <span className="text-bg/40"> — {w.note}</span>}
+                  {w.note && <span className="text-text/50"> — {w.note}</span>}
                 </span>
-                <span className="text-xs text-bg/40">{timeOnly(w.createdAt)}</span>
+                <span className="text-xs text-text/50">{timeOnly(w.createdAt)}</span>
               </li>
             ))}
           </ul>

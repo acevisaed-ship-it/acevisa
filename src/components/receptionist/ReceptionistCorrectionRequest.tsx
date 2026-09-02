@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { ClientInfoForm } from '@/components/receptionist/ClientInfoForm'
+import { CorrectionIcon } from '@/components/receptionist/icons'
 import {
   ClientIntakeEditor,
   mergeIntakeValues,
@@ -209,12 +210,20 @@ export function ReceptionistCorrectionRequest() {
   const recent = requests.filter((r) => r.status !== 'applied').slice(0, 8)
 
   return (
-    <Card variant="dark" className="p-5">
-      <p className="text-sm font-medium text-bg/70">Request a client information correction</p>
-      <p className="mt-1 text-xs text-bg/50">
-        Search by name, phone, email, or AV-code. Admin or CEO approval is required before you can change any field.
-        If another client already uses the same name, phone, or email, you can open their full form below.
-      </p>
+    <Card variant="blue" className="p-5">
+      <div className="flex items-start gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15">
+          <CorrectionIcon className="h-5 w-5" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold">Request a client information correction</p>
+          <p className="mt-0.5 text-xs text-bg/60">
+            Search by name, phone, email, or AV-code. Admin or CEO approval is required before you can change any
+            field. If another client already uses the same name, phone, or email, you can open their full form
+            below.
+          </p>
+        </div>
+      </div>
 
       {approved.length > 0 && mode !== 'apply' && (
         <div className="mt-4 rounded-xl border border-orange/30 bg-orange/10 p-3">

@@ -3,7 +3,7 @@
 import { forwardRef, type HTMLAttributes } from 'react'
 import { cn } from '@/lib/utils'
 
-type CardVariant = 'dark' | 'light' | 'glass'
+type CardVariant = 'dark' | 'light' | 'glass' | 'green' | 'blue'
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   variant?: CardVariant
@@ -14,6 +14,13 @@ const variants: Record<CardVariant, string> = {
   dark:  'bg-grad-teal text-bg crisp-on-dark',
   light: 'bg-grad-bg   text-text crisp',
   glass: 'bg-bg/80 backdrop-blur-xl text-text crisp shadow-sm shadow-text/[0.04]',
+  // Front-desk action rails — grad-green is light, so it pairs with dark
+  // text like `light`; grad-blue is dark enough to pair with light text
+  // like `dark`. Components using these should reach for text-text/…  and
+  // .glass-input-dark on green, but can keep text-bg/… and .glass-input as-is
+  // on blue.
+  green: 'bg-grad-green text-text crisp',
+  blue:  'bg-grad-blue text-bg crisp-on-dark',
 }
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(

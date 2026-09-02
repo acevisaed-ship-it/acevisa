@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { getTodayPKTDateString, addDaysToDateString } from '@/lib/pkt'
+import { DailyLogIcon } from '@/components/receptionist/icons'
 
 type WalkIn = {
   id: string
@@ -65,13 +66,18 @@ export function ReceptionistDailyLog() {
   const isToday = date === todayStr
 
   return (
-    <Card variant="dark" className="p-5">
+    <Card variant="blue" className="p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-sm font-medium text-bg/70">Daily logs</p>
-          <p className="mt-1 text-xs text-bg/50">
-            Every office visit and every client registered, by day.
-          </p>
+        <div className="flex items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15">
+            <DailyLogIcon className="h-5 w-5" />
+          </span>
+          <div>
+            <p className="text-sm font-semibold">Daily logs</p>
+            <p className="mt-0.5 text-xs text-bg/60">
+              Every office visit and every client registered, by day.
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Button

@@ -9,7 +9,7 @@ export default async function ReceptionistLayout({ children }: { children: React
     <div className="min-h-screen bg-grad-teal">
       <PortalHeartbeat />
       <ReceptionistHeader name={receptionist.name} />
-      <main className="mx-auto max-w-2xl px-4 py-8 md:py-12">{children}</main>
+      <main className="mx-auto max-w-6xl px-4 py-8 md:py-12">{children}</main>
     </div>
   )
 }
