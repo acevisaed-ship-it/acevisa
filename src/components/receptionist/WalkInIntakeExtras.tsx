@@ -22,10 +22,11 @@ import {
   type VisaRejectionDraft,
 } from '@/lib/receptionist/walkInIntake'
 
-const inputCls = 'min-h-[44px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input'
-const labelCls = 'mb-1 block text-xs font-medium text-white/60'
-const hintCls = 'mt-1 text-[11px] text-white/35'
-const sectionCls = 'rounded-xl border border-white/10 p-4 space-y-3'
+const inputCls =
+  'min-h-[44px] w-full rounded-xl border border-green/50 bg-white/15 px-3 py-2 text-sm text-white outline-none placeholder:text-white/50 transition-colors focus:border-green focus:bg-white/20'
+const labelCls = 'mb-1 block text-xs font-medium text-white/80'
+const hintCls = 'mt-1 text-[11px] text-white/55'
+const sectionCls = 'rounded-xl border border-white/20 p-4 space-y-3'
 
 export type WalkInIntakeFormValues = {
   lastEducation: string

@@ -31,7 +31,7 @@ import {
 // its own tuned treatment (richer fill, lime focus ring tying back to the
 // card's own header) rather than the generic dark-bg default used app-wide.
 const inputCls =
-  'min-h-[44px] w-full rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-sm text-white outline-none placeholder:text-white/45 transition-colors focus:border-green/70 focus:bg-white/[0.14]'
+  'min-h-[44px] w-full rounded-xl border border-green/50 bg-white/15 px-3 py-2 text-sm text-white outline-none placeholder:text-white/50 transition-colors focus:border-green focus:bg-white/20'
 const labelCls = 'mb-1 block text-xs font-medium text-white/80'
 
 const emptyIntake = (): WalkInIntakeFormValues => ({
@@ -258,7 +258,7 @@ export function ReceptionistRegisterForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl glass-card-md crisp-on-dark p-5 md:p-6">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {/* No repeated "Register a new client" title here — the collapsible
           shell above already announces it; this just adds the how-to-fill-
           it-out detail. */}
