@@ -14,8 +14,6 @@ export default function ReceptionistPage() {
           Log every walk-in below, request information corrections, or register a brand-new client further down.
         </p>
       </div>
-      <StaffAppInstallCard />
-
       {/* Actions rail (lime) is first in the DOM so it stacks first on
           mobile — walk-in/register are the two things front desk does all
           day. lg:order pins it to the wide right column on desktop; the
@@ -25,6 +23,11 @@ export default function ReceptionistPage() {
           <p className="px-1 text-xs font-semibold uppercase tracking-wide text-bg/40">Do this now</p>
           <ReceptionistWalkIn />
           <RegisterFormCollapsible />
+          {/* .glass-card's own background rule wins the cascade over a
+              Tailwind bg-* override here, so only the border is themed —
+              StaffAppInstallCard is shared with the counselor dashboard and
+              keeps its default fill everywhere else. */}
+          <StaffAppInstallCard className="border-green/30" />
         </div>
 
         <div className="flex flex-col gap-4 lg:order-1">

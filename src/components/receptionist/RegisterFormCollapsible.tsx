@@ -25,7 +25,7 @@ export function RegisterFormCollapsible() {
         aria-controls="register-form-panel"
         className="flex w-full items-center gap-3.5 p-5 text-left"
       >
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-text/10">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-bg shadow-sm shadow-black/10">
           <RegisterIcon className="h-6 w-6" />
         </span>
         <span className="min-w-0 flex-1">
@@ -40,8 +40,13 @@ export function RegisterFormCollapsible() {
       </button>
 
       {open && (
-        <div id="register-form-panel" className="bg-grad-teal p-4 sm:p-5">
-          <ReceptionistRegisterForm />
+        // Lime padding stays visible as a frame around the dark panel below
+        // — without it, the panel's own bg-grad-teal is identical to the
+        // page background and the "card" disappears the moment it opens.
+        <div className="px-3 pb-3 sm:px-4 sm:pb-4">
+          <div id="register-form-panel" className="rounded-2xl bg-grad-teal p-4 shadow-inner shadow-black/20 sm:p-5">
+            <ReceptionistRegisterForm />
+          </div>
         </div>
       )}
     </div>

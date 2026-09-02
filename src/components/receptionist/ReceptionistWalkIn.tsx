@@ -79,7 +79,7 @@ export function ReceptionistWalkIn() {
   return (
     <Card variant="green" className="p-5">
       <div className="flex items-start gap-3.5">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-text/10">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-bg shadow-sm shadow-black/10">
           <WalkInIcon className="h-6 w-6" />
         </span>
         <div className="min-w-0 flex-1">
