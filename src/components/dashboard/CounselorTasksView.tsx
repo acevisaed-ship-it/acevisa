@@ -10,9 +10,14 @@ import {
 type Props = {
   tasksApiUrl: string
   readOnly?: boolean
+  clientProfileBasePath?: string
 }
 
-export function CounselorTasksView({ tasksApiUrl, readOnly = false }: Props) {
+export function CounselorTasksView({
+  tasksApiUrl,
+  readOnly = false,
+  clientProfileBasePath,
+}: Props) {
   const [tasks, setTasks] = useState<TaskWithClient[]>([])
   const [counselorId, setCounselorId] = useState('')
   const [selectedTask, setSelectedTask] = useState<TaskWithClient | null>(null)
@@ -43,7 +48,11 @@ export function CounselorTasksView({ tasksApiUrl, readOnly = false }: Props) {
       {loading ? (
         <p className="text-white/50">Loading tasks…</p>
       ) : (
-        <TaskPanel tasks={tasks} onTaskClick={setSelectedTask} />
+        <TaskPanel
+          tasks={tasks}
+          onTaskClick={setSelectedTask}
+          clientProfileBasePath={clientProfileBasePath}
+        />
       )}
       {selectedTask && counselorId && (
         <TaskDetailPanel

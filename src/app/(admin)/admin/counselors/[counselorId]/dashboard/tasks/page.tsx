@@ -13,6 +13,7 @@ export default async function AdminCounselorTasksPage({ params }: Props) {
       <CounselorTasksView
         tasksApiUrl={`/api/admin/counselors/${counselorId}/tasks`}
         readOnly
+        clientProfileBasePath="/admin/clients"
       />
     </main>
   )

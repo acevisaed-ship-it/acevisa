@@ -1,6 +1,7 @@
 'use client'
 
 import { ChevronRight } from 'lucide-react'
+import Link from 'next/link'
 import { useState } from 'react'
 import { formatPKTDueDate, isOverdueInPKT } from '@/lib/pkt'
 
@@ -29,6 +30,12 @@ function getClientName(clients: TaskWithClient['clients']): string {
   return clients.name
 }
 
+function getClientId(clients: TaskWithClient['clients']): string | undefined {
+  if (!clients) return undefined
+  if (Array.isArray(clients)) return clients[0]?.id
+  return clients.id
+}
+
 function getAccentColor(status: string, dueDate: string | null): string {
   if (status === 'completed' || status === 'closed') return '#2083B9'
   if (status === 'in_progress') return '#2083B9'
@@ -39,9 +46,13 @@ function getAccentColor(status: string, dueDate: string | null): string {
 type Props = {
   tasks: TaskWithClient[]
   onTaskClick: (task: TaskWithClient) => void
+  // Counselor pages live under /dashboard, admin pages viewing a counselor's
+  // tasks (or an admin's own "My Tasks") live under /admin — the client
+  // profile link has to land in whichever section is currently active.
+  clientProfileBasePath?: string
 }
 
-export function TaskPanel({ tasks, onTaskClick }: Props) {
+export function TaskPanel({ tasks, onTaskClick, clientProfileBasePath = '/dashboard/clients' }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('open')
   const [search, setSearch] = useState('')
 
@@ -92,6 +103,7 @@ export function TaskPanel({ tasks, onTaskClick }: Props) {
             const overdue = task.status === 'open' && isOverdueInPKT(task.due_date)
             const dueLabel = formatPKTDueDate(task.due_date)
             const accent = getAccentColor(task.status, task.due_date)
+            const clientId = getClientId(task.clients)
 
             return (
               <div
@@ -123,16 +135,27 @@ export function TaskPanel({ tasks, onTaskClick }: Props) {
                         </span>
                       )}
                     </div>
-                    <p className="mt-1 text-sm text-blue">{getClientName(task.clients)}</p>
-                    {dueLabel && (
-                      <p
-                        className={`mt-1 text-sm ${
-                          overdue ? 'text-red-400' : 'text-white/50'
-                        }`}
-                      >
-                        Due {dueLabel}
-                        {overdue ? ' · overdue' : ''}
-                      </p>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      {clientId ? (
+                        <Link
+                          href={`${clientProfileBasePath}/${clientId}`}
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
+                          className="inline-flex items-center rounded-full bg-blue/20 px-2.5 py-1 text-xs font-semibold text-blue transition-colors hover:bg-blue/30"
+                        >
+                          {getClientName(task.clients)}
+                        </Link>
+                      ) : (
+                        <span className="text-sm text-blue">{getClientName(task.clients)}</span>
+                      )}
+                      {dueLabel && overdue && (
+                        <span className="inline-flex items-center rounded-full border border-red-400/40 bg-red-500/20 px-2.5 py-1 text-xs font-semibold text-red-300">
+                          Due {dueLabel} · overdue
+                        </span>
+                      )}
+                    </div>
+                    {dueLabel && !overdue && (
+                      <p className="mt-1 text-sm text-white/50">Due {dueLabel}</p>
                     )}
                   </div>
                   <ChevronRight className="h-5 w-5 shrink-0 text-white/30" />
