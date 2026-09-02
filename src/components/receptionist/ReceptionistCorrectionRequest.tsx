@@ -61,6 +61,22 @@ function statusLabel(status: CorrectionRequest['status']) {
   }
 }
 
+// Plain colored text on this card's blue gradient reads poorly (a dark
+// accent color directly on a mid-tone blue is low-contrast either way) — so
+// every status/accent label gets its own light-tinted chip instead, the same
+// proven pattern already used on the counselor's Tasks list.
+function statusChipCls(status: CorrectionRequest['status']) {
+  switch (status) {
+    case 'approved':
+    case 'applied':
+      return 'border-green/40 bg-green/20 text-green'
+    case 'rejected':
+      return 'border-red-400/40 bg-red-500/20 text-red-300'
+    default:
+      return 'border-bg/30 bg-bg/15 text-bg'
+  }
+}
+
 export function ReceptionistCorrectionRequest() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
@@ -212,12 +228,12 @@ export function ReceptionistCorrectionRequest() {
   return (
     <Card variant="blue" className="p-5">
       <div className="flex items-start gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-green/20 text-orange">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15">
           <CorrectionIcon className="h-5 w-5" />
         </span>
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-grad-orange">Request a client information correction</p>
-          <p className="mt-0.5 text-xs text-green">
+          <p className="text-sm font-semibold">Request a client information correction</p>
+          <p className="mt-0.5 text-xs text-bg/75">
             Search by name, phone, email, or AV-code. Admin or CEO approval is required before you can change any
             field. If another client already uses the same name, phone, or email, you can open their full form
             below.
@@ -226,7 +242,7 @@ export function ReceptionistCorrectionRequest() {
       </div>
 
       {approved.length > 0 && mode !== 'apply' && (
-        <div className="mt-4 rounded-xl border border-orange/30 bg-orange/10 p-3">
+        <div className="mt-4 rounded-xl border border-orange/40 bg-orange/15 p-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-orange">
             Approved — apply these changes
           </p>
@@ -235,9 +251,9 @@ export function ReceptionistCorrectionRequest() {
               <li key={req.id} className="flex items-center justify-between gap-3 text-sm">
                 <span>
                   <span className="font-semibold">{req.clientName}</span>{' '}
-                  <span className="text-orange">· {req.clientCode}</span>
+                  <span className="text-bg/75">· {req.clientCode}</span>
                 </span>
-                <Button type="button" onClick={() => startApply(req)}>
+                <Button type="button" onClick={() => startApply(req)} className="bg-grad-teal">
                   Change information
                 </Button>
               </li>
@@ -254,30 +270,30 @@ export function ReceptionistCorrectionRequest() {
             placeholder="Search by name, phone, email, or AV-code"
             className="min-h-[44px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input"
           />
-          {searching && <p className="mt-1 text-xs text-orange">Searching…</p>}
+          {searching && <p className="mt-1 text-xs text-bg/70">Searching…</p>}
           {results.length > 1 && (
-            <p className="mt-2 text-xs text-orange">
+            <p className="mt-2 text-xs text-bg/70">
               {results.length} clients matched — open a record to view the full information form.
             </p>
           )}
           {results.length > 0 && (
-            <ul className="mt-2 divide-y divide-green/25 rounded-xl border border-green/30">
+            <ul className="mt-2 divide-y divide-bg/25 rounded-xl border border-bg/25">
               {results.map((r) => (
                 <li key={r.id}>
                   <button
                     type="button"
                     onClick={() => openClient(r.id)}
-                    className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-green/10"
+                    className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-bg/10"
                   >
                     <span>
                       <span className="font-semibold">{r.name}</span>{' '}
-                      <span className="text-orange">· {r.clientCode}</span>
-                      <span className="mt-0.5 block text-xs text-orange">
+                      <span className="text-bg/65">· {r.clientCode}</span>
+                      <span className="mt-0.5 block text-xs text-bg/65">
                         {r.phone}
                         {r.email ? ` · ${r.email}` : ''}
                       </span>
                     </span>
-                    <span className="text-xs text-orange">{r.counselorName}</span>
+                    <span className="text-xs text-bg/65">{r.counselorName}</span>
                   </button>
                 </li>
               ))}
@@ -291,8 +307,8 @@ export function ReceptionistCorrectionRequest() {
       {client && mode !== 'search' && (
         <div className="mt-4 space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-green">
-              {client.name} <span className="font-normal text-orange">· {client.client_code}</span>
+            <p className="text-sm font-semibold">
+              {client.name} <span className="font-normal text-bg/70">· {client.client_code}</span>
             </p>
             <button
               type="button"
@@ -305,7 +321,7 @@ export function ReceptionistCorrectionRequest() {
                 setForm(null)
                 setReason('')
               }}
-              className="text-xs text-orange hover:text-green"
+              className="text-xs text-bg/70 hover:text-bg"
             >
               Back to search
             </button>
@@ -322,12 +338,12 @@ export function ReceptionistCorrectionRequest() {
 
           {mode === 'request' && form && (
             <form onSubmit={submitRequest} className="space-y-4">
-              <p className="text-xs text-green">
+              <p className="text-xs text-bg/75">
                 Change any field below. Nothing is saved until an admin or CEO approves, and you apply it.
               </p>
               <ClientIntakeEditor values={form} onChange={updateField} />
               <div>
-                <label className="mb-1 block text-xs font-medium text-green">
+                <label className="mb-1 block text-xs font-medium text-bg/80">
                   Reason for correction
                 </label>
                 <input
@@ -345,7 +361,7 @@ export function ReceptionistCorrectionRequest() {
                 <Button
                   type="button"
                   variant="secondary"
-                  className="border border-green/40 text-green hover:bg-green/10"
+                  className="border border-white/25 px-3 py-1.5 text-xs text-white hover:bg-white/10"
                   onClick={() => setMode('view')}
                 >
                   Cancel
@@ -356,10 +372,10 @@ export function ReceptionistCorrectionRequest() {
 
           {mode === 'apply' && form && applyRequest && (
             <form onSubmit={applyChanges} className="space-y-4">
-              <p className="text-xs text-green">
+              <p className="text-xs text-bg/75">
                 Approved fields are unlocked. Update them now, then save.
               </p>
-              <ul className="text-xs text-green">
+              <ul className="text-xs text-bg/75">
                 {applyFields.map((field) => (
                   <li key={field}>
                     {CORRECTABLE_FIELD_LABELS[field]}:{' '}
@@ -381,11 +397,11 @@ export function ReceptionistCorrectionRequest() {
           )}
 
           {duplicates.length > 0 && (
-            <div className="border-t border-green/30 pt-4">
+            <div className="border-t border-bg/25 pt-4">
               <p className="text-sm font-semibold text-orange">
                 Another client already exists with the same name, phone, or email
               </p>
-              <p className="mt-1 text-xs text-green">
+              <p className="mt-1 text-xs text-bg/75">
                 Open a match to view their whole information form.
               </p>
               <ul className="mt-2 space-y-2">
@@ -394,12 +410,12 @@ export function ReceptionistCorrectionRequest() {
                     <button
                       type="button"
                       onClick={() => setViewingDuplicate(dup)}
-                      className="w-full rounded-xl border border-green/30 px-3 py-2 text-left text-sm hover:bg-green/10"
+                      className="w-full rounded-xl border border-bg/25 px-3 py-2 text-left text-sm hover:bg-bg/10"
                     >
                       <span className="font-semibold">{dup.name}</span>{' '}
-                      <span className="text-orange">· {dup.client_code}</span>
+                      <span className="text-bg/70">· {dup.client_code}</span>
                       {dup.match_reasons && (
-                        <span className="mt-0.5 block text-xs text-orange">
+                        <span className="mt-0.5 block text-xs text-bg/70">
                           {dup.match_reasons.join(', ')}
                         </span>
                       )}
@@ -427,19 +443,23 @@ export function ReceptionistCorrectionRequest() {
       )}
 
       {recent.length > 0 && (
-        <div className="mt-5 border-t border-green/30 pt-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-orange">Recent requests</p>
-          <ul className="mt-2 space-y-1.5 text-sm">
+        <div className="mt-5 border-t border-bg/25 pt-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-bg/70">Recent requests</p>
+          <ul className="mt-2 space-y-2 text-sm">
             {recent.map((req) => (
-              <li key={req.id} className="flex items-start justify-between gap-3">
+              <li key={req.id} className="flex flex-wrap items-center justify-between gap-2">
                 <span>
                   {req.clientName}{' '}
-                  <span className="text-orange">· {req.clientCode}</span>
+                  <span className="text-bg/70">· {req.clientCode}</span>
                   {req.reviewNote && req.status === 'rejected' && (
-                    <span className="mt-0.5 block text-xs text-red-400">{req.reviewNote}</span>
+                    <span className="mt-0.5 block text-xs text-red-300">{req.reviewNote}</span>
                   )}
                 </span>
-                <span className="shrink-0 text-xs text-orange">{statusLabel(req.status)}</span>
+                <span
+                  className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold ${statusChipCls(req.status)}`}
+                >
+                  {statusLabel(req.status)}
+                </span>
               </li>
             ))}
           </ul>
