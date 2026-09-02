@@ -32,7 +32,6 @@ export function ClientControls({
   initialNotes,
   initialEmail = null,
   initialStatus = 'active',
-  isAdmin = false,
   isCeo = false,
   initialManuallyQualified = false,
   initialQualificationFactors = [],
@@ -66,6 +65,9 @@ export function ClientControls({
   const [inactiveRequest, setInactiveRequest] = useState(pendingInactiveRequest)
   const [inactiveBusy, setInactiveBusy] = useState(false)
   const [inactiveError, setInactiveError] = useState<string | null>(null)
+  const [inactiveFormOpen, setInactiveFormOpen] = useState(false)
+  const [inactiveReason, setInactiveReason] = useState('')
+  const [rejectNote, setRejectNote] = useState('')
 
   // Manual lead qualification (counselor's own judgment, separate from the AI score)
   const [manuallyQualified, setManuallyQualified] = useState(initialManuallyQualified)
@@ -180,30 +182,33 @@ export function ClientControls({
   }
 
   async function handleRequestInactive() {
-    const wantActive = !pipelineActive
-    const reason = window.prompt(
-      `Reason for ${wantActive ? 'reactivating' : 'marking this client inactive'}? (optional, sent to the CEO for review)`
-    )
-    if (reason === null) return // cancelled
     setInactiveBusy(true)
     setInactiveError(null)
     try {
       const res = await fetch('/api/clients/inactive-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ clientId, reason: reason.trim() || undefined }),
+        body: JSON.stringify({ clientId, reason: inactiveReason.trim() || undefined }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
         setInactiveError(data.error || 'Failed to submit request')
         return
       }
-      setInactiveRequest({
-        id: data.id,
-        requestedActive: data.requestedActive,
-        reason: reason.trim() || null,
-        createdAt: new Date().toISOString(),
-      })
+      if (data.applied) {
+        setPipelineActive(data.requestedActive)
+        setInactiveRequest(null)
+      } else {
+        setInactiveRequest({
+          id: data.id,
+          requestedActive: data.requestedActive,
+          reason: inactiveReason.trim() || null,
+          createdAt: new Date().toISOString(),
+        })
+      }
+      setInactiveFormOpen(false)
+      setInactiveReason('')
+      startTransition(() => router.refresh())
     } catch {
       setInactiveError('Network error — please try again.')
     } finally {
@@ -213,15 +218,16 @@ export function ClientControls({
 
   async function handleReviewInactiveRequest(next: 'approved' | 'rejected') {
     if (!inactiveRequest) return
-    const note =
-      next === 'rejected' ? window.prompt('Optional note for the counselor (why this was rejected):') ?? '' : ''
     setInactiveBusy(true)
     setInactiveError(null)
     try {
       const res = await fetch(`/api/admin/inactive-requests/${inactiveRequest.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: next, note }),
+        body: JSON.stringify({
+          status: next,
+          note: next === 'rejected' ? rejectNote.trim() : undefined,
+        }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
@@ -230,6 +236,8 @@ export function ClientControls({
       }
       if (next === 'approved') setPipelineActive(inactiveRequest.requestedActive)
       setInactiveRequest(null)
+      setRejectNote('')
+      startTransition(() => router.refresh())
     } catch {
       setInactiveError('Network error — please try again.')
     } finally {
@@ -313,12 +321,19 @@ export function ClientControls({
                 Requested {inactiveRequest.requestedActive ? 'reactivation' : 'to mark inactive'}
                 {inactiveRequest.reason ? ` — ${inactiveRequest.reason}` : ''}
               </p>
+              <textarea
+                value={rejectNote}
+                onChange={(e) => setRejectNote(e.target.value)}
+                rows={2}
+                placeholder="Optional note if you reject…"
+                className="mt-3 min-h-[44px] w-full rounded-xl px-3 py-2 text-xs outline-none glass-input placeholder:text-white/40"
+              />
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
                   type="button"
                   disabled={inactiveBusy}
                   onClick={() => handleReviewInactiveRequest('approved')}
-                  className="min-h-[36px] rounded-full bg-grad-blue crisp-on-dark px-4 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                  className="min-h-[44px] rounded-full bg-grad-blue crisp-on-dark px-4 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
                 >
                   {inactiveBusy ? '…' : 'Approve'}
                 </button>
@@ -326,7 +341,7 @@ export function ClientControls({
                   type="button"
                   disabled={inactiveBusy}
                   onClick={() => handleReviewInactiveRequest('rejected')}
-                  className="min-h-[36px] rounded-full border border-white/20 glass-card px-4 py-1.5 text-xs font-medium text-white/60 transition-colors hover:text-white disabled:opacity-50"
+                  className="min-h-[44px] rounded-full border border-white/20 glass-card px-4 py-1.5 text-xs font-medium text-white/60 transition-colors hover:text-white disabled:opacity-50"
                 >
                   {inactiveBusy ? '…' : 'Reject'}
                 </button>
@@ -338,18 +353,65 @@ export function ClientControls({
               {inactiveRequest.reason ? ` — ${inactiveRequest.reason}` : ''}.
             </p>
           )
-        ) : isAdmin ? (
-          !isCeo && (
-            <p className="text-xs text-white/40">Only the CEO can change this.</p>
-          )
+        ) : inactiveFormOpen ? (
+          <div className="mt-1 space-y-2">
+            <textarea
+              value={inactiveReason}
+              onChange={(e) => setInactiveReason(e.target.value)}
+              rows={2}
+              placeholder={
+                isCeo
+                  ? 'Optional reason (saved on the record)'
+                  : 'Optional reason sent to the CEO'
+              }
+              className="min-h-[44px] w-full rounded-xl px-3 py-2 text-xs outline-none glass-input placeholder:text-white/40"
+            />
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={inactiveBusy}
+                onClick={handleRequestInactive}
+                className="min-h-[44px] rounded-full bg-grad-blue crisp-on-dark px-4 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              >
+                {inactiveBusy
+                  ? '…'
+                  : isCeo
+                    ? pipelineActive
+                      ? 'Mark inactive'
+                      : 'Reactivate'
+                    : 'Submit request'}
+              </button>
+              <button
+                type="button"
+                disabled={inactiveBusy}
+                onClick={() => {
+                  setInactiveFormOpen(false)
+                  setInactiveReason('')
+                  setInactiveError(null)
+                }}
+                className="min-h-[44px] rounded-full border border-white/20 glass-card px-4 py-1.5 text-xs font-medium text-white/60 hover:text-white disabled:opacity-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         ) : (
           <button
             type="button"
             disabled={inactiveBusy}
-            onClick={handleRequestInactive}
-            className="min-h-[40px] w-full rounded-full border border-white/20 glass-card px-4 py-2 text-xs font-medium text-white/70 transition-colors hover:text-white disabled:opacity-50"
+            onClick={() => {
+              setInactiveError(null)
+              setInactiveFormOpen(true)
+            }}
+            className="min-h-[44px] w-full rounded-full border border-white/20 glass-card px-4 py-2 text-xs font-medium text-white/70 transition-colors hover:text-white disabled:opacity-50"
           >
-            {inactiveBusy ? '…' : pipelineActive ? 'Request mark inactive' : 'Request reactivation'}
+            {isCeo
+              ? pipelineActive
+                ? 'Mark inactive'
+                : 'Reactivate'
+              : pipelineActive
+                ? 'Request mark inactive'
+                : 'Request reactivation'}
           </button>
         )}
         {inactiveError && <p className="mt-1.5 text-xs text-red-300">{inactiveError}</p>}

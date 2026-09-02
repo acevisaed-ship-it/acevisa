@@ -52,6 +52,10 @@ export async function POST(request: Request) {
   }
 
   const requestedActive = !(client.pipeline_active ?? true)
+  // CEO is the approver — applying from the client page shouldn't create a
+  // pending row they'd then have to approve themselves.
+  const applyNow = counselor.role === 'ceo'
+  const now = new Date().toISOString()
 
   const { data: inserted, error } = await supabase
     .from('client_inactive_requests')
@@ -61,7 +65,9 @@ export async function POST(request: Request) {
       branch_id: client.branch_id,
       requested_active: requestedActive,
       reason: reason?.trim() || null,
-      status: 'pending',
+      status: applyNow ? 'approved' : 'pending',
+      reviewed_by: applyNow ? counselor.id : null,
+      reviewed_at: applyNow ? now : null,
     })
     .select('id')
     .single()
@@ -71,27 +77,49 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to submit request' }, { status: 500 })
   }
 
+  if (applyNow) {
+    const { error: clientUpdateError } = await supabase
+      .from('clients')
+      .update({ pipeline_active: requestedActive, updated_at: now })
+      .eq('id', clientId)
+
+    if (clientUpdateError) {
+      console.error('[clients/inactive-request] client update failed:', clientUpdateError.message)
+      return NextResponse.json(
+        { error: 'Saved the request but failed to update the client' },
+        { status: 500 }
+      )
+    }
+  }
+
   await logActivity({
     clientId,
     counselorId: counselor.id,
     actorRole: counselor.role,
-    actionType: 'inactive_requested',
-    description: `${counselor.name} requested marking ${client.name} as ${requestedActive ? 'active' : 'inactive'}`,
+    actionType: applyNow ? 'inactive_request_approved' : 'inactive_requested',
+    description: applyNow
+      ? `${counselor.name} marked ${client.name} as ${requestedActive ? 'active' : 'inactive'}`
+      : `${counselor.name} requested marking ${client.name} as ${requestedActive ? 'active' : 'inactive'}`,
     metadata: { requestId: inserted.id, requestedActive, reason: reason?.trim() || null },
   })
 
-  // createNotification fans this out to the CEO(s) (and this counselor's
-  // branch admin, FYI) automatically since a clientId is set and
-  // 'inactive_request' isn't in the no-fan-out list.
-  await createNotification({
-    counselorId: counselor.id,
-    type: 'inactive_request',
-    title: `${requestedActive ? 'Reactivation' : 'Inactive'} request for ${client.name}`,
-    body: `${counselor.name} asked to mark this client ${requestedActive ? 'active' : 'inactive'}${
-      reason?.trim() ? ` — ${reason.trim()}` : ''
-    }`,
-    clientId,
-  })
+  if (!applyNow) {
+    // Fan-out to CEO (and branch admin) — skip when the CEO already applied.
+    await createNotification({
+      counselorId: counselor.id,
+      type: 'inactive_request',
+      title: `${requestedActive ? 'Reactivation' : 'Inactive'} request for ${client.name}`,
+      body: `${counselor.name} asked to mark this client ${requestedActive ? 'active' : 'inactive'}${
+        reason?.trim() ? ` — ${reason.trim()}` : ''
+      }`,
+      clientId,
+    })
+  }
 
-  return NextResponse.json({ success: true, id: inserted.id, requestedActive })
+  return NextResponse.json({
+    success: true,
+    id: inserted.id,
+    requestedActive,
+    applied: applyNow,
+  })
 }

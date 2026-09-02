@@ -35,6 +35,7 @@ export function InactiveRequestsPanel() {
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [rejectNotes, setRejectNotes] = useState<Record<string, string>>({})
 
   async function load(nextStatus = status) {
     setLoading(true)
@@ -60,16 +61,15 @@ export function InactiveRequestsPanel() {
   }, [status])
 
   async function review(id: string, next: 'approved' | 'rejected') {
-    const note =
-      next === 'rejected'
-        ? window.prompt('Optional note for the counselor (why this was rejected):') ?? ''
-        : ''
     setBusyId(id)
     try {
       const res = await fetch(`/api/admin/inactive-requests/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: next, note }),
+        body: JSON.stringify({
+          status: next,
+          note: next === 'rejected' ? rejectNotes[id]?.trim() : undefined,
+        }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -155,19 +155,30 @@ export function InactiveRequestsPanel() {
             )}
 
             {req.status === 'pending' && (
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Button type="button" disabled={busyId === req.id} onClick={() => review(req.id, 'approved')}>
-                  {busyId === req.id ? '…' : 'Approve'}
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled={busyId === req.id}
-                  onClick={() => review(req.id, 'rejected')}
-                  className="text-white"
-                >
-                  Reject
-                </Button>
+              <div className="mt-4 space-y-3">
+                <textarea
+                  value={rejectNotes[req.id] ?? ''}
+                  onChange={(e) =>
+                    setRejectNotes((prev) => ({ ...prev, [req.id]: e.target.value }))
+                  }
+                  rows={2}
+                  placeholder="Optional note if you reject…"
+                  className="min-h-[44px] w-full rounded-xl px-3 py-2 text-sm outline-none glass-input placeholder:text-white/40"
+                />
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" disabled={busyId === req.id} onClick={() => review(req.id, 'approved')}>
+                    {busyId === req.id ? '…' : 'Approve'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={busyId === req.id}
+                    onClick={() => review(req.id, 'rejected')}
+                    className="text-white"
+                  >
+                    Reject
+                  </Button>
+                </div>
               </div>
             )}
           </div>
