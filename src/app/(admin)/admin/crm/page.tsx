@@ -1,6 +1,8 @@
 import { CrmKanban } from '@/components/admin/CrmKanban'
 import { createAdminClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 export default async function CrmPage() {
   const supabase = createAdminClient()
 

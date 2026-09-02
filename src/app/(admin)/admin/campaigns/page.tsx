@@ -1,6 +1,8 @@
 import { CampaignManager } from '@/components/admin/CampaignManager'
 import { createAdminClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 export default async function CampaignsPage() {
   const supabase = createAdminClient()
   const { data: counselors } = await supabase

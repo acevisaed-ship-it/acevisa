@@ -1,6 +1,8 @@
 import { AdminLayoutClient } from '@/components/admin/AdminLayoutClient'
 import { createAdminClient, requireAdmin, isBranchScoped } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const admin = await requireAdmin()
 

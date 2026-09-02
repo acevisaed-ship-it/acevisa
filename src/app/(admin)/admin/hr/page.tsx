@@ -1,6 +1,8 @@
 import { HrSection } from '@/components/admin/HrSection'
 import { createAdminClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 export default async function HrPage() {
   const supabase = createAdminClient()
 
