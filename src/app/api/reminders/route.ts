@@ -82,12 +82,42 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Client not found' }, { status: 404 })
   }
 
+  // A reminder set directly from the profile widget (no taskId — that's the
+  // "close a task and follow up later" path, which already has a task) also
+  // creates a real task due on the reminder date, assigned to whoever set
+  // it. That's what makes it actually show up in their own Tasks list on
+  // the day it's due, instead of only living in this standing widget where
+  // it's easy to forget to check.
+  let linkedTaskId = taskId || null
+  if (!linkedTaskId) {
+    const { data: newTask, error: taskError } = await supabase
+      .from('tasks')
+      .insert({
+        counselor_id: counselor.id,
+        client_id: clientId,
+        task_text: note?.trim() || `Follow up with ${client.name}`,
+        due_date: remindAt,
+        status: 'open',
+        source: 'manual',
+      })
+      .select('id')
+      .single()
+
+    if (taskError) {
+      console.error('[reminders] linked task creation failed:', taskError.message)
+      // Non-fatal — still save the reminder even if the task couldn't be
+      // created, rather than losing the reminder entirely.
+    } else {
+      linkedTaskId = newTask.id
+    }
+  }
+
   const { data: reminder, error } = await supabase
     .from('reminders')
     .insert({
       client_id: clientId,
       counselor_id: counselor.id,
-      task_id: taskId || null,
+      task_id: linkedTaskId,
       remind_at: remindAt,
       note: note || null,
     })
@@ -104,7 +134,7 @@ export async function POST(request: Request) {
     actorRole: counselor.role,
     actionType: 'reminder_set',
     description: `Follow-up reminder set for ${new Date(remindAt).toLocaleString('en-PK')}${note ? `: "${note}"` : ''}`,
-    metadata: { reminderId: reminder.id, taskId: taskId || null },
+    metadata: { reminderId: reminder.id, taskId: linkedTaskId },
   })
 
   return NextResponse.json({ success: true, reminder })

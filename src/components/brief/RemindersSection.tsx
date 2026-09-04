@@ -163,7 +163,8 @@ export function RemindersSection({ clientId }: Props) {
         <p className="mt-4 text-sm text-white/50">Loading reminders…</p>
       ) : reminders.length === 0 ? (
         <p className="mt-4 text-sm text-white/50">
-          No follow-up reminders yet. Set one above, or from a task when you mark it Completed or Closed.
+          No follow-up reminders yet. Set one above — it'll also show up in your own Tasks list on that
+          date — or from a task when you mark it Completed or Closed.
         </p>
       ) : (
         <div className="mt-4 space-y-3">
