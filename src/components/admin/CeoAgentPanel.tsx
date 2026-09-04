@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Check, Sparkles, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { CeoChatBox } from './CeoChatBox'
 
 type Draft = {
   id: string
@@ -128,6 +129,8 @@ export function CeoAgentPanel() {
       </div>
 
       {error && <p className="rounded-xl bg-red-500/20 px-4 py-2 text-sm text-red-400">{error}</p>}
+
+      <CeoChatBox />
 
       <div>
         <h2 className="mb-3 text-lg font-semibold text-white">Pending review</h2>
