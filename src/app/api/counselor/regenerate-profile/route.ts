@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { anthropic } from '@/lib/anthropic'
 import { POST_CONVERSATION_PROFILE_PROMPT } from '@/lib/acePrompts'
+import { closeMilestoneTasksForStage } from '@/lib/tasks/closeMilestoneTasks'
 
 export async function POST(request: Request) {
   const { clientId } = await request.json()
@@ -118,10 +119,16 @@ export async function POST(request: Request) {
     }
 
     const newStage = score >= 7 ? 2 : 1
+    const { data: existingClient } = await supabase
+      .from('clients')
+      .select('pipeline_stage')
+      .eq('id', clientId)
+      .maybeSingle()
     await supabase
       .from('clients')
       .update({ qualification_score: score, pipeline_stage: newStage })
       .eq('id', clientId)
+    await closeMilestoneTasksForStage(supabase, clientId, newStage, existingClient?.pipeline_stage)
 
     return NextResponse.json({ success: true, score })
   } catch (err) {

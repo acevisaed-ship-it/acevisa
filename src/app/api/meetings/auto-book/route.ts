@@ -1,4 +1,5 @@
 import { logActivity } from '@/lib/activityLog'
+import { closeMilestoneTasksForStage } from '@/lib/tasks/closeMilestoneTasks'
 import { anthropic } from '@/lib/anthropic'
 import { createNotification } from '@/lib/notifications'
 import { createAdminClient } from '@/lib/supabase/server'
@@ -269,6 +270,12 @@ Respond with ONLY the JSON. No explanation.`
     minute: '2-digit',
   })
 
+  const { data: existingClient } = await supabase
+    .from('clients')
+    .select('pipeline_stage')
+    .eq('id', clientId)
+    .maybeSingle()
+
   await supabase
     .from('clients')
     .update({
@@ -277,6 +284,8 @@ Respond with ONLY the JSON. No explanation.`
       updated_at: new Date().toISOString(),
     })
     .eq('id', clientId)
+
+  await closeMilestoneTasksForStage(supabase, clientId, 2, existingClient?.pipeline_stage)
 
   if (counselorId) {
     const { error: taskError } = await supabase.from('tasks').insert({

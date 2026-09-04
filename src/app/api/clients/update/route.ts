@@ -26,7 +26,7 @@ export async function PATCH(request: Request) {
   // Confirm counselor owns this client (admins/CEO handled elsewhere on admin routes)
   const { data: owned } = await supabase
     .from('clients')
-    .select('id')
+    .select('id, pipeline_stage')
     .eq('id', clientId)
     .eq('counselor_id', counselor.id)
     .maybeSingle()
@@ -44,11 +44,22 @@ export async function PATCH(request: Request) {
     await logActivity({
       clientId,
       counselorId: counselor.id,
+      actorRole: counselor.role,
       actionType: 'profile_updated',
       description: `Counselor updated client email to ${result.email}`,
       metadata: { field: 'email', email: result.email },
     })
     return NextResponse.json({ success: true, email: result.email })
+  }
+
+  let previousStage = owned?.pipeline_stage
+  if (previousStage === undefined && pipeline_stage !== undefined) {
+    const { data: current } = await supabase
+      .from('clients')
+      .select('pipeline_stage')
+      .eq('id', clientId)
+      .maybeSingle()
+    previousStage = current?.pipeline_stage
   }
 
   const update: Record<string, string | number> = {
@@ -71,10 +82,11 @@ export async function PATCH(request: Request) {
     await logActivity({
       clientId,
       counselorId: counselor.id,
+      actorRole: counselor.role,
       actionType: 'stage_change',
       description: stageClientLabel(pipeline_stage),
       visibility: 'shared',
-      metadata: { pipeline_stage },
+      metadata: { pipeline_stage, previousStage },
     })
   }
 

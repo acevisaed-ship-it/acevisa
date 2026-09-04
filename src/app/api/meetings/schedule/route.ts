@@ -1,4 +1,5 @@
 import { logActivity } from '@/lib/activityLog'
+import { closeMilestoneTasksForStage } from '@/lib/tasks/closeMilestoneTasks'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getBaseUrl } from '@/lib/utils'
 import { sendEmail, meetingBookedEmailHtml } from '@/lib/email'
@@ -75,6 +76,12 @@ export async function POST(request: Request) {
     metadata: { meetingId: meeting.id, scheduledTime: scheduledTimeUTC },
   })
 
+  const { data: existingClient } = await supabase
+    .from('clients')
+    .select('pipeline_stage')
+    .eq('id', clientId)
+    .maybeSingle()
+
   await supabase
     .from('clients')
     .update({
@@ -83,6 +90,8 @@ export async function POST(request: Request) {
       updated_at: new Date().toISOString(),
     })
     .eq('id', clientId)
+
+  await closeMilestoneTasksForStage(supabase, clientId, 2, existingClient?.pipeline_stage)
 
   try {
     await fetch(`${getBaseUrl()}/api/notifications/send`, {

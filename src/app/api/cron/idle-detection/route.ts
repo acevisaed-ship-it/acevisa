@@ -25,16 +25,11 @@ import { NextResponse } from 'next/server'
 // below) — a separate signal from the general negligence flag that HR
 // Flags shows for any overdue task regardless of source.
 //
-// Also sweeps for client messages that have gone unanswered by any human
-// counselor for 2+ hours — a distinct problem from a stale case (a case
-// can be "not idle" because the AI replied, while the counselor still
-// hasn't personally looked at it). Runs as part of this same once-daily
-// sweep rather than its own high-frequency cron — see the note in the
-// function below for the real-time-vs-once-daily tradeoff this implies.
+// Unanswered client-message alerts live in /api/cron/unanswered-messages
+// (every 2 hours) so they are not stuck to this once-daily sweep.
 const TERMINAL_STAGE = 7
 const IDLE_WORKING_DAYS_THRESHOLD = 2
 const ESCALATION_WORKING_DAYS_THRESHOLD = 1
-const UNANSWERED_MESSAGE_HOURS = 2
 
 export async function GET(request: Request) {
   if (process.env.CRON_SECRET) {
@@ -49,9 +44,8 @@ export async function GET(request: Request) {
 
   const created = await runIdleDetection(supabase, todayPKT)
   const escalated = await escalateStaleIdleTasks(supabase, todayPKT)
-  const alerted = await flagUnansweredMessages(supabase)
 
-  return NextResponse.json({ success: true, idleTasksCreated: created, escalated, unansweredAlerted: alerted })
+  return NextResponse.json({ success: true, idleTasksCreated: created, escalated })
 }
 
 async function runIdleDetection(supabase: ReturnType<typeof createAdminClient>, todayPKT: string) {
@@ -179,70 +173,4 @@ async function escalateStaleIdleTasks(supabase: ReturnType<typeof createAdminCli
   }
 
   return escalated
-}
-
-// Real-time detection would need a cron running every few minutes; this
-// project's other automation all runs once daily, so for now this checks
-// "unanswered for 2+ hours as of this run" rather than truly within 2
-// hours of it happening. If more immediate alerting is needed, this
-// function can be split into its own cron at a shorter interval — subject
-// to what the hosting plan's cron frequency actually allows.
-async function flagUnansweredMessages(supabase: ReturnType<typeof createAdminClient>) {
-  const cutoff = new Date(Date.now() - UNANSWERED_MESSAGE_HOURS * 60 * 60 * 1000).toISOString()
-
-  const { data: studentMessages } = await supabase
-    .from('conversations')
-    .select('id, client_id, timestamp, clients(name, counselor_id)')
-    .eq('sender', 'student')
-    .lt('timestamp', cutoff)
-    .order('timestamp', { ascending: false })
-
-  if (!studentMessages || studentMessages.length === 0) return 0
-
-  // Only need the latest student message per client — if that one's
-  // answered, everything before it is moot.
-  const latestByClient = new Map<string, (typeof studentMessages)[number]>()
-  for (const m of studentMessages) {
-    if (!latestByClient.has(m.client_id)) latestByClient.set(m.client_id, m)
-  }
-
-  let alerted = 0
-  for (const [clientId, msg] of latestByClient) {
-    const { data: laterCounselorReply } = await supabase
-      .from('conversations')
-      .select('id')
-      .eq('client_id', clientId)
-      .eq('sender', 'counselor')
-      .gt('timestamp', msg.timestamp)
-      .limit(1)
-      .maybeSingle()
-
-    if (laterCounselorReply) continue
-
-    // Dedupe: only alert once per unanswered message, not once per cron run.
-    const { data: existingAlert } = await supabase
-      .from('notifications')
-      .select('id')
-      .eq('client_id', clientId)
-      .eq('type', 'unanswered_message')
-      .gt('created_at', msg.timestamp)
-      .limit(1)
-      .maybeSingle()
-
-    if (existingAlert) continue
-
-    const client = msg.clients as unknown as { name: string; counselor_id: string | null } | null
-    if (!client?.counselor_id) continue
-
-    await createNotification({
-      counselorId: client.counselor_id,
-      type: 'unanswered_message',
-      title: `${client.name} is still waiting on a reply`,
-      body: `Their message has gone unanswered by a counselor for over ${UNANSWERED_MESSAGE_HOURS} hours.`,
-      clientId,
-    })
-    alerted++
-  }
-
-  return alerted
 }

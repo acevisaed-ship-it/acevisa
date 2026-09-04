@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { logActivity } from '@/lib/activityLog'
+import { closeMilestoneTasksForStage } from '@/lib/tasks/closeMilestoneTasks'
 import { createAdminClient, getAuthenticatedCounselor } from '@/lib/supabase/server'
 import type { QualificationFactor } from '@/types'
 
@@ -70,9 +71,14 @@ export async function POST(
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
+  if (qualified && client.pipeline_stage < 2) {
+    await closeMilestoneTasksForStage(supabase, clientId, 2, client.pipeline_stage)
+  }
+
   await logActivity({
     clientId,
     counselorId: counselor.id,
+    actorRole: counselor.role,
     actionType: qualified ? 'manually_qualified' : 'manually_unqualified',
     description: qualified
       ? `${counselor.name} manually qualified this lead (${cleanFactors.length} factor${cleanFactors.length === 1 ? '' : 's'} recorded)`

@@ -244,7 +244,7 @@ export function AssignTaskModal({ targetId, targetName, onClose, onSuccess }: Pr
               onChange={(e) => setIsMilestone(e.target.checked)}
               className="h-4 w-4 rounded"
             />
-            Milestone-based (tied to a case stage, not a date)
+            Milestone-based — closes when this student's case moves to the next stage
           </label>
 
           {error && <p className="text-sm text-orange">{error}</p>}

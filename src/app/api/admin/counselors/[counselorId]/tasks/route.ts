@@ -108,6 +108,16 @@ export async function POST(request: Request, { params }: RouteParams) {
 
   const clientId = linkedClient?.id ?? null
 
+  let milestoneStage: number | null = null
+  if (body.is_milestone && clientId) {
+    const { data: stageRow } = await supabase
+      .from('clients')
+      .select('pipeline_stage')
+      .eq('id', clientId)
+      .maybeSingle()
+    milestoneStage = stageRow?.pipeline_stage ?? 1
+  }
+
   const { data: newTask, error: insertError } = await supabase
     .from('tasks')
     .insert({
@@ -119,6 +129,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       source: 'assigned',
       assigned_by: admin.id,
       is_milestone: !!body.is_milestone,
+      milestone_stage: milestoneStage,
     })
     .select('id, task_text, due_date, status, is_milestone')
     .single()

@@ -42,6 +42,7 @@ export async function POST(request: Request) {
   await logActivity({
     clientId,
     counselorId: counselor.id,
+    actorRole: counselor.role,
     actionType: 'document_requested',
     description: `Counselor requested document: "${documentName.trim()}"`,
     metadata: { documentId: doc.id },

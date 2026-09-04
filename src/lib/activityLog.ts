@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
+import { closeMilestoneTasksForStage } from '@/lib/tasks/closeMilestoneTasks'
 
 export async function logActivity({
   clientId,
@@ -39,8 +40,22 @@ export async function logActivity({
   // assigned counselor — per the CEO's spec, another counselor, an admin,
   // a receptionist, or an automated/system/AI action must NOT reset the
   // clock, only the assigned counselor's own casework does.
-  if (clientId && counselorId && actorRole && actorRole !== 'system') {
+  //
+  // actorRole is optional at many call sites (stage changes, document
+  // requests). Treat a missing role as human-authored; only an explicit
+  // 'system' role is excluded. resetIdleClock still requires the actor
+  // to be the assigned counselor.
+  if (clientId && counselorId && actorRole !== 'system') {
     await resetIdleClock(supabase, clientId, counselorId)
+  }
+
+  if (clientId && actionType === 'stage_change') {
+    const newStage = Number(metadata.pipeline_stage)
+    const previousStage =
+      metadata.previousStage != null ? Number(metadata.previousStage) : undefined
+    if (Number.isFinite(newStage)) {
+      await closeMilestoneTasksForStage(supabase, clientId, newStage, previousStage)
+    }
   }
 
   return { error: null }
