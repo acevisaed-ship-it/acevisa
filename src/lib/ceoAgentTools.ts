@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type Anthropic from '@anthropic-ai/sdk'
 import { logActivity, logStaffActivity } from '@/lib/activityLog'
 import { createNotification } from '@/lib/notifications'
-import { getTodayPKTDateString, formatPKTDate, formatPKTDueDate, isOverdueInPKT } from '@/lib/pkt'
+import { getTodayPKTDateString, getPKTDayBounds, formatPKTDate, formatPKTDueDate, isOverdueInPKT } from '@/lib/pkt'
 import { computeTaskUrgency, URGENCY_LABELS } from '@/lib/taskUrgency'
 
 // Tool belt for the CEO chat assistant (see /api/ceo-agent/chat and
@@ -77,7 +77,7 @@ export const CEO_AGENT_TOOLS: Anthropic.Tool[] = [
   {
     name: 'get_tasks',
     description:
-      'List tasks matching filters. Use for "what is X working on", "what\'s overdue", "show me HR flags", "what tasks does client Y have open".',
+      'List tasks matching filters. Use for "what is X working on", "what\'s overdue", "show me HR flags", "what tasks does client Y have open". To see what someone COMPLETED in a date range, pass status: "completed" plus completedSince/completedUntil.',
     input_schema: {
       type: 'object',
       properties: {
@@ -86,9 +86,26 @@ export const CEO_AGENT_TOOLS: Anthropic.Tool[] = [
         onlyOverdue: { type: 'boolean' },
         onlyNegligenceFlagged: { type: 'boolean' },
         status: { type: 'string', enum: ['open', 'in_progress', 'completed', 'closed'] },
+        completedSince: { type: 'string', description: 'YYYY-MM-DD, inclusive. Filters by completed_at — only useful combined with status: "completed".' },
+        completedUntil: { type: 'string', description: 'YYYY-MM-DD, inclusive. Defaults to completedSince (a single day) if that is given but this is omitted.' },
         limit: { type: 'number', description: 'Default 20, max 50' },
       },
       required: [],
+    },
+  },
+  {
+    name: 'get_counselor_activity',
+    description:
+      'The best tool for "what did X do [today / this week / on a given day / since a date]" — a single chronological feed of everything one counselor did across ALL their clients: task completions, stage changes, document requests, notes, messages, anything logged in the activity trail, each with a description and which client (if any) it touched. Use this INSTEAD of calling get_client_case once per client — it answers "walk me through her day" or "what has she actually written/updated" in one call. Defaults to today if no dates are given. Requires an exact counselorId from search_counselors.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        counselorId: { type: 'string' },
+        sinceDate: { type: 'string', description: 'YYYY-MM-DD, inclusive start. Defaults to today.' },
+        untilDate: { type: 'string', description: 'YYYY-MM-DD, inclusive end. Defaults to today.' },
+        limit: { type: 'number', description: 'Default 100, max 300' },
+      },
+      required: ['counselorId'],
     },
   },
   {
@@ -144,6 +161,8 @@ export async function executeCeoAgentTool(
       return listAllCounselorsSummary(supabase)
     case 'get_tasks':
       return getTasks(supabase, input)
+    case 'get_counselor_activity':
+      return getCounselorActivity(supabase, input)
     case 'get_attendance_today':
       return getAttendanceToday(supabase)
     case 'get_pipeline_overview':
@@ -316,7 +335,7 @@ async function getTasks(
   const limit = Math.min(Number(input.limit) || 20, 50)
   let query = supabase
     .from('tasks')
-    .select('id, task_text, due_date, status, negligence_flagged, is_milestone, counselors!tasks_counselor_id_fkey(name), clients(name)')
+    .select('id, task_text, due_date, completed_at, status, negligence_flagged, is_milestone, counselors!tasks_counselor_id_fkey(name), clients(name)')
     .order('due_date', { ascending: true, nullsFirst: false })
     .limit(limit)
 
@@ -325,6 +344,13 @@ async function getTasks(
   if (input.status) query = query.eq('status', String(input.status))
   else if (!input.onlyOverdue && !input.onlyNegligenceFlagged) query = query.in('status', ['open', 'in_progress'])
   if (input.onlyNegligenceFlagged) query = query.eq('negligence_flagged', true)
+  if (input.completedSince) {
+    query = query.gte('completed_at', getPKTDayBounds(String(input.completedSince)).startUTC)
+  }
+  if (input.completedUntil || input.completedSince) {
+    const untilDate = String(input.completedUntil || input.completedSince)
+    query = query.lte('completed_at', getPKTDayBounds(untilDate).endUTC)
+  }
 
   const { data, error } = await query
   if (error) return { error: error.message }
@@ -337,11 +363,53 @@ async function getTasks(
       taskId: t.id,
       text: t.task_text,
       dueDate: formatPKTDueDate(t.due_date),
+      completedAt: t.completed_at ? formatPKTDate(t.completed_at) : null,
       overdue: isOverdueInPKT(t.due_date),
       status: t.status,
       negligenceFlagged: t.negligence_flagged,
       counselor: (t.counselors as unknown as { name: string } | null)?.name ?? 'Unassigned',
       client: (t.clients as unknown as { name: string } | null)?.name ?? null,
+    })),
+  }
+}
+
+async function getCounselorActivity(supabase: SupabaseClient, input: Record<string, unknown>) {
+  const counselorId = String(input.counselorId ?? '')
+  if (!counselorId) return { error: 'counselorId is required' }
+
+  const { data: counselor } = await supabase.from('counselors').select('id, name').eq('id', counselorId).maybeSingle()
+  if (!counselor) return { error: 'Counselor not found' }
+
+  const today = getTodayPKTDateString()
+  const sinceDate = typeof input.sinceDate === 'string' && input.sinceDate ? input.sinceDate : today
+  const untilDate = typeof input.untilDate === 'string' && input.untilDate ? input.untilDate : today
+  const limit = Math.min(Number(input.limit) || 100, 300)
+
+  const { startUTC } = getPKTDayBounds(sinceDate)
+  const { endUTC } = getPKTDayBounds(untilDate)
+
+  const { data, error } = await supabase
+    .from('activity_logs')
+    .select('description, action_type, created_at, clients(name)')
+    .eq('counselor_id', counselorId)
+    .gte('created_at', startUTC)
+    .lte('created_at', endUTC)
+    .order('created_at', { ascending: true })
+    .limit(limit)
+
+  if (error) return { error: error.message }
+
+  const entries = data ?? []
+  return {
+    counselor: counselor.name,
+    range: sinceDate === untilDate ? sinceDate : `${sinceDate} to ${untilDate}`,
+    entryCount: entries.length,
+    truncated: entries.length >= limit,
+    entries: entries.map((a) => ({
+      what: a.description,
+      type: a.action_type,
+      client: (a.clients as unknown as { name: string } | null)?.name ?? null,
+      when: formatPKTDate(a.created_at),
     })),
   }
 }

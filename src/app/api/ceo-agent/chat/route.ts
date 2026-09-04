@@ -19,8 +19,13 @@ import { NextResponse } from 'next/server'
 // tool_use/tool_result plumbing from a given turn is NOT persisted across
 // turns, so a follow-up question always re-queries fresh data rather than
 // risking a stale snapshot from a minute-old lookup.
-const MAX_TOOL_ITERATIONS = 6
+const MAX_TOOL_ITERATIONS = 20
 const MODEL = 'claude-sonnet-4-6'
+
+// Deep-history questions (e.g. get_counselor_activity over a wide date
+// range, or several rounds of search -> lookup) can run past the platform's
+// default serverless timeout — match the longer-running email routes.
+export const maxDuration = 60
 
 function systemPrompt(ceoName: string) {
   return `You are the CEO's live portal assistant for ACE Altius Consulting, a study/visa consultancy. ${ceoName} is asking you questions about what's happening in the portal right now, or instructing you to assign work.
@@ -34,6 +39,8 @@ Rules:
 - assign_task is a REAL, immediate action, not a draft — only call it once the CEO has clearly instructed a task be assigned to someone. After calling it, confirm in plain language exactly who it went to, what it says, and the due date (if any).
 - Be concise and direct. Lead with the answer. The CEO is busy — no preamble like "I'll look that up," just look it up and answer.
 - If a question is broad ("how's the team doing"), use list_all_counselors_summary and get_pipeline_overview rather than guessing scope.
+- For "what did X do [today/this week/on a date/since a date]" or any request for someone's history, notes, or a detailed daily/weekly review — call get_counselor_activity ONCE for that person and date range. It returns their full activity feed (task completions, stage changes, notes, everything) across all their clients in one call. Do NOT call get_client_case separately for each of their clients — that wastes calls and will run out of budget before you can answer. Only use get_client_case when the CEO asks about one specific case in depth.
+- You can look arbitrarily far into history — every tool that takes a date accepts any past range, not just today. Pass sinceDate/untilDate (or completedSince/completedUntil on get_tasks) explicitly rather than assuming "today" when the CEO references a different day, week, or "since" a date.
 - Today's date is ${formatPKTDateLong()} (PKT).`
 }
 
