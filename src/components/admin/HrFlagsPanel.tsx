@@ -51,6 +51,8 @@ export function HrFlagsPanel() {
   const [loading, setLoading] = useState(true)
   const [resolvingId, setResolvingId] = useState<string | null>(null)
   const [viewComplaint, setViewComplaint] = useState<OpenComplaint | null>(null)
+  const [flagging, setFlagging] = useState(false)
+  const [flagMessage, setFlagMessage] = useState<string | null>(null)
 
   const loadFlags = useCallback(async () => {
     setLoading(true)
@@ -71,6 +73,29 @@ export function HrFlagsPanel() {
     loadFlags()
   }, [loadFlags])
 
+  async function runFlagCheck() {
+    setFlagging(true)
+    setFlagMessage(null)
+    try {
+      const res = await fetch('/api/admin/hr-flags/run', { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) {
+        setFlagMessage(data.error ?? 'Failed to check for overdue tasks')
+        return
+      }
+      setFlagMessage(
+        data.flagged > 0
+          ? `Flagged ${data.flagged} newly overdue task${data.flagged === 1 ? '' : 's'}.`
+          : 'No new overdue tasks to flag — everything is already accounted for.'
+      )
+      await loadFlags()
+    } catch {
+      setFlagMessage('Network error — please try again')
+    } finally {
+      setFlagging(false)
+    }
+  }
+
   async function resolveFlag(taskId: string) {
     setResolvingId(taskId)
     try {
@@ -89,12 +114,29 @@ export function HrFlagsPanel() {
 
   return (
     <>
-      <div>
-        <h1 className="text-2xl font-semibold text-white md:text-3xl">HR Flags</h1>
-        <p className="mt-1 text-sm text-white/60">
-          Negligence, slow responses, and open complaints requiring attention
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold text-white md:text-3xl">HR Flags</h1>
+          <p className="mt-1 text-sm text-white/60">
+            Negligence, slow responses, and open complaints requiring attention
+          </p>
+        </div>
+        <div className="flex flex-col items-end gap-1.5">
+          <button
+            type="button"
+            onClick={runFlagCheck}
+            disabled={flagging}
+            className="min-h-[40px] rounded-full bg-grad-blue crisp-on-dark px-4 text-xs font-semibold text-white disabled:opacity-50"
+          >
+            {flagging ? 'Checking…' : 'Flag overdue tasks now'}
+          </button>
+          {flagMessage && <p className="max-w-xs text-right text-xs text-white/50">{flagMessage}</p>}
+        </div>
       </div>
+      <p className="mt-2 text-xs text-white/40">
+        Negligence flags normally get set automatically overnight. Use the button above to check right
+        now instead of waiting for the next scheduled run.
+      </p>
 
       <section className="mt-8">
         <h2 className="text-lg font-bold text-white">
