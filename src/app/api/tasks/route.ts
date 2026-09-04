@@ -11,7 +11,7 @@ export async function GET() {
   const { data: tasks } = await supabase
     .from('tasks')
     .select(
-      'id, task_text, due_date, status, notes_count, negligence_flagged, clients(name, id)'
+      'id, task_text, due_date, status, notes_count, negligence_flagged, is_milestone, clients(name, id)'
     )
     .eq('counselor_id', counselor.id)
     .order('due_date', { ascending: true, nullsFirst: false })

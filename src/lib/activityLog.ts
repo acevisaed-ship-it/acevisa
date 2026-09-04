@@ -31,7 +31,55 @@ export async function logActivity({
     console.error('[activityLog] insert failed:', error.message, { actionType, clientId })
     return { error: error.message }
   }
+
+  // Idle-clock reset: this is the ONE funnel every counselor-authored,
+  // client-linked action already passes through, so it's the single place
+  // to bump last_counselor_activity_at rather than touching ~40 call
+  // sites individually. Only counts when the actor IS that client's own
+  // assigned counselor — per the CEO's spec, another counselor, an admin,
+  // a receptionist, or an automated/system/AI action must NOT reset the
+  // clock, only the assigned counselor's own casework does.
+  if (clientId && counselorId && actorRole && actorRole !== 'system') {
+    await resetIdleClock(supabase, clientId, counselorId)
+  }
+
   return { error: null }
+}
+
+async function resetIdleClock(
+  supabase: ReturnType<typeof createAdminClient>,
+  clientId: string,
+  counselorId: string
+) {
+  const { data: client } = await supabase
+    .from('clients')
+    .select('counselor_id')
+    .eq('id', clientId)
+    .maybeSingle()
+
+  if (!client || client.counselor_id !== counselorId) return
+
+  await supabase
+    .from('clients')
+    .update({ last_counselor_activity_at: new Date().toISOString() })
+    .eq('id', clientId)
+
+  // The counselor just acted on this case — any idle-follow-up task
+  // waiting on exactly that action auto-closes instead of sitting open
+  // until the next negligence sweep flags it.
+  const { data: idleTasks } = await supabase
+    .from('tasks')
+    .select('id')
+    .eq('client_id', clientId)
+    .eq('source', 'idle_followup')
+    .in('status', ['open', 'in_progress'])
+
+  if (idleTasks && idleTasks.length > 0) {
+    await supabase
+      .from('tasks')
+      .update({ status: 'completed', completed_at: new Date().toISOString() })
+      .in('id', idleTasks.map((t) => t.id))
+  }
 }
 
 // Convenience wrapper for staff-only events with no associated client

@@ -62,7 +62,7 @@ export async function getAuthenticatedCounselor() {
   const admin = createAdminClient()
   const { data: counselor } = await admin
     .from('counselors')
-    .select('id, name, email, status, avatar_url, role, branch_id')
+    .select('id, name, email, status, avatar_url, role, branch_id, shift_start_time, shift_end_time, working_days')
     .eq('email', user.email)
     .single()
 

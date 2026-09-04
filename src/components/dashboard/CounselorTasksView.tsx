@@ -63,6 +63,7 @@ export function CounselorTasksView({
             status: selectedTask.status,
             notes_count: selectedTask.notes_count ?? 0,
             negligence_flagged: selectedTask.negligence_flagged ?? false,
+            is_milestone: selectedTask.is_milestone ?? false,
             clients: Array.isArray(selectedTask.clients)
               ? selectedTask.clients[0]
               : selectedTask.clients ?? undefined,

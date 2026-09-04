@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { X, Clock, CheckCircle, MessageSquare, Bell } from 'lucide-react'
+import { computeTaskUrgency, URGENCY_LABELS, URGENCY_BADGE_CLASS } from '@/lib/taskUrgency'
 
 interface TaskAction {
   id: string
@@ -22,6 +23,7 @@ interface Task {
   status: string
   notes_count: number
   negligence_flagged: boolean
+  is_milestone?: boolean
   clients?: { name: string; id?: string }
 }
 
@@ -173,6 +175,14 @@ export function TaskDetailPanel({
                   ⚠ OVERDUE
                 </span>
               )}
+              {(task.status === 'open' || task.status === 'in_progress') && (() => {
+                const urgency = computeTaskUrgency({ dueDate: task.due_date, isMilestone: task.is_milestone })
+                return (
+                  <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${URGENCY_BADGE_CLASS[urgency]}`}>
+                    {URGENCY_LABELS[urgency]}
+                  </span>
+                )
+              })()}
             </div>
             <p className="mt-2 text-sm font-semibold leading-snug text-white">{task.task_text}</p>
             <div className="mt-1 flex items-center gap-3 text-xs text-white/50">

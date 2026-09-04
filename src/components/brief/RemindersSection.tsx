@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Bell, Check, X, Plus } from 'lucide-react'
+import { Bell, Check, X, Plus, PauseCircle } from 'lucide-react'
 import { BriefCard } from './BriefCard'
 import type { Reminder, ReminderOutcome } from '@/types'
 
@@ -40,6 +40,12 @@ export function RemindersSection({ clientId }: Props) {
   const [outcome, setOutcome] = useState<ReminderOutcome>('positive')
   const [outcomeNote, setOutcomeNote] = useState('')
   const [alsoCloseTask, setAlsoCloseTask] = useState(true)
+  const [snoozeUntil, setSnoozeUntil] = useState<string | null>(null)
+  const [snoozeReason, setSnoozeReason] = useState<string | null>(null)
+  const [showSnooze, setShowSnooze] = useState(false)
+  const [snoozeDate, setSnoozeDate] = useState('')
+  const [snoozeReasonInput, setSnoozeReasonInput] = useState('')
+  const [snoozeSaving, setSnoozeSaving] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -52,7 +58,55 @@ export function RemindersSection({ clientId }: Props) {
     }
   }, [clientId])
 
+  const loadSnooze = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/clients/${clientId}/idle-snooze`)
+      const data = await res.json()
+      if (res.ok) {
+        setSnoozeUntil(data.snoozeUntil)
+        setSnoozeReason(data.reason)
+      }
+    } catch {
+      // Non-fatal
+    }
+  }, [clientId])
+
   useEffect(() => { void load() }, [load])
+  useEffect(() => { void loadSnooze() }, [loadSnooze])
+
+  async function saveSnooze() {
+    if (!snoozeDate) return
+    setSnoozeSaving(true)
+    try {
+      const res = await fetch(`/api/clients/${clientId}/idle-snooze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ snoozeUntil: snoozeDate, reason: snoozeReasonInput || undefined }),
+      })
+      if (res.ok) {
+        setShowSnooze(false)
+        setSnoozeDate('')
+        setSnoozeReasonInput('')
+        await loadSnooze()
+      }
+    } finally {
+      setSnoozeSaving(false)
+    }
+  }
+
+  async function clearSnooze() {
+    setSnoozeSaving(true)
+    try {
+      const res = await fetch(`/api/clients/${clientId}/idle-snooze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ snoozeUntil: null }),
+      })
+      if (res.ok) await loadSnooze()
+    } finally {
+      setSnoozeSaving(false)
+    }
+  }
 
   async function addReminder() {
     if (!newAt) return
@@ -119,6 +173,69 @@ export function RemindersSection({ clientId }: Props) {
           <Plus className="h-3.5 w-3.5" />
           Set Reminder
         </button>
+      </div>
+
+      <div className="mt-3">
+        {snoozeUntil ? (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-orange/30 bg-orange/10 px-3 py-2">
+            <p className="text-xs text-orange">
+              <PauseCircle className="mr-1 inline h-3.5 w-3.5" />
+              Idle follow-up paused until {snoozeUntil}
+              {snoozeReason ? ` — ${snoozeReason}` : ''}
+            </p>
+            <button
+              type="button"
+              disabled={snoozeSaving}
+              onClick={clearSnooze}
+              className="shrink-0 text-xs font-semibold text-orange/80 hover:text-orange disabled:opacity-50"
+            >
+              Resume
+            </button>
+          </div>
+        ) : showSnooze ? (
+          <div className="flex flex-col gap-2 rounded-xl border border-white/10 glass-card p-3 sm:flex-row">
+            <input
+              type="date"
+              value={snoozeDate}
+              onChange={(e) => setSnoozeDate(e.target.value)}
+              min={new Date().toISOString().slice(0, 10)}
+              className="rounded-xl px-3 py-2 text-sm outline-none glass-input"
+            />
+            <input
+              type="text"
+              value={snoozeReasonInput}
+              onChange={(e) => setSnoozeReasonInput(e.target.value)}
+              placeholder="Reason (e.g. waiting on embassy)"
+              className="flex-1 rounded-xl px-3 py-2 text-sm outline-none glass-input"
+            />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={!snoozeDate || snoozeSaving}
+                onClick={saveSnooze}
+                className="shrink-0 rounded-full bg-grad-orange crisp-on-dark px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+              >
+                {snoozeSaving ? 'Saving…' : 'Pause'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowSnooze(false)}
+                className="shrink-0 rounded-full glass-card px-3 py-2 text-xs font-semibold text-white/60"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowSnooze(true)}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-white/40 hover:text-white/70 transition-colors"
+          >
+            <PauseCircle className="h-3.5 w-3.5" />
+            Pause idle follow-up (waiting on a legitimate reason)
+          </button>
+        )}
       </div>
 
       {showAdd && (

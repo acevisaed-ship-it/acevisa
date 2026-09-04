@@ -25,6 +25,9 @@ export type NotificationType =
   | 'leave_reviewed'
   | 'client_removed'
   | 'daily_followup'
+  | 'idle_followup'
+  | 'idle_escalation'
+  | 'unanswered_message'
   | 'team_message'
   | 'team_dm'
   | 'email_update'
@@ -36,6 +39,11 @@ export type NotificationType =
 const NO_FAN_OUT: NotificationType[] = [
   'chat_message',
   'daily_followup',
+  // A fresh idle-follow-up task is just a nudge to the counselor to act —
+  // not yet an accountability failure. It only reaches leadership if it
+  // gets escalated (see 'idle_escalation', which is allowed to fan out).
+  'idle_followup',
+  'unanswered_message',
   'team_message',
   'team_dm',
   'email_update',

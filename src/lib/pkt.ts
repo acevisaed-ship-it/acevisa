@@ -85,6 +85,44 @@ export function getPKTHourMinute(date: Date = new Date()): { hour: number; minut
   return { hour: hour === 24 ? 0 : hour, minute }
 }
 
+/** Is `dateString`'s day-of-week (0=Sun..6=Sat) one of `workingDays`? Defaults
+ *  to the agency's historical Mon-Sat assumption when no per-counselor
+ *  schedule is known. */
+export function isWorkingDayForPKT(
+  dateString: string,
+  workingDays: number[] = [1, 2, 3, 4, 5, 6]
+): boolean {
+  const date = new Date(`${dateString}T12:00:00+05:00`)
+  return workingDays.includes(date.getUTCDay())
+}
+
+/**
+ * Count of `workingDays` that have elapsed strictly after `fromDateString`
+ * up to and including `toDateString` (both plain PKT `YYYY-MM-DD` dates).
+ * Used for both idle-client detection ("2 working days since last
+ * counselor activity") and negligence-flag timing ("2 working days past
+ * due date") — both counted against the specific counselor's own schedule
+ * rather than a blanket calendar assumption.
+ */
+export function countElapsedWorkingDays(
+  fromDateString: string,
+  toDateString: string,
+  workingDays: number[] = [1, 2, 3, 4, 5, 6]
+): number {
+  let count = 0
+  let cursor = addDaysToDateString(fromDateString, 1)
+  // Safety cap — this only ever walks a handful of days in practice
+  // (idle/negligence windows are a few days wide), but never loop forever
+  // on a bad input.
+  let guard = 0
+  while (cursor <= toDateString && guard < 3650) {
+    if (isWorkingDayForPKT(cursor, workingDays)) count++
+    cursor = addDaysToDateString(cursor, 1)
+    guard++
+  }
+  return count
+}
+
 /** Count of working days (excludes Sundays) in a given `YYYY-MM` month, PKT calendar. */
 export function workingDaysInPKTMonth(month: string): number {
   const [y, m] = month.split('-').map(Number)

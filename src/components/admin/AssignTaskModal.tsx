@@ -20,6 +20,7 @@ type ClientHit = {
 export function AssignTaskModal({ targetId, targetName, onClose, onSuccess }: Props) {
   const [taskText, setTaskText] = useState('')
   const [dueDate, setDueDate] = useState('')
+  const [isMilestone, setIsMilestone] = useState(false)
   const [clientQuery, setClientQuery] = useState('')
   const [clientHits, setClientHits] = useState<ClientHit[]>([])
   const [selectedClient, setSelectedClient] = useState<ClientHit | null>(null)
@@ -96,6 +97,7 @@ export function AssignTaskModal({ targetId, targetName, onClose, onSuccess }: Pr
         body: JSON.stringify({
           task_text: taskText.trim(),
           due_date: dueDate || undefined,
+          is_milestone: isMilestone,
           client_id: selectedClient?.id,
           auto_link: selectedClient
             ? true
@@ -234,6 +236,16 @@ export function AssignTaskModal({ targetId, targetName, onClose, onSuccess }: Pr
               className="min-h-[48px] w-full rounded-full px-4 py-2.5 text-sm outline-none glass-input"
             />
           </div>
+
+          <label className="flex items-center gap-2 text-sm text-white/70">
+            <input
+              type="checkbox"
+              checked={isMilestone}
+              onChange={(e) => setIsMilestone(e.target.checked)}
+              className="h-4 w-4 rounded"
+            />
+            Milestone-based (tied to a case stage, not a date)
+          </label>
 
           {error && <p className="text-sm text-orange">{error}</p>}
 

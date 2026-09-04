@@ -57,7 +57,7 @@ export async function GET(request: Request, { params }: RouteParams) {
   const { data: tasks } = await supabase
     .from('tasks')
     .select(
-      'id, task_text, due_date, status, notes_count, negligence_flagged, assigned_by, clients(name, id)'
+      'id, task_text, due_date, status, notes_count, negligence_flagged, is_milestone, assigned_by, clients(name, id)'
     )
     .eq('counselor_id', target!.id)
     .order('due_date', { ascending: true, nullsFirst: false })
@@ -78,6 +78,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     due_date?: string
     client_id?: string
     auto_link?: boolean
+    is_milestone?: boolean
   }
   const taskText = body.task_text?.trim()
   if (!taskText) {
@@ -117,8 +118,9 @@ export async function POST(request: Request, { params }: RouteParams) {
       status: 'open',
       source: 'assigned',
       assigned_by: admin.id,
+      is_milestone: !!body.is_milestone,
     })
-    .select('id, task_text, due_date, status')
+    .select('id, task_text, due_date, status, is_milestone')
     .single()
 
   if (insertError || !newTask) {

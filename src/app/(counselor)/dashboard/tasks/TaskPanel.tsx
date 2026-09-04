@@ -4,6 +4,7 @@ import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 import { formatPKTDueDate, isOverdueInPKT } from '@/lib/pkt'
+import { computeTaskUrgency, URGENCY_LABELS, URGENCY_BADGE_CLASS } from '@/lib/taskUrgency'
 
 export type TaskWithClient = {
   id: string
@@ -12,6 +13,7 @@ export type TaskWithClient = {
   status: string
   notes_count?: number
   negligence_flagged?: boolean
+  is_milestone?: boolean | null
   clients: { name: string; id?: string } | { name: string; id?: string }[] | null
 }
 
@@ -104,6 +106,10 @@ export function TaskPanel({ tasks, onTaskClick, clientProfileBasePath = '/dashbo
             const dueLabel = formatPKTDueDate(task.due_date)
             const accent = getAccentColor(task.status, task.due_date)
             const clientId = getClientId(task.clients)
+            const urgency =
+              task.status === 'open' || task.status === 'in_progress'
+                ? computeTaskUrgency({ dueDate: task.due_date, isMilestone: task.is_milestone })
+                : null
 
             return (
               <div
@@ -151,6 +157,13 @@ export function TaskPanel({ tasks, onTaskClick, clientProfileBasePath = '/dashbo
                       {dueLabel && overdue && (
                         <span className="inline-flex items-center rounded-full border border-red-400/40 bg-red-500/20 px-2.5 py-1 text-xs font-semibold text-red-300">
                           Due {dueLabel} · overdue
+                        </span>
+                      )}
+                      {urgency && (
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${URGENCY_BADGE_CLASS[urgency]}`}
+                        >
+                          {URGENCY_LABELS[urgency]}
                         </span>
                       )}
                     </div>
