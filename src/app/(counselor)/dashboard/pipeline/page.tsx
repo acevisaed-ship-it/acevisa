@@ -6,7 +6,7 @@ export default async function PipelinePage() {
   const counselor = await getAuthenticatedCounselor()
   if (!counselor) return null
 
-  const { clientsByStage, meetingByClient } = await getPipelineData(counselor.id)
+  const { clientsByStage, meetingByClient, inactiveClients } = await getPipelineData(counselor.id)
 
   return (
     <main className="flex-1 p-4 md:p-8">
@@ -16,6 +16,7 @@ export default async function PipelinePage() {
         stages={PIPELINE_STAGES}
         clientsByStage={clientsByStage}
         meetingByClient={meetingByClient}
+        inactiveClients={inactiveClients}
       />
     </main>
   )

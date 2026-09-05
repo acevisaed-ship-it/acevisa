@@ -21,7 +21,7 @@ export async function flagOverdueTasks(supabase: SupabaseClient) {
 
   const { data: candidates, error: fetchError } = await supabase
     .from('tasks')
-    .select('id, task_text, due_date, counselor_id, client_id, clients(name), counselors!tasks_counselor_id_fkey(working_days)')
+    .select('id, task_text, due_date, counselor_id, client_id, clients(name, pipeline_active), counselors!tasks_counselor_id_fkey(working_days)')
     .in('status', ['open', 'in_progress'])
     .eq('negligence_flagged', false)
     .not('due_date', 'is', null)
@@ -35,7 +35,16 @@ export async function flagOverdueTasks(supabase: SupabaseClient) {
     return { flagged: 0 }
   }
 
-  const overdueTasks = candidates.filter((task) => {
+  // Tasks tied to an inactive client don't count against a counselor —
+  // that case isn't being worked, so its stale tasks shouldn't inflate
+  // negligence flags. Tasks with no client (general/staff tasks) are
+  // unaffected.
+  const eligible = candidates.filter((task) => {
+    const client = task.clients as unknown as { pipeline_active?: boolean } | null
+    return !task.client_id || client?.pipeline_active !== false
+  })
+
+  const overdueTasks = eligible.filter((task) => {
     const workingDays =
       (task.counselors as unknown as { working_days: number[] } | null)?.working_days ?? [1, 2, 3, 4, 5, 6]
     const dueDay = getTodayPKTDateString(new Date(task.due_date as string))

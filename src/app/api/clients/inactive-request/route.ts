@@ -1,6 +1,7 @@
 import { createAdminClient, getAuthenticatedCounselor } from '@/lib/supabase/server'
 import { logActivity } from '@/lib/activityLog'
 import { createNotification } from '@/lib/notifications'
+import { closeOpenTasksForInactiveClient } from '@/lib/tasks/closeTasksForInactiveClient'
 import { NextResponse } from 'next/server'
 
 // POST /api/clients/inactive-request — a counselor (or admin) asks the CEO
@@ -89,6 +90,10 @@ export async function POST(request: Request) {
         { error: 'Saved the request but failed to update the client' },
         { status: 500 }
       )
+    }
+
+    if (!requestedActive) {
+      await closeOpenTasksForInactiveClient(supabase, clientId, counselor.id)
     }
   }
 

@@ -2,6 +2,7 @@ import { requireCeoApi } from '@/lib/admin/requireAdminApi'
 import { logActivity } from '@/lib/activityLog'
 import { createNotification } from '@/lib/notifications'
 import { createAdminClient } from '@/lib/supabase/server'
+import { closeOpenTasksForInactiveClient } from '@/lib/tasks/closeTasksForInactiveClient'
 import { NextResponse } from 'next/server'
 
 // PATCH /api/admin/inactive-requests/[id] — CEO approves or rejects. Unlike
@@ -63,6 +64,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (clientUpdateError) {
       console.error('[admin/inactive-requests] client update failed:', clientUpdateError.message)
       return NextResponse.json({ error: 'Approved but failed to update the client' }, { status: 500 })
+    }
+
+    if (!requestedActive) {
+      await closeOpenTasksForInactiveClient(supabase, row.client_id as string, admin.id)
     }
   }
 

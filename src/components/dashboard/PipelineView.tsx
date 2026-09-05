@@ -19,6 +19,7 @@ type Props = {
   stages: Stage[]
   clientsByStage: Record<number, Client[]>
   meetingByClient: Record<string, string>
+  inactiveClients?: Client[]
   basePath?: string
   allowTransfer?: boolean
   viewingCounselorId?: string
@@ -29,6 +30,7 @@ export function PipelineView({
   stages,
   clientsByStage,
   meetingByClient,
+  inactiveClients = [],
   basePath = '/dashboard',
   allowTransfer = false,
   viewingCounselorId,
@@ -51,6 +53,7 @@ export function PipelineView({
   const [transferClient, setTransferClient] = useState<Client | null>(null)
   const [removeClient, setRemoveClient] = useState<Client | null>(null)
   const [search, setSearch] = useState('')
+  const [showInactive, setShowInactive] = useState(false)
 
   const clientBasePath = allowTransfer ? '/admin/clients' : `${basePath}/clients`
 
@@ -76,6 +79,11 @@ export function PipelineView({
   }, [search, clientsByStage, stages])
 
   const stageClients = filteredByStage[activeStage] ?? []
+  const filteredInactive = useMemo(
+    () => filterClients(inactiveClients),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [search, inactiveClients]
+  )
 
   function renderClientCard(client: Client) {
     const meetingId = meetingByClient[client.id]
@@ -223,6 +231,39 @@ export function PipelineView({
           })}
         </div>
       </div>
+
+      {/* Inactive clients — kept out of the active stage columns above so
+          they don't clutter the working caseload, but still reachable here
+          rather than disappearing entirely. */}
+      {inactiveClients.length > 0 && (
+        <div className="mt-6 rounded-2xl border border-white/10 glass-card crisp-on-dark p-4">
+          <button
+            type="button"
+            onClick={() => setShowInactive((v) => !v)}
+            className="flex min-h-[44px] w-full items-center justify-between text-left"
+          >
+            <span className="text-sm font-bold text-white/70">
+              Inactive clients{' '}
+              <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-semibold text-white/50">
+                {filteredInactive.length}
+              </span>
+            </span>
+            <span className="text-xs font-medium text-white/40">{showInactive ? 'Hide' : 'Show'}</span>
+          </button>
+
+          {showInactive && (
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredInactive.length === 0 ? (
+                <p className="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-center text-sm text-white/30 sm:col-span-2 lg:col-span-3">
+                  No inactive clients match your search
+                </p>
+              ) : (
+                filteredInactive.map(renderClientCard)
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {transferClient && (
         <TransferModal

@@ -14,6 +14,7 @@ export const PIPELINE_STAGES: { stage: number; label: string }[] = [
 export type PipelineData = {
   clientsByStage: Record<number, Client[]>
   meetingByClient: Record<string, string>
+  inactiveClients: Client[]
 }
 
 export async function getPipelineData(counselorId: string): Promise<PipelineData> {
@@ -44,10 +45,18 @@ export async function getPipelineData(counselorId: string): Promise<PipelineData
   for (const stage of PIPELINE_STAGES) {
     clientsByStage[stage.stage] = []
   }
+  const inactiveClients: Client[] = []
+
   for (const client of (clients ?? []) as Client[]) {
+    // Inactive clients get their own section instead of cluttering the
+    // normal stage columns, which are the active-caseload view.
+    if (client.pipeline_active === false) {
+      inactiveClients.push(client)
+      continue
+    }
     const stage = client.pipeline_stage ?? 1
     clientsByStage[stage] = [...(clientsByStage[stage] ?? []), client]
   }
 
-  return { clientsByStage, meetingByClient }
+  return { clientsByStage, meetingByClient, inactiveClients }
 }

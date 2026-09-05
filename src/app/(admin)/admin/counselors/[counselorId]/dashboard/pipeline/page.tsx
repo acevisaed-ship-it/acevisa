@@ -40,6 +40,7 @@ export default async function AdminCounselorPipelinePage({ params }: Props) {
         stages={PIPELINE_STAGES}
         clientsByStage={pipelineData.clientsByStage}
         meetingByClient={pipelineData.meetingByClient}
+        inactiveClients={pipelineData.inactiveClients}
         basePath={basePath}
         allowTransfer
         viewingCounselorId={counselorId}

@@ -13,7 +13,7 @@ export async function flagUnansweredMessages(supabase: SupabaseClient): Promise<
 
   const { data: studentMessages } = await supabase
     .from('conversations')
-    .select('id, client_id, timestamp, clients(name, counselor_id)')
+    .select('id, client_id, timestamp, clients(name, counselor_id, pipeline_active)')
     .eq('sender', 'student')
     .lt('timestamp', cutoff)
     .order('timestamp', { ascending: false })
@@ -49,8 +49,9 @@ export async function flagUnansweredMessages(supabase: SupabaseClient): Promise<
 
     if (existingAlert) continue
 
-    const client = msg.clients as unknown as { name: string; counselor_id: string | null } | null
+    const client = msg.clients as unknown as { name: string; counselor_id: string | null; pipeline_active?: boolean } | null
     if (!client?.counselor_id) continue
+    if (client.pipeline_active === false) continue
 
     await createNotification({
       counselorId: client.counselor_id,
