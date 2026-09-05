@@ -422,3 +422,68 @@ body {
   from { opacity: 0; transform: translateY(30px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ── Front-desk neomorphism (prototype: Walk-In card) ───────────────
+   Scoped, additive "neo-*" classes — nothing above is touched, so
+   every other portal keeps its current glassmorphic look untouched.
+   Soft-UI recipe: a flat tint (no gradient, no blur, no border) with
+   depth coming purely from a light+dark shadow pair. Raised surfaces
+   (.neo-card-*, .neo-btn-*, .neo-badge-*, .neo-chip-*) cast a shadow
+   outward; pressed/inset surfaces (.neo-inset-*, and .neo-btn-* while
+   :active) cast it inward instead. Same lime/blue hues as the rest of
+   the app — only the surface language changes. */
+:root {
+  --neo-green-bg: #E4E9D3;
+  --neo-green-shadow-dark: rgba(126, 138, 64, 0.35);
+  --neo-green-shadow-light: rgba(255, 255, 255, 0.9);
+
+  --neo-blue-bg: #D9E8F0;
+  --neo-blue-shadow-dark: rgba(43, 92, 122, 0.28);
+  --neo-blue-shadow-light: rgba(255, 255, 255, 0.9);
+}
+
+.neo-card-green {
+  background: var(--neo-green-bg);
+  box-shadow: 9px 9px 18px var(--neo-green-shadow-dark), -9px -9px 18px var(--neo-green-shadow-light);
+}
+.neo-card-blue {
+  background: var(--neo-blue-bg);
+  box-shadow: 9px 9px 18px var(--neo-blue-shadow-dark), -9px -9px 18px var(--neo-blue-shadow-light);
+}
+
+.neo-badge-green {
+  background: var(--neo-green-bg);
+  box-shadow: 4px 4px 8px var(--neo-green-shadow-dark), -4px -4px 8px var(--neo-green-shadow-light);
+}
+.neo-chip-green {
+  background: var(--neo-green-bg);
+  box-shadow: 3px 3px 6px var(--neo-green-shadow-dark), -3px -3px 6px var(--neo-green-shadow-light);
+}
+
+.neo-inset-green {
+  background: var(--neo-green-bg) !important;
+  box-shadow: inset 4px 4px 8px var(--neo-green-shadow-dark), inset -4px -4px 8px var(--neo-green-shadow-light);
+  border: none !important;
+  color: var(--text) !important;
+  transition: box-shadow 0.15s ease;
+}
+.neo-inset-green::placeholder { color: rgba(10, 63, 58, 0.45); }
+.neo-inset-green:focus {
+  outline: none;
+  box-shadow: inset 5px 5px 10px var(--neo-green-shadow-dark), inset -5px -5px 10px var(--neo-green-shadow-light),
+    0 0 0 2px rgba(183, 199, 51, 0.55);
+}
+
+.neo-btn-green {
+  background: var(--neo-green-bg);
+  box-shadow: 5px 5px 10px var(--neo-green-shadow-dark), -5px -5px 10px var(--neo-green-shadow-light);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.neo-btn-green:hover:not(:disabled) {
+  box-shadow: 3px 3px 7px var(--neo-green-shadow-dark), -3px -3px 7px var(--neo-green-shadow-light);
+}
+.neo-btn-green:active:not(:disabled) {
+  box-shadow: inset 3px 3px 6px var(--neo-green-shadow-dark), inset -3px -3px 6px var(--neo-green-shadow-light);
+  transform: translateY(1px);
+}
+.neo-btn-green:disabled { opacity: 0.5; }
