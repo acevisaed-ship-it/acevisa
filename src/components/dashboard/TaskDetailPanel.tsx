@@ -191,6 +191,7 @@ export function TaskDetailPanel({
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="ml-3 shrink-0 rounded-full p-1.5 transition-colors hover:bg-white/10 text-white/60 hover:text-white"
           >

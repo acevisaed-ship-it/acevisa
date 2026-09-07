@@ -121,6 +121,7 @@ export function AssignTaskModal({ targetId, targetName, onClose, onSuccess }: Pr
     <div
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:px-4"
       onClick={onClose}
+      onKeyDown={(e) => e.stopPropagation()}
       role="presentation"
     >
       <div
@@ -155,6 +156,7 @@ export function AssignTaskModal({ targetId, targetName, onClose, onSuccess }: Pr
               maxLength={500}
               placeholder="e.g. Follow up on outstanding documents for..."
               onChange={(e) => setTaskText(e.target.value)}
+              autoFocus
               className="w-full resize-none rounded-2xl px-4 py-2.5 text-sm outline-none glass-input"
               required
             />

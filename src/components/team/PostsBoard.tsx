@@ -79,15 +79,22 @@ function ComposePost({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center sm:px-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center sm:px-4"
+      onClick={onClose}
+      onKeyDown={(e) => e.stopPropagation()}
+    >
       <div className="flex w-full flex-col dark-modal rounded-t-2xl p-6 sm:max-w-lg sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-bold text-white">New Post</h2>
-          <button onClick={onClose} className="text-white/40 hover:text-white"><X className="h-5 w-5" /></button>
+          <button type="button" onClick={onClose} className="text-white/40 hover:text-white" aria-label="Close">
+            <X className="h-5 w-5" />
+          </button>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <input
             required
+            autoFocus
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Title"
@@ -324,6 +331,7 @@ export function PostsBoard({ board, title, icon, showDueDate, canRemovePosts = f
         {icon}
         <span className="text-sm font-semibold text-white flex-1">{title}</span>
         <button
+          type="button"
           onClick={() => setComposing(true)}
           className="flex items-center gap-1.5 rounded-full bg-grad-blue crisp-on-dark px-3 py-1.5 text-xs font-bold text-white"
         >

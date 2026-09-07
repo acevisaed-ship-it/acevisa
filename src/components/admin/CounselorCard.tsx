@@ -49,6 +49,10 @@ export function CounselorCard({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
+        // Nested controls (Assign Task modal, links) must keep Space/Enter.
+        // Without this, typing a space in the task field activates the card
+        // and navigates away, closing the modal.
+        if (e.target !== e.currentTarget) return
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
           router.push(`/admin/team/${counselor.id}/activity`)
@@ -118,12 +122,16 @@ export function CounselorCard({
       <Link
         href={`/admin/counselors/${counselor.id}/dashboard`}
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
         className="mt-5 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-grad-blue crisp-on-dark px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
       >
         View Dashboard
         <ArrowRight className="h-4 w-4" />
       </Link>
-      <div onClick={(e) => e.stopPropagation()}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
         <AssignTaskButton targetId={counselor.id} targetName={counselor.name} />
       </div>
     </article>
