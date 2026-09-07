@@ -19,6 +19,7 @@ const TOOL_LABELS: Record<string, string> = {
   get_tasks: 'looked up tasks',
   get_attendance_today: "checked today's attendance",
   get_pipeline_overview: 'pulled pipeline counts',
+  get_focus_summary: 'pulled your focus list',
   assign_task: 'assigned a task',
 }
 

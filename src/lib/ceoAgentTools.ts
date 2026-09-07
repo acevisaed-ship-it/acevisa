@@ -4,6 +4,7 @@ import { logActivity, logStaffActivity } from '@/lib/activityLog'
 import { createNotification } from '@/lib/notifications'
 import { getTodayPKTDateString, getPKTDayBounds, formatPKTDate, formatPKTDueDate, isOverdueInPKT } from '@/lib/pkt'
 import { computeTaskUrgency, URGENCY_LABELS } from '@/lib/taskUrgency'
+import { getCeoFocusSummary } from '@/lib/admin/getCeoFocusSummary'
 
 // Tool belt for the CEO chat assistant (see /api/ceo-agent/chat and
 // CeoChatBox.tsx). Every tool here is read-only EXCEPT assign_task, which
@@ -120,6 +121,12 @@ export const CEO_AGENT_TOOLS: Anthropic.Tool[] = [
     input_schema: { type: 'object', properties: {}, required: [] },
   },
   {
+    name: 'get_focus_summary',
+    description:
+      'Everything currently waiting on the CEO across every queue — pending CEO Agent drafts, inactive-client requests, correction requests, escalated idle follow-ups, negligence-flagged tasks, unassigned clients, and today\'s attendance issues — plus whether the CEO Agent\'s autonomous daily review is on or off. Use this for "what do I need to check today", "what\'s waiting on me", "am I caught up", or any request for a daily focus list/checklist.',
+    input_schema: { type: 'object', properties: {}, required: [] },
+  },
+  {
     name: 'assign_task',
     description:
       "Create a REAL task assigned to a counselor, effective immediately — this is not a draft or suggestion, it lands directly in that counselor's task list and notifies them. Only call this when the CEO has clearly instructed a task be assigned. Resolve the counselor (and client, if mentioned) via search first; if the name was ambiguous, ask the CEO to confirm instead of guessing which person or case they meant.",
@@ -167,6 +174,8 @@ export async function executeCeoAgentTool(
       return getAttendanceToday(supabase)
     case 'get_pipeline_overview':
       return getPipelineOverview(supabase)
+    case 'get_focus_summary':
+      return getCeoFocusSummary()
     case 'assign_task':
       return assignTask(supabase, input, ceo)
     default:
