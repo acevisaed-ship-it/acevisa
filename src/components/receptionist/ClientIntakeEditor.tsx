@@ -109,7 +109,7 @@ export function ClientIntakeEditor({ values, onChange, editableFields }: Props) 
         </div>
         <div>
           <label className={labelCls}>
-            Email address <span className="font-normal text-orange">(optional)</span>
+            Email address <span className="font-normal text-white/50">(optional)</span>
           </label>
           <input
             type="text"

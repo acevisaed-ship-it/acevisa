@@ -23,7 +23,7 @@ export function ReceptionistHeader({ name }: { name: string }) {
       <div className="flex items-center gap-4">
         <Link
           href={STAFF_INSTALL_PATH}
-          className="text-sm font-medium text-orange hover:underline"
+          className="text-sm font-medium text-bg hover:underline"
         >
           Get the app
         </Link>
@@ -31,7 +31,7 @@ export function ReceptionistHeader({ name }: { name: string }) {
         <button
           type="button"
           onClick={handleSignOut}
-          className="min-h-[44px] text-sm text-orange hover:underline"
+          className="min-h-[44px] text-sm text-bg hover:underline"
         >
           Sign out
         </button>

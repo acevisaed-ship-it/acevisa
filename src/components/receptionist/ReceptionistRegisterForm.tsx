@@ -240,7 +240,7 @@ export function ReceptionistRegisterForm() {
       <Card variant="dark" className="text-center">
         <p className="text-sm font-medium text-bg/70">Account created</p>
         <p className="mt-2 text-2xl font-bold text-bg">{success.name}</p>
-        <p className="mt-1 font-mono text-lg font-bold text-orange">{success.clientCode}</p>
+        <p className="mt-1 font-mono text-lg font-bold text-bg">{success.clientCode}</p>
         {success.counselorName && (
           <p className="mt-2 text-sm text-bg/70">Referred to <span className="font-semibold">{success.counselorName}</span></p>
         )}
@@ -252,7 +252,7 @@ export function ReceptionistRegisterForm() {
           <div className="mt-4 rounded-xl bg-white/10 px-4 py-3 text-left text-sm text-bg/80">
             <p className="mb-2 font-medium text-bg">No email on file — share these login details with the client:</p>
             <p><span className="text-bg/50">Phone:</span> <span className="font-mono font-semibold">{success.loginPhone}</span></p>
-            <p className="mt-1"><span className="text-bg/50">Temp password:</span> <span className="font-mono font-semibold text-orange">{success.tempPassword}</span></p>
+            <p className="mt-1"><span className="text-bg/50">Temp password:</span> <span className="font-mono font-semibold text-bg">{success.tempPassword}</span></p>
             <p className="mt-2 text-xs text-bg/50">They can log in at the student portal with their phone number and this password.</p>
           </div>
         )}
@@ -275,7 +275,7 @@ export function ReceptionistRegisterForm() {
 
       <div>
         <label className={labelCls}>
-          Name <span className="font-normal text-orange">(required)</span>
+          Name <span className="font-normal text-green">(required)</span>
         </label>
         <input
           required
@@ -320,7 +320,7 @@ export function ReceptionistRegisterForm() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className={labelCls}>
-            Age <span className="font-normal text-orange">(required)</span>
+            Age <span className="font-normal text-green">(required)</span>
           </label>
           <input
             required
@@ -337,7 +337,7 @@ export function ReceptionistRegisterForm() {
         </div>
         <div>
           <label className={labelCls}>
-            City <span className="font-normal text-orange">(required)</span>
+            City <span className="font-normal text-green">(required)</span>
           </label>
           <input
             required

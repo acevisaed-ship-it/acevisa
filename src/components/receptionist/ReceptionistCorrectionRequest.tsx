@@ -242,8 +242,8 @@ export function ReceptionistCorrectionRequest() {
       </div>
 
       {approved.length > 0 && mode !== 'apply' && (
-        <div className="mt-4 rounded-xl border border-orange/40 bg-orange/15 p-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-orange">
+        <div className="mt-4 rounded-xl border border-green/40 bg-green/15 p-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-text">
             Approved — apply these changes
           </p>
           <ul className="mt-2 space-y-2">
@@ -302,7 +302,7 @@ export function ReceptionistCorrectionRequest() {
         </div>
       )}
 
-      {loadingClient && <p className="mt-3 text-xs text-orange">Loading client form…</p>}
+      {loadingClient && <p className="mt-3 text-xs text-text">Loading client form…</p>}
 
       {client && mode !== 'search' && (
         <div className="mt-4 space-y-4">
@@ -379,7 +379,7 @@ export function ReceptionistCorrectionRequest() {
                 {applyFields.map((field) => (
                   <li key={field}>
                     {CORRECTABLE_FIELD_LABELS[field]}:{' '}
-                    <span className="text-orange">{applyRequest.currentValues[field] || '—'}</span>
+                    <span className="text-text">{applyRequest.currentValues[field] || '—'}</span>
                     {' → '}
                     <span className="font-semibold">{applyRequest.proposedChanges[field] || '—'}</span>
                   </li>
@@ -398,7 +398,7 @@ export function ReceptionistCorrectionRequest() {
 
           {duplicates.length > 0 && (
             <div className="border-t border-bg/25 pt-4">
-              <p className="text-sm font-semibold text-orange">
+              <p className="text-sm font-semibold text-text">
                 Another client already exists with the same name, phone, or email
               </p>
               <p className="mt-1 text-xs text-bg/75">

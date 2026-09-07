@@ -56,7 +56,7 @@ export function ClientInfoForm({
     <div className="rounded-xl border border-bg/10 bg-bg/5 p-4">
       {title && <p className="mb-3 text-sm font-semibold text-bg">{title}</p>}
       {client.match_reasons && client.match_reasons.length > 0 && (
-        <p className="mb-3 text-xs font-medium text-orange">
+        <p className="mb-3 text-xs font-medium text-text">
           Matched on: {client.match_reasons.join(', ')}
         </p>
       )}

@@ -48,7 +48,7 @@ type Props = {
 
 function FieldMark({ kind }: { kind: 'required' | 'optional' | 'conditional' }) {
   const styles = {
-    required: 'text-orange',
+    required: 'text-green',
     optional: 'text-white/40',
     conditional: 'text-blue',
   }
@@ -202,7 +202,7 @@ function RemoveRowButton({ label, onClick }: { label: string; onClick: () => voi
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl text-white/40 hover:bg-white/5 hover:text-orange"
+      className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl text-white/40 hover:bg-white/5 hover:text-white"
       aria-label={label}
     >
       <X className="h-4 w-4" />

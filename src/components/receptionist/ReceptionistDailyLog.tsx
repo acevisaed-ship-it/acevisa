@@ -69,11 +69,11 @@ export function ReceptionistDailyLog() {
     <Card variant="blue" className="p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-green/20 text-orange">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-green/20 text-text">
             <DailyLogIcon className="h-5 w-5" />
           </span>
           <div>
-            <p className="text-sm font-semibold text-grad-orange">Daily logs</p>
+            <p className="text-sm font-semibold text-grad-teal">Daily logs</p>
             <p className="mt-0.5 text-xs text-green">
               Every office visit and every client registered, by day.
             </p>
@@ -118,7 +118,7 @@ export function ReceptionistDailyLog() {
       {!loading && !error && (
         <div className="mt-4 grid gap-6 md:grid-cols-2">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-orange">
+            <p className="text-xs font-medium uppercase tracking-wide text-text">
               Office visits ({walkIns.length})
             </p>
             {walkIns.length === 0 ? (
@@ -130,13 +130,13 @@ export function ReceptionistDailyLog() {
                     <div className="flex items-center justify-between">
                       <span className="font-semibold text-green">
                         {w.clientName}
-                        {w.clientCode && <span className="text-orange"> · {w.clientCode}</span>}
+                        {w.clientCode && <span className="text-text"> · {w.clientCode}</span>}
                       </span>
-                      <span className="text-xs text-orange">{timeOnly(w.createdAt)}</span>
+                      <span className="text-xs text-text">{timeOnly(w.createdAt)}</span>
                     </div>
                     {w.note && <p className="mt-0.5 text-xs text-green">{w.note}</p>}
                     {w.loggedByName && (
-                      <p className="mt-0.5 text-xs text-orange">Logged by {w.loggedByName}</p>
+                      <p className="mt-0.5 text-xs text-text">Logged by {w.loggedByName}</p>
                     )}
                   </li>
                 ))}
@@ -145,7 +145,7 @@ export function ReceptionistDailyLog() {
           </div>
 
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-orange">
+            <p className="text-xs font-medium uppercase tracking-wide text-text">
               New clients registered ({registrations.length})
             </p>
             {registrations.length === 0 ? (
@@ -156,15 +156,15 @@ export function ReceptionistDailyLog() {
                   <li key={r.id} className="rounded-lg border border-green/30 px-3 py-2 text-sm">
                     <div className="flex items-center justify-between">
                       <span className="font-semibold text-green">
-                        {r.name} <span className="text-orange">· {r.clientCode}</span>
+                        {r.name} <span className="text-text">· {r.clientCode}</span>
                       </span>
-                      <span className="text-xs text-orange">{timeOnly(r.registrationDate)}</span>
+                      <span className="text-xs text-text">{timeOnly(r.registrationDate)}</span>
                     </div>
                     <p className="mt-0.5 text-xs text-green">
                       {r.interestedIn ?? '—'}
                       {r.targetCountry ? ` · ${r.targetCountry}` : ''}
                     </p>
-                    <p className="mt-0.5 text-xs text-orange">
+                    <p className="mt-0.5 text-xs text-text">
                       {r.counselorName ? `Assigned to ${r.counselorName}` : 'Unassigned'}
                       {r.adSource ? ` · via ${r.adSource}` : ''}
                     </p>

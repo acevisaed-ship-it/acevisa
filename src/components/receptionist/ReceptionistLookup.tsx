@@ -36,10 +36,10 @@ export function ReceptionistLookup() {
   return (
     <Card variant="blue" className="p-5">
       <div className="flex items-center gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-green/20 text-orange">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-green/20 text-text">
           <LookupIcon className="h-5 w-5" />
         </span>
-        <p className="text-sm font-semibold text-grad-orange">Look up a client</p>
+        <p className="text-sm font-semibold text-grad-teal">Look up a client</p>
       </div>
 
       <div className="relative mt-3">
@@ -68,9 +68,9 @@ export function ReceptionistLookup() {
                 >
                   <span>
                     <span className="font-semibold text-green">{r.name}</span>{' '}
-                    <span className="text-orange">· {r.clientCode}</span>
+                    <span className="text-text">· {r.clientCode}</span>
                   </span>
-                  <span className="text-xs text-orange">{r.counselorName}</span>
+                  <span className="text-xs text-text">{r.counselorName}</span>
                 </button>
               </li>
             ))}
@@ -82,13 +82,13 @@ export function ReceptionistLookup() {
         <div className="mt-3 flex items-center justify-between rounded-xl border border-green/30 px-3 py-2 text-sm">
           <span>
             <span className="font-semibold text-green">{selected.name}</span>{' '}
-            <span className="text-orange">· {selected.clientCode}</span>
-            <span className="block text-xs text-orange">Counselor: {selected.counselorName}</span>
+            <span className="text-text">· {selected.clientCode}</span>
+            <span className="block text-xs text-text">Counselor: {selected.counselorName}</span>
           </span>
           <button
             type="button"
             onClick={() => setSelected(null)}
-            className="text-xs text-orange hover:text-green"
+            className="text-xs text-text hover:text-green"
           >
             Clear
           </button>
