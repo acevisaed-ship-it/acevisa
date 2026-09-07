@@ -32,6 +32,7 @@ export async function getCeoFocusSummary(): Promise<CeoFocusSummary> {
   const [
     { data: agentSettings },
     { count: pendingDrafts },
+    { count: staleReminders },
     { count: pendingInactiveRequests },
     { count: pendingCorrections },
     { count: escalatedTasks },
@@ -40,7 +41,16 @@ export async function getCeoFocusSummary(): Promise<CeoFocusSummary> {
     { data: attendanceIssues },
   ] = await Promise.all([
     supabase.from('agent_settings').select('enabled').eq('id', 'ceo_agent').maybeSingle(),
-    supabase.from('agent_task_drafts').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabase
+      .from('agent_task_drafts')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'pending')
+      .neq('source_rule', 'stale_reminder_followup'),
+    supabase
+      .from('agent_task_drafts')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'pending')
+      .eq('source_rule', 'stale_reminder_followup'),
     supabase.from('client_inactive_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('client_correction_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase
@@ -72,6 +82,13 @@ export async function getCeoFocusSummary(): Promise<CeoFocusSummary> {
       count: pendingDrafts ?? 0,
       href: '/admin/ceo-agent',
       description: 'Proposed by the daily retention-risk review, waiting on your approve/reject.',
+    },
+    {
+      key: 'stale_reminders',
+      label: 'Reminders needing a nudge',
+      count: staleReminders ?? 0,
+      href: '/admin/ceo-agent',
+      description: "A counselor's reminder went past due without an update — get a status or send a nudge.",
     },
     {
       key: 'inactive_requests',

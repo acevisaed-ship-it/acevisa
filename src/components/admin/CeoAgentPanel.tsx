@@ -18,6 +18,7 @@ type Draft = {
 
 const RULE_LABELS: Record<string, string> = {
   retention_risk_review: 'Retention risk review',
+  stale_reminder_followup: 'Reminder needs a nudge',
 }
 
 export function CeoAgentPanel() {
@@ -96,9 +97,11 @@ export function CeoAgentPanel() {
             CEO Agent
           </h1>
           <p className="mt-1 max-w-2xl text-sm text-white/60">
-            Runs one narrow, named playbook rule each morning and drafts a task when it fires.
-            Nothing here ever creates a real task, assigns anyone, or sends a notification on its
-            own — every draft below needs your approval first.
+            Runs a small set of named playbook rules each morning (retention risk, stale
+            reminders) and drafts a task when one fires. These drafts never create a real task,
+            assign anyone, or notify a counselor on their own — every one below needs your
+            approval first. Live counts from every other queue you own are above, updated in
+            real time.
           </p>
         </div>
         <div className="flex items-center gap-3 rounded-2xl border border-white/10 glass-card crisp-on-dark px-4 py-3">
