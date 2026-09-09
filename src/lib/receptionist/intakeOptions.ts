@@ -1,6 +1,11 @@
 export const languages = ['Urdu', 'English', 'Punjabi', 'Sindhi', 'Pashto'] as const
 export const services = ['Study Visa', 'Job Abroad', 'Visit Visa', 'Language & Test Prep'] as const
 export const STUDY_VISA = 'Study Visa' as const
+export const VISIT_VISA = 'Visit Visa' as const
+export const visitVisaSubTypes = [
+  'Tourist', 'Business', 'Family Visit', 'Medical', 'Conference / Event', 'Other',
+] as const
+export const availabilityOptions = ['Yes', 'No', 'Not sure'] as const
 export const languageTestOptions = [
   'IELTS', 'PTE', 'Duolingo', 'TOEFL', 'LanguageCert', 'Oxford ELLT', 'Other',
 ] as const

@@ -22,8 +22,11 @@ import {
   draftsToLanguageTestPayload,
   draftsToRejectionPayload,
   draftsToTravelPayload,
+  emptyVisitVisaProfileDraft,
   isStudyVisa,
+  isVisitVisa,
   parseAndValidateWalkInIntake,
+  visitVisaProfileDraftToPayload,
 } from '@/lib/receptionist/walkInIntake'
 
 // Distinct from the shared .glass-input class on purpose — this form only
@@ -49,6 +52,7 @@ const emptyIntake = (): WalkInIntakeFormValues => ({
   visaRejections: [],
   languageTests: [],
   budget: '',
+  visitVisaProfile: emptyVisitVisaProfileDraft(),
 })
 
 interface FormState {
@@ -173,6 +177,9 @@ export function ReceptionistRegisterForm() {
       visaRejectionHistory: draftsToRejectionPayload(form.intake.visaRejections),
       languageTestScores: draftsToLanguageTestPayload(form.intake.languageTests),
       budget: form.intake.budget,
+      visitVisaProfile: isVisitVisa(form.interested_in)
+        ? visitVisaProfileDraftToPayload(form.intake.visitVisaProfile)
+        : undefined,
     })
 
     if (!intakeResult.ok) {
@@ -204,6 +211,7 @@ export function ReceptionistRegisterForm() {
           visaRejectionHistory: intakeResult.data.visaRejectionHistory,
           languageTestScores: intakeResult.data.languageTestScores,
           budget: intakeResult.data.budget,
+          visitVisaProfile: intakeResult.data.visitVisaProfile,
         }),
       })
       const data = await res.json()
@@ -372,6 +380,7 @@ export function ReceptionistRegisterForm() {
             onChange={(e) => {
               const interested_in = e.target.value as FormState['interested_in']
               const keepEducation = isStudyVisa(interested_in)
+              const keepVisitVisaProfile = isVisitVisa(interested_in)
               setForm({
                 ...form,
                 interested_in,
@@ -379,15 +388,20 @@ export function ReceptionistRegisterForm() {
                   interested_in === 'Language & Test Prep' ? form.language_test_interest : '',
                 language_test_interest_custom:
                   interested_in === 'Language & Test Prep' ? form.language_test_interest_custom : '',
-                intake: keepEducation
-                  ? form.intake
-                  : {
-                      ...form.intake,
-                      lastEducation: '',
-                      lastEducationCustom: '',
-                      educationPercentage: '',
-                      educationCompletionYear: '',
-                    },
+                intake: {
+                  ...form.intake,
+                  ...(keepEducation
+                    ? {}
+                    : {
+                        lastEducation: '',
+                        lastEducationCustom: '',
+                        educationPercentage: '',
+                        educationCompletionYear: '',
+                      }),
+                  visitVisaProfile: keepVisitVisaProfile
+                    ? form.intake.visitVisaProfile
+                    : emptyVisitVisaProfileDraft(),
+                },
               })
             }}
             className={inputCls}
@@ -486,6 +500,7 @@ export function ReceptionistRegisterForm() {
 
       <WalkInIntakeExtras
         isStudyVisa={isStudyVisa(form.interested_in)}
+        isVisitVisa={isVisitVisa(form.interested_in)}
         values={form.intake}
         onChange={(patch) => setForm({ ...form, intake: { ...form.intake, ...patch } })}
       />

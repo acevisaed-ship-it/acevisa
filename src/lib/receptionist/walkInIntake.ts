@@ -1,5 +1,6 @@
 import {
   STUDY_VISA,
+  VISIT_VISA,
   scoredLanguageTests,
 } from '@/lib/receptionist/intakeOptions'
 
@@ -22,6 +23,29 @@ export type LanguageTestScoreEntry = {
   score: string
 }
 
+// Every field here is optional per branch instruction — this is background
+// financial/sponsor context a receptionist can capture up front for a Visit
+// Visa inquiry so the assigned counselor isn't starting from zero, not a
+// checklist that blocks registration. Free text rather than strict typing
+// (amounts, income, tax status) because what a walk-in visitor can state on
+// the spot is rarely a clean number, and receptionists aren't underwriters.
+export type VisitVisaProfile = {
+  visaSubType: string | null
+  visaSubTypeCustom: string | null
+  financialAssetValue: string | null
+  financialProfileAvailable: string | null
+  incomeSource: string | null
+  declaredIncome: string | null
+  bankStatementAvailable: string | null
+  declaredAssetValue: string | null
+  invitationLetterAvailable: string | null
+  invitingResidentName: string | null
+  invitingResidentRelationship: string | null
+  invitingResidentStatus: string | null
+  invitingResidentIncome: string | null
+  invitingResidentFinancialNotes: string | null
+}
+
 export type WalkInIntakePayload = {
   age: number
   lastEducation: string | null
@@ -31,6 +55,7 @@ export type WalkInIntakePayload = {
   visaRejectionHistory: VisaRejectionEntry[]
   languageTestScores: LanguageTestScoreEntry[]
   budget: string | null
+  visitVisaProfile: VisitVisaProfile | null
 }
 
 export type TravelHistoryDraft = {
@@ -52,6 +77,23 @@ export type LanguageTestDraft = {
   id: string
   test: string
   score: string
+}
+
+export type VisitVisaProfileDraft = {
+  visaSubType: string
+  visaSubTypeCustom: string
+  financialAssetValue: string
+  financialProfileAvailable: string
+  incomeSource: string
+  declaredIncome: string
+  bankStatementAvailable: string
+  declaredAssetValue: string
+  invitationLetterAvailable: string
+  invitingResidentName: string
+  invitingResidentRelationship: string
+  invitingResidentStatus: string
+  invitingResidentIncome: string
+  invitingResidentFinancialNotes: string
 }
 
 const CURRENT_YEAR = new Date().getFullYear()
@@ -97,6 +139,10 @@ export function isStudyVisa(interestedIn: string | null | undefined): boolean {
   return interestedIn === STUDY_VISA
 }
 
+export function isVisitVisa(interestedIn: string | null | undefined): boolean {
+  return interestedIn === VISIT_VISA
+}
+
 export function emptyTravelDraft(): TravelHistoryDraft {
   return { id: crypto.randomUUID(), country: '', year: '', duration: '' }
 }
@@ -113,6 +159,25 @@ export function emptyRejectionDraft(): VisaRejectionDraft {
 
 export function emptyLanguageTestDraft(): LanguageTestDraft {
   return { id: crypto.randomUUID(), test: '', score: '' }
+}
+
+export function emptyVisitVisaProfileDraft(): VisitVisaProfileDraft {
+  return {
+    visaSubType: '',
+    visaSubTypeCustom: '',
+    financialAssetValue: '',
+    financialProfileAvailable: '',
+    incomeSource: '',
+    declaredIncome: '',
+    bankStatementAvailable: '',
+    declaredAssetValue: '',
+    invitationLetterAvailable: '',
+    invitingResidentName: '',
+    invitingResidentRelationship: '',
+    invitingResidentStatus: '',
+    invitingResidentIncome: '',
+    invitingResidentFinancialNotes: '',
+  }
 }
 
 export function languageTestScoreHint(test: string): string {
@@ -330,6 +395,61 @@ function parseLanguageTests(value: unknown): { ok: true; data: LanguageTestScore
   return { ok: true, data: entries }
 }
 
+const VISIT_VISA_TEXT_MAX = 300
+
+function parseVisitVisaProfile(value: unknown): { ok: true; data: VisitVisaProfile | null } | { ok: false; error: string } {
+  if (value == null) return { ok: true, data: null }
+  if (!isRecord(value)) return { ok: false, error: 'Visit visa profile is invalid' }
+
+  const visaSubTypeRaw = asTrimmed(value.visaSubType)
+  const visaSubTypeCustom = asTrimmed(value.visaSubTypeCustom)
+  const visaSubType = visaSubTypeRaw === 'Other' ? visaSubTypeCustom : visaSubTypeRaw
+
+  const fields: Record<string, string> = {
+    financialAssetValue: asTrimmed(value.financialAssetValue),
+    financialProfileAvailable: asTrimmed(value.financialProfileAvailable),
+    incomeSource: asTrimmed(value.incomeSource),
+    declaredIncome: asTrimmed(value.declaredIncome),
+    bankStatementAvailable: asTrimmed(value.bankStatementAvailable),
+    declaredAssetValue: asTrimmed(value.declaredAssetValue),
+    invitationLetterAvailable: asTrimmed(value.invitationLetterAvailable),
+    invitingResidentName: asTrimmed(value.invitingResidentName),
+    invitingResidentRelationship: asTrimmed(value.invitingResidentRelationship),
+    invitingResidentStatus: asTrimmed(value.invitingResidentStatus),
+    invitingResidentIncome: asTrimmed(value.invitingResidentIncome),
+    invitingResidentFinancialNotes: asTrimmed(value.invitingResidentFinancialNotes),
+  }
+
+  for (const [key, val] of Object.entries({ visaSubType, ...fields })) {
+    if (val.length > VISIT_VISA_TEXT_MAX) {
+      return { ok: false, error: `Visit visa profile: ${key} must be ${VISIT_VISA_TEXT_MAX} characters or fewer` }
+    }
+  }
+
+  const allEmpty = !visaSubType && Object.values(fields).every((v) => !v)
+  if (allEmpty) return { ok: true, data: null }
+
+  return {
+    ok: true,
+    data: {
+      visaSubType: visaSubType || null,
+      visaSubTypeCustom: visaSubTypeRaw === 'Other' ? visaSubTypeCustom || null : null,
+      financialAssetValue: fields.financialAssetValue || null,
+      financialProfileAvailable: fields.financialProfileAvailable || null,
+      incomeSource: fields.incomeSource || null,
+      declaredIncome: fields.declaredIncome || null,
+      bankStatementAvailable: fields.bankStatementAvailable || null,
+      declaredAssetValue: fields.declaredAssetValue || null,
+      invitationLetterAvailable: fields.invitationLetterAvailable || null,
+      invitingResidentName: fields.invitingResidentName || null,
+      invitingResidentRelationship: fields.invitingResidentRelationship || null,
+      invitingResidentStatus: fields.invitingResidentStatus || null,
+      invitingResidentIncome: fields.invitingResidentIncome || null,
+      invitingResidentFinancialNotes: fields.invitingResidentFinancialNotes || null,
+    },
+  }
+}
+
 export function parseAndValidateWalkInIntake(input: {
   interestedIn: string
   age: unknown
@@ -340,6 +460,7 @@ export function parseAndValidateWalkInIntake(input: {
   visaRejectionHistory?: unknown
   languageTestScores?: unknown
   budget?: unknown
+  visitVisaProfile?: unknown
 }): { ok: true; data: WalkInIntakePayload } | { ok: false; error: string } {
   const age = parseInteger(input.age)
   if (age === null || age < 1 || age > 100) {
@@ -391,6 +512,13 @@ export function parseAndValidateWalkInIntake(input: {
     return { ok: false, error: 'Budget must be 200 characters or fewer' }
   }
 
+  const visitVisa = isVisitVisa(input.interestedIn)
+  const visitVisaProfileResult = parseVisitVisaProfile(input.visitVisaProfile)
+  if (!visitVisaProfileResult.ok) return visitVisaProfileResult
+  if (!visitVisa && visitVisaProfileResult.data) {
+    return { ok: false, error: 'Visit visa profile details are only collected for Visit Visa inquiries' }
+  }
+
   return {
     ok: true,
     data: {
@@ -402,6 +530,7 @@ export function parseAndValidateWalkInIntake(input: {
       visaRejectionHistory: rejections.data,
       languageTestScores: tests.data,
       budget: budget || null,
+      visitVisaProfile: visitVisa ? visitVisaProfileResult.data : null,
     },
   }
 }
@@ -421,4 +550,8 @@ export function draftsToRejectionPayload(drafts: VisaRejectionDraft[]) {
 
 export function draftsToLanguageTestPayload(drafts: LanguageTestDraft[]) {
   return drafts.map(({ test, score }) => ({ test, score }))
+}
+
+export function visitVisaProfileDraftToPayload(draft: VisitVisaProfileDraft) {
+  return { ...draft }
 }

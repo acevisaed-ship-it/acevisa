@@ -32,6 +32,7 @@ export async function POST(request: Request) {
     visaRejectionHistory?: unknown
     languageTestScores?: unknown
     budget?: unknown
+    visitVisaProfile?: unknown
   }
 
   const { name, phone, email, city, language, interested_in, target_country, language_test_interest, counselorId } = body
@@ -53,6 +54,7 @@ export async function POST(request: Request) {
     visaRejectionHistory: body.visaRejectionHistory,
     languageTestScores: body.languageTestScores,
     budget: body.budget,
+    visitVisaProfile: body.visitVisaProfile,
   })
 
   if (!intakeResult.ok) {
@@ -166,6 +168,7 @@ export async function POST(request: Request) {
       visa_rejection_history: intakeResult.data.visaRejectionHistory,
       language_test_scores: intakeResult.data.languageTestScores,
       budget: intakeResult.data.budget,
+      visit_visa_profile: intakeResult.data.visitVisaProfile,
       ad_source: 'receptionist',
       branch_id: receptionist.branch_id,
       registered_by: receptionist.id,

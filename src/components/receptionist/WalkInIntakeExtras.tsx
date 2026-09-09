@@ -4,12 +4,14 @@ import { useEffect, useState } from 'react'
 import { Plus, X } from 'lucide-react'
 import {
   OTHER,
+  availabilityOptions,
   cefrLevels,
   educationLevels,
   popularDestinations,
   schengenCountries,
   scoredLanguageTests,
   visaCategories,
+  visitVisaSubTypes,
 } from '@/lib/receptionist/intakeOptions'
 import {
   emptyLanguageTestDraft,
@@ -20,6 +22,7 @@ import {
   type LanguageTestDraft,
   type TravelHistoryDraft,
   type VisaRejectionDraft,
+  type VisitVisaProfileDraft,
 } from '@/lib/receptionist/walkInIntake'
 
 const inputCls =
@@ -38,10 +41,12 @@ export type WalkInIntakeFormValues = {
   visaRejections: VisaRejectionDraft[]
   languageTests: LanguageTestDraft[]
   budget: string
+  visitVisaProfile: VisitVisaProfileDraft
 }
 
 type Props = {
   isStudyVisa: boolean
+  isVisitVisa: boolean
   values: WalkInIntakeFormValues
   onChange: (patch: Partial<WalkInIntakeFormValues>) => void
 }
@@ -58,6 +63,25 @@ function FieldMark({ kind }: { kind: 'required' | 'optional' | 'conditional' }) 
     conditional: 'Required for Study Visa',
   }
   return <span className={`font-normal ${styles[kind]}`}>({labels[kind]})</span>
+}
+
+function AvailabilitySelect({
+  value,
+  onChange,
+  placeholder = 'Select…',
+}: {
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+}) {
+  return (
+    <select value={value} onChange={(e) => onChange(e.target.value)} className={inputCls}>
+      <option value="" className={optionCls}>{placeholder}</option>
+      {availabilityOptions.map((opt) => (
+        <option key={opt} value={opt} className={optionCls}>{opt}</option>
+      ))}
+    </select>
+  )
 }
 
 function isKnownCountry(value: string) {
@@ -210,7 +234,11 @@ function RemoveRowButton({ label, onClick }: { label: string; onClick: () => voi
   )
 }
 
-export function WalkInIntakeExtras({ isStudyVisa, values, onChange }: Props) {
+export function WalkInIntakeExtras({ isStudyVisa, isVisitVisa, values, onChange }: Props) {
+  function patchVisitVisaProfile(patch: Partial<VisitVisaProfileDraft>) {
+    onChange({ visitVisaProfile: { ...values.visitVisaProfile, ...patch } })
+  }
+
   function patchTravel(id: string, patch: Partial<TravelHistoryDraft>) {
     onChange({
       travelHistory: values.travelHistory.map((row) => (row.id === id ? { ...row, ...patch } : row)),
@@ -298,6 +326,160 @@ export function WalkInIntakeExtras({ isStudyVisa, values, onChange }: Props) {
                 onChange={(e) => onChange({ educationCompletionYear: e.target.value })}
                 className={inputCls}
                 placeholder="e.g. 2023"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isVisitVisa && (
+        <div className={sectionCls}>
+          <div>
+            <p className="text-sm font-medium text-white">
+              Visit visa financial &amp; sponsor profile <FieldMark kind="optional" />
+            </p>
+            <p className={hintCls}>
+              Everything here is optional — capture whatever the visitor can share now so the
+              counselor isn&apos;t starting from zero. Skip any field they can&apos;t answer yet.
+            </p>
+          </div>
+
+          <div>
+            <label className={labelCls}>Type of visit visa</label>
+            <select
+              value={values.visitVisaProfile.visaSubType}
+              onChange={(e) =>
+                patchVisitVisaProfile({
+                  visaSubType: e.target.value,
+                  visaSubTypeCustom: e.target.value === OTHER ? values.visitVisaProfile.visaSubTypeCustom : '',
+                })
+              }
+              className={inputCls}
+            >
+              <option value="" className={optionCls}>Select visit visa type…</option>
+              {visitVisaSubTypes.map((t) => (
+                <option key={t} value={t} className={optionCls}>{t}</option>
+              ))}
+            </select>
+            {values.visitVisaProfile.visaSubType === OTHER && (
+              <input
+                value={values.visitVisaProfile.visaSubTypeCustom}
+                onChange={(e) => patchVisitVisaProfile({ visaSubTypeCustom: e.target.value })}
+                className={`${inputCls} mt-2`}
+                placeholder="Enter visit visa type"
+              />
+            )}
+          </div>
+
+          <p className="pt-1 text-xs font-medium text-white/60">Financial profile</p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelCls}>Financial asset value</label>
+              <input
+                value={values.visitVisaProfile.financialAssetValue}
+                onChange={(e) => patchVisitVisaProfile({ financialAssetValue: e.target.value })}
+                className={inputCls}
+                placeholder="e.g. PKR 50 lakh in property + savings"
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Financial profile / tax returns available?</label>
+              <AvailabilitySelect
+                value={values.visitVisaProfile.financialProfileAvailable}
+                onChange={(v) => patchVisitVisaProfile({ financialProfileAvailable: v })}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Job / salary / income source</label>
+              <input
+                value={values.visitVisaProfile.incomeSource}
+                onChange={(e) => patchVisitVisaProfile({ incomeSource: e.target.value })}
+                className={inputCls}
+                placeholder="e.g. Salaried — bank manager"
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Declared income</label>
+              <input
+                value={values.visitVisaProfile.declaredIncome}
+                onChange={(e) => patchVisitVisaProfile({ declaredIncome: e.target.value })}
+                className={inputCls}
+                placeholder="e.g. PKR 250,000 / month"
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Bank statement available?</label>
+              <AvailabilitySelect
+                value={values.visitVisaProfile.bankStatementAvailable}
+                onChange={(v) => patchVisitVisaProfile({ bankStatementAvailable: v })}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Declared asset value</label>
+              <input
+                value={values.visitVisaProfile.declaredAssetValue}
+                onChange={(e) => patchVisitVisaProfile({ declaredAssetValue: e.target.value })}
+                className={inputCls}
+                placeholder="e.g. PKR 30 lakh"
+              />
+            </div>
+          </div>
+
+          <p className="pt-1 text-xs font-medium text-white/60">Invitation / sponsor</p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelCls}>Invitation or sponsor letter available?</label>
+              <AvailabilitySelect
+                value={values.visitVisaProfile.invitationLetterAvailable}
+                onChange={(v) => patchVisitVisaProfile({ invitationLetterAvailable: v })}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Inviting resident&apos;s name</label>
+              <input
+                value={values.visitVisaProfile.invitingResidentName}
+                onChange={(e) => patchVisitVisaProfile({ invitingResidentName: e.target.value })}
+                className={inputCls}
+                placeholder="Full name, if known"
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Relationship to visitor</label>
+              <input
+                value={values.visitVisaProfile.invitingResidentRelationship}
+                onChange={(e) => patchVisitVisaProfile({ invitingResidentRelationship: e.target.value })}
+                className={inputCls}
+                placeholder="e.g. Brother, employer, friend"
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Inviting resident&apos;s visa / residency status</label>
+              <input
+                value={values.visitVisaProfile.invitingResidentStatus}
+                onChange={(e) => patchVisitVisaProfile({ invitingResidentStatus: e.target.value })}
+                className={inputCls}
+                placeholder="e.g. Citizen, PR, work visa holder"
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Inviting resident&apos;s income</label>
+              <input
+                value={values.visitVisaProfile.invitingResidentIncome}
+                onChange={(e) => patchVisitVisaProfile({ invitingResidentIncome: e.target.value })}
+                className={inputCls}
+                placeholder="If disclosed"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className={labelCls}>
+                Embassy financial requirements — notes
+              </label>
+              <input
+                value={values.visitVisaProfile.invitingResidentFinancialNotes}
+                onChange={(e) => patchVisitVisaProfile({ invitingResidentFinancialNotes: e.target.value })}
+                className={inputCls}
+                placeholder="Any other requirement the embassy asks the inviting resident to meet"
+                maxLength={300}
               />
             </div>
           </div>
