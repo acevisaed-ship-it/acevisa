@@ -45,14 +45,19 @@ export default async function AllClientsPage() {
       qualification_score: client.qualification_score,
       created_at: client.created_at,
       status: (row.status as 'active' | 'suspended') ?? 'active',
+      pipeline_active: (row.pipeline_active as boolean | null) !== false,
     }
   })
+
+  const activeCount = rows.filter((r) => r.pipeline_active).length
+  const inactiveCount = rows.length - activeCount
 
   return (
     <main className="flex-1 p-4 md:p-8">
       <h1 className="text-2xl font-semibold text-white md:text-3xl">All Clients</h1>
       <p className="mt-1 text-sm text-white/60">
-        {rows.length} client{rows.length === 1 ? '' : 's'} across all counselors
+        {activeCount} active client{activeCount === 1 ? '' : 's'} across all counselors
+        {inactiveCount > 0 && ` · ${inactiveCount} inactive`}
       </p>
 
       <div className="mt-6">

@@ -10,7 +10,7 @@ export default async function ClientsPage() {
 
   const { data: clients } = await supabase
     .from('clients')
-    .select('id, name, client_code, email, phone, city, pipeline_stage, qualification_score, registration_date, status')
+    .select('id, name, client_code, email, phone, city, pipeline_stage, qualification_score, registration_date, status, pipeline_active')
     .eq('counselor_id', counselor.id)
     .neq('status', 'removed')
     .order('registration_date', { ascending: false })
@@ -26,14 +26,19 @@ export default async function ClientsPage() {
     qualification_score: c.qualification_score ?? null,
     registration_date: c.registration_date,
     status: ((c as Record<string, unknown>).status as 'active' | 'suspended') ?? 'active',
+    pipeline_active: ((c as Record<string, unknown>).pipeline_active as boolean | null) !== false,
   }))
+
+  const activeCount = rows.filter((r) => r.pipeline_active).length
+  const inactiveCount = rows.length - activeCount
 
   return (
     <main className="flex-1 p-4 md:p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-white md:text-3xl">Clients</h1>
         <p className="mt-1 text-sm text-white/60">
-          {rows.length} client{rows.length === 1 ? '' : 's'}
+          {activeCount} active client{activeCount === 1 ? '' : 's'}
+          {inactiveCount > 0 && ` · ${inactiveCount} inactive`}
         </p>
       </div>
 

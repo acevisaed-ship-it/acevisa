@@ -3,7 +3,10 @@
   "include": [
     "next-env.d.ts",
     "src/types/speech-recognition.d.ts",
-    "src/types/index.ts",
-    "src/components/brief/ProfileSummarySection.tsx"
+    "src/components/admin/AllClientsTable.tsx",
+    "src/components/dashboard/CounselorClientsList.tsx",
+    "src/app/(admin)/admin/clients/page.tsx",
+    "src/app/(counselor)/dashboard/clients/page.tsx",
+    "src/app/(admin)/admin/counselors/[counselorId]/dashboard/clients/page.tsx"
   ]
 }

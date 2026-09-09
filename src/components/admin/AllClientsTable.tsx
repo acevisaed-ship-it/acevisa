@@ -22,6 +22,7 @@ export type AdminClientRow = {
   qualification_score: number | null
   created_at: string
   status?: 'active' | 'suspended'
+  pipeline_active?: boolean
 }
 
 type Props = {
@@ -36,13 +37,29 @@ export function AllClientsTable({ clients, counselors }: Props) {
   const [counselorFilter, setCounselorFilter] = useState('')
   const [stageFilter, setStageFilter] = useState('1')
   const [search, setSearch] = useState('')
+  const [showInactive, setShowInactive] = useState(false)
   const [transferClient, setTransferClient] = useState<AdminClientRow | null>(null)
   const [removeClient, setRemoveClient] = useState<AdminClientRow | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [rows, setRows] = useState(clients)
 
+  const activeRows = useMemo(() => rows.filter((c) => c.pipeline_active !== false), [rows])
+  const inactiveRows = useMemo(() => rows.filter((c) => c.pipeline_active === false), [rows])
+
+  function bySearch(list: AdminClientRow[]) {
+    const q = search.trim().toLowerCase()
+    if (!q) return list
+    return list.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        (c.client_code && c.client_code.toLowerCase().includes(q)) ||
+        (c.email && c.email.toLowerCase().includes(q)) ||
+        (c.phone && c.phone.toLowerCase().includes(q))
+    )
+  }
+
   const filtered = useMemo(() => {
-    let result = rows
+    let result = activeRows
 
     // Filter mode
     switch (filterMode) {
@@ -57,20 +74,11 @@ export function AllClientsTable({ clients, counselors }: Props) {
         break
     }
 
-    // Search
-    const q = search.trim().toLowerCase()
-    if (q) {
-      result = result.filter(
-        (c) =>
-          c.name.toLowerCase().includes(q) ||
-          (c.client_code && c.client_code.toLowerCase().includes(q)) ||
-          (c.email && c.email.toLowerCase().includes(q)) ||
-          (c.phone && c.phone.toLowerCase().includes(q))
-      )
-    }
+    return bySearch(result)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterMode, counselorFilter, stageFilter, search, activeRows])
 
-    return result
-  }, [filterMode, counselorFilter, stageFilter, search, rows])
+  const filteredInactive = useMemo(() => bySearch(inactiveRows), [search, inactiveRows])
 
   function handleTransferSuccess(clientId: string, counselorName: string) {
     const counselor = counselors.find((c) => c.name === counselorName)
@@ -103,6 +111,68 @@ export function AllClientsTable({ clients, counselors }: Props) {
       month: 'short',
       year: 'numeric',
     })
+  }
+
+  function renderRow(client: AdminClientRow) {
+    return (
+      <tr key={client.id} className="border-b border-white/5 last:border-0">
+        <td className="px-4 py-3">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-white/80">{client.name}</span>
+            {client.status === 'suspended' && (
+              <span className="inline-flex items-center rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-300">
+                Suspended
+              </span>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-x-2 text-xs text-white/40">
+            {client.client_code && (
+              <span className="font-mono font-semibold text-orange/80">{client.client_code}</span>
+            )}
+            {client.email && <span>{client.email}</span>}
+          </div>
+        </td>
+        <td className="px-4 py-3 text-white/60">
+          {client.counselor_name ? (
+            client.counselor_name
+          ) : (
+            <span className="font-medium text-red-400">Unassigned</span>
+          )}
+        </td>
+        <td className="px-4 py-3 text-white/60">{client.ad_source || 'direct'}</td>
+        <td className="px-4 py-3 text-white/60">
+          {getPipelineStageLabel(client.pipeline_stage)}
+        </td>
+        <td className="px-4 py-3 text-white/60">
+          {client.qualification_score ?? '—'}
+        </td>
+        <td className="px-4 py-3 text-white/50">{formatDate(client.created_at)}</td>
+        <td className="px-4 py-3">
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setTransferClient(client)}
+              className="rounded-full border border-white/20 px-3 py-1 text-xs font-medium text-white/60 hover:text-white"
+            >
+              Transfer
+            </button>
+            <Link
+              href={`/admin/clients/${client.id}`}
+              className="rounded-full bg-blue/20 px-3 py-1 text-xs font-medium text-white hover:bg-blue/30"
+            >
+              View Profile
+            </Link>
+            <button
+              type="button"
+              onClick={() => setRemoveClient(client)}
+              className="rounded-full border border-red-500/30 px-3 py-1 text-xs font-medium text-red-400 hover:bg-red-500/10"
+            >
+              Remove
+            </button>
+          </div>
+        </td>
+      </tr>
+    )
   }
 
   return (
@@ -203,69 +273,61 @@ export function AllClientsTable({ clients, counselors }: Props) {
                 </td>
               </tr>
             ) : (
-              filtered.map((client) => (
-                <tr key={client.id} className="border-b border-white/5 last:border-0">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-white/80">{client.name}</span>
-                      {client.status === 'suspended' && (
-                        <span className="inline-flex items-center rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-300">
-                          Suspended
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-x-2 text-xs text-white/40">
-                      {client.client_code && (
-                        <span className="font-mono font-semibold text-orange/80">{client.client_code}</span>
-                      )}
-                      {client.email && <span>{client.email}</span>}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-white/60">
-                    {client.counselor_name ? (
-                      client.counselor_name
-                    ) : (
-                      <span className="font-medium text-red-400">Unassigned</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-white/60">{client.ad_source || 'direct'}</td>
-                  <td className="px-4 py-3 text-white/60">
-                    {getPipelineStageLabel(client.pipeline_stage)}
-                  </td>
-                  <td className="px-4 py-3 text-white/60">
-                    {client.qualification_score ?? '—'}
-                  </td>
-                  <td className="px-4 py-3 text-white/50">{formatDate(client.created_at)}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setTransferClient(client)}
-                        className="rounded-full border border-white/20 px-3 py-1 text-xs font-medium text-white/60 hover:text-white"
-                      >
-                        Transfer
-                      </button>
-                      <Link
-                        href={`/admin/clients/${client.id}`}
-                        className="rounded-full bg-blue/20 px-3 py-1 text-xs font-medium text-white hover:bg-blue/30"
-                      >
-                        View Profile
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={() => setRemoveClient(client)}
-                        className="rounded-full border border-red-500/30 px-3 py-1 text-xs font-medium text-red-400 hover:bg-red-500/10"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+              filtered.map(renderRow)
             )}
           </tbody>
         </table>
       </div>
+
+      {/* Inactive clients — kept out of the main list above (and out of the
+          count/filters) so they don't clutter the active caseload, but still
+          reachable here rather than disappearing entirely. */}
+      {inactiveRows.length > 0 && (
+        <div className="mt-6 rounded-2xl border border-white/10 glass-card crisp-on-dark p-4">
+          <button
+            type="button"
+            onClick={() => setShowInactive((v) => !v)}
+            className="flex min-h-[44px] w-full items-center justify-between text-left"
+          >
+            <span className="text-sm font-bold text-white/70">
+              Inactive clients{' '}
+              <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-semibold text-white/50">
+                {filteredInactive.length}
+              </span>
+            </span>
+            <span className="text-xs font-medium text-white/40">{showInactive ? 'Hide' : 'Show'}</span>
+          </button>
+
+          {showInactive && (
+            <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10">
+              <table className="w-full min-w-[720px] text-left text-sm">
+                <thead>
+                  <tr className="border-b border-white/10 text-xs uppercase tracking-wide text-white/40">
+                    <th className="px-4 py-3 font-medium">Name</th>
+                    <th className="px-4 py-3 font-medium">Counselor</th>
+                    <th className="px-4 py-3 font-medium">Ad Source</th>
+                    <th className="px-4 py-3 font-medium">Stage</th>
+                    <th className="px-4 py-3 font-medium">Score</th>
+                    <th className="px-4 py-3 font-medium">Registered</th>
+                    <th className="px-4 py-3 font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredInactive.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-10 text-center text-white/40">
+                        No inactive clients match your search.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredInactive.map(renderRow)
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {transferClient && (
         <TransferModal

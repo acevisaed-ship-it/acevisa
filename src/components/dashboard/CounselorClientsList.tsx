@@ -17,6 +17,7 @@ export type CounselorClientRow = {
   qualification_score: number | null
   registration_date: string
   status?: 'active' | 'suspended'
+  pipeline_active?: boolean
 }
 
 type Props = {
@@ -27,27 +28,98 @@ type Props = {
 
 export function CounselorClientsList({ clients, basePath = '/dashboard', allowRemove = false }: Props) {
   const [search, setSearch] = useState('')
+  const [showInactive, setShowInactive] = useState(false)
   const [rows, setRows] = useState(clients)
   const [removeClient, setRemoveClient] = useState<CounselorClientRow | null>(null)
   const [toast, setToast] = useState<string | null>(null)
 
-  const filtered = useMemo(() => {
+  const activeRows = useMemo(() => rows.filter((c) => c.pipeline_active !== false), [rows])
+  const inactiveRows = useMemo(() => rows.filter((c) => c.pipeline_active === false), [rows])
+
+  function bySearch(list: CounselorClientRow[]) {
     const q = search.trim().toLowerCase()
-    if (!q) return rows
-    return rows.filter(
+    if (!q) return list
+    return list.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
         (c.client_code && c.client_code.toLowerCase().includes(q)) ||
         (c.email && c.email.toLowerCase().includes(q)) ||
         (c.phone && c.phone.toLowerCase().includes(q))
     )
-  }, [search, rows])
+  }
+
+  const filtered = useMemo(() => bySearch(activeRows), [search, activeRows])
+  const filteredInactive = useMemo(() => bySearch(inactiveRows), [search, inactiveRows])
 
   function handleRemoveSuccess(clientId: string, clientName: string) {
     setRows((current) => current.filter((c) => c.id !== clientId))
     setRemoveClient(null)
     setToast(`${clientName} removed`)
     setTimeout(() => setToast(null), 4000)
+  }
+
+  function renderRow(client: CounselorClientRow) {
+    const score = client.qualification_score
+    const scoreColor = score !== null && score > 0 ? getScoreBadgeColor(score) : null
+    return (
+      <tr key={client.id} className="border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
+        <td className="px-4 py-3">
+          <div className="flex items-center gap-2">
+            <p className="font-semibold text-white/80">{client.name}</p>
+            {client.status === 'suspended' && (
+              <span className="inline-flex items-center rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-300">
+                Suspended
+              </span>
+            )}
+          </div>
+          {client.client_code && (
+            <p className="font-mono text-xs font-semibold text-orange/80">{client.client_code}</p>
+          )}
+          {client.email && (
+            <p className="text-xs text-white/40">{client.email}</p>
+          )}
+        </td>
+        <td className="px-4 py-3 text-white/60">{client.phone}</td>
+        <td className="px-4 py-3 text-white/60">{client.city || '—'}</td>
+        <td className="px-4 py-3 text-white/60">
+          {getPipelineStageLabel(client.pipeline_stage)}
+        </td>
+        <td className="px-4 py-3">
+          {scoreColor !== null && score !== null ? (
+            <span
+              className="inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white"
+              style={{ backgroundColor: scoreColor }}
+            >
+              {score}
+            </span>
+          ) : (
+            <span className="text-white/30">—</span>
+          )}
+        </td>
+        <td className="px-4 py-3 text-xs text-white/40">
+          {formatPKTRegistrationDate(client.registration_date)}
+        </td>
+        <td className="px-4 py-3">
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href={`${basePath}/clients/${client.id}`}
+              className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-medium text-white/60 transition-colors hover:text-white"
+            >
+              View →
+            </Link>
+            {allowRemove && (
+              <button
+                type="button"
+                onClick={() => setRemoveClient(client)}
+                className="rounded-full border border-red-500/30 px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-500/10"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+        </td>
+      </tr>
+    )
   }
 
   return (
@@ -100,73 +172,60 @@ export function CounselorClientsList({ clients, basePath = '/dashboard', allowRe
                 </td>
               </tr>
             ) : (
-              filtered.map((client) => {
-                const score = client.qualification_score
-                const scoreColor = score !== null && score > 0 ? getScoreBadgeColor(score) : null
-                return (
-                  <tr key={client.id} className="border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <p className="font-semibold text-white/80">{client.name}</p>
-                        {client.status === 'suspended' && (
-                          <span className="inline-flex items-center rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-300">
-                            Suspended
-                          </span>
-                        )}
-                      </div>
-                      {client.client_code && (
-                        <p className="font-mono text-xs font-semibold text-orange/80">{client.client_code}</p>
-                      )}
-                      {client.email && (
-                        <p className="text-xs text-white/40">{client.email}</p>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-white/60">{client.phone}</td>
-                    <td className="px-4 py-3 text-white/60">{client.city || '—'}</td>
-                    <td className="px-4 py-3 text-white/60">
-                      {getPipelineStageLabel(client.pipeline_stage)}
-                    </td>
-                    <td className="px-4 py-3">
-                      {scoreColor !== null && score !== null ? (
-                        <span
-                          className="inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white"
-                          style={{ backgroundColor: scoreColor }}
-                        >
-                          {score}
-                        </span>
-                      ) : (
-                        <span className="text-white/30">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-xs text-white/40">
-                      {formatPKTRegistrationDate(client.registration_date)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-2">
-                        <Link
-                          href={`${basePath}/clients/${client.id}`}
-                          className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-medium text-white/60 transition-colors hover:text-white"
-                        >
-                          View →
-                        </Link>
-                        {allowRemove && (
-                          <button
-                            type="button"
-                            onClick={() => setRemoveClient(client)}
-                            className="rounded-full border border-red-500/30 px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-500/10"
-                          >
-                            Remove
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })
+              filtered.map(renderRow)
             )}
           </tbody>
         </table>
       </div>
+
+      {/* Inactive clients — kept out of the main list above so they don't
+          clutter the active caseload, but still reachable here. */}
+      {inactiveRows.length > 0 && (
+        <div className="mt-6 rounded-2xl border border-white/10 glass-card crisp-on-dark p-4">
+          <button
+            type="button"
+            onClick={() => setShowInactive((v) => !v)}
+            className="flex min-h-[44px] w-full items-center justify-between text-left"
+          >
+            <span className="text-sm font-bold text-white/70">
+              Inactive clients{' '}
+              <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-semibold text-white/50">
+                {filteredInactive.length}
+              </span>
+            </span>
+            <span className="text-xs font-medium text-white/40">{showInactive ? 'Hide' : 'Show'}</span>
+          </button>
+
+          {showInactive && (
+            <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10">
+              <table className="w-full min-w-[640px] text-left text-sm">
+                <thead>
+                  <tr className="border-b border-white/10 text-xs uppercase tracking-wide text-white/40">
+                    <th className="px-4 py-3 font-medium">Name</th>
+                    <th className="px-4 py-3 font-medium">Phone</th>
+                    <th className="px-4 py-3 font-medium">City</th>
+                    <th className="px-4 py-3 font-medium">Stage</th>
+                    <th className="px-4 py-3 font-medium">Score</th>
+                    <th className="px-4 py-3 font-medium">Registered</th>
+                    <th className="px-4 py-3 font-medium"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredInactive.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-10 text-center text-sm text-white/40">
+                        No inactive clients match your search.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredInactive.map(renderRow)
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

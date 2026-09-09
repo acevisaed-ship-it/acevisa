@@ -19,7 +19,7 @@ export default async function AdminCounselorClientsPage({ params }: Props) {
       .single(),
     supabase
       .from('clients')
-      .select('id, name, client_code, email, phone, city, pipeline_stage, qualification_score, registration_date')
+      .select('id, name, client_code, email, phone, city, pipeline_stage, qualification_score, registration_date, pipeline_active')
       .eq('counselor_id', counselorId)
       .neq('status', 'removed')
       .order('registration_date', { ascending: false }),
@@ -39,7 +39,11 @@ export default async function AdminCounselorClientsPage({ params }: Props) {
     pipeline_stage: c.pipeline_stage ?? 1,
     qualification_score: c.qualification_score ?? null,
     registration_date: c.registration_date,
+    pipeline_active: ((c as Record<string, unknown>).pipeline_active as boolean | null) !== false,
   }))
+
+  const activeCount = rows.filter((r) => r.pipeline_active).length
+  const inactiveCount = rows.length - activeCount
 
   const basePath = `/admin/counselors/${counselorId}/dashboard`
 
@@ -48,7 +52,8 @@ export default async function AdminCounselorClientsPage({ params }: Props) {
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-white md:text-3xl">Clients</h1>
         <p className="mt-1 text-sm text-text/60">
-          {rows.length} client{rows.length === 1 ? '' : 's'}
+          {activeCount} active client{activeCount === 1 ? '' : 's'}
+          {inactiveCount > 0 && ` · ${inactiveCount} inactive`}
         </p>
       </div>
 
