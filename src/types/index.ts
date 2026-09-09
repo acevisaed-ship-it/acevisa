@@ -75,6 +75,22 @@ export type Client = {
   visa_rejection_history?: Array<{ applicationCountry: string; visaCategory: string; reason: string }> | null
   language_test_scores?: Array<{ test: string; score: string }> | null
   budget?: string | null
+  visit_visa_profile?: {
+    visaSubType: string | null
+    visaSubTypeCustom: string | null
+    financialAssetValue: string | null
+    financialProfileAvailable: string | null
+    incomeSource: string | null
+    declaredIncome: string | null
+    bankStatementAvailable: string | null
+    declaredAssetValue: string | null
+    invitationLetterAvailable: string | null
+    invitingResidentName: string | null
+    invitingResidentRelationship: string | null
+    invitingResidentStatus: string | null
+    invitingResidentIncome: string | null
+    invitingResidentFinancialNotes: string | null
+  } | null
   interested_in?: string | null
   target_country?: string | null
   language_test_interest?: string | null

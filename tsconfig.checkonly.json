@@ -3,10 +3,7 @@
   "include": [
     "next-env.d.ts",
     "src/types/speech-recognition.d.ts",
-    "src/lib/receptionist/intakeOptions.ts",
-    "src/lib/receptionist/walkInIntake.ts",
-    "src/components/receptionist/WalkInIntakeExtras.tsx",
-    "src/components/receptionist/ReceptionistRegisterForm.tsx",
-    "src/app/api/receptionist/register-client/route.ts"
+    "src/types/index.ts",
+    "src/components/brief/ProfileSummarySection.tsx"
   ]
 }

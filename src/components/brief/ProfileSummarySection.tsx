@@ -17,6 +17,39 @@ function IntakeHistoryList({ label, items }: { label: string; items: string[] })
   )
 }
 
+function VisitVisaProfileSection({ profile }: { profile: NonNullable<Client['visit_visa_profile']> }) {
+  const rows: Array<[string, string | null]> = [
+    ['Visa type', profile.visaSubType === 'Other' ? profile.visaSubTypeCustom : profile.visaSubType] as [string, string | null],
+    ['Financial asset value', profile.financialAssetValue] as [string, string | null],
+    ['Financial profile / tax returns', profile.financialProfileAvailable] as [string, string | null],
+    ['Job / income source', profile.incomeSource] as [string, string | null],
+    ['Declared income', profile.declaredIncome] as [string, string | null],
+    ['Bank statement available', profile.bankStatementAvailable] as [string, string | null],
+    ['Declared asset value', profile.declaredAssetValue] as [string, string | null],
+    ['Invitation / sponsor letter', profile.invitationLetterAvailable] as [string, string | null],
+    ['Inviting resident', profile.invitingResidentName] as [string, string | null],
+    ['Relationship to visitor', profile.invitingResidentRelationship] as [string, string | null],
+    ['Inviting resident status', profile.invitingResidentStatus] as [string, string | null],
+    ['Inviting resident income', profile.invitingResidentIncome] as [string, string | null],
+    ['Embassy requirement notes', profile.invitingResidentFinancialNotes] as [string, string | null],
+  ].filter(([, value]) => !!value)
+
+  if (rows.length === 0) return null
+
+  return (
+    <div>
+      <p className="font-bold">Visit visa profile:</p>
+      <ul className="mt-1 list-disc space-y-0.5 pl-5">
+        {rows.map(([label, value]) => (
+          <li key={label}>
+            <span className="font-medium">{label}:</span> {value}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 type Props = {
   client: Client
   profile: AIProfileData | null
@@ -101,6 +134,9 @@ export function ProfileSummarySection({
             label="Language test scores"
             items={(client.language_test_scores ?? []).map((row) => `${row.test}: ${row.score}`)}
           />
+          {client.visit_visa_profile && (
+            <VisitVisaProfileSection profile={client.visit_visa_profile} />
+          )}
           {client.ad_source ? (
             <p>
               <span className="font-bold">Ad Source:</span>{' '}
