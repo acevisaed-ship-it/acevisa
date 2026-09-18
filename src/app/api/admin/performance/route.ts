@@ -65,6 +65,8 @@ export async function GET(request: Request) {
       .from('tasks')
       .select('counselor_id, status, negligence_flagged'),
     supabase.from('commission_rules').select('counselor_id, commission_rate, base_salary'),
+    // Deals are only used for `dealsClosed` (pipeline activity) below — real
+    // revenue comes from paid invoices, matching HR Analytics.
     supabase
       .from('deals')
       .select('id, counselor_id, deal_value, stage, actual_close_date')
@@ -72,6 +74,16 @@ export async function GET(request: Request) {
       .gte('actual_close_date', start.slice(0, 10))
       .lte('actual_close_date', end.slice(0, 10)),
   ])
+
+  // Real revenue: invoices actually paid within the month, attributed to the
+  // counselor the invoice was billed under (auto-set from the client at
+  // invoice creation time).
+  const { data: paidInvoices } = await supabase
+    .from('invoices')
+    .select('id, counselor_id, total, status, paid_at')
+    .eq('status', 'paid')
+    .gte('paid_at', start)
+    .lt('paid_at', end)
 
   // Raw attendance counts — team performance counts every late arrival and
   // absence regardless of whether a leave/excuse application was later
@@ -84,7 +96,7 @@ export async function GET(request: Request) {
     .lt('date', end.slice(0, 10))
     .in('status', ['late', 'absent'])
 
-  const totalRevenue = (closedDeals ?? []).reduce((s, d) => s + Number(d.deal_value), 0)
+  const totalRevenue = (paidInvoices ?? []).reduce((s, i) => s + Number(i.total), 0)
 
   const performance = (counselors ?? []).map((counselor) => {
     const counselorClients = (clients ?? []).filter((c) => c.counselor_id === counselor.id)
@@ -122,7 +134,8 @@ export async function GET(request: Request) {
     const baseSalary = Number(rule?.base_salary ?? counselor.base_salary ?? 0)
     const commissionRate = Number(rule?.commission_rate ?? counselor.commission_rate ?? 10)
     const counselorDeals = (closedDeals ?? []).filter((d) => d.counselor_id === counselor.id)
-    const revenueGenerated = counselorDeals.reduce((s, d) => s + Number(d.deal_value), 0)
+    const counselorInvoices = (paidInvoices ?? []).filter((i) => i.counselor_id === counselor.id)
+    const revenueGenerated = counselorInvoices.reduce((s, i) => s + Number(i.total), 0)
     const commissionEarned = Math.round((revenueGenerated * commissionRate) / 100)
     const totalCost = baseSalary + commissionEarned
     const businessContributionPct =

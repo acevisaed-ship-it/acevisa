@@ -1,6 +1,7 @@
 import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
 import { createAdminClient } from '@/lib/supabase/server'
+import { getPKTDayBounds, getTodayPKTDateString } from '@/lib/pkt'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
@@ -12,8 +13,20 @@ export async function GET(request: Request) {
   const offset = Number(url.searchParams.get('offset') ?? 0)
   const counselorId = url.searchParams.get('counselorId')
 
-  const branchScoped = isBranchScopedAdmin(admin)
+  // Date filter — defaults to "today" (PKT) so the log doesn't just keep
+  // building up unbounded; pass `from`/`to` (YYYY-MM-DD, PKT calendar days,
+  // inclusive) to page back through earlier days, or `all=1` to disable the
+  // date filter entirely and see everything (previous behavior).
+  const showAll = url.searchParams.get('all') === '1'
+  const fromParam = url.searchParams.get('from')
+  const toParam = url.searchParams.get('to')
+  const today = getTodayPKTDateString()
+  const fromDate = fromParam || today
+  const toDate = toParam || fromDate
+
   const supabase = createAdminClient()
+
+  const branchScoped = isBranchScopedAdmin(admin)
 
   let query = supabase
     .from('activity_logs')
@@ -25,6 +38,12 @@ export async function GET(request: Request) {
     )
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1)
+
+  if (!showAll) {
+    const { startUTC } = getPKTDayBounds(fromDate)
+    const { endUTC } = getPKTDayBounds(toDate)
+    query = query.gte('created_at', startUTC).lte('created_at', endUTC)
+  }
 
   if (branchScoped) {
     // Show client events in this branch OR staff events by counselors in this branch.
@@ -63,5 +82,11 @@ export async function GET(request: Request) {
     }
   })
 
-  return NextResponse.json({ logs: rows, total: count ?? 0 })
+  return NextResponse.json({
+    logs: rows,
+    total: count ?? 0,
+    dateFrom: fromDate,
+    dateTo: toDate,
+    showAll,
+  })
 }

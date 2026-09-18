@@ -6,6 +6,7 @@ import { getScoreBadgeColor } from '@/lib/brief'
 import { formatPKTRegistrationDate } from '@/lib/pkt'
 import { TransferModal } from '@/components/admin/TransferModal'
 import { RemoveClientModal } from '@/components/admin/RemoveClientModal'
+import { withReturnParams } from '@/lib/returnLink'
 import type { Client } from '@/types'
 
 type Stage = {
@@ -24,6 +25,10 @@ type Props = {
   allowTransfer?: boolean
   viewingCounselorId?: string
   counselors?: CounselorOption[]
+  /** Current page path + label, stamped onto client links so their profile's
+   * back button returns here instead of a hardcoded default. */
+  returnTo?: string
+  returnLabel?: string
 }
 
 export function PipelineView({
@@ -35,6 +40,8 @@ export function PipelineView({
   allowTransfer = false,
   viewingCounselorId,
   counselors = [],
+  returnTo,
+  returnLabel = 'Pipeline',
 }: Props) {
   const defaultStage = useMemo(() => {
     let maxStage = stages[0]?.stage ?? 1
@@ -56,6 +63,8 @@ export function PipelineView({
   const [showInactive, setShowInactive] = useState(false)
 
   const clientBasePath = allowTransfer ? '/admin/clients' : `${basePath}/clients`
+  const clientHref = (clientId: string) =>
+    returnTo ? withReturnParams(`${clientBasePath}/${clientId}`, returnTo, returnLabel) : `${clientBasePath}/${clientId}`
 
   // Filter clients by search query across name, email, phone
   const filterClients = (clients: Client[]) => {
@@ -122,7 +131,7 @@ export function PipelineView({
 
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <Link
-            href={`${clientBasePath}/${client.id}`}
+            href={clientHref(client.id)}
             className="inline-flex min-h-[44px] items-center rounded-full border border-white/20 px-3 py-1.5 text-xs font-medium text-white/70 transition-colors hover:text-white"
           >
             View Client →

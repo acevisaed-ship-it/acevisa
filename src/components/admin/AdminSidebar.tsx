@@ -34,6 +34,7 @@ import { ProfilePicture } from '@/components/dashboard/ProfilePicture'
 import { UnassignedCountBadge } from '@/components/admin/UnassignedCountBadge'
 import { CorrectionCountBadge } from '@/components/admin/CorrectionCountBadge'
 import { InactiveRequestCountBadge } from '@/components/admin/InactiveRequestCountBadge'
+import { TeamHubCountBadge } from '@/components/team/TeamHubCountBadge'
 import { LogoHomeLink } from '@/components/ui/LogoHomeLink'
 import { cn } from '@/lib/utils'
 
@@ -49,7 +50,7 @@ type NavItem = {
   label: string
   icon: typeof Users
   exact?: boolean
-  badge?: 'unassigned' | 'corrections' | 'inactiveRequests'
+  badge?: 'unassigned' | 'corrections' | 'inactiveRequests' | 'teamHub'
 }
 
 const navItems: NavItem[] = [
@@ -64,7 +65,7 @@ const navItems: NavItem[] = [
   { href: '/admin/campaigns', label: 'Campaigns', icon: Megaphone },
   { href: '/admin/performance', label: 'Performance', icon: BarChart3 },
   { href: '/admin/crm', label: 'CRM Pipeline', icon: Handshake },
-  { href: '/admin/hub', label: 'Team Hub', icon: MessageSquareMore },
+  { href: '/admin/hub', label: 'Team Hub', icon: MessageSquareMore, badge: 'teamHub' },
   { href: '/admin/email', label: 'Email', icon: Mail },
   { href: '/admin/accounts', label: 'Accounts', icon: Wallet },
   { href: '/admin/hr', label: 'HR', icon: ShieldCheck },
@@ -177,6 +178,7 @@ function SidebarContent({
               )}
               {!collapsed && badge === 'corrections' && <CorrectionCountBadge />}
               {!collapsed && badge === 'inactiveRequests' && <InactiveRequestCountBadge />}
+              {!collapsed && badge === 'teamHub' && <TeamHubCountBadge />}
             </Link>
           )
         })}

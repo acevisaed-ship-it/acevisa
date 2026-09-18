@@ -292,12 +292,14 @@ function InvoicesTab({
   canManageEntries,
   branches,
   showBranchFilter,
+  initialDealId,
 }: {
   clients: ClientOption[]
   deals: DealOption[]
   canManageEntries: boolean
   branches: BranchOption[]
   showBranchFilter: boolean
+  initialDealId?: string
 }) {
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loading, setLoading] = useState(true)
@@ -347,6 +349,29 @@ function InvoicesTab({
   }, [statusTab, fromDate, toDate, branchId])
 
   useEffect(() => { loadInvoices() }, [loadInvoices])
+
+  // Deep-linked from the CRM Pipeline's "Create Invoice for this Deal"
+  // action (/admin/accounts?tab=invoices&dealId=...) — open the create
+  // modal pre-filled with that deal's client and value. The client's
+  // counselor is auto-attached below (selectedClient?.counselor_id), so the
+  // invoice — and therefore the revenue — lands on the right counselor
+  // automatically.
+  useEffect(() => {
+    if (!initialDealId) return
+    const deal = deals.find((d) => d.id === initialDealId)
+    if (!deal) return
+    setEditingId(null)
+    setInvoiceStatus('draft')
+    setClientId(deal.client_id)
+    setDealId(deal.id)
+    setProductId('')
+    setDueDate('')
+    setNotes('')
+    setLineItems([{ description: deal.service_type, amount: String(deal.deal_value) }])
+    setError('')
+    setModalOpen(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialDealId])
 
   // Load products when modal opens
   useEffect(() => {
@@ -1294,11 +1319,16 @@ export function InvoiceManager({
   deals,
   canManageEntries,
   showBranchFilter = false,
+  initialDealId,
 }: {
   clients: ClientOption[]
   deals: DealOption[]
   canManageEntries: boolean
   showBranchFilter?: boolean
+  /** Deal id to pre-fill a new invoice from (e.g. deep-linked from the CRM
+   * Pipeline's "Create Invoice for this Deal" action). Opens the create
+   * modal automatically with the deal's client + value pre-filled. */
+  initialDealId?: string
 }) {
   const [activeTab, setActiveTab] = useState<'invoices' | 'expenses'>('invoices')
   const [branches, setBranches] = useState<BranchOption[]>([])
@@ -1358,6 +1388,7 @@ export function InvoiceManager({
           canManageEntries={canManageEntries}
           branches={branches}
           showBranchFilter={showBranchFilter}
+          initialDealId={initialDealId}
         />
       ) : (
         <ExpensesTab

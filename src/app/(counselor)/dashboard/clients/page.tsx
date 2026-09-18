@@ -42,7 +42,12 @@ export default async function ClientsPage() {
         </p>
       </div>
 
-      <CounselorClientsList clients={rows} basePath="/dashboard" />
+      <CounselorClientsList
+        clients={rows}
+        basePath="/dashboard"
+        returnTo="/dashboard/clients"
+        returnLabel="Clients"
+      />
     </main>
   )
 }

@@ -27,13 +27,17 @@ import { ClientProfileHeaderActions } from '@/app/(counselor)/dashboard/clients/
 import { PendingProfileUpdates } from '@/app/(counselor)/dashboard/clients/[clientId]/PendingProfileUpdates'
 import { PendingStageSuggestion } from '@/app/(counselor)/dashboard/clients/[clientId]/PendingStageSuggestion'
 import { RegenerateProfileButton } from '@/components/brief/RegenerateProfileButton'
+import { resolveBackLink, withReturnParams } from '@/lib/returnLink'
 
 type Props = {
   params: Promise<{ clientId: string }>
+  searchParams: Promise<{ returnTo?: string; returnLabel?: string }>
 }
 
-export default async function AdminClientProfilePage({ params }: Props) {
+export default async function AdminClientProfilePage({ params, searchParams }: Props) {
   const { clientId } = await params
+  const sp = await searchParams
+  const backLink = resolveBackLink(sp, '/admin/clients', 'All Clients')
   const admin = await requireAdmin()
 
   const supabase = createAdminClient()
@@ -165,10 +169,10 @@ export default async function AdminClientProfilePage({ params }: Props) {
       <div className="mx-auto max-w-[1500px]">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <Link
-            href="/admin/clients"
+            href={backLink.href}
             className="inline-flex items-center text-sm text-white/60 hover:text-white"
           >
-            ← Back to all clients
+            ← Back to {backLink.label}
           </Link>
         </div>
 
@@ -176,7 +180,7 @@ export default async function AdminClientProfilePage({ params }: Props) {
             bell on desktop; rendered inline here on mobile. */}
         <ClientProfileHeaderActions
           clientId={clientId}
-          chatHref={`/admin/clients/${clientId}/chat`}
+          chatHref={withReturnParams(`/admin/clients/${clientId}/chat`, backLink.href, backLink.label)}
         />
 
         <div className="flex items-center justify-between">

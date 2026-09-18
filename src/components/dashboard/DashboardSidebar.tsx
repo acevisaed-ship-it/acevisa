@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { ProfilePicture } from '@/components/dashboard/ProfilePicture'
 import { LogoHomeLink } from '@/components/ui/LogoHomeLink'
 import { STAFF_INSTALL_PATH } from '@/components/StaffAppInstallCard'
+import { TeamHubCountBadge } from '@/components/team/TeamHubCountBadge'
 import { cn } from '@/lib/utils'
 
 // Client profile detail pages (not the clients list, not the chat sub-page)
@@ -23,6 +24,7 @@ type NavItem = {
   label: string
   icon: typeof Home
   exact?: boolean
+  badge?: 'teamHub'
 }
 
 function buildNavItems(basePath: string, adminView: boolean): NavItem[] {
@@ -31,7 +33,7 @@ function buildNavItems(basePath: string, adminView: boolean): NavItem[] {
     { href: `${basePath}/pipeline`, label: 'Pipeline', icon: Kanban },
     { href: `${basePath}/tasks`, label: 'Tasks', icon: CheckSquare },
     { href: `${basePath}/clients`, label: 'Clients', icon: Users },
-    { href: `${basePath}/hub`, label: 'Team Hub', icon: MessageSquareMore },
+    { href: `${basePath}/hub`, label: 'Team Hub', icon: MessageSquareMore, badge: 'teamHub' },
     { href: `${basePath}/email`, label: 'Email', icon: Mail },
   ]
   // Self check-in / leave applications only make sense for the counselor
@@ -107,7 +109,7 @@ function SidebarContent({
       </div>
 
       <nav className="flex flex-1 flex-col gap-1 px-3">
-        {navItems.map(({ href, label, icon: Icon, exact }) => {
+        {navItems.map(({ href, label, icon: Icon, exact, badge }) => {
           const active = isActive(href, exact)
           return (
             <Link
@@ -124,7 +126,8 @@ function SidebarContent({
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
-              {!collapsed && label}
+              {!collapsed && <span className="flex-1">{label}</span>}
+              {!collapsed && badge === 'teamHub' && <TeamHubCountBadge />}
             </Link>
           )
         })}

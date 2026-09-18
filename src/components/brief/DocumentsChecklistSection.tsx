@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle, CheckCircle2, Clock, Download, Loader2, Plus, X } from 'lucide-react'
+import { CheckCircle, CheckCircle2, Clock, Download, Loader2, Plus, ShieldCheck, Trash2, X } from 'lucide-react'
 import type { Document } from '@/types'
 import { BriefCard } from './BriefCard'
 
@@ -66,6 +66,7 @@ export function DocumentsChecklistSection({ documents, clientId }: Props) {
   const [showForm, setShowForm] = useState(false)
   const [customName, setCustomName] = useState('')
   const [requesting, setRequesting] = useState(false)
+  const [busyId, setBusyId] = useState<string | null>(null)
 
   async function requestDocument(name: string) {
     if (!name.trim()) return
@@ -82,6 +83,30 @@ export function DocumentsChecklistSection({ documents, clientId }: Props) {
       setShowForm(false)
     }
     setRequesting(false)
+  }
+
+  async function toggleVerified(doc: Document) {
+    const nextStatus = doc.status === 'verified' ? 'uploaded' : 'verified'
+    setBusyId(doc.id)
+    const res = await fetch(`/api/documents/${doc.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: nextStatus }),
+    })
+    if (res.ok) {
+      setDocs((prev) => prev.map((d) => (d.id === doc.id ? { ...d, status: nextStatus } : d)))
+    }
+    setBusyId(null)
+  }
+
+  async function removeDocument(doc: Document) {
+    if (!window.confirm(`Remove "${doc.document_name}"? This can't be undone.`)) return
+    setBusyId(doc.id)
+    const res = await fetch(`/api/documents/${doc.id}`, { method: 'DELETE' })
+    if (res.ok) {
+      setDocs((prev) => prev.filter((d) => d.id !== doc.id))
+    }
+    setBusyId(null)
   }
 
   return (
@@ -140,6 +165,7 @@ export function DocumentsChecklistSection({ documents, clientId }: Props) {
             const config = DOCUMENT_STATUS[doc.status] ?? DOCUMENT_STATUS.requested
             const Icon = config.icon
             const hasFile = doc.status === 'uploaded' || doc.status === 'verified'
+            const busy = busyId === doc.id
             return (
               <div key={doc.id} className="flex items-center gap-3">
                 <Icon className={`h-5 w-5 shrink-0 ${config.color}`} />
@@ -147,7 +173,30 @@ export function DocumentsChecklistSection({ documents, clientId }: Props) {
                   {doc.document_name}
                 </span>
                 {hasFile && <DownloadButton documentId={doc.id} />}
+                {hasFile && (
+                  <button
+                    onClick={() => toggleVerified(doc)}
+                    disabled={busy}
+                    title={doc.status === 'verified' ? 'Mark as not verified' : 'Mark as verified'}
+                    className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold disabled:opacity-50 ${
+                      doc.status === 'verified'
+                        ? 'bg-blue/10 text-blue hover:bg-blue/20'
+                        : 'bg-green/10 text-green hover:bg-green/20'
+                    }`}
+                  >
+                    {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <ShieldCheck className="h-3 w-3" />}
+                    {doc.status === 'verified' ? 'Verified' : 'Verify'}
+                  </button>
+                )}
                 <span className={`text-xs font-bold ${config.color}`}>{config.label}</span>
+                <button
+                  onClick={() => removeDocument(doc)}
+                  disabled={busy}
+                  title="Remove document"
+                  className="text-white/30 hover:text-red-400 disabled:opacity-50"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
               </div>
             )
           })}

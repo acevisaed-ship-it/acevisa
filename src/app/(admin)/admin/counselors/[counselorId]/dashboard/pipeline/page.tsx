@@ -45,6 +45,8 @@ export default async function AdminCounselorPipelinePage({ params }: Props) {
         allowTransfer
         viewingCounselorId={counselorId}
         counselors={(counselors ?? []).map((c) => ({ id: c.id, name: c.name }))}
+        returnTo={`${basePath}/pipeline`}
+        returnLabel="Pipeline"
       />
     </main>
   )

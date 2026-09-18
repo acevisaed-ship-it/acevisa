@@ -1,7 +1,8 @@
 'use client'
 
 import { type DragEvent, type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import { Plus, X } from 'lucide-react'
+import Link from 'next/link'
+import { Plus, Receipt, X } from 'lucide-react'
 import {
   DEAL_SERVICE_LABELS,
   DEAL_SERVICE_TYPES,
@@ -440,6 +441,14 @@ export function CrmKanban({
                   className="w-full resize-none rounded-2xl px-4 py-2.5 text-sm outline-none glass-input"
                 />
               </div>
+
+              <Link
+                href={`/admin/accounts?tab=invoices&dealId=${selectedDeal.id}`}
+                className="flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-green py-3 text-sm font-bold text-text"
+              >
+                <Receipt className="h-4 w-4" />
+                Create Invoice for this Deal
+              </Link>
             </div>
           </div>
         </div>

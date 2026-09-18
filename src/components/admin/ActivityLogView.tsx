@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Activity, ArrowLeft, ChevronDown } from 'lucide-react'
+import { Activity, ArrowLeft, CalendarDays, ChevronDown } from 'lucide-react'
+import { getTodayPKTDateString } from '@/lib/pkt'
 
 type LogEntry = {
   id: string
@@ -180,15 +181,24 @@ export function ActivityLogView({
   counselorId?: string
   counselorName?: string
 } = {}) {
+  const today = getTodayPKTDateString()
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [offset, setOffset] = useState(0)
+  const [date, setDate] = useState(today)
+  const [showAll, setShowAll] = useState(false)
 
   async function fetchLogs(off: number, append = false) {
     const qs = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(off) })
     if (counselorId) qs.set('counselorId', counselorId)
+    if (showAll) {
+      qs.set('all', '1')
+    } else {
+      qs.set('from', date)
+      qs.set('to', date)
+    }
     const res = await fetch(`/api/admin/activity?${qs}`)
     const data = await res.json()
     if (!res.ok) {
@@ -204,8 +214,11 @@ export function ActivityLogView({
   }
 
   useEffect(() => {
+    setLoading(true)
+    setOffset(0)
     fetchLogs(0).finally(() => setLoading(false))
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [date, showAll])
 
   async function loadMore() {
     const newOffset = offset + PAGE_SIZE
@@ -215,7 +228,7 @@ export function ActivityLogView({
     setLoadingMore(false)
   }
 
-  if (loading) return <p className="text-sm text-white/50">Loading staff log...</p>
+  const isToday = !showAll && date === today
 
   return (
     <div>
@@ -233,12 +246,55 @@ export function ActivityLogView({
           {counselorId ? `Activity Log — ${counselorName ?? 'Counselor'}` : 'Staff Log and Activity'}
         </h1>
         <p className="mt-1 text-sm text-white/60">
-          {total} action{total === 1 ? '' : 's'} recorded
-          {total > 0 ? ' — creates, edits, assignments, approvals, and other portal actions' : ''}
+          {loading ? 'Loading…' : `${total} action${total === 1 ? '' : 's'} recorded`}
+          {!loading && total > 0
+            ? showAll
+              ? ' — all time'
+              : isToday
+                ? ' — today'
+                : ` — ${new Date(`${date}T12:00:00+05:00`).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })}`
+            : ''}
         </p>
       </div>
 
-      {logs.length === 0 ? (
+      {/* Date filter — defaults to today so the log doesn't just keep
+          building up; pick an earlier date to page back through history,
+          or "Show all" to remove the date filter entirely. */}
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <CalendarDays className="h-4 w-4 text-white/40" />
+        <input
+          type="date"
+          value={date}
+          max={today}
+          disabled={showAll}
+          onChange={(e) => e.target.value && setDate(e.target.value)}
+          className="min-h-[40px] rounded-full border border-white/15 glass-card px-4 text-sm text-white outline-none disabled:opacity-40"
+        />
+        {!isToday && !showAll && (
+          <button
+            type="button"
+            onClick={() => setDate(today)}
+            className="min-h-[36px] rounded-full border border-white/15 px-3 text-xs font-medium text-white/60 hover:text-white"
+          >
+            Today
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => setShowAll((v) => !v)}
+          className={`min-h-[36px] rounded-full border px-3 text-xs font-medium transition-colors ${
+            showAll
+              ? 'border-green bg-green/20 text-green'
+              : 'border-white/15 text-white/60 hover:text-white'
+          }`}
+        >
+          Show all
+        </button>
+      </div>
+
+      {loading ? (
+        <p className="mt-6 text-sm text-white/50">Loading staff log...</p>
+      ) : logs.length === 0 ? (
         <div className="mt-12 flex flex-col items-center gap-2 text-center">
           <Activity className="h-10 w-10 text-white/20" />
           <p className="text-white/50">

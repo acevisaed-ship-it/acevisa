@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { FinanceSummary } from '@/components/admin/FinanceSummary'
 import { InvoiceManager } from '@/components/admin/InvoiceManager'
@@ -35,7 +36,12 @@ export function AccountsSection({
   canManageEntries: boolean
   showBranchFilter?: boolean
 }) {
-  const [tab, setTab] = useState<Tab>('invoices')
+  const searchParams = useSearchParams()
+  const tabParam = searchParams.get('tab') as Tab | null
+  const dealIdParam = searchParams.get('dealId')
+  const [tab, setTab] = useState<Tab>(
+    tabParam && TABS.some((t) => t.id === tabParam) ? tabParam : 'invoices'
+  )
 
   return (
     <div className="flex flex-col gap-6">
@@ -72,6 +78,7 @@ export function AccountsSection({
             deals={deals}
             canManageEntries={canManageEntries}
             showBranchFilter={showBranchFilter}
+            initialDealId={dealIdParam ?? undefined}
           />
         )}
         {tab === 'payroll' && <HRMView showBranchFilter={showBranchFilter} />}

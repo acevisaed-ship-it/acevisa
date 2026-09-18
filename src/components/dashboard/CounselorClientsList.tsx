@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 import { getScoreBadgeColor, getPipelineStageLabel } from '@/lib/brief'
 import { formatPKTRegistrationDate } from '@/lib/pkt'
 import { RemoveClientModal } from '@/components/admin/RemoveClientModal'
+import { withReturnParams } from '@/lib/returnLink'
 
 export type CounselorClientRow = {
   id: string
@@ -24,9 +25,25 @@ type Props = {
   clients: CounselorClientRow[]
   basePath?: string
   allowRemove?: boolean
+  /** True when this list is being viewed by an admin/CEO drilling into a
+   * counselor's client roster — routes profile links to the real admin
+   * client-profile route (/admin/clients/{id}) instead of `${basePath}/clients/{id}`,
+   * which doesn't exist as a page. Mirrors PipelineView's `allowTransfer` pattern. */
+  adminView?: boolean
+  /** Current page path + label, stamped onto client links so their profile's
+   * back button returns here instead of a hardcoded default. */
+  returnTo?: string
+  returnLabel?: string
 }
 
-export function CounselorClientsList({ clients, basePath = '/dashboard', allowRemove = false }: Props) {
+export function CounselorClientsList({
+  clients,
+  basePath = '/dashboard',
+  allowRemove = false,
+  adminView = false,
+  returnTo,
+  returnLabel = 'Clients',
+}: Props) {
   const [search, setSearch] = useState('')
   const [showInactive, setShowInactive] = useState(false)
   const [rows, setRows] = useState(clients)
@@ -35,6 +52,9 @@ export function CounselorClientsList({ clients, basePath = '/dashboard', allowRe
 
   const activeRows = useMemo(() => rows.filter((c) => c.pipeline_active !== false), [rows])
   const inactiveRows = useMemo(() => rows.filter((c) => c.pipeline_active === false), [rows])
+  const clientBasePath = adminView ? '/admin/clients' : `${basePath}/clients`
+  const clientHref = (clientId: string) =>
+    returnTo ? withReturnParams(`${clientBasePath}/${clientId}`, returnTo, returnLabel) : `${clientBasePath}/${clientId}`
 
   function bySearch(list: CounselorClientRow[]) {
     const q = search.trim().toLowerCase()
@@ -102,7 +122,7 @@ export function CounselorClientsList({ clients, basePath = '/dashboard', allowRe
         <td className="px-4 py-3">
           <div className="flex flex-wrap gap-2">
             <Link
-              href={`${basePath}/clients/${client.id}`}
+              href={clientHref(client.id)}
               className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-medium text-white/60 transition-colors hover:text-white"
             >
               View →

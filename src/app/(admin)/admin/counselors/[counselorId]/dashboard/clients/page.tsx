@@ -57,7 +57,14 @@ export default async function AdminCounselorClientsPage({ params }: Props) {
         </p>
       </div>
 
-      <CounselorClientsList clients={rows} basePath={basePath} allowRemove />
+      <CounselorClientsList
+        clients={rows}
+        basePath={basePath}
+        allowRemove
+        adminView
+        returnTo={`${basePath}/clients`}
+        returnLabel={`${counselor.name}'s Clients`}
+      />
     </main>
   )
 }

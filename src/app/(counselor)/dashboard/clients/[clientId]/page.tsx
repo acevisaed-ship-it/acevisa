@@ -30,13 +30,17 @@ import { ClientProfileHeaderActions } from './ClientProfileHeaderActions'
 import { PendingProfileUpdates } from './PendingProfileUpdates'
 import { PendingStageSuggestion } from './PendingStageSuggestion'
 import { RegenerateProfileButton } from '@/components/brief/RegenerateProfileButton'
+import { resolveBackLink, withReturnParams } from '@/lib/returnLink'
 
 type Props = {
   params: Promise<{ clientId: string }>
+  searchParams: Promise<{ returnTo?: string; returnLabel?: string }>
 }
 
-export default async function ClientRecordPage({ params }: Props) {
+export default async function ClientRecordPage({ params, searchParams }: Props) {
   const { clientId } = await params
+  const sp = await searchParams
+  const backLink = resolveBackLink(sp, '/dashboard', 'Dashboard')
   const counselor = await getAuthenticatedCounselor()
   if (!counselor) return null
 
@@ -171,10 +175,10 @@ export default async function ClientRecordPage({ params }: Props) {
         {/* Top bar */}
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <Link
-            href="/dashboard"
+            href={backLink.href}
             className="inline-flex items-center text-sm text-white/60 hover:text-white"
           >
-            ← Back to dashboard
+            ← Back to {backLink.label}
           </Link>
         </div>
 
@@ -183,7 +187,7 @@ export default async function ClientRecordPage({ params }: Props) {
             mobile where the shared header has no room. */}
         <ClientProfileHeaderActions
           clientId={clientId}
-          chatHref={`/dashboard/clients/${clientId}/chat`}
+          chatHref={withReturnParams(`/dashboard/clients/${clientId}/chat`, backLink.href, backLink.label)}
           counselorId={counselor.id}
           initialOnline={counselorStatus?.is_online ?? false}
           initialAutoReply={counselorStatus?.auto_reply_enabled ?? false}

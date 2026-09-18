@@ -17,6 +17,8 @@ export default async function PipelinePage() {
         clientsByStage={clientsByStage}
         meetingByClient={meetingByClient}
         inactiveClients={inactiveClients}
+        returnTo="/dashboard/pipeline"
+        returnLabel="Pipeline"
       />
     </main>
   )

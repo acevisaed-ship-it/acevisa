@@ -1,14 +1,17 @@
 import { notFound } from 'next/navigation'
 import { createAdminClient, getAuthenticatedCounselor } from '@/lib/supabase/server'
 import { CounselorChatLayout } from '@/components/chat/CounselorChatLayout'
+import { withReturnParams } from '@/lib/returnLink'
 import type { ChatMessage } from '@/types'
 
 type Props = {
   params: Promise<{ clientId: string }>
+  searchParams: Promise<{ returnTo?: string; returnLabel?: string }>
 }
 
-export default async function CounselorChatPage({ params }: Props) {
+export default async function CounselorChatPage({ params, searchParams }: Props) {
   const { clientId } = await params
+  const sp = await searchParams
   const counselor = await getAuthenticatedCounselor()
   if (!counselor) return null
 
@@ -37,6 +40,11 @@ export default async function CounselorChatPage({ params }: Props) {
       counselorName={counselor.name}
       clientLanguage={client.language ?? null}
       initialMessages={(messages ?? []) as ChatMessage[]}
+      backHref={
+        sp.returnTo && sp.returnLabel
+          ? withReturnParams(`/dashboard/clients/${clientId}`, sp.returnTo, sp.returnLabel)
+          : `/dashboard/clients/${clientId}`
+      }
     />
   )
 }
