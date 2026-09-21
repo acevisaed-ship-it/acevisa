@@ -131,9 +131,7 @@ export function CeoKnowledgeBaseManager() {
                     </p>
                     <div className="mt-4 flex gap-3">
                       <a
-                        href={`/api/admin/ceo-knowledge-base/${doc.id}/view`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href={`/admin/knowledge-base/documents/${doc.id}`}
                         className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold text-white hover:bg-white/20"
                       >
                         View

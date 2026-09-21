@@ -3,12 +3,14 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 const BUCKET = 'ceo-knowledge-base'
-const SIGNED_URL_TTL_SECONDS = 300 // 5 minutes — regenerated on every view
 
 type Params = { params: Promise<{ id: string }> }
 
-// GET /api/admin/ceo-knowledge-base/[id]/view — CEO only. Redirects to a
-// short-lived signed URL so the private bucket is never exposed directly.
+// GET /api/admin/ceo-knowledge-base/[id]/view — CEO only. Streams the file
+// content directly from this route (same origin as the portal) rather than
+// redirecting to a Supabase Storage URL, so it can be embedded in an
+// in-portal viewer page (iframe) instead of popping out to a different
+// domain in a new tab.
 export async function GET(_request: Request, { params }: Params) {
   const { error } = await requireCeoApi()
   if (error) return error
@@ -18,7 +20,7 @@ export async function GET(_request: Request, { params }: Params) {
 
   const { data: doc } = await supabase
     .from('ceo_knowledge_documents')
-    .select('storage_path')
+    .select('storage_path, mime_type')
     .eq('id', id)
     .single()
 
@@ -26,14 +28,22 @@ export async function GET(_request: Request, { params }: Params) {
     return NextResponse.json({ error: 'Document not found' }, { status: 404 })
   }
 
-  const { data: signed, error: signError } = await supabase.storage
+  const { data: fileBlob, error: downloadError } = await supabase.storage
     .from(BUCKET)
-    .createSignedUrl(doc.storage_path, SIGNED_URL_TTL_SECONDS)
+    .download(doc.storage_path)
 
-  if (signError || !signed?.signedUrl) {
-    console.error('CEO knowledge base signed URL error:', signError)
-    return NextResponse.json({ error: 'Failed to generate view link' }, { status: 500 })
+  if (downloadError || !fileBlob) {
+    console.error('CEO knowledge base download error:', downloadError)
+    return NextResponse.json({ error: 'Failed to load document' }, { status: 500 })
   }
 
-  return NextResponse.redirect(signed.signedUrl)
+  const arrayBuffer = await fileBlob.arrayBuffer()
+
+  return new NextResponse(arrayBuffer, {
+    headers: {
+      'Content-Type': doc.mime_type || 'text/html',
+      'Content-Disposition': 'inline',
+      'Cache-Control': 'private, max-age=60',
+    },
+  })
 }
