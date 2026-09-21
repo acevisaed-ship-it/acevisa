@@ -4,6 +4,7 @@ import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react
 import { Pencil, Plus, Trash2, X } from 'lucide-react'
 import { KB_CATEGORIES, type KbCategory } from '@/lib/admin/categories'
 import { cn } from '@/lib/utils'
+import { CeoKnowledgeBaseManager } from '@/components/admin/CeoKnowledgeBaseManager'
 
 type KbEntry = {
   id: string
@@ -385,6 +386,10 @@ export function KnowledgeBaseManager() {
           </div>
         </div>
       )}
+
+      {/* Self-gating -- renders nothing at all (no wrapper, no divider) unless
+          the viewer is CEO. Same tab, same page, no separate nav item. */}
+      <CeoKnowledgeBaseManager />
     </>
   )
 }

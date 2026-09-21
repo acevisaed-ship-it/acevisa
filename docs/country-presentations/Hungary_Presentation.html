@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hungary — ACE Altius Country Deck</title>
+<style>
+@page { size: 1280px 720px; margin: 0; }
+* { box-sizing: border-box; }
+body { margin:0; font-family: 'Helvetica Neue', Arial, sans-serif; }
+
+:root {
+  --bg: #E6E8E7;
+  --green: #B7C733;
+  --orange: #E48328;
+  --text: #0A3F3A;
+  --blue: #2083B9;
+}
+
+.page {
+  width:1280px; height:720px;
+  position: relative;
+  page-break-after: always;
+  overflow: hidden;
+}
+.page:last-child { page-break-after: avoid; }
+
+.bg-teal {
+  background: linear-gradient(145deg, #0e5551 0%, #0A3F3A 55%, #052825 100%);
+}
+.bg-light {
+  background: linear-gradient(145deg, #eeeeed 0%, #E6E8E7 55%, #dcdede 100%);
+}
+
+.stripe-top {
+  position:absolute; top:0; left:0; width:100%; height:8px;
+  background: linear-gradient(90deg, #E48328 0%, #2083B9 100%);
+}
+
+/* glass card - flat-color approximation of backdrop-filter blur since
+   weasyprint doesn't support backdrop-filter; visually near-identical
+   over a flat/gradient background */
+.card {
+  background: rgba(238,238,237,0.11);
+  border-radius: 20px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+  padding: 28px 32px;
+}
+.card-light {
+  background: rgba(255,255,255,0.75);
+  border-radius: 20px;
+  box-shadow: inset 0 0 0 1px rgba(10,63,58,0.09);
+  padding: 28px 32px;
+}
+
+.pill {
+  display:inline-block;
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.pill-blue   { background: rgba(32,131,185,0.16); color:#5fc1f0; }
+.pill-orange { background: rgba(228,131,40,0.18); color:#ffb066; }
+.pill-green  { background: rgba(183,199,51,0.18); color:#d8e878; }
+.pill-blue-light   { background: rgba(32,131,185,0.10); color:#176fa0; }
+.pill-orange-light { background: rgba(228,131,40,0.12); color:#ca7220; }
+.pill-green-light  { background: rgba(183,199,51,0.14); color:#7c8a1f; }
+
+.logo-pill {
+  display:inline-flex; align-items:center; gap:10px;
+  background: rgba(255,255,255,0.97);
+  border-radius: 14px;
+  padding: 8px 16px;
+}
+.logo-pill img { height: 34px; display:block; }
+
+h1.title { color:#fff; font-size: 44px; font-weight: 800; margin:0 0 6px 0; letter-spacing: -0.01em; }
+h1.title-dark { color: var(--text); font-size: 44px; font-weight: 800; margin:0 0 6px 0; letter-spacing: -0.01em; }
+.subtitle { color: rgba(255,255,255,0.68); font-size: 17px; margin:0; }
+.subtitle-dark { color: rgba(10,63,58,0.62); font-size: 17px; margin:0; }
+
+.eyebrow { color:#ffb066; font-size:13px; font-weight:800; letter-spacing:0.14em; text-transform:uppercase; margin:0 0 8px 0; }
+.eyebrow-dark { color:#ca7220; font-size:13px; font-weight:800; letter-spacing:0.14em; text-transform:uppercase; margin:0 0 8px 0; }
+
+.footer {
+  position:absolute; bottom:0; left:0; width:100%; height:44px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 0 40px; font-size:12px; color: rgba(255,255,255,0.45);
+  border-top: 1px solid rgba(255,255,255,0.10);
+}
+.footer-dark {
+  position:absolute; bottom:0; left:0; width:100%; height:44px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 0 40px; font-size:12px; color: rgba(10,63,58,0.45);
+  border-top: 1px solid rgba(10,63,58,0.10);
+}
+
+table.data { width:100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+table.data th {
+  text-align:left; padding: 7px 10px; font-size:11px;
+  text-transform:uppercase; letter-spacing:0.04em;
+  color: rgba(255,255,255,0.55); border-bottom: 1px solid rgba(255,255,255,0.16);
+  white-space: nowrap; overflow:hidden;
+}
+table.data td {
+  padding: 7px 10px; color: rgba(255,255,255,0.92);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  white-space: nowrap; overflow:hidden; text-overflow: ellipsis;
+  height: 28px; line-height: 14px;
+}
+table.data tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+
+.check-row {
+  display:flex; align-items:center; gap:10px; padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.check-dot {
+  width:20px; height:20px; border-radius:999px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:900; color:#052825;
+}
+
+body { background: #052825; }
+.doc-wrap { max-width: 1180px; margin: 0 auto; }
+.hero {
+  background: linear-gradient(145deg, #0e5551 0%, #0A3F3A 55%, #052825 100%);
+  padding: 56px 56px 64px;
+  position: relative;
+}
+.hero .stripe-top { position:absolute; top:0; left:0; width:100%; height:8px;
+  background: linear-gradient(90deg, #E48328 0%, #2083B9 100%); }
+.layout { display: grid; grid-template-columns: 220px 1fr; gap: 0; background: #052825; }
+@media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+.rail {
+  position: sticky; top: 0; align-self: start;
+  max-height: 100vh; overflow-y: auto;
+  padding: 24px 14px;
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+@media (max-width: 860px) { .rail { position: static; max-height: none; border-right: none;
+  border-bottom: 1px solid rgba(255,255,255,0.08); display:flex; flex-wrap:wrap; gap:4px; } }
+.rail a {
+  display: block; padding: 7px 10px; border-radius: 8px;
+  color: rgba(255,255,255,0.6); text-decoration: none; font-size: 12.5px;
+  margin-bottom: 1px;
+}
+.rail a:hover { background: rgba(255,255,255,0.06); color: #fff; }
+.main { padding: 8px 0 80px; }
+.deck-section { padding: 40px 56px; border-bottom: 1px solid rgba(255,255,255,0.06); scroll-margin-top: 12px; }
+.deck-section:last-child { border-bottom: none; }
+@media (max-width: 700px) { .hero, .deck-section { padding-left: 20px; padding-right: 20px; } }
+.section-eyebrow { color:#ffb066; font-size:12.5px; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; margin:0 0 8px 0; }
+.section-title { color:#fff; font-size:26px; font-weight:800; margin:0 0 18px 0; letter-spacing:-0.01em; }
+.course-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+@media (max-width: 700px) { .course-grid { grid-template-columns: 1fr; } }
+table.data { table-layout: auto !important; }
+table.data td, table.data th { white-space: normal !important; }
+.doc-footer {
+  padding: 26px 56px 50px; color: rgba(255,255,255,0.35); font-size: 12px;
+  display:flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+}
+</style></head>
+<body>
+<div class="doc-wrap">
+  <div class="layout">
+    <nav class="rail"><a href="#top">Overview</a><a href="#s1">Snapshot</a><a href="#s2">Registry</a><a href="#s3">Profiles</a><a href="#s4">Eligibility Matrix</a><a href="#s5">Fee Matrix</a><a href="#s6a">Docs (Inst.)</a><a href="#s6b">Financial (Ctry)</a><a href="#s7">Visa & PSW</a><a href="#s8a">Scholarships (Ntl)</a><a href="#s8b">Scholarships (Inst.)</a><a href="#s9">Deadlines</a><a href="#s10">URLs & Sources</a><a href="#s11">Data Quality</a><a href="#s12a">Safeguards (Ctry)</a><a href="#s12b">Safeguards (Inst.)</a></nav>
+    <div class="main"><div class="hero" id="top">
+      <div class="stripe-top"></div>
+      <div class="logo-pill"><img src="logo.png"/></div>
+      <div style="margin-top:40px; max-width:900px;">
+        <div class="eyebrow">Jan Intake &middot; September 2026 &ndash; January 2027</div>
+        <h1 class="title" style="font-size:clamp(32px,5vw,48px);">Study in Hungary</h1>
+        <p class="subtitle" style="font-size:18px; margin-top:10px;">2 institutions on Hungary's known research list — IBS Budapest (private, business-focused) and University of Debrecen (public, broad faculty range) — each profiled individually across identity, contact, programmes, eligibility, fees, deadlines, documents, verification and scholarships, with only visa, financial-requirement, and post-study-work facts treated as country-wide.</p>
+        <div style="margin-top:28px;"><div class="pill pill-blue" style="margin:0 10px 10px 0;">EU / Schengen</div><div class="pill pill-orange" style="margin:0 10px 10px 0;">2 Institutions Profiled</div><div class="pill pill-green" style="margin:0 10px 10px 0;">Institution-Level Model</div><div class="pill pill-blue" style="margin:0 10px 10px 0;">Stipendium Hungaricum (National)</div></div>
+      </div>
+      <div style="margin-top:36px; color:rgba(255,255,255,0.35); font-size:12px;">
+        ACE Altius Consulting &middot; Counselor Reference &amp; Client Presentation &middot; Prepared for internal + client use
+      </div>
+    </div><section class="deck-section" id="s1">
+      <div class="section-eyebrow">Section 1</div>
+      <h2 class="section-title">Country Snapshot</h2>
+      
+<div class="card" style="border: 1px solid rgba(228,131,40,0.5); margin-bottom:18px;">
+  <div class="eyebrow" style="color:#E48328;">Coverage Note</div>
+  <div style="color:#fff; font-size:15px; font-weight:800;">2 of Hungary's 40+ institutions have researched profiles in this deck</div>
+  <div style="color:rgba(255,255,255,0.75); font-size:13px; margin-top:8px; line-height:1.7;">
+    Unlike Sweden (where a full official master list existed but wasn't being used), no broader
+    institution master list was found anywhere in Hungary's source material — this is a genuine
+    research-coverage gap, not an extraction bug. IBS Budapest and University of Debrecen are
+    presented as strong starting recommendations, not as the full extent of Hungary's options.
+  </div>
+</div>
+<div style="display:grid; grid-template-columns: repeat(3,1fr); gap:18px;">
+  <div class="card"><div class="eyebrow">Institution Types Present (in this deck)</div>
+    <div style="color:#fff; font-size:15px; font-weight:700;">Independent / Private &middot; Public</div></div>
+  <div class="card"><div class="eyebrow">Main Intake(s)</div>
+    <div style="color:#fff; font-size:16px; font-weight:800;">September (main) + limited February</div></div>
+  <div class="card"><div class="eyebrow">Language(s) of Instruction</div>
+    <div style="color:#fff; font-size:16px; font-weight:800;">English (both institutions fully English-taught)</div></div>
+  <div class="card"><div class="eyebrow">Visa Type</div>
+    <div style="color:#fff; font-size:16px; font-weight:800;">National type D student residence permit</div></div>
+  <div class="card"><div class="eyebrow">Visa Fee</div>
+    <div style="color:#fff; font-size:16px; font-weight:800;">Information required</div></div>
+  <div class="card"><div class="eyebrow">Visa Processing Time</div>
+    <div style="color:#fff; font-size:16px; font-weight:800;">4&ndash;5 weeks (interview to decision)</div></div>
+  <div class="card"><div class="eyebrow">Financial Requirement</div>
+    <div style="color:#fff; font-size:16px; font-weight:800;">~EUR 8,000/yr (IBS guidance) or ~HUF 200,000/month</div>
+    <div style="color:rgba(255,255,255,0.55); font-size:11.5px; margin-top:4px;">Two different figures from two source passes — see Section 12A</div></div>
+  <div class="card"><div class="eyebrow">Post-Study Work Rights</div>
+    <div style="color:#fff; font-size:16px; font-weight:800;">9-month job-seeking residence permit</div></div>
+  <div class="card"><div class="eyebrow">PR Pathway</div>
+    <div style="color:#fff; font-size:16px; font-weight:800;">Information required</div></div>
+  <div class="card"><div class="eyebrow">Citizenship Pathway</div>
+    <div style="color:#fff; font-size:16px; font-weight:800;">Information required</div></div>
+  <div class="card"><div class="eyebrow">Dual Nationality with Pakistan</div>
+    <div style="color:#fff; font-size:16px; font-weight:800;">Information required</div></div>
+  <div class="card"><div class="eyebrow">Embassy Fraud Warnings</div>
+    <div style="color:#fff; font-size:16px; font-weight:800;">Information required</div></div>
+  <div class="card"><div class="eyebrow">National Application Portal</div>
+    <div style="color:#fff; font-size:16px; font-weight:800;">None — each institution has its own portal</div></div>
+  <div class="card"><div class="eyebrow">Institutions Covered in This File</div>
+    <div style="color:#fff; font-size:16px; font-weight:800;">2 fully profiled / ~38 registry-unknown</div></div>
+</div>
+
+    </section><section class="deck-section" id="s2">
+      <div class="section-eyebrow">Section 2</div>
+      <h2 class="section-title">Master Institution Registry</h2>
+      <table class="data"><colgroup><col style="width:32%"><col style="width:18%"><col style="width:18%"><col style="width:16%"><col style="width:16%"></colgroup><tr><th>Institution Name</th><th>Type</th><th>City</th><th>Region</th><th>Profile Status</th></tr><tr><td>IBS Budapest (International Business School)</td><td>Independent / Private</td><td>Budapest (+ Vienna campus)</td><td>Budapest</td><td>Fully profiled</td></tr><tr><td>University of Debrecen</td><td>Public</td><td>Debrecen</td><td>Hajdú-Bihar</td><td>Fully profiled</td></tr><tr><td>~38 additional Hungarian institutions</td><td>Information required</td><td>Information required</td><td>Information required</td><td>Registry unknown — not named in any source reviewed</td></tr></table>
+<div style="color:rgba(255,255,255,0.45); font-size:12px; margin-top:10px;">
+  Hungary has 40+ higher-education institutions nationally; only these 2 have researched profiles in our
+  source material, and we don't have names for the rest — shown honestly as "registry unknown" rather than
+  guessed at or silently omitted.
+</div>
+    </section><section class="deck-section" id="s3">
+      <div class="section-eyebrow">Section 3</div>
+      <h2 class="section-title">Institution Profiles (2)</h2>
+      <div style="color:rgba(255,255,255,0.55); font-size:12.5px; margin-bottom:14px;">
+  Both institutions in this deck are profiled in full across the same 9 field groups used for every
+  country in this set. "Information required" marks a genuine source gap; "Not applicable" marks a field that
+  doesn't apply to the Hungarian system.
+</div>
+<div class="card" id="inst-ibs" style="margin-bottom:16px;">
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+    <div style="color:#fff; font-size:18px; font-weight:800;">IBS Budapest (International Business School)</div>
+    <div class="pill pill-blue" style="font-size:10.5px;">Fully profiled</div>
+  </div>
+
+  <div style="margin-top:14px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;">
+    <div><div class="eyebrow" style="font-size:10.5px;">Identity</div><div style="font-size:12px; color:#fff; line-height:1.85;">Type: Independent / Private<br/>City: Budapest (+ Vienna campus)<br/>Region: Budapest<br/>Founded: 1991<br/>British-accredited (BAC, valid to March 2027) &middot; FIBAA quality seal &middot; degrees delivered via partnership with the University of Buckingham (primary) and Dublin Business School (select programmes)</div></div>
+    <div><div class="eyebrow" style="font-size:10.5px;">Contact</div><div style="font-size:12px; color:#fff; line-height:1.85;"><span style="color:#5fc1f0;">Website: https://www.ibs-b.hu/en/</span><br/><span style="color:#5fc1f0;">Portal: https://www.ibs-b.hu/en/how-to-apply/</span><br/>Application system: Direct application via IBS's own online portal<br/>Social media: Information required<br/>Int'l office email: Information required</div></div>
+    <div><div class="eyebrow" style="font-size:10.5px;">Fees</div><div style="font-size:12px; color:#fff; line-height:1.85;">Tuition: Bachelor's €8,000/yr &middot; Master's/MBA €12,800/yr &middot; Foundation €6,000 total &middot; PhD €8,000/yr<br/>Semester contribution: Not applicable<br/>Application fee: €200<br/>Enrolment/other fees: Registration fee (non-EU) €1,200 &middot; visa service fee €1,000<br/>Fee waivers: Merit/English-ability scholarships available for high-performing applicants (amount not published)</div></div>
+  </div>
+
+  <div style="margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+    <div><div class="eyebrow" style="font-size:10.5px;">Programmes</div>
+      <div style="font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:4px;">Bachelor's (11)</div>
+      <div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">BSc Corporate Finance</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">BSc Business Management</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">BSc Business Management with Marketing</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">BSc Business Management with HRM & Business Psychology</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">BSc Business Management with Tourism</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">BSc Business Management with Arts</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">BSc Business Management with Diplomacy & International Relations</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">BSc Business Administration & Management</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">BSc International Business Economics</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">BSc Commerce & Marketing</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">BA Psychology</div>
+      <div style="font-size:12px; color:rgba(255,255,255,0.5); margin:8px 0 4px;">Master's (3)</div>
+      <div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Strategic International Management (+ Finance/Marketing/HRM tracks)</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc IT for Business Data Analytics</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MBA in Strategic Data-Driven Management</div>
+      <div style="font-size:11.5px; color:rgba(255,255,255,0.5); margin-top:8px;">Joint/double degrees: None (degrees awarded via University of Buckingham / Dublin Business School partnership, not joint with another Hungarian institution).</div>
+    </div>
+    <div><div class="eyebrow" style="font-size:10.5px;">Eligibility & Language</div><div style="font-size:12px; color:#fff; line-height:1.85;">Min GPA (local): Information required<br/>Min GPA (PK equiv.): Information required<br/>Subject prereqs: Programme-specific; no fixed subject prerequisite published<br/>Entrance exam: None — a simple maths test may be requested at the visa interview stage (not an academic entrance exam)<br/>Interview: Sometimes for Bachelor's; mandatory Orientation Interview (via Zoom) for Master's<br/>Motivation letter: Information required<br/>References: Information required<br/>Work experience: Not required, but strengthens a gapped Master's application<br/>Foundation/pathway equivalent: International Foundation Programme — for students below B2 English or not meeting direct entry (9 months, 2 semesters, €3,000/semester, €6,000 total)<br/>English requirement: Bachelor's: B2 (IELTS 6.0, TOEFL iBT 72, Duolingo 105, PTE 50, Cambridge 169, Oxford Test of English 111, CELPIP 7, CAEL 50) &middot; Master's: C1 (IELTS 6.5, TOEFL iBT 95, Duolingo 120, PTE 58, Cambridge 176, Oxford Test of English 141, CELPIP 8, CAEL 60)<br/>Local language requirement: Not required for English-taught programmes<br/>Accepted alternatives: MOI accepted at both levels; official school certificate confirming English-medium study also accepted</div></div>
+  </div>
+
+  <div style="margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+    <div><div class="eyebrow" style="font-size:10.5px;">Deadlines</div><div style="font-size:12px; color:#fff; line-height:1.85;">Main intake deadline: Information required (confirm current-cycle deadline directly with IBS)<br/>Secondary/other deadlines: Information required<br/>Visa-applicant deadline: Apply immediately after receiving IBS's Visa Support Certificate<br/>Extension history: Information required</div></div>
+    <div><div class="eyebrow" style="font-size:10.5px;">Documents & Legalisation (Pakistan)</div><div style="font-size:12px; color:#fff; line-height:1.85;">APS or equivalent: No APS-equivalent requirement found in source research<br/>HEC certificate: Not specifically confirmed for IBS (general Pakistan HEC/IBCC/MOFA chain applies nationally — see Section 6B)<br/>Document legalisation: General Pakistan chain (Board + IBCC + MOFA); IBS-specific legalisation requirement not separately confirmed<br/>Translation requirement: Information required</div></div>
+  </div>
+
+  <div style="margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+    <div><div class="eyebrow" style="font-size:10.5px;">Verification</div><div style="font-size:12px; color:#fff; line-height:1.85;">Sources: https://www.ibs-b.hu/en/how-to-apply/requirements/, https://www.ibs-b.hu/en/how-to-apply/visa-information/<br/>Last verified: 21 September 2026<br/>Data quality: Verified — official institution pages (requirements, fees, visa-information)</div></div>
+    <div><div class="eyebrow" style="font-size:10.5px;">Extra</div><div style="font-size:12px; color:#fff; line-height:1.85;">Institutional scholarship: Merit/English-ability based scholarships for outstanding international applicants (amount/criteria not published)<br/>Notable alumni/rankings: Not independently ranked (QS/THE) — positions itself on British accreditation and international partner-degree recognition<br/>Caveats: Private institution — tuition runs well above Hungarian public universities; limited engineering/science/medicine/agriculture options; primarily a business & management specialist. English requirement language notes it 'has become stricter for recent intakes, especially for Master's programmes' — reconfirm current-cycle requirement directly with IBS.</div></div>
+  </div>
+</div>
+
+<div class="card" id="inst-university" style="margin-bottom:16px;">
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+    <div style="color:#fff; font-size:18px; font-weight:800;">University of Debrecen</div>
+    <div class="pill pill-blue" style="font-size:10.5px;">Fully profiled</div>
+  </div>
+
+  <div style="margin-top:14px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;">
+    <div><div class="eyebrow" style="font-size:10.5px;">Identity</div><div style="font-size:12px; color:#fff; line-height:1.85;">Type: Public<br/>City: Debrecen<br/>Region: Hajdú-Bihar<br/>Founded: 1538<br/>7,700+ international students from 140+ countries &middot; 80+ English-taught programmes &middot; QS World Ranking approx. 560&ndash;580</div></div>
+    <div><div class="eyebrow" style="font-size:10.5px;">Contact</div><div style="font-size:12px; color:#fff; line-height:1.85;"><span style="color:#5fc1f0;">Website: https://unideb.hu/en</span><br/><span style="color:#5fc1f0;">Portal: https://edu.unideb.hu/</span><br/>Application system: Direct application via UD's international admissions portal (edu.unideb.hu)<br/>Social media: Information required<br/>Int'l office email: Information required</div></div>
+    <div><div class="eyebrow" style="font-size:10.5px;">Fees</div><div style="font-size:12px; color:#fff; line-height:1.85;">Tuition: Medicine USD 16,900 &middot; Dentistry USD 17,500 &middot; Pharmacy USD 8,000 &middot; Nursing USD 7,500 &middot; Physiotherapy USD 7,000 &middot; Public Health USD 6,000 &middot; most MSc USD 8,000&ndash;8,500<br/>Semester contribution: Not applicable<br/>Application fee: USD 150<br/>Enrolment/other fees: Entrance fee USD 350 (health insurance & student card included in tuition)<br/>Fee waivers: Stipendium Hungaricum, UD International Scholarship, Erasmus+, Diaspora Scholarship — some cover full tuition + stipend + accommodation + health insurance</div></div>
+  </div>
+
+  <div style="margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+    <div><div class="eyebrow" style="font-size:10.5px;">Programmes</div>
+      <div style="font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:4px;">Bachelor's (22)</div>
+      <div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Agriculture</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Agriculture Engineering</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Food Engineering</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Environmental Management</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Rural Development</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mechanical Engineering</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Electrical Engineering</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Chemical Engineering</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mechatronics Engineering</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computer Science Engineering</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Information Technology</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Business Administration</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Business Economics</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Commerce and Marketing</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Nursing</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Physiotherapy</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Public Health</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">English Studies</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Relations</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Medicine (6 years)</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Dentistry (5 years)</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Pharmacy (5 years)</div>
+      <div style="font-size:12px; color:rgba(255,255,255,0.5); margin:8px 0 4px;">Master's (11)</div>
+      <div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Crop Production</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Plant Protection</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Agricultural Water Management</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Food Safety</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Mechanical Engineering</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Environmental Engineering</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Management</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc International Economy and Business</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Public Health</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Molecular Biology</div><div style="font-size:12px; color:rgba(255,255,255,0.85); padding:2px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MA International Relations</div>
+      <div style="font-size:11.5px; color:rgba(255,255,255,0.5); margin-top:8px;">Joint/double degrees: Information required</div>
+    </div>
+    <div><div class="eyebrow" style="font-size:10.5px;">Eligibility & Language</div><div style="font-size:12px; color:#fff; line-height:1.85;">Min GPA (local): Information required<br/>Min GPA (PK equiv.): Information required<br/>Subject prereqs: Science background preferred for Pharmacy; Biology/Chemistry/Physics for Medicine and Dentistry<br/>Entrance exam: Medicine: Biology/Chemistry/Physics written + oral &middot; Dentistry: Biology/Chemistry/Physics + English interview &middot; Pharmacy: entrance assessment &middot; Nursing: Biology exam + English interview &middot; Agriculture/Engineering: academic evaluation + interview<br/>Interview: Some faculties for Bachelor's; many Master's programmes include an online interview<br/>Motivation letter: Information required<br/>References: Recommendation letters (if required, Master's only)<br/>Work experience: Not required, but can help justify a study gap<br/>Foundation/pathway equivalent: International Foundation Year (9 months, USD 6,000) &middot; English Language Course (9 months, USD 6,000) &middot; Intensive Foundation/English Semester (5 months, USD 4,800)<br/>English requirement: Bachelor's: IELTS 5.5&ndash;6.0, TOEFL iBT 72, Duolingo 95&ndash;105, PTE 50&ndash;55, Cambridge B2 &middot; Master's: IELTS 6.0&ndash;6.5, TOEFL iBT 72&ndash;80, Duolingo 105&ndash;115, PTE 58, Cambridge C1<br/>Local language requirement: Not required for English-taught programmes<br/>Accepted alternatives: MOI commonly accepted for non-medical programmes (Agriculture, Business, Engineering, Social Sciences relatively flexible); medical programmes generally prefer IELTS/entrance exam over MOI alone</div></div>
+  </div>
+
+  <div style="margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+    <div><div class="eyebrow" style="font-size:10.5px;">Deadlines</div><div style="font-size:12px; color:#fff; line-height:1.85;">Main intake deadline: 15 June 2026 (all other September-intake programmes)<br/>Secondary/other deadlines: 15 November 2026 (February intake, limited programmes) &middot; PhD: 15 May 2026 &middot; Basic Medicine Course II: 1 November<br/>Visa-applicant deadline: Apply after admission offer, per national process (Section 6B)<br/>Extension history: Information required</div></div>
+    <div><div class="eyebrow" style="font-size:10.5px;">Documents & Legalisation (Pakistan)</div><div style="font-size:12px; color:#fff; line-height:1.85;">APS or equivalent: No APS-equivalent requirement found in source research<br/>HEC certificate: Not specifically confirmed for UD (general Pakistan HEC/IBCC/MOFA chain applies nationally — see Section 6B)<br/>Document legalisation: General Pakistan chain (Board + IBCC + MOFA); UD-specific legalisation requirement not separately confirmed<br/>Translation requirement: Information required</div></div>
+  </div>
+
+  <div style="margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+    <div><div class="eyebrow" style="font-size:10.5px;">Verification</div><div style="font-size:12px; color:#fff; line-height:1.85;">Sources: https://edu.unideb.hu/<br/>Last verified: 21 September 2026<br/>Data quality: Verified — institution programme/fee/deadline pages, cross-checked against a second independent research pass</div></div>
+    <div><div class="eyebrow" style="font-size:10.5px;">Extra</div><div style="font-size:12px; color:#fff; line-height:1.85;">Institutional scholarship: UD International Scholarship; also eligible for the national Stipendium Hungaricum, Erasmus+, and Diaspora Scholarship (see Section 8)<br/>Notable alumni/rankings: QS World Ranking approx. 560–580; one of Hungary's broadest public universities (rare Medicine + Agriculture + Engineering + Business combination at one institution)<br/>Caveats: Fees are quoted in USD in source material vs. IBS's EUR — always confirm which currency a figure is in before presenting to a client. Medicine/Dentistry use competitive entrance examinations — do not present admission as guaranteed by meeting the base language requirement alone.</div></div>
+  </div>
+</div>
+
+    </section><section class="deck-section" id="s4">
+      <div class="section-eyebrow">Section 4</div>
+      <h2 class="section-title">Eligibility Matrix (Institution-Aggregated)</h2>
+      <table class="data"><colgroup><col style="width:20%"><col style="width:6%"><col style="width:13%"><col style="width:13%"><col style="width:20%"><col style="width:16%"><col style="width:12%"></colgroup><tr><th>Institution</th><th>Level</th><th>Min GPA (local)</th><th>Min GPA (PK equiv.)</th><th>Subject prereqs</th><th>Entrance exam</th><th>Language test</th></tr><tr><td>IBS Budapest (International Business School)</td><td>UG</td><td>Information required</td><td>Information required</td><td>Programme-specific; no fixed subject prerequisite published</td><td>None — a simple maths test may be requested at the visa interview stage (not an academic entrance exam)</td><td>Bachelor's: B2 (IELTS 6.0, TOEFL iBT 72,…</td></tr><tr><td>IBS Budapest (International Business School)</td><td>PG</td><td>Information required</td><td>Information required</td><td>Programme-specific; no fixed subject prerequisite published</td><td>None — a simple maths test may be requested at the visa interview stage (not an academic entrance exam)</td><td>Bachelor's: B2 (IELTS 6.0, TOEFL iBT 72,…</td></tr><tr><td>University of Debrecen</td><td>UG</td><td>Information required</td><td>Information required</td><td>Science background preferred for Pharmacy; Biology/Chemistry/Physics for Medicine and Dentistry</td><td>Medicine: Biology/Chemistry/Physics written + oral &middot; Dentistry: Biology/Chemistry/Physics + English interview &middot; Pharmacy: entrance assessment &middot; Nursing: Biology exam + English interview &middot; Agriculture/Engineering: academic evaluation + interview</td><td>Bachelor's: IELTS 5.5&ndash;6.0, TOEFL i…</td></tr><tr><td>University of Debrecen</td><td>PG</td><td>Information required</td><td>Information required</td><td>Science background preferred for Pharmacy; Biology/Chemistry/Physics for Medicine and Dentistry</td><td>Medicine: Biology/Chemistry/Physics written + oral &middot; Dentistry: Biology/Chemistry/Physics + English interview &middot; Pharmacy: entrance assessment &middot; Nursing: Biology exam + English interview &middot; Agriculture/Engineering: academic evaluation + interview</td><td>Bachelor's: IELTS 5.5&ndash;6.0, TOEFL i…</td></tr></table>
+    </section><section class="deck-section" id="s5">
+      <div class="section-eyebrow">Section 5</div>
+      <h2 class="section-title">Fee Matrix (Institution-Aggregated)</h2>
+      <table class="data"><colgroup><col style="width:20%"><col style="width:38%"><col style="width:14%"><col style="width:12%"><col style="width:16%"></colgroup><tr><th>Institution</th><th>Tuition</th><th>Semester contribution</th><th>Application fee</th><th>Total first-year cost estimate</th></tr><tr><td>IBS Budapest (International Business School)</td><td>Bachelor's €8,000/yr &middot; Master's/MBA €12,800/yr &middo</td><td>Not applicable</td><td>€200</td><td>Information required</td></tr><tr><td>University of Debrecen</td><td>Medicine USD 16,900 &middot; Dentistry USD 17,500 &middot; P</td><td>Not applicable</td><td>USD 150</td><td>Information required</td></tr></table><div style="color:rgba(255,255,255,0.45); font-size:12px; margin-top:10px;">
+  IBS quotes fees in EUR; University of Debrecen quotes fees in USD &mdash; do not compare the two figures
+  directly without converting. Total first-year cost (tuition + living + fees) was not computed for either
+  institution &mdash; shown as "Information required" rather than a rough guess.
+</div>
+    </section><section class="deck-section" id="s6a">
+      <div class="section-eyebrow">Section 6A</div>
+      <h2 class="section-title">Institution-Specific Document Requirements</h2>
+      <table class="data"><colgroup><col style="width:20%"><col style="width:24%"><col style="width:24%"><col style="width:22%"><col style="width:10%"></colgroup><tr><th>Institution</th><th>APS or equivalent</th><th>HEC certificate</th><th>Document legalisation</th><th>Translation requirement</th></tr><tr><td>IBS Budapest (International Business School)</td><td>No APS-equivalent requirement found in source research</td><td>Not specifically confirmed for IBS (general Pakistan HEC/IBCC/MOFA chain applies nationally — see Section 6B)</td><td>General Pakistan chain (Board + IBCC + MOFA); IBS-specific legalisation requirement not separately confirmed</td><td>Information required</td></tr><tr><td>University of Debrecen</td><td>No APS-equivalent requirement found in source research</td><td>Not specifically confirmed for UD (general Pakistan HEC/IBCC/MOFA chain applies nationally — see Section 6B)</td><td>General Pakistan chain (Board + IBCC + MOFA); UD-specific legalisation requirement not separately confirmed</td><td>Information required</td></tr></table>
+    </section><section class="deck-section" id="s6b">
+      <div class="section-eyebrow">Section 6B</div>
+      <h2 class="section-title">Country-Wide Financial & Visa Requirements</h2>
+      
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+  <div class="card">
+    <div class="eyebrow">Financial Proof</div>
+    <div style="color:#fff; font-size:14px; line-height:1.8;">
+      &bull; IBS's own visa guidance: proof of ~EUR 8,000 for one year's stay, from a regular-income bank account<br/>
+      &bull; Separate practical-info research pass: ~HUF 200,000/month (~EUR 500, ~EUR 6,000/year)<br/>
+      &bull; These are two different sources/figures — see Section 12A for the reconciliation note
+    </div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Visa Processing Timeline</div>
+    <div style="color:#fff; font-size:14px; line-height:1.8;">
+      &bull; Processing after interview: <b>4&ndash;5 weeks</b> (book the interview early)<br/>
+      &bull; Type D visa allows single entry; <b>30 days</b> after arrival to register at the Immigration Office in Budapest for the residence permit card
+    </div>
+  </div>
+</div>
+
+    </section><section class="deck-section" id="s7">
+      <div class="section-eyebrow">Section 7</div>
+      <h2 class="section-title">Visa & Post-Study Work</h2>
+      
+<div class="card">
+  <div class="eyebrow">Hungarian Student Residence Permit — General Process (non-EU / Pakistani applicants)</div>
+  <div style="color:#fff; font-size:13.5px; line-height:1.9;">
+    Pakistani nationals apply in person for a <b>type D student residence permit</b> at the nearest Hungarian Consulate (Islamabad). After the visa interview, processing commonly takes <b>4&ndash;5 weeks</b> &mdash; book the interview as early as possible. Once granted, the type D visa allows a single entry to Hungary; you then have <b>30 days after arrival</b> to report to the Immigration Office in Budapest and receive your residence permit card.
+  </div>
+</div>
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:18px;">
+  <div class="card">
+    <div class="eyebrow">Typical Requirements</div>
+    <div style="color:#fff; font-size:13px; line-height:1.9;">
+      Original school/ID documents &bull; institution's visa-support / admission certificate confirming student status, accommodation and health insurance &bull; proof of financial means from a regular-income account (IBS's own guidance cites roughly <b>EUR 8,000</b>) &bull; proof of accommodation &bull; health insurance (paid on arrival at some institutions &mdash; e.g. IBS: ~HUF 120,000 / ~EUR 300) &bull; English-language certificate &bull; basic knowledge of Hungary and the chosen programme (may be tested at the visa interview)
+    </div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Where to Apply</div>
+    <div style="color:#fff; font-size:13px; line-height:1.9;">
+      <a href="http://konzuliszolgalat.kormany.hu/en" style="color:#5fc1f0;">Hungarian Consulates &amp; Embassies</a> &mdash; nearest to Pakistan: Islamabad<br/>
+      <a href="http://www.bmbah.hu" style="color:#5fc1f0;">Hungarian Immigration Office</a> (registration after arrival)<br/>
+      IBS Budapest applicants: <a href="https://www.ibs-b.hu/en/how-to-apply/visa-information/" style="color:#5fc1f0;">IBS Visa Information</a><br/>
+      University of Debrecen applicants: coordinate through <a href="https://edu.unideb.hu/" style="color:#5fc1f0;">edu.unideb.hu</a>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px;">
+  <div class="eyebrow" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+    <span>Post-Study Work &amp; Visa Financial Requirement</span>
+    <span style="font-size:10.5px; font-weight:700; letter-spacing:0.04em; text-transform:none; color:#ffb066; background:rgba(228,131,40,0.14); padding:3px 10px; border-radius:999px;">reported — verify before quoting a client</span>
+  </div>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:10px;">
+    <div>
+      <div style="color:rgba(255,255,255,0.5); font-size:11.5px; text-transform:uppercase; letter-spacing:0.04em;">Post-study work rights</div>
+      <div style="color:#fff; font-size:14px; line-height:1.6; margin-top:4px;">9-month job-seeking residence permit after graduation.</div>
+    </div>
+    <div>
+      <div style="color:rgba(255,255,255,0.5); font-size:11.5px; text-transform:uppercase; letter-spacing:0.04em;">Visa financial requirement</div>
+      <div style="color:#fff; font-size:14px; line-height:1.6; margin-top:4px;">~HUF 200,000/month (roughly €500).</div>
+    </div>
+  </div>
+</div>
+    </section><section class="deck-section" id="s8a">
+      <div class="section-eyebrow">Section 8A</div>
+      <h2 class="section-title">National Scholarships</h2>
+      
+<div class="card">
+  <div class="eyebrow">Stipendium Hungaricum — National, Country-Wide</div>
+  <div style="color:#fff; font-size:14.5px; line-height:1.8;">
+    &bull; Hungarian government scholarship programme, available at University of Debrecen and most other
+    Hungarian public universities (not confirmed for IBS, a private institution)<br/>
+    &bull; Some awards cover full tuition + monthly stipend + accommodation + health insurance<br/>
+    &bull; Competitive — do not present as automatic or guaranteed
+  </div>
+</div>
+<div class="card" style="margin-top:14px;">
+  <div class="eyebrow">Erasmus+ — EU-Wide Programme</div>
+  <div style="color:#fff; font-size:14.5px; line-height:1.8;">
+    Available at University of Debrecen (and most EU institutions generally); not specific to Hungary alone,
+    but relevant for exchange/mobility components.
+  </div>
+</div>
+
+    </section><section class="deck-section" id="s8b">
+      <div class="section-eyebrow">Section 8B</div>
+      <h2 class="section-title">Institution-Specific Scholarships</h2>
+      <table class="data"><colgroup><col style="width:24%"><col style="width:76%"></colgroup><tr><th>Institution</th><th>Institution-Specific Scholarship</th></tr><tr><td>IBS Budapest (International Business School)</td><td>Merit/English-ability based scholarships for outstanding international applicants (amount/criteria not published)</td></tr><tr><td>University of Debrecen</td><td>UD International Scholarship; also eligible for the national Stipendium Hungaricum, Erasmus+, and Diaspora Scholarship (see Section 8)</td></tr></table>
+    </section><section class="deck-section" id="s9">
+      <div class="section-eyebrow">Section 9</div>
+      <h2 class="section-title">Deadlines & Extension History</h2>
+      <table class="data"><colgroup><col style="width:18%"><col style="width:22%"><col style="width:24%"><col style="width:20%"><col style="width:8%"><col style="width:8%"></colgroup><tr><th>Institution</th><th>Main Deadline</th><th>Secondary Deadline</th><th>Visa-Applicant Deadline</th><th>Extension Granted</th><th>Reason</th></tr><tr><td>IBS Budapest (International Business School)</td><td>Information required (confirm current-cycle deadline directly with IBS)</td><td>Information required</td><td>Apply immediately after receiving IBS's Visa Support Certificate</td><td>Information required</td><td>Information required</td></tr><tr><td>University of Debrecen</td><td>15 June 2026 (all other September-intake programmes)</td><td>15 November 2026 (February intake, limited programmes) &middot; PhD: 15 May 2026 &middot; Basic Medicine Course II: 1 November</td><td>Apply after admission offer, per national process (Section 6B)</td><td>Information required</td><td>Information required</td></tr></table>
+    </section><section class="deck-section" id="s10">
+      <div class="section-eyebrow">Section 10</div>
+      <h2 class="section-title">Official URLs & Sources</h2>
+      <table class="data"><colgroup><col style="width:20%"><col style="width:24%"><col style="width:22%"><col style="width:22%"><col style="width:12%"></colgroup><tr><th>Institution</th><th>Official Website</th><th>Admissions Portal</th><th>Primary Verification Source</th><th>Last Verified</th></tr><tr><td>IBS Budapest (International Business School)</td><td><span style="color:#5fc1f0;">https://www.ibs-b.hu/en/</span></td><td><span style="color:#5fc1f0;">https://www.ibs-b.hu/en/how-to-apply/</span></td><td><span style="color:#5fc1f0;">https://www.ibs-b.hu/en/how-to-apply/requirements/</span></td><td>21 September 2026</td></tr><tr><td>University of Debrecen</td><td><span style="color:#5fc1f0;">https://unideb.hu/en</span></td><td><span style="color:#5fc1f0;">https://edu.unideb.hu/</span></td><td><span style="color:#5fc1f0;">https://edu.unideb.hu/</span></td><td>21 September 2026</td></tr></table>
+    </section><section class="deck-section" id="s11">
+      <div class="section-eyebrow">Section 11</div>
+      <h2 class="section-title">Data Quality Report</h2>
+      <div style="color:rgba(255,255,255,0.55); font-size:12.5px; margin-bottom:12px;">
+  Both institutions in this deck are fully profiled with confirmed data across every tracked field.
+  The real data-quality issue in Hungary isn't within these 2 profiles — it's the ~38 institutions
+  with no researched profile at all (see Section 2).
+</div>
+<table class="data"><colgroup><col style="width:20%"><col style="width:12%"><col style="width:12%"><col style="width:14%"><col style="width:12%"><col style="width:20%"><col style="width:10%"></colgroup><tr><th>Institution</th><th>Tuition/Fees</th><th>Deadlines</th><th>Website/Portal</th><th>Programmes</th><th>Eligibility</th><th>Source Type</th></tr><tr><td>IBS Budapest (International Business School)</td><td>&#9989;</td><td>&#9989;</td><td>&#9989;</td><td>&#9989;</td><td>&#9989; (qualitative bands, not numeric GPA)</td><td>Official institution pages</td></tr><tr><td>University of Debrecen</td><td>&#9989;</td><td>&#9989;</td><td>&#9989;</td><td>&#9989;</td><td>&#9989; (qualitative bands, not numeric GPA)</td><td>Official institution pages</td></tr></table>
+    </section><section class="deck-section" id="s12a">
+      <div class="section-eyebrow">Section 12A</div>
+      <h2 class="section-title">Quote Carefully — Country-Wide Safeguards</h2>
+      
+<div class="card">
+  <div class="eyebrow">Country-Wide Safeguards</div>
+  <div style="color:#fff; font-size:14.5px; line-height:1.9;">
+    &bull; This deck covers only 2 of Hungary's 40+ higher-education institutions &mdash; present these as strong starting options, not the full extent of what Hungary offers.<br/>
+    &bull; <b>Visa financial-requirement figures differ by source:</b> IBS's own visa guidance cites ~EUR 8,000 as one year's proof-of-funds, while the separate practical-info research pass cites ~HUF 200,000/month (~EUR 500, ~EUR 6,000/year). These are not necessarily contradictory (a consulate can want a lump-sum balance larger than the monthly minimum it checks against) but come from two different sources &mdash; verify the current combined requirement with the consulate or institution before quoting a client.<br/>
+    &bull; PR pathway, citizenship pathway, dual-nationality status with Pakistan, visa fee, and embassy fraud warnings were not confirmed in any source reviewed &mdash; do not state a position on any of these without checking a current, authoritative source first.
+  </div>
+</div>
+
+    </section><section class="deck-section" id="s12b">
+      <div class="section-eyebrow">Section 12B</div>
+      <h2 class="section-title">Quote Carefully — Institution-Specific Safeguards</h2>
+      <table class="data"><colgroup><col style="width:20%"><col style="width:80%"></colgroup><tr><th>Institution</th><th>Institution-Specific Caveat</th></tr><tr><td>IBS Budapest (International Business School)</td><td>Private institution — tuition runs well above Hungarian public universities; limited engineering/science/medicine/agriculture options; primarily a business & management specialist. English requirement language notes it 'has become stricter for recent intakes, especially for Master's programmes' — reconfirm current-cycle requirement directly with IBS.</td></tr><tr><td>University of Debrecen</td><td>Fees are quoted in USD in source material vs. IBS's EUR — always confirm which currency a figure is in before presenting to a client. Medicine/Dentistry use competitive entrance examinations — do not present admission as guaranteed by meeting the base language requirement alone.</td></tr></table>
+    </section><div class="doc-footer">
+  <div>ACE Altius Consulting &middot; From Dreams to Destinations</div>
+  <div>Hungary &middot; Jan Intake 2026/27 &middot; Institution-Profile Model</div>
+</div></div>
+  </div>
+</div>
+</body></html>

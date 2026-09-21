@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Germany — ACE Altius Country Deck</title>
+<style>
+@page { size: 1280px 720px; margin: 0; }
+* { box-sizing: border-box; }
+body { margin:0; font-family: 'Helvetica Neue', Arial, sans-serif; }
+
+:root {
+  --bg: #E6E8E7;
+  --green: #B7C733;
+  --orange: #E48328;
+  --text: #0A3F3A;
+  --blue: #2083B9;
+}
+
+.page {
+  width:1280px; height:720px;
+  position: relative;
+  page-break-after: always;
+  overflow: hidden;
+}
+.page:last-child { page-break-after: avoid; }
+
+.bg-teal {
+  background: linear-gradient(145deg, #0e5551 0%, #0A3F3A 55%, #052825 100%);
+}
+.bg-light {
+  background: linear-gradient(145deg, #eeeeed 0%, #E6E8E7 55%, #dcdede 100%);
+}
+
+.stripe-top {
+  position:absolute; top:0; left:0; width:100%; height:8px;
+  background: linear-gradient(90deg, #E48328 0%, #2083B9 100%);
+}
+
+/* glass card - flat-color approximation of backdrop-filter blur since
+   weasyprint doesn't support backdrop-filter; visually near-identical
+   over a flat/gradient background */
+.card {
+  background: rgba(238,238,237,0.11);
+  border-radius: 20px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+  padding: 28px 32px;
+}
+.card-light {
+  background: rgba(255,255,255,0.75);
+  border-radius: 20px;
+  box-shadow: inset 0 0 0 1px rgba(10,63,58,0.09);
+  padding: 28px 32px;
+}
+
+.pill {
+  display:inline-block;
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.pill-blue   { background: rgba(32,131,185,0.16); color:#5fc1f0; }
+.pill-orange { background: rgba(228,131,40,0.18); color:#ffb066; }
+.pill-green  { background: rgba(183,199,51,0.18); color:#d8e878; }
+.pill-blue-light   { background: rgba(32,131,185,0.10); color:#176fa0; }
+.pill-orange-light { background: rgba(228,131,40,0.12); color:#ca7220; }
+.pill-green-light  { background: rgba(183,199,51,0.14); color:#7c8a1f; }
+
+.logo-pill {
+  display:inline-flex; align-items:center; gap:10px;
+  background: rgba(255,255,255,0.97);
+  border-radius: 14px;
+  padding: 8px 16px;
+}
+.logo-pill img { height: 34px; display:block; }
+
+h1.title { color:#fff; font-size: 44px; font-weight: 800; margin:0 0 6px 0; letter-spacing: -0.01em; }
+h1.title-dark { color: var(--text); font-size: 44px; font-weight: 800; margin:0 0 6px 0; letter-spacing: -0.01em; }
+.subtitle { color: rgba(255,255,255,0.68); font-size: 17px; margin:0; }
+.subtitle-dark { color: rgba(10,63,58,0.62); font-size: 17px; margin:0; }
+
+.eyebrow { color:#ffb066; font-size:13px; font-weight:800; letter-spacing:0.14em; text-transform:uppercase; margin:0 0 8px 0; }
+.eyebrow-dark { color:#ca7220; font-size:13px; font-weight:800; letter-spacing:0.14em; text-transform:uppercase; margin:0 0 8px 0; }
+
+.footer {
+  position:absolute; bottom:0; left:0; width:100%; height:44px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 0 40px; font-size:12px; color: rgba(255,255,255,0.45);
+  border-top: 1px solid rgba(255,255,255,0.10);
+}
+.footer-dark {
+  position:absolute; bottom:0; left:0; width:100%; height:44px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 0 40px; font-size:12px; color: rgba(10,63,58,0.45);
+  border-top: 1px solid rgba(10,63,58,0.10);
+}
+
+table.data { width:100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+table.data th {
+  text-align:left; padding: 7px 10px; font-size:11px;
+  text-transform:uppercase; letter-spacing:0.04em;
+  color: rgba(255,255,255,0.55); border-bottom: 1px solid rgba(255,255,255,0.16);
+  white-space: nowrap; overflow:hidden;
+}
+table.data td {
+  padding: 7px 10px; color: rgba(255,255,255,0.92);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  white-space: nowrap; overflow:hidden; text-overflow: ellipsis;
+  height: 28px; line-height: 14px;
+}
+table.data tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+
+.check-row {
+  display:flex; align-items:center; gap:10px; padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.check-dot {
+  width:20px; height:20px; border-radius:999px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:900; color:#052825;
+}
+
+body { background: #052825; }
+.doc-wrap { max-width: 1180px; margin: 0 auto; }
+.hero {
+  background: linear-gradient(145deg, #0e5551 0%, #0A3F3A 55%, #052825 100%);
+  padding: 56px 56px 64px;
+  position: relative;
+}
+.hero .stripe-top { position:absolute; top:0; left:0; width:100%; height:8px;
+  background: linear-gradient(90deg, #E48328 0%, #2083B9 100%); }
+.layout { display: grid; grid-template-columns: 220px 1fr; gap: 0; background: #052825; }
+@media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+.rail {
+  position: sticky; top: 0; align-self: start;
+  max-height: 100vh; overflow-y: auto;
+  padding: 24px 14px;
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+@media (max-width: 860px) { .rail { position: static; max-height: none; border-right: none;
+  border-bottom: 1px solid rgba(255,255,255,0.08); display:flex; flex-wrap:wrap; gap:4px; } }
+.rail a {
+  display: block; padding: 7px 10px; border-radius: 8px;
+  color: rgba(255,255,255,0.6); text-decoration: none; font-size: 12.5px;
+  margin-bottom: 1px;
+}
+.rail a:hover { background: rgba(255,255,255,0.06); color: #fff; }
+.main { padding: 8px 0 80px; }
+.deck-section { padding: 40px 56px; border-bottom: 1px solid rgba(255,255,255,0.06); scroll-margin-top: 12px; }
+.deck-section:last-child { border-bottom: none; }
+@media (max-width: 700px) { .hero, .deck-section { padding-left: 20px; padding-right: 20px; } }
+.section-eyebrow { color:#ffb066; font-size:12.5px; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; margin:0 0 8px 0; }
+.section-title { color:#fff; font-size:26px; font-weight:800; margin:0 0 18px 0; letter-spacing:-0.01em; }
+.course-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+@media (max-width: 700px) { .course-grid { grid-template-columns: 1fr; } }
+table.data { table-layout: auto !important; }
+table.data td, table.data th { white-space: normal !important; }
+.doc-footer {
+  padding: 26px 56px 50px; color: rgba(255,255,255,0.35); font-size: 12px;
+  display:flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+}
+</style></head>
+<body>
+<div class="doc-wrap">
+  <div class="layout">
+    <nav class="rail"><a href="#top">Overview</a><a href="#glance">At a Glance</a><a href="#institutions">Institutions</a><a href="#sources">Websites</a><a href="#courses">Courses</a><a href="#visa">Visa & Timing</a><a href="#docs">Documents</a><a href="#caution">Counselor Notes</a></nav>
+    <div class="main"><div class="hero" id="top">
+      <div class="stripe-top"></div>
+      <div class="logo-pill"><img src="logo.png"/></div>
+      <div style="margin-top:40px; max-width:900px;">
+        <div class="eyebrow">Jan Intake &middot; September 2026 &ndash; January 2027</div>
+        <h1 class="title" style="font-size:clamp(32px,5vw,48px);">Study in Germany</h1>
+        <p class="subtitle" style="font-size:18px; margin-top:10px;">142 German institutions, 2,484 English-taught programmes identified nationally, an eroding-but-mostly-intact tuition-free model, and an explicitly flagged open question on the APS Certificate that needs direct embassy verification before advising clients.</p>
+        <div style="margin-top:28px;"><div class="pill pill-blue" style="margin:0 10px 10px 0;">EU / Schengen</div><div class="pill pill-orange" style="margin:0 10px 10px 0;">142 Institutions Shown</div><div class="pill pill-orange" style="margin:0 10px 10px 0;">APS Status Unresolved — Verify</div><div class="pill pill-green" style="margin:0 10px 10px 0;">14/16 States Tuition-Free</div><div class="pill pill-blue" style="margin:0 10px 10px 0;">HEC Certificate Mandatory</div></div>
+      </div>
+      <div style="margin-top:36px; color:rgba(255,255,255,0.35); font-size:12px;">
+        ACE Altius Consulting &middot; Counselor Reference &amp; Client Presentation &middot; Prepared for internal + client use
+      </div>
+    </div><section class="deck-section" id="glance">
+      <div class="section-eyebrow">Country Snapshot</div>
+      <h2 class="section-title">Germany at a Glance</h2>
+      
+<div style="display:grid; grid-template-columns: repeat(3,1fr); gap:18px; margin-top:4px;">
+  <div class="card" style="grid-column: span 3; border: 1px solid rgba(228,131,40,0.55);">
+    <div class="eyebrow" style="color:#ffb066;">⚠ Unresolved — APS Certificate Requirement</div>
+    <div style="color:#fff; font-size:17px; font-weight:800;">Sources actively disagree on whether APS is mandatory for Pakistani applicants</div>
+    <div style="color:rgba(255,255,255,0.7); font-size:13.5px; margin-top:6px;">Multiple 2026 sources (MS in Germany APS Quiz, BorderNbridges, Ocean.net.pk, Opaige) say APS is mandatory for Pakistan; other sources (GradGermany, MS in Germany, Studienkolleg.org) say Pakistan does NOT need it, and a 2024 uni-Koblenz source lists APS as required only for China/Mongolia/Vietnam/India. This deck's own institution-level eligibility matrix lists "APS + HEC" at every profiled university, which leans toward treating it as required — but <b>do not state a firm answer to a client</b>. Resolve directly with the German Embassy Islamabad or DAAD Pakistan before advising. If it does apply: fee ≈PKR 30,000 (~€100), processing 4 weeks normal / 8–16 weeks peak, lifetime validity.</div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">HEC Certificate — Confirmed Mandatory</div>
+    <div style="color:#fff; font-size:19px; font-weight:800;">Required since February 2026</div>
+    <div style="color:rgba(255,255,255,0.6); font-size:14px; margin-top:6px;">uni-assist will not process an application without HEC verification — unlike the APS question, this is not in dispute</div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Tuition Model — Eroding, Not Uniform</div>
+    <div style="color:#fff; font-size:19px; font-weight:800;">14 of 16 states still tuition-free</div>
+    <div style="color:rgba(255,255,255,0.6); font-size:14px; margin-top:6px;">But TUM, Hochschule München, TH Ingolstadt, Konstanz already charge, and FAU joins from Summer 2027 — do not present Germany as universally tuition-free anymore</div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Blocked Account (Sperrkonto)</div>
+    <div style="color:#fff; font-size:19px; font-weight:800;">€11,904 minimum (2026/27)</div>
+    <div style="color:rgba(255,255,255,0.6); font-size:14px; margin-top:6px;">Max monthly withdrawal €992 &middot; Expatrio/Fintiba/Coracle/Deutsche Bank all offer provider accounts</div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Visa Appointment Wait</div>
+    <div style="color:#fff; font-size:19px; font-weight:800;">Islamabad ~7 months / Karachi ~4 months</div>
+    <div style="color:rgba(255,255,255,0.6); font-size:14px; margin-top:6px;">Plus 6–12 weeks for the decision after interview at either consulate — start the process very early</div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Institutions Covered</div>
+    <div style="color:#fff; font-size:19px; font-weight:800;">142 shown (20 fully profiled)</div>
+    <div style="color:rgba(255,255,255,0.6); font-size:14px; margin-top:6px;">Germany has ~422 higher-education institutions nationally (120 universities + 243 FH + 57 arts/music + 22 theological/education) — this deck profiles the most relevant for international students</div>
+  </div>
+</div>
+
+    </section><section class="deck-section" id="institutions">
+      <div class="section-eyebrow">142 Verified Institutions</div>
+      <h2 class="section-title">Institutions Overview</h2>
+      <table class="data"><colgroup><col style="width:32%"><col style="width:16%"><col style="width:24%"><col style="width:28%"></colgroup>
+      <tr><th>Institution</th><th>City</th><th>Tuition (non-EU/year)</th><th>Application Deadline</th></tr>
+      <tr><td style="font-weight:600;">Alanus University</td>
+          <td>Alfter</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">BSP Business and Law School</td>
+          <td>Berlin</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Bard College Berlin</td>
+          <td>Berlin</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Bauhaus-Universität Weimar</td>
+          <td>Weimar</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Berlin International University</td>
+          <td>Berlin</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Berlin School of Economics and Law</td>
+          <td>Berlin</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Bielefeld University of Applied Science…</td>
+          <td>Bielefeld</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Brandenburgische Technische Universität…</td>
+          <td>Cottbus</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Charité – Universitätsmedizin Berlin</td>
+          <td>Berlin</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Constructor University</td>
+          <td>Bremen</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Deutsche Sporthochschule Köln</td>
+          <td>Cologne</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">EBC Hochschule</td>
+          <td>Berlin</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">EBS University of Business and Law</td>
+          <td>Wiesbaden</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">ESCP Business School</td>
+          <td>Berlin</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">EU Business School</td>
+          <td>Munich</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Europa-Universität Flensburg</td>
+          <td>Flensburg</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Europa-Universität Frankfurt (Oder)</td>
+          <td>Frankfurt (Oder)</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">FH Aachen</td>
+          <td>Aachen</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">FH Münster</td>
+          <td>Münster</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">FH Wedel</td>
+          <td>Wedel</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">FOM Hochschule</td>
+          <td>Dortmund</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">FernUniversität in Hagen</td>
+          <td>Hagen</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Frankfurt School of Finance and Managem…</td>
+          <td>Frankfurt</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Freie Universität Berlin</td>
+          <td>Berlin</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Fresenius University of Applied Sciences</td>
+          <td>Cologne</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">GISMA Business School</td>
+          <td>Potsdam</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Goethe University Frankfurt</td>
+          <td>Frankfurt</td><td>€0 (tuition-free, Hesse)</td>
+          <td>15 Jul 2027 (Winter…</td></tr><tr><td style="font-weight:600;">HDBW Munich</td>
+          <td>Munich</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">HHL Leipzig Graduate School of Manageme…</td>
+          <td>Leipzig</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">HM Hochschule München</td>
+          <td>Munich</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">HMU Health and Medical University</td>
+          <td>Potsdam</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">HSB Hochschule Bremen</td>
+          <td>Bremen</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">HTW Aalen</td>
+          <td>Aalen</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">HafenCity Universität Hamburg</td>
+          <td>Hamburg</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Hamburg University of Applied Sciences</td>
+          <td>Hamburg</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Heidelberg University</td>
+          <td>Heidelberg</td><td>€1,500/semester (Baden-Wü…</td>
+          <td>1 Jun – 15 Jul 2027…</td></tr><tr><td style="font-weight:600;">Hertie School</td>
+          <td>Berlin</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Hochschule Bremen</td>
+          <td>Bremen</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Hochschule Düsseldorf (HSD)</td>
+          <td>Düsseldorf</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Hochschule Fulda</td>
+          <td>Fulda</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Hochschule Harz</td>
+          <td>Wernigerode</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Hochschule Hof</td>
+          <td>Hof</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Hochschule Mannheim</td>
+          <td>Mannheim</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Hochschule Merseburg</td>
+          <td>Merseburg</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Hochschule Offenbach</td>
+          <td>Offenbach</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Hochschule Rhein-Main</td>
+          <td>Wiesbaden</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Hochschule Rhein-Waal</td>
+          <td>Kleve</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Humboldt-Universität Berlin</td>
+          <td>Berlin</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">IU International University</td>
+          <td>Multiple campus…</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">International School of Management (ISM)</td>
+          <td>Dortmund</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">KIT Karlsruhe</td>
+          <td>Karlsruhe</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Karlshochschule International University</td>
+          <td>Karlsruhe</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Katholische Universität Eichstätt-Ingol…</td>
+          <td>Eichstätt</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">LMU Munich</td>
+          <td>Munich</td><td>€0 (tuition-free, Bavaria…</td>
+          <td>15 May (Winter) / 1…</td></tr><tr><td style="font-weight:600;">Leuphana Universität Lüneburg</td>
+          <td>Lüneburg</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">MSB Medical School Berlin</td>
+          <td>Berlin</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Medizinische Hochschule Hannover</td>
+          <td>Hannover</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Medizinische Universität Lausitz</td>
+          <td>Cottbus</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Munich Business School</td>
+          <td>Munich</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Nordakademie</td>
+          <td>Elmshorn</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Osnabrück University of Applied Sciences</td>
+          <td>Osnabrück</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">PFH Private University</td>
+          <td>Göttingen</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">RWTH Aachen University</td>
+          <td>Aachen</td><td>€0 (tuition-free, NRW)</td>
+          <td>15 Jul 2027 (Winter…</td></tr><tr><td style="font-weight:600;">Ruhr-Universität Bochum</td>
+          <td>Bochum</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">SRH University</td>
+          <td>Berlin</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Schiller International University</td>
+          <td>Heidelberg</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">TH Köln</td>
+          <td>Cologne</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">TUM (Technical University of Munich)</td>
+          <td>Munich</td><td>€2,300–3,400 (UG) / €4,60…</td>
+          <td>15 Jan 2027 (Summer…</td></tr><tr><td style="font-weight:600;">Technische Hochschule Mittelhessen (THM)</td>
+          <td>Giessen</td><td>Typically €0 (public) — c…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Technische Universität Bergakademie Fre…</td>
+          <td>Freiberg</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Technische Universität Berlin</td>
+          <td>Berlin</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Technische Universität Braunschweig</td>
+          <td>Braunschweig</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Technische Universität Chemnitz</td>
+          <td>Chemnitz</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Technische Universität Clausthal</td>
+          <td>Clausthal</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Technische Universität Darmstadt</td>
+          <td>Darmstadt</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Technische Universität Dortmund</td>
+          <td>Dortmund</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Technische Universität Dresden</td>
+          <td>Dresden</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Technische Universität Hamburg</td>
+          <td>Hamburg</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Technische Universität Ilmenau</td>
+          <td>Ilmenau</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Technische Universität Kaiserslautern-L…</td>
+          <td>Kaiserslautern</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Tierärztliche Hochschule Hannover</td>
+          <td>Hannover</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">University of Bonn</td>
+          <td>Bonn</td><td>€0 (tuition-free, NRW)</td>
+          <td>15 Jul 2027 (Winter…</td></tr><tr><td style="font-weight:600;">University of Cologne</td>
+          <td>Cologne</td><td>€0 (tuition-free, NRW)</td>
+          <td>15 Jul 2027 (Winter…</td></tr><tr><td style="font-weight:600;">University of Europe for Applied Scienc…</td>
+          <td>Berlin</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">University of Freiburg</td>
+          <td>Freiburg</td><td>€1,500/semester (Baden-Wü…</td>
+          <td>15 Jul 2027 (Winter…</td></tr><tr><td style="font-weight:600;">University of Giessen</td>
+          <td>Giessen</td><td>€0 (tuition-free, Hesse)</td>
+          <td>1 Jun – 15 Jul 2027…</td></tr><tr><td style="font-weight:600;">University of Göttingen</td>
+          <td>Göttingen</td><td>€0 (tuition-free, Lower S…</td>
+          <td>15 Jul 2027 (Winter…</td></tr><tr><td style="font-weight:600;">University of Hamburg</td>
+          <td>Hamburg</td><td>€0 (tuition-free, Hamburg)</td>
+          <td>1 Jun – 15 Jul 2027…</td></tr><tr><td style="font-weight:600;">University of Jena</td>
+          <td>Jena</td><td>€0 (tuition-free, Thüring…</td>
+          <td>1 Dec 2026 – 15 Jan…</td></tr><tr><td style="font-weight:600;">University of Kassel</td>
+          <td>Kassel</td><td>€0 (tuition-free, Hesse)</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">University of Mannheim</td>
+          <td>Mannheim</td><td>€1,500/semester (Baden-Wü…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">University of Marburg</td>
+          <td>Marburg</td><td>€0 (tuition-free, Hesse)</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">University of Münster</td>
+          <td>Münster</td><td>€0 (tuition-free, NRW)</td>
+          <td>15 Jul 2027 (Winter…</td></tr><tr><td style="font-weight:600;">University of Passau</td>
+          <td>Passau</td><td>€0 (tuition-free, Bavaria…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">University of Regensburg</td>
+          <td>Regensburg</td><td>€0 (tuition-free, Bavaria…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">University of Stuttgart</td>
+          <td>Stuttgart</td><td>€1,500/semester (Baden-Wü…</td>
+          <td>15 Jul 2027 (Winter…</td></tr><tr><td style="font-weight:600;">University of Würzburg</td>
+          <td>Würzburg</td><td>€0 (tuition-free, Bavaria…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Augsburg</td>
+          <td>Augsburg</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Bamberg</td>
+          <td>Bamberg</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Bayreuth</td>
+          <td>Bayreuth</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Bielefeld</td>
+          <td>Bielefeld</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Bremen</td>
+          <td>Bremen</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Duisburg-Essen</td>
+          <td>Duisburg/Essen</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Düsseldorf (Heinrich Heine)</td>
+          <td>Düsseldorf</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Erfurt</td>
+          <td>Erfurt</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Erlangen-Nürnberg (FAU)</td>
+          <td>Erlangen</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Frankfurt am Main (Goethe)</td>
+          <td>Frankfurt</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Gießen (Justus Liebig)</td>
+          <td>Gießen</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Greifswald</td>
+          <td>Greifswald</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Halle-Wittenberg</td>
+          <td>Halle</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Hamburg</td>
+          <td>Hamburg</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Hannover (Gottfried Wilhelm…</td>
+          <td>Hannover</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Hildesheim</td>
+          <td>Hildesheim</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Hohenheim</td>
+          <td>Stuttgart</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Koblenz</td>
+          <td>Koblenz</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Konstanz</td>
+          <td>Konstanz</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Leipzig</td>
+          <td>Leipzig</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Magdeburg</td>
+          <td>Magdeburg</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Mainz (Johannes Gutenberg)</td>
+          <td>Mainz</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Mannheim</td>
+          <td>Mannheim</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität München (LMU)</td>
+          <td>Munich</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Münster</td>
+          <td>Münster</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Oldenburg (Carl von Ossietz…</td>
+          <td>Oldenburg</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Paderborn</td>
+          <td>Paderborn</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Potsdam</td>
+          <td>Potsdam</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Rostock</td>
+          <td>Rostock</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Siegen</td>
+          <td>Siegen</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Trier</td>
+          <td>Trier</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Tübingen</td>
+          <td>Tübingen</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Ulm</td>
+          <td>Ulm</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Vechta</td>
+          <td>Vechta</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Witten/Herdecke</td>
+          <td>Witten</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität Wuppertal (Bergische)</td>
+          <td>Wuppertal</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität der Bundeswehr Hamburg</td>
+          <td>Hamburg</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität der Bundeswehr München</td>
+          <td>Munich</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität des Saarlandes</td>
+          <td>Saarbrücken</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität für Verwaltungswissenschaft…</td>
+          <td>Speyer</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität zu Kiel</td>
+          <td>Kiel</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität zu Köln</td>
+          <td>Cologne</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Universität zu Lübeck</td>
+          <td>Lübeck</td><td>€0 in 14/16 states — some…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">WHU – Otto Beisheim School of Management</td>
+          <td>Vallendar</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Zeppelin University</td>
+          <td>Friedrichshafen</td><td>€4,150–33,000+/semester (…</td>
+          <td>See admissions page</td></tr></table>
+      <div style="color:rgba(255,255,255,0.45); font-size:12px; margin-top:10px;">122 institutions are shown for city/tuition-range reference only (no individually confirmed course list in the source research) — 20 institutions have full profiled course data on the following pages. Tuition shown as €0 reflects the general state policy; always confirm per-institution since several public universities (TUM, FAU, Hochschule München, TH Ingolstadt, Konstanz) now charge non-EU tuition.</div>
+    </section><section class="deck-section" id="sources">
+      <div class="section-eyebrow">Official Sources</div>
+      <h2 class="section-title">Websites & Admissions Portals</h2>
+      <table class="data"><colgroup><col style="width:26%"><col style="width:37%"><col style="width:37%"></colgroup>
+      <tr><th>Institution</th><th>Official Website</th><th>International / Admissions Portal</th></tr>
+      <tr><td style="font-weight:600;">Alanus University</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">BSP Business and Law School</td>
+          <td style="color:#5fc1f0;">https://www.bsp-berlin.de/en</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Bard College Berlin</td>
+          <td style="color:#5fc1f0;">https://berlin.bard.edu/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Bauhaus-Universität Weimar</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Berlin International University</td>
+          <td style="color:#5fc1f0;">https://www.berlin-international.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Berlin School of Economics and Law</td>
+          <td style="color:#5fc1f0;">https://www.hwr-berlin.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Bielefeld University of Applied Sci…</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Brandenburgische Technische Univers…</td>
+          <td style="color:#5fc1f0;">https://www.thm.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Charité – Universitätsmedizin Berlin</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Constructor University</td>
+          <td style="color:#5fc1f0;">https://constructor.university/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Deutsche Sporthochschule Köln</td>
+          <td style="color:#5fc1f0;">https://www.th-koeln.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">EBC Hochschule</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">EBS University of Business and Law</td>
+          <td style="color:#5fc1f0;">https://www.ebs.edu/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">ESCP Business School</td>
+          <td style="color:#5fc1f0;">https://escp.eu/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">EU Business School</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Europa-Universität Flensburg</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Europa-Universität Frankfurt (Oder)</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">FH Aachen</td>
+          <td style="color:#5fc1f0;">https://www.fh-aachen.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">FH Münster</td>
+          <td style="color:#5fc1f0;">https://www.fh-muenster.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">FH Wedel</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">FOM Hochschule</td>
+          <td style="color:#5fc1f0;">https://www.fom.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">FernUniversität in Hagen</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Frankfurt School of Finance and Man…</td>
+          <td style="color:#5fc1f0;">https://www.frankfurt-school.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Freie Universität Berlin</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Fresenius University of Applied Sci…</td>
+          <td style="color:#5fc1f0;">https://www.hs-fresenius.de/en</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">GISMA Business School</td>
+          <td style="color:#5fc1f0;">https://www.gisma.com/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Goethe University Frankfurt</td>
+          <td style="color:#5fc1f0;">https://www.uni-frankfurt.de</td>
+          <td style="color:#5fc1f0;">https://www.goethe-university-frankfurt.de/en/studying/application</td></tr><tr><td style="font-weight:600;">HDBW Munich</td>
+          <td style="color:#5fc1f0;">https://www.hdbw-hochschule.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">HHL Leipzig Graduate School of Mana…</td>
+          <td style="color:#5fc1f0;">https://www.hhl.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">HM Hochschule München</td>
+          <td style="color:#5fc1f0;">https://www.hm.edu/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">HMU Health and Medical University</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">HSB Hochschule Bremen</td>
+          <td style="color:#5fc1f0;">https://www.hs-bremen.de/en</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">HTW Aalen</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">HafenCity Universität Hamburg</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Hamburg University of Applied Scien…</td>
+          <td style="color:#5fc1f0;">https://www.haw-hamburg.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Heidelberg University</td>
+          <td style="color:#5fc1f0;">https://www.uni-heidelberg.de</td>
+          <td style="color:#5fc1f0;">https://www.uni-heidelberg.de/en/study/application</td></tr><tr><td style="font-weight:600;">Hertie School</td>
+          <td style="color:#5fc1f0;">https://www.hertie-school.org/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Hochschule Bremen</td>
+          <td style="color:#5fc1f0;">https://www.hs-bremen.de/en</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Hochschule Düsseldorf (HSD)</td>
+          <td style="color:#5fc1f0;">https://www.hsd.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Hochschule Fulda</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Hochschule Harz</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Hochschule Hof</td>
+          <td style="color:#5fc1f0;">https://www.hof-university.com/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Hochschule Mannheim</td>
+          <td style="color:#5fc1f0;">https://www.hs-mannheim.de/en</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Hochschule Merseburg</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Hochschule Offenbach</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Hochschule Rhein-Main</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Hochschule Rhein-Waal</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Humboldt-Universität Berlin</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">IU International University</td>
+          <td style="color:#5fc1f0;">https://www.iu.org/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">International School of Management…</td>
+          <td style="color:#5fc1f0;">https://www.ism.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">KIT Karlsruhe</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Karlshochschule International Unive…</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Katholische Universität Eichstätt-I…</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">LMU Munich</td>
+          <td style="color:#5fc1f0;">https://www.lmu.de</td>
+          <td style="color:#5fc1f0;">https://www.lmu.de/en/study/application</td></tr><tr><td style="font-weight:600;">Leuphana Universität Lüneburg</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">MSB Medical School Berlin</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Medizinische Hochschule Hannover</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Medizinische Universität Lausitz</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Munich Business School</td>
+          <td style="color:#5fc1f0;">https://www.munich-business-school.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Nordakademie</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Osnabrück University of Applied Sci…</td>
+          <td style="color:#5fc1f0;">https://www.hs-osnabrueck.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">PFH Private University</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">RWTH Aachen University</td>
+          <td style="color:#5fc1f0;">https://www.rwth-aachen.de</td>
+          <td style="color:#5fc1f0;">https://www.rwth-aachen.de/go/id/bqzb/</td></tr><tr><td style="font-weight:600;">Ruhr-Universität Bochum</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">SRH University</td>
+          <td style="color:#5fc1f0;">https://www.srh-university.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Schiller International University</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">TH Köln</td>
+          <td style="color:#5fc1f0;">https://www.th-koeln.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">TUM (Technical University of Munich)</td>
+          <td style="color:#5fc1f0;">https://www.tum.de</td>
+          <td style="color:#5fc1f0;">https://www.tum.de/en/studies/application</td></tr><tr><td style="font-weight:600;">Technische Hochschule Mittelhessen…</td>
+          <td style="color:#5fc1f0;">https://www.thm.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Technische Universität Bergakademie…</td>
+          <td style="color:#5fc1f0;">https://www.thm.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Technische Universität Berlin</td>
+          <td style="color:#5fc1f0;">https://www.thm.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Technische Universität Braunschweig</td>
+          <td style="color:#5fc1f0;">https://www.thm.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Technische Universität Chemnitz</td>
+          <td style="color:#5fc1f0;">https://www.thm.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Technische Universität Clausthal</td>
+          <td style="color:#5fc1f0;">https://www.thm.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Technische Universität Darmstadt</td>
+          <td style="color:#5fc1f0;">https://www.thm.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Technische Universität Dortmund</td>
+          <td style="color:#5fc1f0;">https://www.thm.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Technische Universität Dresden</td>
+          <td style="color:#5fc1f0;">https://www.thm.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Technische Universität Hamburg</td>
+          <td style="color:#5fc1f0;">https://www.thm.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Technische Universität Ilmenau</td>
+          <td style="color:#5fc1f0;">https://www.thm.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Technische Universität Kaiserslaute…</td>
+          <td style="color:#5fc1f0;">https://www.thm.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Tierärztliche Hochschule Hannover</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">University of Bonn</td>
+          <td style="color:#5fc1f0;">https://www.uni-bonn.de</td>
+          <td style="color:#5fc1f0;">https://www.uni-bonn.de/en/studying/application</td></tr><tr><td style="font-weight:600;">University of Cologne</td>
+          <td style="color:#5fc1f0;">https://www.uni-koeln.de</td>
+          <td style="color:#5fc1f0;">https://www.uni-koeln.de/en/studying/application</td></tr><tr><td style="font-weight:600;">University of Europe for Applied Sc…</td>
+          <td style="color:#5fc1f0;">https://www.ue-germany.com/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">University of Freiburg</td>
+          <td style="color:#5fc1f0;">https://www.uni-freiburg.de</td>
+          <td style="color:#5fc1f0;">https://uni-freiburg.de/en/study/application</td></tr><tr><td style="font-weight:600;">University of Giessen</td>
+          <td style="color:#5fc1f0;">https://www.uni-giessen.de</td>
+          <td style="color:#5fc1f0;">https://www.uni-giessen.de</td></tr><tr><td style="font-weight:600;">University of Göttingen</td>
+          <td style="color:#5fc1f0;">https://www.uni-goettingen.de</td>
+          <td style="color:#5fc1f0;">https://www.uni-goettingen.de/en/study/application</td></tr><tr><td style="font-weight:600;">University of Hamburg</td>
+          <td style="color:#5fc1f0;">https://www.uni-hamburg.de</td>
+          <td style="color:#5fc1f0;">https://www.uni-hamburg.de/en/studium/bewerbung.html</td></tr><tr><td style="font-weight:600;">University of Jena</td>
+          <td style="color:#5fc1f0;">https://www.uni-jena.de</td>
+          <td style="color:#5fc1f0;">https://www.uni-jena.de/en/study/application</td></tr><tr><td style="font-weight:600;">University of Kassel</td>
+          <td style="color:#5fc1f0;">https://www.uni-kassel.de</td>
+          <td style="color:#5fc1f0;">https://www.uni-kassel.de/en/study/application</td></tr><tr><td style="font-weight:600;">University of Mannheim</td>
+          <td style="color:#5fc1f0;">https://www.uni-mannheim.de</td>
+          <td style="color:#5fc1f0;">https://www.uni-mannheim.de/en/study/application</td></tr><tr><td style="font-weight:600;">University of Marburg</td>
+          <td style="color:#5fc1f0;">https://www.uni-marburg.de</td>
+          <td style="color:#5fc1f0;">https://www.uni-marburg.de/en/study/application</td></tr><tr><td style="font-weight:600;">University of Münster</td>
+          <td style="color:#5fc1f0;">https://www.uni-muenster.de</td>
+          <td style="color:#5fc1f0;">https://www.uni-muenster.de/en/studium/bewerbung/</td></tr><tr><td style="font-weight:600;">University of Passau</td>
+          <td style="color:#5fc1f0;">https://www.uni-passau.de</td>
+          <td style="color:#5fc1f0;">https://www.uni-passau.de/en/study/application</td></tr><tr><td style="font-weight:600;">University of Regensburg</td>
+          <td style="color:#5fc1f0;">https://www.uni-regensburg.de</td>
+          <td style="color:#5fc1f0;">https://www.uni-regensburg.de/en/study/application</td></tr><tr><td style="font-weight:600;">University of Stuttgart</td>
+          <td style="color:#5fc1f0;">https://www.uni-stuttgart.de</td>
+          <td style="color:#5fc1f0;">https://www.uni-stuttgart.de/en/study/application</td></tr><tr><td style="font-weight:600;">University of Würzburg</td>
+          <td style="color:#5fc1f0;">https://www.uni-wuerzburg.de</td>
+          <td style="color:#5fc1f0;">https://www.uni-wuerzburg.de/en/study/application</td></tr><tr><td style="font-weight:600;">Universität Augsburg</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Bamberg</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Bayreuth</td>
+          <td style="color:#5fc1f0;">https://www.uni-bayreuth.de/en</td>
+          <td style="color:#5fc1f0;">https://www.uni-bayreuth.de/en/study/application</td></tr><tr><td style="font-weight:600;">Universität Bielefeld</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Bremen</td>
+          <td style="color:#5fc1f0;">https://www.hs-bremen.de/en</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Duisburg-Essen</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Düsseldorf (Heinrich He…</td>
+          <td style="color:#5fc1f0;">https://www.hsd.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Erfurt</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Erlangen-Nürnberg (FAU)</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Frankfurt am Main (Goet…</td>
+          <td style="color:#5fc1f0;">https://www.goethe-university-frankfurt.de/en</td>
+          <td style="color:#5fc1f0;">https://www.goethe-university-frankfurt.de/en/studying/application</td></tr><tr><td style="font-weight:600;">Universität Gießen (Justus Liebig)</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Greifswald</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Halle-Wittenberg</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Hamburg</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Hannover (Gottfried Wil…</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Hildesheim</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Hohenheim</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Koblenz</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Konstanz</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Leipzig</td>
+          <td style="color:#5fc1f0;">https://www.hhl.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Magdeburg</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Mainz (Johannes Gutenbe…</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Mannheim</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität München (LMU)</td>
+          <td style="color:#5fc1f0;">https://www.lmu.de/en/</td>
+          <td style="color:#5fc1f0;">https://www.lmu.de/en/study/application</td></tr><tr><td style="font-weight:600;">Universität Münster</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Oldenburg (Carl von Oss…</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Paderborn</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Potsdam</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Rostock</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Siegen</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Trier</td>
+          <td style="color:#5fc1f0;">https://www.uni-trier.de/en/</td>
+          <td style="color:#5fc1f0;">https://www.uni-trier.de/en/study/application</td></tr><tr><td style="font-weight:600;">Universität Tübingen</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Ulm</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Vechta</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Witten/Herdecke</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität Wuppertal (Bergische)</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität der Bundeswehr Hamburg</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität der Bundeswehr München</td>
+          <td style="color:#5fc1f0;">https://www.hm.edu/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität des Saarlandes</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität für Verwaltungswissensc…</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität zu Kiel</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität zu Köln</td>
+          <td style="color:#5fc1f0;">https://www.th-koeln.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Universität zu Lübeck</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">WHU – Otto Beisheim School of Manag…</td>
+          <td style="color:#5fc1f0;">https://www.whu.edu/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Zeppelin University</td>
+          <td style="color:#5fc1f0;">https://www.zu.de/en/</td>
+          <td style="color:#5fc1f0;">—</td></tr></table>
+    </section><section class="deck-section" id="courses">
+      <div class="section-eyebrow">English-Taught Programmes</div>
+      <h2 class="section-title">Available Courses (20 institutions)</h2>
+      <div class="course-grid"><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">Goethe University Frankfurt</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uni-frankfurt.de</div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught bachelor's programmes listed in source data.</div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (6)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Particle Accelerator Science (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Molecular Biosciences (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Management Science (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">LL.M. in Finance <span style="color:rgba(255,255,255,0.4);">&middot; 2 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Goethe MBA – Digital Transformation, Data Science, Sustainabi… <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Economics and Economic Policy (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">Heidelberg University</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uni-heidelberg.de</div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught bachelor's programmes listed in source data.</div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (16)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Data and Computer Science (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mathematics of Machine Learning and Data Science (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Molecular Biosciences (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">English Studies (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Biomedical Engineering (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Sociocultural Anthropology (Ethnology) (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Development, Environment, Societies, and History of South Asi… <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">American Studies (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Scientific Computing (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Health (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 2 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Governance of Risk and Resources <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Medical Education <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Near Eastern Archaeology (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:11px; color:rgba(255,255,255,0.35); padding-top:4px;">+ 2 more in source data</div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">LMU Munich</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.lmu.de</div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught bachelor's programmes listed in source data.</div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (11)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Statistics and Data Science (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Software Engineering [Elite Graduate Program] (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Data Science (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Management International Triple Degree (M.Sc./MBA) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">European and International Economic Law (LL.M.) <span style="color:rgba(255,255,255,0.4);">&middot; 2 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Precision Oncology (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; Part-time</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Theater, Dance and Performance Research (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Global Public Policy (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Geology (M.Sc.) — joint with TUM <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Management and Digital Technologies (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Epidemiology (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">RWTH Aachen University</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.rwth-aachen.de</div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught bachelor's programmes listed in source data.</div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (19)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Chemistry (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Robotic Systems Engineering (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Periodontology (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 3 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Governance of Technology and Innovation (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">European Mining Course (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Resilient Civil Engineering (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computer Aided Conception and Production in Mechanical Engine… <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Smart Production Systems (SPE) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Management and Engineering in Computer Aided Mechanical Engin… <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Textile Engineering (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Data Analytics & Decision Science (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Management & Engineering in Technology, Innovation, Marketing… <span style="color:rgba(255,255,255,0.4);">&middot; 3 semesters / 90 CP</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Digitalization & Industrial Change (MBA) <span style="color:rgba(255,255,255,0.4);">&middot; —</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Applied Geophysics <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:11px; color:rgba(255,255,255,0.35); padding-top:4px;">+ 5 more in source data</div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">TUM (Technical University of Munich)</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.tum.de</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (6)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Bioeconomy (Straubing) <span style="color:rgba(255,255,255,0.4);">&middot; 6 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Information Engineering (Heilbronn) <span style="color:rgba(255,255,255,0.4);">&middot; 6 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Sustainable Engineering for Materials and Processes (Straubin… <span style="color:rgba(255,255,255,0.4);">&middot; 6 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Management & Data Science (Heilbronn) <span style="color:rgba(255,255,255,0.4);">&middot; 6 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Aerospace <span style="color:rgba(255,255,255,0.4);">&middot; 6 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Sustainable Management & Technology <span style="color:rgba(255,255,255,0.4);">&middot; 6 semesters</span></div></div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught master's programmes listed in source data.</div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Bonn</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uni-bonn.de</div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught bachelor's programmes listed in source data.</div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (19)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Agricultural and Food Economics (AFECO) (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Agricultural Sciences and Resource Management in the Tropics… <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Anthropology of the Americas (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Applied Linguistics (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Astrophysics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">English Literatures and Cultures (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Geodetic Engineering (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computer Science (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Artificial Intelligence (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mobile Robotics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Cyber Security (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Dependency and Slavery Studies (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Molecular Cell Biology (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:11px; color:rgba(255,255,255,0.35); padding-top:4px;">+ 5 more in source data</div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Cologne</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uni-koeln.de</div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught bachelor's programmes listed in source data.</div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (5)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Master of Environmental Sciences (IMES) (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Joint International Master of Environmental Sustainability <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Business Analytics & Econometrics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Supply Chain Management (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Freiburg</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uni-freiburg.de</div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught bachelor's programmes listed in source data.</div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (5)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computer Science (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Earth Sciences (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Sustainable Systems Engineering (SSE) (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Environmental Sciences (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Embedded Systems Engineering (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Giessen</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uni-giessen.de</div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught bachelor's programmes listed in source data.</div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (13)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Transition Management (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Agrobiotechnology (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Insect Biotechnology and Bioresources (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Sustainable Transition (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Advanced Materials (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Global Change: Ecosystem Science and Policy (M.Sc.) — joint w… <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics of Global Risk (EGR) (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Sustainable Chemistry (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Control, Computer and Communications Engineering (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mind, Brain and Behavior (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">One Health (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Anglophone Studies (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Data Analytics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Göttingen</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uni-goettingen.de</div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught bachelor's programmes listed in source data.</div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (10)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Applied Data Science (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Cardiovascular Science (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Law (LL.M.) <span style="color:rgba(255,255,255,0.4);">&middot; 2 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Crop Protection (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Molecular Life Sciences (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Applied Computer Science (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Developmental, Neural, and Behavioral Biology (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Biodiversity: Ecology, Evolution, and Conservation (BEEC) (M.… <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Economics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mathematics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Hamburg</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uni-hamburg.de</div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught bachelor's programmes listed in source data.</div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (10)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Innovation, Business and Sustainability (MIBAS) (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Health Economics and Health Care Management (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Peace and Security Studies (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Political Science (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">European and International Law (MEIL) <span style="color:rgba(255,255,255,0.4);">&middot; 2 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mathematical Physics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Integrated Climate System Sciences (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Geophysics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Communication and Journalism Research for a Sustainable Socie… <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Jena</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uni-jena.de</div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught bachelor's programmes listed in source data.</div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (5)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Biogeoscience of the Anthropocene (M.Sc.) — new 2026/27 <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Evolution, Ecology and Systematics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Microbiology (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Molecular Medicine (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Kassel</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uni-kassel.de</div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught bachelor's programmes listed in source data.</div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (10)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Control and Autonomous Systems Engineering (CASE) (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Electrical Communication Engineering (ECE) (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Nanoscience (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Global Business, Economics, and Policy <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economic Behaviour and Governance <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">European Master in Business Studies <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Labour Policies and Globalisation (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 1 year</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mathematics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computer Science (M.Sc.) — from Winter 2026/27 <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Wind Energy Systems (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Mannheim</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uni-mannheim.de</div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught bachelor's programmes listed in source data.</div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (13)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mannheim Master in Data Science (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Data Science, AI, and Digital Business (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Comparative Business Law (M.C.B.L.) <span style="color:rgba(255,255,255,0.4);">&middot; 2 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Business Informatics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Culture and Economics: English and American Studies (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mannheim Master in Sustainability and Impact Management (M.Sc… <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Translation and Communication Technologies (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Culture and Economy (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mannheim Master in Management (MMM) — English track <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mannheim Master in Finance, Accounting & Taxation (MMFACT) —… <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mannheim Master in Operations & Supply Chain Management (MMOS… <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mannheim Master of Business Administration (MBA) <span style="color:rgba(255,255,255,0.4);">&middot; Part-time/full-time</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Marburg</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uni-marburg.de</div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught bachelor's programmes listed in source data.</div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (9)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Political Economy (M.Sc.) — double degree with… <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Data Science (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computer Science (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics, Institutions, and Behavior (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics of the Middle East (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Political and Social Science Research (IPSSR) (… <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Business Informatics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Peace and Conflict Studies (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Molecular Biotechnology (MBT) (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Münster</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uni-muenster.de</div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught bachelor's programmes listed in source data.</div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (14)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">British, American and Postcolonial Studies (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Business Administration (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Business Chemistry (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Business Development (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Comparative and Global Law (LL.M.) <span style="color:rgba(255,255,255,0.4);">&middot; 2 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Comparative Public Governance (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Geoinformatics and Spatial Data Science (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Geophysics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Geospatial Technologies (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Information Systems (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Knowledge and Communication (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mathematics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Data Science (M.Sc.) — from Winter 2026/27 <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Passau</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uni-passau.de</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (2)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Artificial Intelligence (B.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 6 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mathematics (B.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 6 semesters</span></div></div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (9)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Artificial Intelligence Engineering (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computer Science (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Information Systems (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computational Mathematics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Economics and Business (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Development Studies (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Governance and Public Policy (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">European Studies (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Double Master Degree in Digital Enterprise Management (DEMA) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Regensburg</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uni-regensburg.de</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (5)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Liberal Arts: Culture, History, Society (B.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 7 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Electrical Engineering (B.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 6 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Mechanical Engineering (B.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 6 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Computer Science (B.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 6 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">British Studies (B.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 6 semesters</span></div></div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (6)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computer Science (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Data Science (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Human-Centred AI (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Biology (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">English Linguistics (M.A.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Stuttgart</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uni-stuttgart.de</div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught bachelor's programmes listed in source data.</div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (14)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Information Technology (INFOTECH) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Electrical Engineering (EENG) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computer Science <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Geomatics Engineering (GEOENGINE) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Geomatics for Environmental Monitoring (GEM) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Engineering Cybernetics <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Fundamentals and Applications of Mechanical Engineering (FAME) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">WASTE (Air Quality Control, Solid Waste and Waste Water Proce… <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computational Linguistics <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computational Mechanics of Materials and Structures (COMMAS) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Integrated Urbanism and Sustainable Design (IUSD) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Integrative Technologies and Architectural Design Research (I… <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Infrastructure Planning (MIP) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Aerospace Engineering (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Würzburg</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uni-wuerzburg.de</div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught bachelor's programmes listed in source data.</div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (9)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Artificial Intelligence & Extended Reality (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Global Challenges for Sustainability (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Management International (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">FOKUS Life Sciences (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Chemistry (M.Sc.) — from Winter 2026/27 <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Neuroethology (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Economic Policy (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Biosciences – Cell and Infection Biology (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computational Humanities (M.Sc.) <span style="color:rgba(255,255,255,0.4);">&middot; 4 semesters</span></div></div>
+    </div>
+    </div></div>
+    </section><section class="deck-section" id="visa">
+      <div class="section-eyebrow">Visa & Timing</div>
+      <h2 class="section-title">Visa Process & Application Timing</h2>
+      
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+  <div class="card">
+    <div class="eyebrow">Visa Document Checklist (Consulate Karachi Official)</div>
+    <div style="color:#fff; font-size:12.5px; line-height:1.7;">
+      &bull; National Visa (D) form, biometric photo (&lt;3 months, white background)<br/>
+      &bull; <b>Zulassungsbescheid</b> (admission letter)<br/>
+      &bull; Proof of financial resources — blocked account (Sperrkonto)<br/>
+      &bull; CV (Karachi consulate specifically) + <b>Motivationsbrief</b><br/>
+      &bull; Educational certificates <b>pre-certified by HEC</b><br/>
+      &bull; Language certificates — TOEFL 550 (paper) minimum, or Goethe A2+<br/>
+      &bull; Proof of previous employment (if applicable) + two sets of A4 copies
+    </div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Processing &amp; Costs</div>
+    <div style="color:#fff; font-size:13px; line-height:1.8;">
+      &bull; Appointment wait: <b>~7 months</b> (Islamabad) / <b>~4 months</b> (Karachi)<br/>
+      &bull; Decision after interview: <b>6–12 weeks</b>, either consulate<br/>
+      &bull; Blocked account: <b>€11,904</b> minimum, €992/month max withdrawal, 12-month coverage<br/>
+      &bull; Health insurance: statutory €111–150/month (recommended) or private €72–400/month<br/>
+      &bull; Verify university recognition at <b>anabin.kmk.org</b> — H+ fully recognised, H+/- programme-specific, H- not recognised
+    </div>
+  </div>
+</div>
+<div class="card" style="margin-top:14px;">
+  <div class="eyebrow">Studienkolleg Route (FSc/HSSC without A-Levels)</div>
+  <div style="color:#fff; font-size:13px; line-height:1.7;">
+    Must attend a 1-year Studienkolleg foundation programme and pass the Feststellungsprüfung, OR complete 1 year of undergraduate study at an HEC-recognised Pakistani university first. German B1 required for the standard track; English-track options exist at FH Aachen, Studienkolleg NRW (Hochschule Fresenius), and Berlin International College (BIC).
+  </div>
+</div>
+<div class="card" style="margin-top:14px;">
+  <div class="eyebrow">Scholarships</div>
+  <div style="color:#fff; font-size:13px; line-height:1.7;">
+    <b>Helmut-Schmidt-Programme (DAAD):</b> full tuition + stipend + travel + health insurance for Master's in Public Policy/Good Governance; Pakistan eligible (upper third of class); apply 1 Jun – 31 Jul 2026 for Sept/Oct 2027 start; participating universities: Bonn-Rhein-Sieg, Duisburg-Essen, Erfurt, Magdeburg, Osnabrück, Passau. <b>DAAD Study Scholarships:</b> fully/partially funded — contact DAAD Information Centre Islamabad directly.
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px;">
+  <div class="eyebrow" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+    <span>Post-Study Work &amp; Visa Financial Requirement</span>
+    <span style="font-size:10.5px; font-weight:700; letter-spacing:0.04em; text-transform:none; color:#ffb066; background:rgba(228,131,40,0.14); padding:3px 10px; border-radius:999px;">reported — verify before quoting a client</span>
+  </div>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:10px;">
+    <div>
+      <div style="color:rgba(255,255,255,0.5); font-size:11.5px; text-transform:uppercase; letter-spacing:0.04em;">Post-study work rights</div>
+      <div style="color:#fff; font-size:14px; line-height:1.6; margin-top:4px;">18-month residence permit for job seeking after graduation.</div>
+    </div>
+    <div>
+      <div style="color:rgba(255,255,255,0.5); font-size:11.5px; text-transform:uppercase; letter-spacing:0.04em;">Visa financial requirement</div>
+      <div style="color:#fff; font-size:14px; line-height:1.6; margin-top:4px;">€11,904 blocked account (already covered elsewhere in this deck; this is the same figure reframed as the visa financial requirement).</div>
+    </div>
+  </div>
+</div>
+    </section><section class="deck-section" id="docs">
+      <div class="section-eyebrow">Before Filing</div>
+      <h2 class="section-title">Documents Checklist</h2>
+      <div class="card" style="max-width:760px;"><div class="eyebrow">General Application Documents</div><div style="margin-top:6px;"><div class="check-row"><div class="check-dot" style="background:#2083B9;"></div><div style="color:#fff; font-size:15px;">Passport (first 2 pages, scanned)</div></div><div class="check-row"><div class="check-dot" style="background:#2083B9;"></div><div style="color:#fff; font-size:15px;">Academic transcripts — Matric through Bachelor's</div></div><div class="check-row"><div class="check-dot" style="background:#2083B9;"></div><div style="color:#fff; font-size:15px;">Degree certificates (all levels)</div></div><div class="check-row"><div class="check-dot" style="background:#E48328;"></div><div style="color:#fff; font-size:15px;">CV / Europass format</div></div><div class="check-row"><div class="check-dot" style="background:#E48328;"></div><div style="color:#fff; font-size:15px;">Motivation letter / SOP</div></div><div class="check-row"><div class="check-dot" style="background:#E48328;"></div><div style="color:#fff; font-size:15px;">English language certificate (IELTS/equivalent)</div></div><div class="check-row"><div class="check-dot" style="background:#B7C733;"></div><div style="color:#fff; font-size:15px;">Recommendation letters (program-dependent)</div></div><div class="check-row"><div class="check-dot" style="background:#B7C733;"></div><div style="color:#fff; font-size:15px;">Proof of funds / tuition payment evidence</div></div></div></div>
+    </section><section class="deck-section" id="caution">
+      <div class="section-eyebrow">Counselor Notes</div>
+      <h2 class="section-title">Quote Carefully — Corrections & Safeguards</h2>
+      
+<div class="card">
+  <div class="eyebrow">Counselor Notes — What Changed From the Previous Germany Deck</div>
+  <div style="color:#fff; font-size:13px; line-height:1.8;">
+    &bull; <b>APS status is a genuinely open question</b> — do not tell a client it is or isn't required; say it depends on current embassy guidance and needs direct confirmation before they commit to the (optional but often expected) certificate process.<br/>
+    &bull; <b>HEC certificate is now confirmed mandatory</b> (Feb 2026) — this is new since the last deck and is not optional; uni-assist rejects applications without it.<br/>
+    &bull; <b>Germany is no longer uniformly tuition-free</b> — TUM, Hochschule München, TH Ingolstadt, and Konstanz already charge; FAU joins from Summer 2027. Always name the specific institution's fee status, never say "Germany is free" as a blanket claim.<br/>
+    &bull; Two standard deadlines apply broadly: <b>15 January 2027</b> (Summer 2027 intake) and <b>15 July 2027</b> (Winter 2027/28 intake) — but individual institutions vary, shown per-institution where confirmed.<br/>
+    &bull; 122 institutions in this deck are registry-only (name/city/sector, no individually confirmed programme list) — present as "Germany also has..." breadth, not as fully researched options.<br/>
+    &bull; Course lists are the confirmed English-taught programmes found in this source, not guaranteed-exhaustive — always confirm the live list on the university's own site before quoting a client.<br/>
+    &bull; No blanket deadline extensions exist in Germany — occasional single-institution extensions happen, but should never be assumed.
+  </div>
+</div>
+
+    </section><div class="doc-footer">
+      <div>ACE Altius Consulting &middot; From Dreams to Destinations</div>
+      <div>Germany &middot; Jan Intake 2026/27</div>
+    </div></div>
+  </div>
+</div>
+</body></html>

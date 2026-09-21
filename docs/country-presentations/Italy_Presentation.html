@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Italy — ACE Altius Country Deck</title>
+<style>
+@page { size: 1280px 720px; margin: 0; }
+* { box-sizing: border-box; }
+body { margin:0; font-family: 'Helvetica Neue', Arial, sans-serif; }
+
+:root {
+  --bg: #E6E8E7;
+  --green: #B7C733;
+  --orange: #E48328;
+  --text: #0A3F3A;
+  --blue: #2083B9;
+}
+
+.page {
+  width:1280px; height:720px;
+  position: relative;
+  page-break-after: always;
+  overflow: hidden;
+}
+.page:last-child { page-break-after: avoid; }
+
+.bg-teal {
+  background: linear-gradient(145deg, #0e5551 0%, #0A3F3A 55%, #052825 100%);
+}
+.bg-light {
+  background: linear-gradient(145deg, #eeeeed 0%, #E6E8E7 55%, #dcdede 100%);
+}
+
+.stripe-top {
+  position:absolute; top:0; left:0; width:100%; height:8px;
+  background: linear-gradient(90deg, #E48328 0%, #2083B9 100%);
+}
+
+/* glass card - flat-color approximation of backdrop-filter blur since
+   weasyprint doesn't support backdrop-filter; visually near-identical
+   over a flat/gradient background */
+.card {
+  background: rgba(238,238,237,0.11);
+  border-radius: 20px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+  padding: 28px 32px;
+}
+.card-light {
+  background: rgba(255,255,255,0.75);
+  border-radius: 20px;
+  box-shadow: inset 0 0 0 1px rgba(10,63,58,0.09);
+  padding: 28px 32px;
+}
+
+.pill {
+  display:inline-block;
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.pill-blue   { background: rgba(32,131,185,0.16); color:#5fc1f0; }
+.pill-orange { background: rgba(228,131,40,0.18); color:#ffb066; }
+.pill-green  { background: rgba(183,199,51,0.18); color:#d8e878; }
+.pill-blue-light   { background: rgba(32,131,185,0.10); color:#176fa0; }
+.pill-orange-light { background: rgba(228,131,40,0.12); color:#ca7220; }
+.pill-green-light  { background: rgba(183,199,51,0.14); color:#7c8a1f; }
+
+.logo-pill {
+  display:inline-flex; align-items:center; gap:10px;
+  background: rgba(255,255,255,0.97);
+  border-radius: 14px;
+  padding: 8px 16px;
+}
+.logo-pill img { height: 34px; display:block; }
+
+h1.title { color:#fff; font-size: 44px; font-weight: 800; margin:0 0 6px 0; letter-spacing: -0.01em; }
+h1.title-dark { color: var(--text); font-size: 44px; font-weight: 800; margin:0 0 6px 0; letter-spacing: -0.01em; }
+.subtitle { color: rgba(255,255,255,0.68); font-size: 17px; margin:0; }
+.subtitle-dark { color: rgba(10,63,58,0.62); font-size: 17px; margin:0; }
+
+.eyebrow { color:#ffb066; font-size:13px; font-weight:800; letter-spacing:0.14em; text-transform:uppercase; margin:0 0 8px 0; }
+.eyebrow-dark { color:#ca7220; font-size:13px; font-weight:800; letter-spacing:0.14em; text-transform:uppercase; margin:0 0 8px 0; }
+
+.footer {
+  position:absolute; bottom:0; left:0; width:100%; height:44px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 0 40px; font-size:12px; color: rgba(255,255,255,0.45);
+  border-top: 1px solid rgba(255,255,255,0.10);
+}
+.footer-dark {
+  position:absolute; bottom:0; left:0; width:100%; height:44px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 0 40px; font-size:12px; color: rgba(10,63,58,0.45);
+  border-top: 1px solid rgba(10,63,58,0.10);
+}
+
+table.data { width:100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+table.data th {
+  text-align:left; padding: 7px 10px; font-size:11px;
+  text-transform:uppercase; letter-spacing:0.04em;
+  color: rgba(255,255,255,0.55); border-bottom: 1px solid rgba(255,255,255,0.16);
+  white-space: nowrap; overflow:hidden;
+}
+table.data td {
+  padding: 7px 10px; color: rgba(255,255,255,0.92);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  white-space: nowrap; overflow:hidden; text-overflow: ellipsis;
+  height: 28px; line-height: 14px;
+}
+table.data tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+
+.check-row {
+  display:flex; align-items:center; gap:10px; padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.check-dot {
+  width:20px; height:20px; border-radius:999px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:900; color:#052825;
+}
+
+body { background: #052825; }
+.doc-wrap { max-width: 1180px; margin: 0 auto; }
+.hero {
+  background: linear-gradient(145deg, #0e5551 0%, #0A3F3A 55%, #052825 100%);
+  padding: 56px 56px 64px;
+  position: relative;
+}
+.hero .stripe-top { position:absolute; top:0; left:0; width:100%; height:8px;
+  background: linear-gradient(90deg, #E48328 0%, #2083B9 100%); }
+.layout { display: grid; grid-template-columns: 220px 1fr; gap: 0; background: #052825; }
+@media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+.rail {
+  position: sticky; top: 0; align-self: start;
+  max-height: 100vh; overflow-y: auto;
+  padding: 24px 14px;
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+@media (max-width: 860px) { .rail { position: static; max-height: none; border-right: none;
+  border-bottom: 1px solid rgba(255,255,255,0.08); display:flex; flex-wrap:wrap; gap:4px; } }
+.rail a {
+  display: block; padding: 7px 10px; border-radius: 8px;
+  color: rgba(255,255,255,0.6); text-decoration: none; font-size: 12.5px;
+  margin-bottom: 1px;
+}
+.rail a:hover { background: rgba(255,255,255,0.06); color: #fff; }
+.main { padding: 8px 0 80px; }
+.deck-section { padding: 40px 56px; border-bottom: 1px solid rgba(255,255,255,0.06); scroll-margin-top: 12px; }
+.deck-section:last-child { border-bottom: none; }
+@media (max-width: 700px) { .hero, .deck-section { padding-left: 20px; padding-right: 20px; } }
+.section-eyebrow { color:#ffb066; font-size:12.5px; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; margin:0 0 8px 0; }
+.section-title { color:#fff; font-size:26px; font-weight:800; margin:0 0 18px 0; letter-spacing:-0.01em; }
+.course-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+@media (max-width: 700px) { .course-grid { grid-template-columns: 1fr; } }
+table.data { table-layout: auto !important; }
+table.data td, table.data th { white-space: normal !important; }
+.doc-footer {
+  padding: 26px 56px 50px; color: rgba(255,255,255,0.35); font-size: 12px;
+  display:flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+}
+</style></head>
+<body>
+<div class="doc-wrap">
+  <div class="layout">
+    <nav class="rail"><a href="#top">Overview</a><a href="#glance">At a Glance</a><a href="#institutions">Institutions</a><a href="#sources">Websites</a><a href="#courses">Courses</a><a href="#visa">Visa & Timing</a><a href="#docs">Documents</a><a href="#caution">Counselor Notes</a></nav>
+    <div class="main"><div class="hero" id="top">
+      <div class="stripe-top"></div>
+      <div class="logo-pill"><img src="logo.png"/></div>
+      <div style="margin-top:40px; max-width:900px;">
+        <div class="eyebrow">Jan Intake &middot; September 2026 &ndash; January 2027</div>
+        <h1 class="title" style="font-size:clamp(32px,5vw,48px);">Study in Italy</h1>
+        <p class="subtitle" style="font-size:18px; margin-top:10px;">92 Italian institutions (61 public + 30 private + AFAM/ITS), the confirmed abolition of the IMAT medical entrance test, income-based public tuition from €900/year, and a fully cross-checked Pakistan visa/document pathway.</p>
+        <div style="margin-top:28px;"><div class="pill pill-blue" style="margin:0 10px 10px 0;">Schengen (Non-EU)</div><div class="pill pill-orange" style="margin:0 10px 10px 0;">92 Institutions Shown</div><div class="pill pill-green" style="margin:0 10px 10px 0;">IMAT Abolished — Open Semester</div><div class="pill pill-blue" style="margin:0 10px 10px 0;">€900–4,000 Public Tuition</div><div class="pill pill-orange" style="margin:0 10px 10px 0;">Verified Sept 2026</div></div>
+      </div>
+      <div style="margin-top:36px; color:rgba(255,255,255,0.35); font-size:12px;">
+        ACE Altius Consulting &middot; Counselor Reference &amp; Client Presentation &middot; Prepared for internal + client use
+      </div>
+    </div><section class="deck-section" id="glance">
+      <div class="section-eyebrow">Country Snapshot</div>
+      <h2 class="section-title">Italy at a Glance</h2>
+      
+<div style="display:grid; grid-template-columns: repeat(3,1fr); gap:18px; margin-top:4px;">
+  <div class="card" style="grid-column: span 3; border: 1px solid rgba(183,199,51,0.5);">
+    <div class="eyebrow" style="color:#B7C733;">Critical Update — IMAT Abolished</div>
+    <div style="color:#fff; font-size:17px; font-weight:800;">Public medical schools no longer use the IMAT entrance test</div>
+    <div style="color:rgba(255,255,255,0.7); font-size:13.5px; margin-top:6px;">Replaced by the "Open Semester" (Semestre Aperto) system — confirmed extended for 2026/27 via Ministerial Decree No. 941 (10 July 2026). Students enrol without an admission test, complete a common first semester, and progression to the next semester is decided by first-semester exam results and national ranking. 52,000 students competed for 18,889 places in 2026/27. <b>Private medical schools</b> (Humanitas, San Raffaele, UniCamillus, Cattolica) still use their own selection tests (HUMAT, UniSR Test, etc.) — IMAT abolition applies to public universities only.</div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Tuition (Public, Non-EU)</div>
+    <div style="color:#fff; font-size:19px; font-weight:800;">€900 – €4,000 / year</div>
+    <div style="color:rgba(255,255,255,0.6); font-size:14px; margin-top:6px;">Income-based (ISEE) at most public universities — genuinely one of Europe's most affordable public systems</div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Tuition (Private, Non-EU)</div>
+    <div style="color:#fff; font-size:19px; font-weight:800;">€6,000 – €25,000+ / year</div>
+    <div style="color:rgba(255,255,255,0.6); font-size:14px; margin-top:6px;">Bocconi, LUISS, Cattolica, and the private medical schools sit at the top of this range</div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Visa Financial Requirement</div>
+    <div style="color:#fff; font-size:19px; font-weight:800;">€10,179.85 / year</div>
+    <div style="color:rgba(255,255,255,0.6); font-size:14px; margin-top:6px;">≈PKR 3.2–3.3 million, confirmed for both 2026/27 and 2027/28 — bank statements now need 12 months of history (extended from 6)</div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Visa Deadline (MUR Fixed)</div>
+    <div style="color:#fff; font-size:19px; font-weight:800;">31 October 2027 (2027/28)</div>
+    <div style="color:rgba(255,255,255,0.6); font-size:14px; margin-top:6px;">2026/27 cycle: 30 November 2026 — university internal deadlines are often earlier, always check both</div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Institutions Covered</div>
+    <div style="color:#fff; font-size:19px; font-weight:800;">92 shown (18 fully profiled)</div>
+    <div style="color:rgba(255,255,255,0.6); font-size:14px; margin-top:6px;">61 state universities + 30 private universities + AFAM academies/conservatories + ITS academies exist nationally — this deck profiles the most relevant for international students</div>
+  </div>
+</div>
+
+    </section><section class="deck-section" id="institutions">
+      <div class="section-eyebrow">92 Verified Institutions</div>
+      <h2 class="section-title">Institutions Overview</h2>
+      <table class="data"><colgroup><col style="width:32%"><col style="width:16%"><col style="width:24%"><col style="width:28%"></colgroup>
+      <tr><th>Institution</th><th>City</th><th>Tuition (non-EU/year)</th><th>Application Deadline</th></tr>
+      <tr><td style="font-weight:600;">Accademia Italiana</td>
+          <td>Florence</td><td>€6,000–25,000+/year (AFAM)</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Accademia Nazionale di Arte Drammatica…</td>
+          <td></td><td>€900–4,000/year public /…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Accademia Nazionale di Danza</td>
+          <td></td><td>€900–4,000/year public /…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Accademia di Belle Arti di Brera</td>
+          <td></td><td>€900–4,000/year public /…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Accademia di Belle Arti di Roma</td>
+          <td></td><td>€900–4,000/year public /…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Bocconi University</td>
+          <td>Milan</td><td>€17,000 (BSc) / €18,550 (…</td>
+          <td>30 Oct 2026 – 29 Ap…</td></tr><tr><td style="font-weight:600;">Ca' Foscari University of Venice</td>
+          <td>Venice</td><td>€700 (Cat. 1) / €1,300 (C…</td>
+          <td>30 September 2026 (…</td></tr><tr><td style="font-weight:600;">Conservatorio di Milano</td>
+          <td></td><td>€900–4,000/year public /…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Conservatorio di Santa Cecilia</td>
+          <td></td><td>€900–4,000/year public /…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Federico II University of Naples</td>
+          <td>Naples</td><td>€900–4,000/year (income-b…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Humanitas University</td>
+          <td>Milan</td><td>€23,000/year (Medicine)</td>
+          <td>See admissions page…</td></tr><tr><td style="font-weight:600;">IED (Istituto Europeo di Design)</td>
+          <td>Milan</td><td>€6,000–25,000+/year (AFAM)</td>
+          <td>Rolling admissions</td></tr><tr><td style="font-weight:600;">IULM</td>
+          <td>Milan</td><td>€6,000–25,000+/year (priv…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">John Cabot University</td>
+          <td>Rome</td><td>€6,000–25,000+/year (priv…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">LIUC – Università Carlo Cattaneo</td>
+          <td>Castellanza</td><td>€6,000–25,000+/year (priv…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">LUISS Guido Carli</td>
+          <td>Rome</td><td>€14,000 (UG) / €17,000 (P…</td>
+          <td>10 Feb 2027 (UG) /…</td></tr><tr><td style="font-weight:600;">LUMSA</td>
+          <td>Rome</td><td>€6,000–25,000+/year (priv…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">NABA (Nuova Accademia di Belle Arti)</td>
+          <td>Milan</td><td>€6,000–25,000+/year (AFAM)</td>
+          <td>11 September 2026 (…</td></tr><tr><td style="font-weight:600;">Politecnico di Milano</td>
+          <td>Milan</td><td>€900–4,000/year (income-b…</td>
+          <td>18 May – 18 June 20…</td></tr><tr><td style="font-weight:600;">Politecnico di Torino</td>
+          <td>Turin</td><td>€900–4,000/year (income-b…</td>
+          <td>15 March / 15 April…</td></tr><tr><td style="font-weight:600;">RUFA (Rome University of Fine Arts)</td>
+          <td>Rome</td><td>€6,000–25,000+/year (AFAM)</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Roma Tor Vergata</td>
+          <td>Rome</td><td>€900–4,000/year (income-b…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Roma Tre University</td>
+          <td>Rome</td><td>€900–4,000/year (income-b…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Saint Louis College of Music</td>
+          <td>Rome</td><td>€6,000–25,000+/year (priv…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">San Raffaele University (UniSR)</td>
+          <td>Milan</td><td>€25,000/year (Medicine)</td>
+          <td>See admissions page…</td></tr><tr><td style="font-weight:600;">Sapienza University of Rome</td>
+          <td>Rome</td><td>€900–4,000/year (income-b…</td>
+          <td>29 April 2027 (visa…</td></tr><tr><td style="font-weight:600;">Sapienza Università di Roma</td>
+          <td>Rome</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Scuola Normale Superiore di Pisa</td>
+          <td>Pisa</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Scuola Superiore Sant'Anna</td>
+          <td>Pisa</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">The American University of Rome</td>
+          <td>Rome</td><td>€6,000–25,000+/year (priv…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">UniCamillus</td>
+          <td>Rome</td><td>€6,000–25,000+/year (own…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">University of Bari Aldo Moro</td>
+          <td>Bari</td><td>€900–4,000/year (income-b…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">University of Bologna</td>
+          <td>Bologna</td><td>€500–600 + €157.04 (low-i…</td>
+          <td>21 November 2026 (m…</td></tr><tr><td style="font-weight:600;">University of Florence</td>
+          <td>Florence</td><td>€900–4,000/year (income-b…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">University of Genoa</td>
+          <td>Genoa</td><td>€900–4,000/year (income-b…</td>
+          <td>5 November 2026 (31…</td></tr><tr><td style="font-weight:600;">University of Milan (La Statale)</td>
+          <td>Milan</td><td>€2,750–2,950/year</td>
+          <td>30 September 2026 (…</td></tr><tr><td style="font-weight:600;">University of Padua</td>
+          <td>Padua</td><td>€2,739–2,950/year</td>
+          <td>15 November 2026 (C…</td></tr><tr><td style="font-weight:600;">University of Pavia</td>
+          <td>Pavia</td><td>Group A €2,750 / Group B…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">University of Siena</td>
+          <td>Siena</td><td>€900–4,000/year (income-b…</td>
+          <td>7 September 2026 (D…</td></tr><tr><td style="font-weight:600;">University of Trento</td>
+          <td>Trento</td><td>€6,500–10,000/year (some…</td>
+          <td>11 May 2026 (for 20…</td></tr><tr><td style="font-weight:600;">University of Turin</td>
+          <td>Turin</td><td>Max €2,800/year (income-b…</td>
+          <td>January 2027 (TBC)</td></tr><tr><td style="font-weight:600;">Università Ca' Foscari Venezia</td>
+          <td>Venice</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università Campus Bio-Medico</td>
+          <td>Rome</td><td>€6,000–25,000+/year (priv…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università Cattolica del Sacro Cuore</td>
+          <td>Milan/Rome</td><td>€8,800 (UG) / €9,350 (PG)…</td>
+          <td>5 May 2027 (non-EU…</td></tr><tr><td style="font-weight:600;">Università IUAV di Venezia</td>
+          <td>Venice</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università Telematica Pegaso</td>
+          <td>Naples</td><td>€6,000–25,000+/year (priv…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi Magna Graecia</td>
+          <td>Catanzaro</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi Mediterranea</td>
+          <td>Reggio Calabria</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi Roma Foro Italico</td>
+          <td>Rome</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi Roma Tre</td>
+          <td>Rome</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi del Molise</td>
+          <td>Campobasso</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi del Salento</td>
+          <td>Lecce</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi del Sannio</td>
+          <td>Benevento</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi dell'Insubria</td>
+          <td>Varese</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi della Basilicata</td>
+          <td>Potenza</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi della Calabria</td>
+          <td>Rende</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi della Campania V…</td>
+          <td>Caserta</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi della Tuscia</td>
+          <td>Viterbo</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Bergamo</td>
+          <td>Bergamo</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Brescia</td>
+          <td>Brescia</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Cagliari</td>
+          <td>Cagliari</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Camerino</td>
+          <td>Camerino</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Cassino</td>
+          <td>Cassino</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Catania</td>
+          <td>Catania</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Enna Kore</td>
+          <td>Enna</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Ferrara</td>
+          <td>Ferrara</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Firenze</td>
+          <td>Florence</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Foggia</td>
+          <td>Foggia</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Genova</td>
+          <td>Genoa</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Macerata</td>
+          <td>Macerata</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Messina</td>
+          <td>Messina</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Milano</td>
+          <td>Milan</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Milano-Bicocca</td>
+          <td>Milan</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Modena e Regg…</td>
+          <td>Modena</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Napoli Federi…</td>
+          <td>Naples</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Napoli L'Orie…</td>
+          <td>Naples</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Napoli Parthe…</td>
+          <td>Naples</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Napoli l'Orie…</td>
+          <td>Naples</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Padova</td>
+          <td>Padua</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Palermo</td>
+          <td>Palermo</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Parma</td>
+          <td>Parma</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Salerno</td>
+          <td>Salerno</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Sassari</td>
+          <td>Sassari</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Siena</td>
+          <td>Siena</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Teramo</td>
+          <td>Teramo</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Trieste</td>
+          <td>Trieste</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Udine</td>
+          <td>Udine</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Urbino Carlo…</td>
+          <td>Urbino</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università degli Studi di Verona</td>
+          <td>Verona</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università per Stranieri di Perugia</td>
+          <td>Perugia</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Università per Stranieri di Siena</td>
+          <td>Siena</td><td>€900–4,000/year (public r…</td>
+          <td>See admissions page</td></tr><tr><td style="font-weight:600;">Vita-Salute San Raffaele</td>
+          <td>Milan</td><td>€6,000–25,000+/year (priv…</td>
+          <td>See admissions page</td></tr></table>
+      <div style="color:rgba(255,255,255,0.45); font-size:12px; margin-top:10px;">74 institutions are shown for tuition-range reference only (no individually confirmed course list in the source research) — 18 institutions have full profiled course data on the following pages.</div>
+    </section><section class="deck-section" id="sources">
+      <div class="section-eyebrow">Official Sources</div>
+      <h2 class="section-title">Websites & Admissions Portals</h2>
+      <table class="data"><colgroup><col style="width:26%"><col style="width:37%"><col style="width:37%"></colgroup>
+      <tr><th>Institution</th><th>Official Website</th><th>International / Admissions Portal</th></tr>
+      <tr><td style="font-weight:600;">Accademia Italiana</td>
+          <td style="color:#5fc1f0;">https://www.accademiaitaliana.com</td>
+          <td style="color:#5fc1f0;">https://www.accademiaitaliana.com/en</td></tr><tr><td style="font-weight:600;">Accademia Nazionale di Arte Drammat…</td>
+          <td style="color:#5fc1f0;">https://www.silviodamico.it</td>
+          <td style="color:#5fc1f0;">https://www.silviodamico.it</td></tr><tr><td style="font-weight:600;">Accademia Nazionale di Danza</td>
+          <td style="color:#5fc1f0;">https://www.accademianazionaledanza.it</td>
+          <td style="color:#5fc1f0;">https://www.accademianazionaledanza.it</td></tr><tr><td style="font-weight:600;">Accademia di Belle Arti di Brera</td>
+          <td style="color:#5fc1f0;">https://www.accademiadibrera.milano.it</td>
+          <td style="color:#5fc1f0;">https://www.accademiadibrera.milano.it</td></tr><tr><td style="font-weight:600;">Accademia di Belle Arti di Roma</td>
+          <td style="color:#5fc1f0;">https://www.accademiabelleartiroma.it</td>
+          <td style="color:#5fc1f0;">https://www.accademiabelleartiroma.it</td></tr><tr><td style="font-weight:600;">Bocconi University</td>
+          <td style="color:#5fc1f0;">https://www.unibocconi.eu</td>
+          <td style="color:#5fc1f0;">https://www.unibocconi.eu/admissions</td></tr><tr><td style="font-weight:600;">Ca' Foscari University of Venice</td>
+          <td style="color:#5fc1f0;">https://www.unive.it</td>
+          <td style="color:#5fc1f0;">https://www.unive.it/en/study/admission</td></tr><tr><td style="font-weight:600;">Conservatorio di Milano</td>
+          <td style="color:#5fc1f0;">https://www.consmilano.it</td>
+          <td style="color:#5fc1f0;">https://www.consmilano.it</td></tr><tr><td style="font-weight:600;">Conservatorio di Santa Cecilia</td>
+          <td style="color:#5fc1f0;">https://www.conservatoriosantacecilia.it</td>
+          <td style="color:#5fc1f0;">https://www.conservatoriosantacecilia.it</td></tr><tr><td style="font-weight:600;">Federico II University of Naples</td>
+          <td style="color:#5fc1f0;">https://www.unina.it</td>
+          <td style="color:#5fc1f0;">https://www.unina.it/en/admission</td></tr><tr><td style="font-weight:600;">Humanitas University</td>
+          <td style="color:#5fc1f0;">https://www.hunimed.eu</td>
+          <td style="color:#5fc1f0;">https://www.hunimed.eu/admissions</td></tr><tr><td style="font-weight:600;">IED (Istituto Europeo di Design)</td>
+          <td style="color:#5fc1f0;">https://www.ied.edu</td>
+          <td style="color:#5fc1f0;">https://www.ied.edu/admissions</td></tr><tr><td style="font-weight:600;">IULM</td>
+          <td style="color:#5fc1f0;">https://www.iulm.it/en</td>
+          <td style="color:#5fc1f0;">https://www.iulm.it/en/admission</td></tr><tr><td style="font-weight:600;">John Cabot University</td>
+          <td style="color:#5fc1f0;">https://www.johncabot.edu</td>
+          <td style="color:#5fc1f0;">https://www.johncabot.edu/admissions</td></tr><tr><td style="font-weight:600;">LIUC – Università Carlo Cattaneo</td>
+          <td style="color:#5fc1f0;">https://www.liuc.it/en</td>
+          <td style="color:#5fc1f0;">https://www.liuc.it/en/admission</td></tr><tr><td style="font-weight:600;">LUISS Guido Carli</td>
+          <td style="color:#5fc1f0;">https://www.luiss.edu</td>
+          <td style="color:#5fc1f0;">https://www.luiss.it/en/admissions</td></tr><tr><td style="font-weight:600;">LUMSA</td>
+          <td style="color:#5fc1f0;">https://www.lumsa.it/en</td>
+          <td style="color:#5fc1f0;">https://www.lumsa.it/en/admission</td></tr><tr><td style="font-weight:600;">NABA (Nuova Accademia di Belle Arti)</td>
+          <td style="color:#5fc1f0;">https://www.naba.it</td>
+          <td style="color:#5fc1f0;">https://www.naba.it/en</td></tr><tr><td style="font-weight:600;">Politecnico di Milano</td>
+          <td style="color:#5fc1f0;">https://www.polimi.it</td>
+          <td style="color:#5fc1f0;">https://www.polimi.it/en/prospective-students</td></tr><tr><td style="font-weight:600;">Politecnico di Torino</td>
+          <td style="color:#5fc1f0;">https://www.polito.it</td>
+          <td style="color:#5fc1f0;">https://www.polito.it/en/education/admission</td></tr><tr><td style="font-weight:600;">RUFA (Rome University of Fine Arts)</td>
+          <td style="color:#5fc1f0;">https://www.unirufa.it</td>
+          <td style="color:#5fc1f0;">https://www.unirufa.it/en/</td></tr><tr><td style="font-weight:600;">Roma Tor Vergata</td>
+          <td style="color:#5fc1f0;">https://www.uniroma2.it</td>
+          <td style="color:#5fc1f0;">https://www.uniroma2.it</td></tr><tr><td style="font-weight:600;">Roma Tre University</td>
+          <td style="color:#5fc1f0;">https://www.uniroma3.it</td>
+          <td style="color:#5fc1f0;">https://www.uniroma3.it</td></tr><tr><td style="font-weight:600;">Saint Louis College of Music</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">San Raffaele University (UniSR)</td>
+          <td style="color:#5fc1f0;">https://www.unisr.it</td>
+          <td style="color:#5fc1f0;">https://www.unisr.it/en/offerta-formativa/filosofia/international-students</td></tr><tr><td style="font-weight:600;">Sapienza University of Rome</td>
+          <td style="color:#5fc1f0;">https://www.uniroma1.it</td>
+          <td style="color:#5fc1f0;">https://www.uniroma1.it/en/admissions</td></tr><tr><td style="font-weight:600;">Sapienza Università di Roma</td>
+          <td style="color:#5fc1f0;">https://www.uniroma1.it/en</td>
+          <td style="color:#5fc1f0;">https://www.uniroma1.it/en/admissions</td></tr><tr><td style="font-weight:600;">Scuola Normale Superiore di Pisa</td>
+          <td style="color:#5fc1f0;">https://www.sns.it/en</td>
+          <td style="color:#5fc1f0;">https://www.sns.it/en/admission</td></tr><tr><td style="font-weight:600;">Scuola Superiore Sant'Anna</td>
+          <td style="color:#5fc1f0;">https://www.santannapisa.it/en</td>
+          <td style="color:#5fc1f0;">https://www.santannapisa.it/en/admission</td></tr><tr><td style="font-weight:600;">The American University of Rome</td>
+          <td style="color:#5fc1f0;">https://www.aur.edu</td>
+          <td style="color:#5fc1f0;">https://www.aur.edu/admissions</td></tr><tr><td style="font-weight:600;">UniCamillus</td>
+          <td style="color:#5fc1f0;">https://www.unicamillus.org</td>
+          <td style="color:#5fc1f0;">https://www.unicamillus.org/en/</td></tr><tr><td style="font-weight:600;">University of Bari Aldo Moro</td>
+          <td style="color:#5fc1f0;">https://www.uniba.it</td>
+          <td style="color:#5fc1f0;">https://www.uniba.it</td></tr><tr><td style="font-weight:600;">University of Bologna</td>
+          <td style="color:#5fc1f0;">https://www.unibo.it</td>
+          <td style="color:#5fc1f0;">https://www.unibo.it/en/study/degree-programmes</td></tr><tr><td style="font-weight:600;">University of Florence</td>
+          <td style="color:#5fc1f0;">https://www.unifi.it</td>
+          <td style="color:#5fc1f0;">https://www.unifi.it</td></tr><tr><td style="font-weight:600;">University of Genoa</td>
+          <td style="color:#5fc1f0;">https://www.unige.it</td>
+          <td style="color:#5fc1f0;">https://www.unige.it</td></tr><tr><td style="font-weight:600;">University of Milan (La Statale)</td>
+          <td style="color:#5fc1f0;">https://www.unimi.it</td>
+          <td style="color:#5fc1f0;">https://www.unimi.it</td></tr><tr><td style="font-weight:600;">University of Padua</td>
+          <td style="color:#5fc1f0;">https://www.unipd.it</td>
+          <td style="color:#5fc1f0;">https://www.unipd.it</td></tr><tr><td style="font-weight:600;">University of Pavia</td>
+          <td style="color:#5fc1f0;">https://www.unipv.it</td>
+          <td style="color:#5fc1f0;">https://www.unipv.eu/en/study/admission</td></tr><tr><td style="font-weight:600;">University of Siena</td>
+          <td style="color:#5fc1f0;">https://www.unisi.it</td>
+          <td style="color:#5fc1f0;">https://www.unisi.it/en/education/admission</td></tr><tr><td style="font-weight:600;">University of Trento</td>
+          <td style="color:#5fc1f0;">https://www.unitn.it</td>
+          <td style="color:#5fc1f0;">https://www.unitn.it/en/admission</td></tr><tr><td style="font-weight:600;">University of Turin</td>
+          <td style="color:#5fc1f0;">https://www.unito.it</td>
+          <td style="color:#5fc1f0;">https://www.unito.it</td></tr><tr><td style="font-weight:600;">Università Ca' Foscari Venezia</td>
+          <td style="color:#5fc1f0;">https://www.unive.it/en</td>
+          <td style="color:#5fc1f0;">https://www.unive.it/en/study/admission</td></tr><tr><td style="font-weight:600;">Università Campus Bio-Medico</td>
+          <td style="color:#5fc1f0;">https://www.unicampus.it/en</td>
+          <td style="color:#5fc1f0;">https://www.unicampus.it/en/admission</td></tr><tr><td style="font-weight:600;">Università Cattolica del Sacro Cuore</td>
+          <td style="color:#5fc1f0;">https://www.unicatt.it</td>
+          <td style="color:#5fc1f0;">https://www.unicatt.it/en/admission</td></tr><tr><td style="font-weight:600;">Università IUAV di Venezia</td>
+          <td style="color:#5fc1f0;">https://www.iuav.it/en</td>
+          <td style="color:#5fc1f0;">https://www.iuav.it/en/study/admission</td></tr><tr><td style="font-weight:600;">Università Telematica Pegaso</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi Magna Graecia</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi Mediterranea</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi Roma Foro It…</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi Roma Tre</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi del Molise</td>
+          <td style="color:#5fc1f0;">https://www.unicatt.it/en</td>
+          <td style="color:#5fc1f0;">https://www.unicatt.it/en/admission</td></tr><tr><td style="font-weight:600;">Università degli Studi del Salento</td>
+          <td style="color:#5fc1f0;">https://www.unicatt.it/en</td>
+          <td style="color:#5fc1f0;">https://www.unicatt.it/en/admission</td></tr><tr><td style="font-weight:600;">Università degli Studi del Sannio</td>
+          <td style="color:#5fc1f0;">https://www.unicatt.it/en</td>
+          <td style="color:#5fc1f0;">https://www.unicatt.it/en/admission</td></tr><tr><td style="font-weight:600;">Università degli Studi dell'Insubria</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi della Basili…</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi della Calabr…</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi della Campan…</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi della Tuscia</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi di Bergamo</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi di Brescia</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi di Cagliari</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi di Camerino</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi di Cassino</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi di Catania</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi di Enna Kore</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi di Ferrara</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi di Firenze</td>
+          <td style="color:#5fc1f0;">https://www.unifi.it/en</td>
+          <td style="color:#5fc1f0;">https://www.unifi.it/en/admission</td></tr><tr><td style="font-weight:600;">Università degli Studi di Foggia</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi di Genova</td>
+          <td style="color:#5fc1f0;">https://unige.it/en</td>
+          <td style="color:#5fc1f0;">https://unige.it/en/education/admission</td></tr><tr><td style="font-weight:600;">Università degli Studi di Macerata</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi di Messina</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi di Milano</td>
+          <td style="color:#5fc1f0;">https://www.unimi.it/en</td>
+          <td style="color:#5fc1f0;">https://www.unimi.it/en/education/admission</td></tr><tr><td style="font-weight:600;">Università degli Studi di Milano-Bi…</td>
+          <td style="color:#5fc1f0;">https://www.unimib.it/en</td>
+          <td style="color:#5fc1f0;">https://www.unimib.it/en/study/admission</td></tr><tr><td style="font-weight:600;">Università degli Studi di Modena e…</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi di Napoli Fe…</td>
+          <td style="color:#5fc1f0;">https://www.unina.it/en</td>
+          <td style="color:#5fc1f0;">https://www.unina.it/en/admission</td></tr><tr><td style="font-weight:600;">Università degli Studi di Napoli L'…</td>
+          <td style="color:#5fc1f0;">https://www.unina.it/en</td>
+          <td style="color:#5fc1f0;">https://www.unina.it/en/admission</td></tr><tr><td style="font-weight:600;">Università degli Studi di Napoli Pa…</td>
+          <td style="color:#5fc1f0;">https://www.unina.it/en</td>
+          <td style="color:#5fc1f0;">https://www.unina.it/en/admission</td></tr><tr><td style="font-weight:600;">Università degli Studi di Napoli l'…</td>
+          <td style="color:#5fc1f0;">https://www.unina.it/en</td>
+          <td style="color:#5fc1f0;">https://www.unina.it/en/admission</td></tr><tr><td style="font-weight:600;">Università degli Studi di Padova</td>
+          <td style="color:#5fc1f0;">https://www.unipd.it/en</td>
+          <td style="color:#5fc1f0;">https://www.unipd.it/en/how-apply</td></tr><tr><td style="font-weight:600;">Università degli Studi di Palermo</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi di Parma</td>
+          <td style="color:#5fc1f0;">https://www.unipr.it/en</td>
+          <td style="color:#5fc1f0;">https://www.unipr.it/en/admission</td></tr><tr><td style="font-weight:600;">Università degli Studi di Salerno</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi di Sassari</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi di Siena</td>
+          <td style="color:#5fc1f0;">https://www.unisi.it/en</td>
+          <td style="color:#5fc1f0;">https://www.unisi.it/en/education/admission</td></tr><tr><td style="font-weight:600;">Università degli Studi di Teramo</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi di Trieste</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università degli Studi di Udine</td>
+          <td style="color:#5fc1f0;">https://www.uniud.it/en</td>
+          <td style="color:#5fc1f0;">https://www.uniud.it/en/admission</td></tr><tr><td style="font-weight:600;">Università degli Studi di Urbino Ca…</td>
+          <td style="color:#5fc1f0;">https://www.liuc.it/en</td>
+          <td style="color:#5fc1f0;">https://www.liuc.it/en/admission</td></tr><tr><td style="font-weight:600;">Università degli Studi di Verona</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università per Stranieri di Perugia</td>
+          <td style="color:#5fc1f0;">—</td>
+          <td style="color:#5fc1f0;">—</td></tr><tr><td style="font-weight:600;">Università per Stranieri di Siena</td>
+          <td style="color:#5fc1f0;">https://www.unisi.it/en</td>
+          <td style="color:#5fc1f0;">https://www.unisi.it/en/education/admission</td></tr><tr><td style="font-weight:600;">Vita-Salute San Raffaele</td>
+          <td style="color:#5fc1f0;">https://www.unisr.it/en</td>
+          <td style="color:#5fc1f0;">https://www.unisr.it/en/admission</td></tr></table>
+    </section><section class="deck-section" id="courses">
+      <div class="section-eyebrow">English-Taught Programmes</div>
+      <h2 class="section-title">Available Courses (18 institutions)</h2>
+      <div class="course-grid"><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">Bocconi University</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.unibocconi.eu</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (10)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Management (L-18) <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Management for the Arts and Cultures (L-18) <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Finance (L-33) <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics (L-33) <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Management and Computer Science (L-33) <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mathematical and Computing Sciences for Artificial Intelligen… <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Politics and Government (L-36) <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">World Bachelor in Business (L-18) <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Global Law (L-14 R) <span style="color:rgba(255,255,255,0.4);">&middot; 5 years / 300 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Politics and Government – Double degree with HEC <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div></div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (15)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Management <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Marketing Management <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Finance <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Accounting and Financial Management (AFM) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics and Management in Arts, Culture, Media and Entertai… <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics and Management of Government and International Orga… <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics and Social Sciences <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Data Science and Business Analytics <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Cyber Risk Strategy and Governance <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Politics and Policy Analysis <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Transformative Sustainability <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">AI, Data Science, and Business <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Master in Corporate Finance (MCF) — Specialised <span style="color:rgba(255,255,255,0.4);">&middot; 1 year / 60 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Master in Sustainability Management (MSM) — Specialised <span style="color:rgba(255,255,255,0.4);">&middot; 1 year / 60 ECTS</span></div><div style="font-size:11px; color:rgba(255,255,255,0.35); padding-top:4px;">+ 1 more in source data</div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">Ca' Foscari University of Venice</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.unive.it</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (2)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics and Business <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Italian and Mediterranean Studies (NEW 2026/27) <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div></div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (11)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Global Accounting and Finance <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Management <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Tourism Management and Sustainability <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Innovation and Management for Culture and Creativity <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Data Analytics for Business and Society <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics, Finance and Sustainability <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Global Development and Entrepreneurship <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Global Economics and Social Affairs <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Quantum Machine Learning <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Environmental Engineering for the Green Transition (NEW 2026/… <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computer Science (partnership with Masarykova Univerzita) <span style="color:rgba(255,255,255,0.4);">&middot; 3 years</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">Federico II University of Naples</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.unina.it</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (1)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Electrical Engineering and Information Technology (EEIT) <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div></div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (4)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics and Finance <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Medical Biotechnology (Advanced Technologies curriculum) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Veterinary Medicine (NEW 2026/27, single-cycle) <span style="color:rgba(255,255,255,0.4);">&middot; 5 years / 300 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Nursing and Midwifery Sciences – Midwifery Track (NEW 2026/27) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">Politecnico di Milano</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.polimi.it</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (4)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Civil Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Engineering Science (NEW Sept 2026) <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Industrial Engineering (NEW Sept 2026) <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Process Engineering (NEW Sept 2026) <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div></div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught master's programmes listed in source data.</div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">Politecnico di Torino</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.polito.it</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (7)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Architecture Construction City <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Automotive Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Civil and Environmental Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computer Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Electronic and Communications Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mechanical Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Foodtech for Ecological Transition (NEW 2026, joint with Univ… <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div></div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (17)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">AgriTech Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Architecture Construction and City <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Automotive Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Civil Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Communications Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computer Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Cybersecurity <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Energy and Nuclear Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Environmental and Land Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Management Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Materials Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mechanical Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Nanotechnologies for ICTs <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Quantum Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:11px; color:rgba(255,255,255,0.35); padding-top:4px;">+ 3 more in source data</div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">Roma Tor Vergata</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uniroma2.it</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (2)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Global Governance <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Innovation Tourism for Made in Italy <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div></div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (3)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics (LM-56) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Business Administration <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Technology and New Frontier Management <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">Roma Tre University</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uniroma3.it</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (1)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Science – Architecture <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div></div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (7)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Studies (MAIS) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Restoration (LM-4 R) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Business Administration (LM-77 R) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics and Management (LM-77 R) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Financial Services Strategies <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Strategic Management in Public Sector <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Circular Economy and Sustainability Management <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">Sapienza University of Rome</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.uniroma1.it</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (10)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">BSc Applied Computer Science and Artificial Intelligence <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">BSc Bioinformatics <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">BSc Business Sciences <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">BSc Economics and Finance <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">BA Classics <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">BA Global Humanities <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">BSc Molecular Biology, Medicinal Chemistry and Computer Scien… <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">BSc Sustainable Building Engineering (Rieti campus) <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Medicine and Surgery <span style="color:rgba(255,255,255,0.4);">&middot; 6 years / 360 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Dentistry and Dental Prosthodontics <span style="color:rgba(255,255,255,0.4);">&middot; 6 years / 360 ECTS</span></div></div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (46)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Applied Dynamic and Clinical Psychology <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Astrophysics and Cosmology <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Atmospheric Science and Technology for Meteorology & Clim… <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Architecture – Urban Regeneration <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Architecture (Conservation) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Artificial Intelligence and Robotics <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Biochemistry <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Business Management <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Chemical Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Cognitive Forensic Sciences <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Cognitive Neuroscience <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Computer Science <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MSc Control Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">MA Cultural Heritage in the Near and Middle East, and in Afri… <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:11px; color:rgba(255,255,255,0.35); padding-top:4px;">+ 32 more in source data</div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Bologna</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.unibo.it</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (8)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Biology of Human and Environmental Health <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Business and Economics <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Building Construction Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics of Tourism and the Cities <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Financial and Business Management <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Hospitality Management <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Management and Economics <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Veterinary Medicine (first fully English-taught in Italy) <span style="color:rgba(255,255,255,0.4);">&middot; 5 years / 300 ECTS</span></div></div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught master's programmes listed in source data.</div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Florence</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.unifi.it</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (1)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Sustainable Business for Societal Challenges <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div></div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (10)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Mechanical Engineering for Sustainability <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Management Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Geoengineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Advanced Molecular Sciences <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Design of Sustainable Tourism Systems <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Tropical and Subtropical Agriculture <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics and Development <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Finance and Risk Management <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Software: Science and Technology (with Scuola IMT Lucca) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Medicine and Surgery (NEW 2026/27, single-cycle) <span style="color:rgba(255,255,255,0.4);">&middot; 6 years / 360 ECTS</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Genoa</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.unige.it</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (1)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Maritime Science and Technology <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div></div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (10)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics and Data Science (EDS) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Management for Energy and Environmental Transition (MEET) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Robotics Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Naval Architecture and Marine Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Environmental Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Safety Engineering for Transport Logistics and Production <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Yacht Design <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Marine Biology and Ecology <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Vessel and Yacht Design <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Maritime and Port Management <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Milan (La Statale)</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.unimi.it</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (7)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Ancient Civilisations for the Contemporary World <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Artificial Intelligence <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics: Behaviour, Data and Policy <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Politics, Law and Economics (IPLE) <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Communication and Society (partly English, double degree with… <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Viticulture and Enology (partly English, double degree with G… <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Exercise, Sport and Health Sciences <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div></div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught master's programmes listed in source data.</div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Padua</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.unipd.it</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (9)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Animal Care <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Psychological Science <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Techniques and Methods in Psychological Science <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Information Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Italian Medieval and Renaissance Studies <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Biology of Human and Environmental Health <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Earth and Climate Dynamics <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics, Governance and Decision-Making <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Philosophy, Politics and Economics <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div></div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (39)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Environmental Sciences for the Ecological Transition <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Environmental Sustainability and Education <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">European and Global Studies <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Evolutionary Biology <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Aerospace Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Chemical and Process Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computer Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computer Science <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Cybersecurity <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Control Systems Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Data Science <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Electrical Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Electronic Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Energy Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:11px; color:rgba(255,255,255,0.35); padding-top:4px;">+ 25 more in source data</div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Pavia</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.unipv.it</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (1)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Harvey Medicine and Surgery (first medical course in Italy ta… <span style="color:rgba(255,255,255,0.4);">&middot; 6 years / 360 ECTS</span></div></div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (6)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Bio and Nanomaterials (Chemistry curriculum — NEW 2026/27) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computational Engineering Modeling and Simulation (CEMS) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computer Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Finance <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Business and Entrepreneurship (MIBE) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">World Politics and International Relations (WPIR) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Siena</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.unisi.it</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (5)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Biotech Engineering for Health <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics and Management (Banking and Finance curriculum) <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics and Management (Business and Management curriculum) <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics and Management (Economics and Social Sciences curri… <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Dentistry and Dental Prosthodontics <span style="color:rgba(255,255,255,0.4);">&middot; 6 years / 360 ECTS</span></div></div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (16)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Applied Mathematics (Mathematical Methodologies, Mathematical… <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Artificial Intelligence and Automation Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Biodiversity, Conservation and Environmental Quality <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Biotechnologies of Human Reproduction <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Chemistry <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Electronics and Communications Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Engineering Management <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Finance <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Genetic Counsellors <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Accounting and Management <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Studies – European Studies <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Language and Mind: Linguistics and Cognitive Studies <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Medical Biotechnologies <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:11px; color:rgba(255,255,255,0.35); padding-top:4px;">+ 2 more in source data</div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Trento</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.unitn.it</div>
+      <div style="color:rgba(255,255,255,0.4); font-size:12.5px; margin-top:4px;">No English-taught bachelor's programmes listed in source data.</div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (22)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Agrifood Innovation Management <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Artificial Intelligence Systems <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Bioengineering for Personalized Medicine <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Biology <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Cellular and Molecular Biotechnology <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Cognitive Science <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Computer Science <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Data Science <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics (MEC) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Energy Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Environmental Meteorology <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">European and International Studies (MEIS) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Human-Computer Interaction (MHCI) <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Information Engineering <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:11px; color:rgba(255,255,255,0.35); padding-top:4px;">+ 8 more in source data</div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">University of Turin</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.unito.it</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (4)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Business & Management <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Global Law and Transnational Legal Studies <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics and Finance with Data Science <span style="color:rgba(255,255,255,0.4);">&middot; 3 years / 180 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Medicine and Surgery <span style="color:rgba(255,255,255,0.4);">&middot; 6 years / 360 ECTS</span></div></div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (20)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Area and Global Studies for International Cooperation <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Artificial Intelligence and High Performance Computing Techno… <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Artificial Intelligence for Biomedicine and Healthcare <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Biotechnological and Chemical Sciences in Diagnostics <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Biotechnology for Neuroscience <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Business Administration <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Cellular and Molecular Biology <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Cultural Heritage and Creativity for Tourism and Territorial… <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Digital Skills for Sustainable Societal Transition <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics of Innovation for Sustainable Development <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">English and American Studies <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">European Legal Studies <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Food Science and Technology <span style="color:rgba(255,255,255,0.4);">&middot; 2 years / 120 ECTS</span></div><div style="font-size:11px; color:rgba(255,255,255,0.35); padding-top:4px;">+ 6 more in source data</div></div>
+    </div>
+    </div><div>
+    <div class="card" style="height:100%;">
+      <div style="color:#fff; font-size:16px; font-weight:800;">Università Cattolica del Sacro Cuore</div>
+      <div style="font-size:11.5px; color:#5fc1f0; margin-top:2px;">https://www.unicatt.it</div>
+      <div class="pill pill-blue" style="margin-top:8px;">Bachelor's Programmes (11)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Business and Finance <span style="color:rgba(255,255,255,0.4);">&middot; Brescia</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Communication Management <span style="color:rgba(255,255,255,0.4);">&middot; Milan</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Criminology <span style="color:rgba(255,255,255,0.4);">&middot; Milan</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Economics and Management <span style="color:rgba(255,255,255,0.4);">&middot; Milan</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Finance <span style="color:rgba(255,255,255,0.4);">&middot; Milan</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Business Management <span style="color:rgba(255,255,255,0.4);">&middot; Piacenza</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">International Relations and Global Affairs <span style="color:rgba(255,255,255,0.4);">&middot; Milan</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Psychology <span style="color:rgba(255,255,255,0.4);">&middot; Milan</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Food Production Management <span style="color:rgba(255,255,255,0.4);">&middot; Piacenza</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Medicine and Surgery (single-cycle, 6 years) <span style="color:rgba(255,255,255,0.4);">&middot; Rome</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Medicine and Surgery (single-cycle, 6 years) <span style="color:rgba(255,255,255,0.4);">&middot; Bolzano</span></div></div>
+      <div class="pill pill-green" style="margin-top:8px;">Master's Programmes (4)</div><div style="margin-top:4px;"><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Corporate Communication & Branding <span style="color:rgba(255,255,255,0.4);">&middot; €12,500</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Advanced Public and Cultural Diplomacy for International Rela… <span style="color:rgba(255,255,255,0.4);">&middot; €10,000</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Advanced Global Studies <span style="color:rgba(255,255,255,0.4);">&middot; €10,000</span></div><div style="font-size:12.5px; color:rgba(255,255,255,0.88); padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.06);">Various 2-year MSc programmes <span style="color:rgba(255,255,255,0.4);">&middot; €9,350/year</span></div></div>
+    </div>
+    </div></div>
+    </section><section class="deck-section" id="visa">
+      <div class="section-eyebrow">Visa & Timing</div>
+      <h2 class="section-title">Visa Process & Application Timing</h2>
+      
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+  <div class="card">
+    <div class="eyebrow">Visa Document Checklist (Embassy Islamabad)</div>
+    <div style="color:#fff; font-size:13px; line-height:1.75;">
+      &bull; National Visa (D) form, ICAO photo, valid passport (3+ months beyond visa)<br/>
+      &bull; Health insurance — minimum &euro;30,000 Schengen coverage<br/>
+      &bull; Pre-enrolment via the <b>Universitaly portal</b>, validated by the university<br/>
+      &bull; <b>CIMEA Certificate</b> (Comparability + Verification) OR Declaration of Value<br/>
+      &bull; Educational documents — apostilled + translated into Italian<br/>
+      &bull; B2 language certificate (Italian or English programme)<br/>
+      &bull; Proof of funds: <b>&euro;10,179.85/year</b>; bank statements — last <b>12 months</b>; income tax returns — last <b>3 years</b><br/>
+      &bull; Apostilled Family Registration Certificate (FRC)
+    </div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Attestation &amp; Process</div>
+    <div style="color:#fff; font-size:13px; line-height:1.8;">
+      &bull; IBCC, HEC, and MoFA attestation required before visa submission<br/>
+      &bull; Documentation valid <b>6 months</b> from date of issue<br/>
+      &bull; Universitaly validation gates the Embassy appointment — booked via BLS-Intiana in validation-date order<br/>
+      &bull; <b>Fraud warning:</b> Embassy Islamabad reports a rise in fraudulent Pakistani documents for 2026/27 — financial documents are being scrutinised more rigorously than before
+    </div>
+  </div>
+</div>
+<div class="card" style="margin-top:16px;">
+  <div class="eyebrow">Scholarships Worth Flagging</div>
+  <div style="color:#fff; font-size:13px; line-height:1.8;">
+    &bull; <b>DSU regional scholarships:</b> full tuition + stipend + accommodation — University of Milan (deadline 30 Sep 2026, strictly no extension), DSU Toscana/Pisa (7 Sep 2026) &mdash; early and unforgiving deadlines<br/>
+    &bull; <b>MAECI scholarships:</b> Ministry of Foreign Affairs award for Pakistani applicants under 28 with a relevant bachelor's<br/>
+    &bull; <b>LUISS:</b> 30 international Master's scholarships (20 full + 10 at 50%) &middot; <b>Bocconi:</b> merit-based full/partial waivers &middot; <b>Cattolica:</b> tuition reduced to &euro;5,900&ndash;6,400 &middot; <b>Humanitas:</b> &euro;5,000&ndash;23,000/year merit awards
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px;">
+  <div class="eyebrow" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+    <span>Post-Study Work &amp; Visa Financial Requirement</span>
+    <span style="font-size:10.5px; font-weight:700; letter-spacing:0.04em; text-transform:none; color:#ffb066; background:rgba(228,131,40,0.14); padding:3px 10px; border-radius:999px;">reported — verify before quoting a client</span>
+  </div>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:10px;">
+    <div>
+      <div style="color:rgba(255,255,255,0.5); font-size:11.5px; text-transform:uppercase; letter-spacing:0.04em;">Post-study work rights</div>
+      <div style="color:#fff; font-size:14px; line-height:1.6; margin-top:4px;">12-month residence permit for job seeking after graduation.</div>
+    </div>
+    <div>
+      <div style="color:rgba(255,255,255,0.5); font-size:11.5px; text-transform:uppercase; letter-spacing:0.04em;">Visa financial requirement</div>
+      <div style="color:#fff; font-size:14px; line-height:1.6; margin-top:4px;">€10,179.85/year (already covered elsewhere in this deck as the visa financial requirement).</div>
+    </div>
+  </div>
+</div>
+    </section><section class="deck-section" id="docs">
+      <div class="section-eyebrow">Before Filing</div>
+      <h2 class="section-title">Documents Checklist</h2>
+      <div class="card" style="max-width:760px;"><div class="eyebrow">General Application Documents</div><div style="margin-top:6px;"><div class="check-row"><div class="check-dot" style="background:#2083B9;"></div><div style="color:#fff; font-size:15px;">Passport (first 2 pages, scanned)</div></div><div class="check-row"><div class="check-dot" style="background:#2083B9;"></div><div style="color:#fff; font-size:15px;">Academic transcripts — Matric through Bachelor's</div></div><div class="check-row"><div class="check-dot" style="background:#2083B9;"></div><div style="color:#fff; font-size:15px;">Degree certificates (all levels)</div></div><div class="check-row"><div class="check-dot" style="background:#E48328;"></div><div style="color:#fff; font-size:15px;">CV / Europass format</div></div><div class="check-row"><div class="check-dot" style="background:#E48328;"></div><div style="color:#fff; font-size:15px;">Motivation letter / SOP</div></div><div class="check-row"><div class="check-dot" style="background:#E48328;"></div><div style="color:#fff; font-size:15px;">English language certificate (IELTS/equivalent)</div></div><div class="check-row"><div class="check-dot" style="background:#B7C733;"></div><div style="color:#fff; font-size:15px;">Recommendation letters (program-dependent)</div></div><div class="check-row"><div class="check-dot" style="background:#B7C733;"></div><div style="color:#fff; font-size:15px;">Proof of funds / tuition payment evidence</div></div></div></div>
+    </section><section class="deck-section" id="caution">
+      <div class="section-eyebrow">Counselor Notes</div>
+      <h2 class="section-title">Quote Carefully — Corrections & Safeguards</h2>
+      
+<div class="card">
+  <div class="eyebrow">Counselor Notes — Verified Source, Still Confirm Before Quoting</div>
+  <div style="color:#fff; font-size:13.5px; line-height:1.85;">
+    &bull; This deck is built from a <b>cross-checked, verified</b> research report (MUR circulars, Embassy Islamabad, university pages, WHO Observatory) — a meaningful upgrade over the earlier Italy deck, which carried heavy data-reliability warnings from an unverified source.<br/>
+    &bull; The IMAT-abolition finding is the single most important update — the previous deck described IMAT as active; it is not, for public universities, as of the Ministerial Decree extending the Open Semester system through 2026/27.<br/>
+    &bull; Public-university tuition is <b>income-based (ISEE)</b> — the €900–4,000 range is real but the exact figure a given family pays depends on declared income; don't quote a single flat number as guaranteed.<br/>
+    &bull; 74 institutions in this deck are registry-only (name/city, no individually confirmed programme list or fee) — present them as "Italy also has..." breadth, not as fully researched options.<br/>
+    &bull; Course lists on the following pages are the confirmed English-taught programmes found in the source research, not guaranteed-exhaustive catalogues — always confirm the live list on the university's own site before quoting a client.<br/>
+    &bull; DSU scholarship deadlines are early (Sept) and explicitly not extended in past cycles — flag this well ahead of the application season, not as an afterthought.<br/>
+    &bull; Financial-document scrutiny has increased for Pakistani applicants specifically — prepare clients for a more rigorous review than in prior cycles.
+  </div>
+</div>
+
+    </section><div class="doc-footer">
+      <div>ACE Altius Consulting &middot; From Dreams to Destinations</div>
+      <div>Italy &middot; Jan Intake 2026/27</div>
+    </div></div>
+  </div>
+</div>
+</body></html>
