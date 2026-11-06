@@ -31,6 +31,7 @@ export type NotificationType =
   | 'team_message'
   | 'team_dm'
   | 'email_update'
+  | 'invoice'
 
 // Client events that stay counselor-only — too high-frequency to push up the
 // chain to every branch manager and the CEO (routine chat traffic would bury
@@ -47,6 +48,7 @@ const NO_FAN_OUT: NotificationType[] = [
   'team_message',
   'team_dm',
   'email_update',
+  'invoice',
   // A stage suggestion is just a pending proposal awaiting the counselor's
   // own review — it's not yet a confirmed accountability event, so it stays
   // counselor-only until they act on it.

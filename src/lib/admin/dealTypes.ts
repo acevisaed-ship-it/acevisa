@@ -34,11 +34,12 @@ export const DEAL_SERVICE_LABELS: Record<DealServiceType, string> = {
   language_ielts: 'Language & IELTS',
 }
 
-export const INVOICE_STATUSES = ['draft', 'sent', 'paid', 'overdue', 'cancelled'] as const
+export const INVOICE_STATUSES = ['draft', 'awaiting_consent', 'sent', 'paid', 'overdue', 'cancelled'] as const
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number]
 
 export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
   draft: 'Draft',
+  awaiting_consent: 'Awaiting agreement',
   sent: 'Sent',
   paid: 'Paid',
   overdue: 'Overdue',

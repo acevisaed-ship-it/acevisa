@@ -33,17 +33,36 @@ type SendOptions = {
   to: string | string[]
   subject: string
   html: string
+  text?: string
+}
+
+function htmlToTextFallback(html: string) {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 /** Returns true if the message was handed to SMTP successfully. */
-export async function sendEmail({ to, subject, html }: SendOptions): Promise<boolean> {
+export async function sendEmail({ to, subject, html, text }: SendOptions): Promise<boolean> {
   const transporter = getTransporter()
   if (!transporter) {
     console.log('[email] SES_SMTP_USER/SES_SMTP_PASSWORD not set — skipped:', subject)
     return false
   }
   try {
-    const info = await transporter.sendMail({ from: FROM, to, subject, html })
+    const info = await transporter.sendMail({
+      from: FROM,
+      to,
+      subject,
+      html,
+      text: text || htmlToTextFallback(html),
+    })
     console.log('[email] sent', {
       subject,
       to,
@@ -291,6 +310,7 @@ export function paymentReceiptEmailHtml(opts: {
   currency: string
   paidAtPKT: string
   lineItems: { description: string; amount: number }[]
+  termsReference?: string
 }) {
   const rows = opts.lineItems
     .map(
@@ -306,7 +326,12 @@ export function paymentReceiptEmailHtml(opts: {
       ${rows}
       <tr><td style="padding:10px 0 0;font-weight:bold;border-top:1px solid #E6E8E7">Total paid</td><td style="padding:10px 0 0;font-weight:bold;text-align:right;border-top:1px solid #E6E8E7;color:#E48328">${opts.currency} ${opts.amount}</td></tr>
     </table>
-    <p style="font-size:13px;color:#0A3F3A99">Paid on ${opts.paidAtPKT}</p>`)
+    <p style="font-size:13px;color:#0A3F3A99">Paid on ${opts.paidAtPKT}</p>
+    ${
+      opts.termsReference
+        ? `<p style="margin-top:16px;font-size:12px;color:#0A3F3A99">${opts.termsReference}</p>`
+        : ''
+    }`)
 }
 
 export function counselorProgressReportEmailHtml(opts: {
@@ -344,3 +369,88 @@ export function counselorProgressReportEmailHtml(opts: {
     </table>
     <p style="margin-top:20px;font-size:13px;color:#0A3F3A99">Sent automatically from the ACE portal at ${opts.counselorName}'s request.</p>`)
 }
+
+export function termsAcceptanceEmailHtml(opts: {
+  firstName: string
+  productName: string
+  policyHtml: string
+  generalHtml: string
+  agreeUrl: string
+  expiresLabel: string
+}) {
+  return wrap(`
+    <h2 style="color:#0A3F3A;margin:0 0 16px">Please review and agree to our terms</h2>
+    <p>Hi ${opts.firstName},</p>
+    <p>Before we can send your invoice for <strong>${opts.productName}</strong>, we need you to read and agree to the product policy and our terms of service.</p>
+    <p style="font-size:13px;color:#0A3F3A99">This email does not include amounts or a bill. You will receive the invoice after you agree. This link expires on ${opts.expiresLabel}.</p>
+    ${opts.policyHtml}
+    ${opts.generalHtml}
+    <p style="margin:16px 0 8px;font-size:13px">By tapping the button you confirm that you have read these documents and agree to them.</p>
+    ${ctaButton(opts.agreeUrl, 'Review and agree →')}
+    <p style="margin-top:20px;font-size:11px;color:#0A3F3A99">This is not legal advice. A lawyer should review the final wording before you rely on it.</p>`)
+}
+
+export function termsRequestCounselorEmailHtml(opts: {
+  counselorName: string
+  clientFirstName: string
+  productName: string
+}) {
+  return wrap(`
+    <h2 style="color:#0A3F3A;margin:0 0 16px">Terms request sent</h2>
+    <p>Hi ${opts.counselorName},</p>
+    <p>A terms-acceptance request was emailed to <strong>${opts.clientFirstName}</strong> for <strong>${opts.productName}</strong>. The invoice will be issued only after they agree.</p>`)
+}
+
+export function invoiceIssuedEmailHtml(opts: {
+  clientName: string
+  invoiceNumber: string
+  dueDate: string
+  currency: string
+  total: string
+  lineItemsHtml: string
+  paymentInstructionsHtml: string
+  disclaimerHtml: string
+}) {
+  return wrap(`
+    <h2 style="color:#0A3F3A;margin:0 0 16px">Your invoice ${opts.invoiceNumber}</h2>
+    <p>Hi ${opts.clientName},</p>
+    <p>Thank you for agreeing to our terms. Please find your invoice below.</p>
+    <table style="width:100%;border-collapse:collapse;margin:16px 0;background:#F4F5F4;border-radius:12px;padding:12px">
+      ${opts.lineItemsHtml}
+      <tr><td style="padding:10px 0 0;font-weight:bold;border-top:1px solid #E6E8E7">Total due</td><td style="padding:10px 0 0;font-weight:bold;text-align:right;border-top:1px solid #E6E8E7;color:#E48328">${opts.currency} ${opts.total}</td></tr>
+    </table>
+    <p style="font-size:13px;color:#0A3F3A99">Due ${opts.dueDate}</p>
+    ${opts.paymentInstructionsHtml}
+    ${opts.disclaimerHtml}`)
+}
+
+export function invoiceCopyCounselorEmailHtml(opts: {
+  counselorName: string
+  clientName: string
+  invoiceNumber: string
+  agreedOn: string
+  currency: string
+  total: string
+  disclaimerHtml: string
+}) {
+  return wrap(`
+    <h2 style="color:#0A3F3A;margin:0 0 16px">Invoice copy — ${opts.invoiceNumber}</h2>
+    <p>Hi ${opts.counselorName},</p>
+    <p>A copy of invoice <strong>${opts.invoiceNumber}</strong> for <strong>${opts.clientName}</strong> is below. The client agreed to the terms on ${opts.agreedOn}.</p>
+    <p style="font-size:16px;font-weight:bold;color:#E48328">Total ${opts.currency} ${opts.total}</p>
+    ${opts.disclaimerHtml}`)
+}
+
+export function termsReminderEmailHtml(opts: {
+  firstName: string
+  productName: string
+  agreeUrl: string
+  expiresLabel: string
+}) {
+  return wrap(`
+    <h2 style="color:#0A3F3A;margin:0 0 16px">Reminder: please agree to our terms</h2>
+    <p>Hi ${opts.firstName},</p>
+    <p>We still need your agreement to the policy for <strong>${opts.productName}</strong> and our terms of service before we can send your invoice. This link expires on ${opts.expiresLabel}.</p>
+    ${ctaButton(opts.agreeUrl, 'Review and agree →')}`)
+}
+

@@ -1,0 +1,40 @@
+import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
+import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { sendInvoiceToClient } from '@/lib/invoices/issueAndSend'
+import { createAdminClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+
+export async function POST(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { admin, error } = await requireAdminApi()
+  if (error) return error
+
+  const { id } = await params
+  const supabase = createAdminClient()
+
+  if (isBranchScopedAdmin(admin)) {
+    const { data: row } = await supabase
+      .from('invoices')
+      .select('id, clients!inner(branch_id)')
+      .eq('id', id)
+      .is('deleted_at', null)
+      .eq('clients.branch_id', admin.branch_id)
+      .maybeSingle()
+    if (!row) {
+      return NextResponse.json({ error: 'Invoice not in your branch' }, { status: 403 })
+    }
+  }
+
+  const result = await sendInvoiceToClient(supabase, id, {
+    id: admin.id,
+    name: admin.name,
+    role: admin.role,
+  })
+
+  if (!result.ok) {
+    return NextResponse.json({ error: result.error }, { status: result.status })
+  }
+  return NextResponse.json({ invoice: result.invoice, message: result.message })
+}

@@ -97,6 +97,8 @@ export function getNotificationHref(
         return '/admin/hub'
       case 'email_update':
         return '/admin/email'
+      case 'invoice':
+        return '/admin/accounts?tab=invoices'
       default:
         return null
     }
@@ -133,6 +135,8 @@ export function getNotificationHref(
       return '/dashboard/hub'
     case 'email_update':
       return '/dashboard/email'
+    case 'invoice':
+      return client_id ? `/dashboard/clients/${client_id}` : null
     default:
       return null
   }

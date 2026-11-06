@@ -25,6 +25,7 @@ import {
   UserX,
   Users,
   Users2,
+  ScrollText,
   Wallet,
   X,
 } from 'lucide-react'
@@ -68,6 +69,7 @@ const navItems: NavItem[] = [
   { href: '/admin/hub', label: 'Team Hub', icon: MessageSquareMore, badge: 'teamHub' },
   { href: '/admin/email', label: 'Email', icon: Mail },
   { href: '/admin/accounts', label: 'Accounts', icon: Wallet },
+  { href: '/admin/terms', label: 'Invoice terms', icon: ScrollText },
   { href: '/admin/hr', label: 'HR', icon: ShieldCheck },
   { href: '/admin/activity', label: 'Staff Log and Activity', icon: ClipboardList },
   { href: '/admin/settings', label: 'Settings', icon: Settings },

@@ -18,6 +18,7 @@ import { downloadInvoicePdf } from '@/lib/admin/generateInvoicePdf'
 import { createClient } from '@/lib/supabase/client'
 import { ConfirmDeleteModal } from '@/components/admin/ConfirmDeleteModal'
 import { cn } from '@/lib/utils'
+import type { TermsSnapshot } from '@/lib/invoices/types'
 
 async function uploadReceipt(file: File): Promise<string | null> {
   const supabase = createClient()
@@ -29,7 +30,7 @@ async function uploadReceipt(file: File): Promise<string | null> {
   return data.publicUrl
 }
 
-type ClientOption = { id: string; name: string; counselor_id: string | null }
+type ClientOption = { id: string; name: string; counselor_id: string | null; counselor_name?: string | null }
 type DealOption = { id: string; client_id: string; deal_value: number; service_type: string }
 type BranchOption = { id: string; name: string }
 
@@ -91,6 +92,11 @@ type Invoice = {
   created_at: string
   client_name: string | null
   counselor_name: string | null
+  consent_id?: string | null
+  consent_status?: 'pending' | 'agreed' | 'expired' | 'revoked' | null
+  consent_agreed_at?: string | null
+  consent_label?: string
+  terms_snapshot?: TermsSnapshot | null
 }
 
 type Expense = {
@@ -278,6 +284,8 @@ function statusBadgeClass(status: string) {
       return 'bg-orange/20 text-orange'
     case 'cancelled':
       return 'glass-card text-white/40'
+    case 'awaiting_consent':
+      return 'bg-orange/20 text-orange'
     default:
       return 'glass-card text-white/50'
   }
@@ -451,12 +459,11 @@ function InvoicesTab({
       const payload = {
         client_id: clientId,
         deal_id: dealId || null,
-        counselor_id: selectedClient?.counselor_id || null,
         product_id: productId || null,
         line_items: lineItems.map((i) => ({ description: i.description, amount: Number(i.amount) })),
         due_date: dueDate || null,
         notes: notes || null,
-        status: editingId ? invoiceStatus : sendNow ? 'sent' : 'draft',
+        status: editingId ? invoiceStatus : 'draft',
       }
       const res = await fetch(editingId ? `/api/admin/invoices/${editingId}` : '/api/admin/invoices', {
         method: editingId ? 'PATCH' : 'POST',
@@ -465,12 +472,56 @@ function InvoicesTab({
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || (editingId ? 'Failed to update invoice' : 'Failed to create invoice')); return }
+      let saved = data.invoice as Invoice
+      if (!editingId && sendNow && saved?.id) {
+        const sendRes = await fetch(`/api/admin/invoices/${saved.id}/send`, { method: 'POST' })
+        const sendData = await sendRes.json()
+        if (!sendRes.ok) {
+          setInvoices((cur) => [saved, ...cur])
+          setError(sendData.error || 'Invoice saved as draft, but sending failed')
+          return
+        }
+        saved = sendData.invoice
+      }
       if (editingId) {
-        setInvoices((cur) => cur.map((i) => (i.id === editingId ? data.invoice : i)))
+        setInvoices((cur) => cur.map((i) => (i.id === editingId ? saved : i)))
       } else {
-        setInvoices((cur) => [data.invoice, ...cur])
+        setInvoices((cur) => [saved, ...cur])
       }
       closeModal()
+    } catch { setError('Something went wrong') }
+    finally { setSaving(false) }
+  }
+
+  async function sendInvoice(invoice: Invoice) {
+    setSaving(true); setError('')
+    try {
+      const res = await fetch(`/api/admin/invoices/${invoice.id}/send`, { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Failed to send invoice'); return }
+      setInvoices((cur) => cur.map((i) => (i.id === invoice.id ? data.invoice : i)))
+    } catch { setError('Something went wrong') }
+    finally { setSaving(false) }
+  }
+
+  async function resendConsent(invoice: Invoice) {
+    setSaving(true); setError('')
+    try {
+      const res = await fetch(`/api/admin/invoices/${invoice.id}/consent/resend`, { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Failed to resend terms request'); return }
+      setInvoices((cur) => cur.map((i) => (i.id === invoice.id ? data.invoice : i)))
+    } catch { setError('Something went wrong') }
+    finally { setSaving(false) }
+  }
+
+  async function revokeConsent(invoice: Invoice) {
+    setSaving(true); setError('')
+    try {
+      const res = await fetch(`/api/admin/invoices/${invoice.id}/consent/revoke`, { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Failed to revoke terms request'); return }
+      setInvoices((cur) => cur.map((i) => (i.id === invoice.id ? data.invoice : i)))
     } catch { setError('Something went wrong') }
     finally { setSaving(false) }
   }
@@ -580,6 +631,7 @@ function InvoicesTab({
                 <th className="px-4 py-3 font-medium">Product</th>
                 <th className="px-4 py-3 font-medium">Amount</th>
                 <th className="px-4 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium">Terms</th>
                 <th className="px-4 py-3 font-medium">Due date</th>
                 <th className="px-4 py-3 font-medium">Actions</th>
               </tr>
@@ -604,6 +656,7 @@ function InvoicesTab({
                       {INVOICE_STATUS_LABELS[invoice.status as InvoiceStatus] ?? invoice.status}
                     </span>
                   </td>
+                  <td className="px-4 py-3 text-xs text-white/60">{invoice.consent_label ?? 'Not requested'}</td>
                   <td className="px-4 py-3 text-white/60">
                     {invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-PK') : '—'}
                   </td>
@@ -613,6 +666,32 @@ function InvoicesTab({
                         className="inline-flex items-center gap-1 rounded-full bg-blue/20 px-3 py-1 text-xs font-medium text-white">
                         <Download className="h-3 w-3" />Download
                       </button>
+                      <a
+                        href={`/admin/invoices/${invoice.id}/print`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white"
+                      >
+                        Print
+                      </a>
+                      {invoice.status === 'draft' && (
+                        <button type="button" onClick={() => sendInvoice(invoice)}
+                          className="rounded-full bg-green/20 px-3 py-1 text-xs font-medium text-white">
+                          Send
+                        </button>
+                      )}
+                      {(invoice.status === 'awaiting_consent' || invoice.consent_status === 'expired' || invoice.consent_status === 'pending') && (
+                        <>
+                          <button type="button" onClick={() => resendConsent(invoice)}
+                            className="rounded-full bg-blue/20 px-3 py-1 text-xs font-medium text-white">
+                            Resend terms
+                          </button>
+                          <button type="button" onClick={() => revokeConsent(invoice)}
+                            className="rounded-full bg-orange/20 px-3 py-1 text-xs font-medium text-orange">
+                            Revoke
+                          </button>
+                        </>
+                      )}
                       {(invoice.status === 'sent' || invoice.status === 'overdue') && (
                         <button type="button"
                           onClick={() => { setPaymentMethod('bank_transfer'); setReferenceNumber(''); setPaidAt(new Date().toISOString().slice(0, 10)); setError(''); setPaymentModal(invoice) }}
@@ -675,6 +754,15 @@ function InvoicesTab({
                   value={clientId}
                   onChange={(id) => { setClientId(id); setDealId('') }}
                 />
+                {selectedClient && (
+                  <p className="mt-2 text-sm text-white/70">
+                    Counselor:{' '}
+                    <span className="font-medium text-white">
+                      {selectedClient.counselor_name || (selectedClient.counselor_id ? 'Assigned' : 'None assigned')}
+                    </span>
+                    <span className="ml-2 text-xs text-white/40">(read-only, from the student record)</span>
+                  </p>
+                )}
               </div>
 
               {clientId && clientDeals.length > 0 && (
@@ -846,7 +934,7 @@ function InvoicesTab({
                   </button>
                   <button type="button" disabled={saving} onClick={(e) => handleSave(e, true)}
                     className="min-h-[52px] flex-1 rounded-full bg-green py-3 text-sm font-bold text-text disabled:opacity-50">
-                    {saving ? 'Saving…' : 'Send to Client'}
+                    {saving ? 'Saving…' : 'Save & send'}
                   </button>
                 </div>
               )}

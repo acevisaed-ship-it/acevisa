@@ -1,42 +1,12 @@
 import { INVOICE_STATUSES, type InvoiceStatus } from '@/lib/admin/dealTypes'
-import { parseClientJoin, parseCounselorName } from '@/lib/admin/parseCounselorJoin'
 import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { mapInvoice } from '@/lib/invoices/mapInvoice'
+import { INVOICE_SELECT, INVOICE_SELECT_BRANCH } from '@/lib/invoices/types'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 type LineItem = { description: string; amount: number }
-
-function mapInvoice(row: Record<string, unknown>) {
-  const client = parseClientJoin(
-    row.clients as { name: string; id: string } | { name: string; id: string }[] | null
-  )
-  const product = row.products as { name: string } | null
-  return {
-    id: row.id as string,
-    invoice_number: row.invoice_number as string,
-    client_id: row.client_id as string,
-    deal_id: row.deal_id as string | null,
-    counselor_id: row.counselor_id as string | null,
-    product_id: row.product_id as string | null,
-    product_name: product?.name ?? null,
-    line_items: row.line_items as LineItem[],
-    subtotal: Number(row.subtotal),
-    tax_rate: Number(row.tax_rate),
-    tax_amount: Number(row.tax_amount),
-    total: Number(row.total),
-    currency: row.currency as string,
-    status: row.status as string,
-    due_date: row.due_date as string | null,
-    paid_at: row.paid_at as string | null,
-    notes: row.notes as string | null,
-    created_at: row.created_at as string,
-    client_name: client?.name ?? null,
-    counselor_name: parseCounselorName(
-      row.counselors as { name: string } | { name: string }[] | null
-    ),
-  }
-}
 
 async function generateInvoiceNumber(supabase: ReturnType<typeof createAdminClient>) {
   const year = new Date().getFullYear()
@@ -61,16 +31,11 @@ export async function GET(request: Request) {
 
   const params = new URL(request.url).searchParams
   const status = params.get('status')
-  const from = params.get('from') // YYYY-MM-DD, filters created_at
-  const to = params.get('to') // YYYY-MM-DD, exclusive upper bound
-  // Branch Managers are always locked to their own branch. CEO/unscoped
-  // admins may optionally pick one branch via ?branchId=; omitted or 'all'
-  // means every branch (Idea #4 — universal branch filtering).
+  const from = params.get('from')
+  const to = params.get('to')
   const requestedBranchId = params.get('branchId')
 
   const branchScoped = isBranchScopedAdmin(admin)
-  // Any branch filter at all (forced, or CEO-selected) requires the inner
-  // join so `.eq('clients.branch_id', ...)` has something to filter on.
   const effectiveBranchId = branchScoped
     ? admin.branch_id
     : requestedBranchId && requestedBranchId !== 'all'
@@ -80,11 +45,7 @@ export async function GET(request: Request) {
   const supabase = createAdminClient()
   let query = supabase
     .from('invoices')
-    .select(
-      effectiveBranchId
-        ? 'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients!inner(name, id, branch_id), counselors!counselor_id(name), products(name)'
-        : 'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors!counselor_id(name), products(name)'
-    )
+    .select(effectiveBranchId ? INVOICE_SELECT_BRANCH : INVOICE_SELECT)
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
 
@@ -98,7 +59,6 @@ export async function GET(request: Request) {
     query = query.gte('created_at', from)
   }
   if (to && /^\d{4}-\d{2}-\d{2}$/.test(to)) {
-    // Exclusive: caller passes the day *after* the last day they want included.
     query = query.lt('created_at', to)
   }
 
@@ -119,7 +79,7 @@ export async function GET(request: Request) {
 
   const today = new Date().toISOString().slice(0, 10)
   const invoices = (data ?? []).map((row) => {
-    const invoice = mapInvoice(row)
+    const invoice = mapInvoice(row as unknown as Record<string, unknown>)
     if (invoice.status === 'sent' && invoice.due_date && invoice.due_date < today) {
       return { ...invoice, status: 'overdue' }
     }
@@ -134,7 +94,7 @@ export async function POST(request: Request) {
   if (error) return error
 
   const body = await request.json()
-  const { client_id, deal_id, counselor_id, line_items, due_date, notes, status, product_id } = body
+  const { client_id, deal_id, line_items, due_date, notes, product_id } = body
 
   if (!client_id) {
     return NextResponse.json({ error: 'Client is required' }, { status: 400 })
@@ -147,35 +107,37 @@ export async function POST(request: Request) {
   }
 
   const subtotal = validItems.reduce((sum, i) => sum + Number(i.amount), 0)
-  const invoiceStatus = status === 'sent' ? 'sent' : 'draft'
-
   const supabase = createAdminClient()
 
-  if (isBranchScopedAdmin(admin)) {
-    const { data: clientRow } = await supabase
-      .from('clients')
-      .select('branch_id')
-      .eq('id', client_id)
-      .single()
-    if (!clientRow || clientRow.branch_id !== admin.branch_id) {
-      return NextResponse.json({ error: 'Client not in your branch' }, { status: 403 })
-    }
+  const { data: clientRow } = await supabase
+    .from('clients')
+    .select('branch_id, counselor_id')
+    .eq('id', client_id)
+    .single()
+
+  if (!clientRow) {
+    return NextResponse.json({ error: 'Client not found' }, { status: 404 })
+  }
+
+  if (isBranchScopedAdmin(admin) && clientRow.branch_id !== admin.branch_id) {
+    return NextResponse.json({ error: 'Client not in your branch' }, { status: 403 })
   }
 
   const invoice_number = await generateInvoiceNumber(supabase)
+  const counselorId = clientRow.counselor_id || null
 
   const insertPayload = {
     invoice_number,
     client_id,
     deal_id: deal_id || null,
-    counselor_id: counselor_id || null,
+    counselor_id: counselorId,
     ...(product_id ? { product_id } : {}),
     line_items: validItems,
     subtotal,
     tax_rate: 0,
     tax_amount: 0,
     total: subtotal,
-    status: invoiceStatus,
+    status: 'draft',
     due_date: due_date || null,
     notes: notes?.trim() || null,
   }
@@ -184,19 +146,17 @@ export async function POST(request: Request) {
     invoice_number,
     client_id,
     deal_id: insertPayload.deal_id,
-    counselor_id: insertPayload.counselor_id,
+    counselor_id: counselorId,
     product_id: product_id || null,
     itemCount: validItems.length,
     subtotal,
-    status: invoiceStatus,
+    status: 'draft',
   })
 
   const { data, error: insertError } = await supabase
     .from('invoices')
     .insert(insertPayload)
-    .select(
-      'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors!counselor_id(name), products(name)'
-    )
+    .select(INVOICE_SELECT)
     .single()
 
   if (insertError) {
@@ -208,7 +168,7 @@ export async function POST(request: Request) {
       invoice_number,
       client_id,
       product_id: product_id || null,
-      counselor_id: counselor_id || null,
+      counselor_id: counselorId,
     })
     return NextResponse.json(
       { error: `Failed to create invoice: ${insertError.message}` },
@@ -216,7 +176,6 @@ export async function POST(request: Request) {
     )
   }
 
-  // ── Auto-create expense records for fixed-amount product vendors ──────────────
   if (product_id && data) {
     const [{ data: vendors }, { data: productRow }] = await Promise.all([
       supabase
@@ -225,11 +184,7 @@ export async function POST(request: Request) {
         .eq('product_id', product_id)
         .eq('amount_type', 'fixed')
         .gt('amount', 0),
-      supabase
-        .from('products')
-        .select('name')
-        .eq('id', product_id)
-        .single(),
+      supabase.from('products').select('name').eq('id', product_id).single(),
     ])
 
     if (vendors && vendors.length > 0) {
@@ -257,5 +212,5 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ invoice: mapInvoice(data) })
+  return NextResponse.json({ invoice: mapInvoice(data as Record<string, unknown>) })
 }

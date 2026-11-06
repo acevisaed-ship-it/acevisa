@@ -1,4 +1,6 @@
 import { jsPDF } from 'jspdf'
+import { PAYMENT_INSTRUCTION_LINES } from '@/lib/invoices/paymentInstructions'
+import type { TermsSnapshot } from '@/lib/invoices/types'
 
 export type InvoicePdfData = {
   invoice_number: string
@@ -11,17 +13,8 @@ export type InvoicePdfData = {
   notes: string | null
   created_at: string
   status: string
+  terms_snapshot?: TermsSnapshot | null
 }
-
-const PAYMENT_INSTRUCTIONS = [
-  'Bank: Meezan Bank',
-  'Account Name: ACE Altius Consulting',
-  'Account Number: 0123-4567890-1',
-  'IBAN: PK00MEZN0001234567890001',
-  '',
-  'Alternative: Easypaisa / JazzCash on 0300-1234567',
-  'Please include invoice number as payment reference.',
-]
 
 function formatDate(dateStr: string | null) {
   if (!dateStr) return '—'
@@ -128,7 +121,7 @@ export function downloadInvoicePdf(invoice: InvoicePdfData) {
   y += 7
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(9)
-  for (const line of PAYMENT_INSTRUCTIONS) {
+  for (const line of PAYMENT_INSTRUCTION_LINES) {
     doc.text(line, margin, y)
     y += 5
   }
@@ -143,6 +136,49 @@ export function downloadInvoicePdf(invoice: InvoicePdfData) {
     doc.setFontSize(9)
     const noteLines = doc.splitTextToSize(invoice.notes.trim(), pageWidth - margin * 2)
     doc.text(noteLines, margin, y)
+  }
+
+  if (invoice.terms_snapshot) {
+    const snapshot = invoice.terms_snapshot
+    if (y > doc.internal.pageSize.getHeight() - 40) {
+      doc.addPage()
+      y = 20
+    }
+    y += 8
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(10)
+    doc.setTextColor(0)
+    doc.text('Disclaimer — policy and terms of service', margin, y)
+    y += 6
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8)
+    const agreed = snapshot.agreedAt
+      ? `Agreed on ${formatDate(snapshot.agreedAt)}. Stored snapshot; later edits do not change this invoice.`
+      : 'Stored snapshot at issue time; later edits do not change this invoice.'
+    const agreedLines = doc.splitTextToSize(agreed, pageWidth - margin * 2)
+    doc.text(agreedLines, margin, y)
+    y += agreedLines.length * 4 + 4
+
+    for (const docBlock of [snapshot.product, snapshot.general]) {
+      if (y > doc.internal.pageSize.getHeight() - 30) {
+        doc.addPage()
+        y = 20
+      }
+      doc.setFont('helvetica', 'bold')
+      doc.text(`${docBlock.title} · v${docBlock.version}`, margin, y)
+      y += 5
+      doc.setFont('helvetica', 'normal')
+      const bodyLines = doc.splitTextToSize(docBlock.body, pageWidth - margin * 2)
+      for (const line of bodyLines) {
+        if (y > doc.internal.pageSize.getHeight() - 16) {
+          doc.addPage()
+          y = 20
+        }
+        doc.text(line, margin, y)
+        y += 4
+      }
+      y += 4
+    }
   }
 
   doc.setFontSize(8)

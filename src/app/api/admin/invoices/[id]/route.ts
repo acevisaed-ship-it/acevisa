@@ -1,46 +1,13 @@
 import { logActivity } from '@/lib/activityLog'
 import { changedFields, formatFieldChanges } from '@/lib/admin/accountEntries'
 import { INVOICE_STATUSES, type InvoiceStatus } from '@/lib/admin/dealTypes'
-import { parseClientJoin, parseCounselorName } from '@/lib/admin/parseCounselorJoin'
-import { requireCeoApi } from '@/lib/admin/requireAdminApi'
+import { requireAdminApi, requireCeoApi } from '@/lib/admin/requireAdminApi'
+import { mapInvoice } from '@/lib/invoices/mapInvoice'
+import { INVOICE_SELECT } from '@/lib/invoices/types'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 type LineItem = { description: string; amount: number }
-
-const INVOICE_SELECT =
-  'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors!counselor_id(name), products(name)'
-
-function mapInvoice(row: Record<string, unknown>) {
-  const client = parseClientJoin(
-    row.clients as { name: string; id: string } | { name: string; id: string }[] | null
-  )
-  const product = row.products as { name: string } | null
-  return {
-    id: row.id as string,
-    invoice_number: row.invoice_number as string,
-    client_id: row.client_id as string,
-    deal_id: row.deal_id as string | null,
-    counselor_id: row.counselor_id as string | null,
-    product_id: row.product_id as string | null,
-    product_name: product?.name ?? null,
-    line_items: row.line_items as LineItem[],
-    subtotal: Number(row.subtotal),
-    tax_rate: Number(row.tax_rate),
-    tax_amount: Number(row.tax_amount),
-    total: Number(row.total),
-    currency: row.currency as string,
-    status: row.status as string,
-    due_date: row.due_date as string | null,
-    paid_at: row.paid_at as string | null,
-    notes: row.notes as string | null,
-    created_at: row.created_at as string,
-    client_name: client?.name ?? null,
-    counselor_name: parseCounselorName(
-      row.counselors as { name: string } | { name: string }[] | null
-    ),
-  }
-}
 
 function snapshot(row: {
   client_id: string
@@ -68,6 +35,28 @@ function snapshot(row: {
   }
 }
 
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { error } = await requireAdminApi()
+  if (error) return error
+
+  const { id } = await params
+  const supabase = createAdminClient()
+  const { data, error: fetchError } = await supabase
+    .from('invoices')
+    .select(INVOICE_SELECT)
+    .eq('id', id)
+    .is('deleted_at', null)
+    .maybeSingle()
+
+  if (fetchError || !data) {
+    return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
+  }
+  return NextResponse.json({ invoice: mapInvoice(data as Record<string, unknown>) })
+}
+
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -77,7 +66,7 @@ export async function PATCH(
 
   const { id } = await params
   const body = await request.json()
-  const { client_id, deal_id, counselor_id, line_items, due_date, notes, status, product_id } = body
+  const { client_id, deal_id, line_items, due_date, notes, status, product_id } = body
 
   if (!client_id) {
     return NextResponse.json({ error: 'Client is required' }, { status: 400 })
@@ -94,6 +83,12 @@ export async function PATCH(
   if (status && !invoiceStatus) {
     return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
   }
+  if (invoiceStatus === 'sent' || invoiceStatus === 'awaiting_consent') {
+    return NextResponse.json(
+      { error: 'Use Send to Client to issue an invoice. Status cannot be set to sent or awaiting agreement here.' },
+      { status: 400 }
+    )
+  }
 
   const supabase = createAdminClient()
   const { data: existing, error: fetchError } = await supabase
@@ -109,12 +104,18 @@ export async function PATCH(
     return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
   }
 
+  const { data: clientRow } = await supabase
+    .from('clients')
+    .select('counselor_id')
+    .eq('id', client_id)
+    .maybeSingle()
+
   const subtotal = validItems.reduce((sum, i) => sum + Number(i.amount), 0)
   const nextStatus = invoiceStatus ?? (existing.status as InvoiceStatus)
   const updates: Record<string, unknown> = {
     client_id,
     deal_id: deal_id || null,
-    counselor_id: counselor_id || null,
+    counselor_id: clientRow?.counselor_id || null,
     product_id: product_id || null,
     line_items: validItems,
     subtotal,
@@ -142,7 +143,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'Failed to update invoice' }, { status: 500 })
   }
 
-  const mapped = mapInvoice(data)
+  const mapped = mapInvoice(data as Record<string, unknown>)
   const before = snapshot({
     ...existing,
     line_items: existing.line_items as LineItem[],

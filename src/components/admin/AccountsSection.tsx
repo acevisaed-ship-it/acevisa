@@ -11,7 +11,7 @@ import { ProductsPanel } from '@/components/admin/ProductsPanel'
 
 type Tab = 'pl' | 'invoices' | 'payroll' | 'incentive' | 'products'
 
-type ClientOption = { id: string; name: string; counselor_id: string | null }
+type ClientOption = { id: string; name: string; counselor_id: string | null; counselor_name?: string | null }
 type DealOption = { id: string; client_id: string; deal_value: number; service_type: string }
 type CounselorOption = { id: string; name: string }
 

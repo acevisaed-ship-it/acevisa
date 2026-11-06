@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import {
-  Home, MessageCircle, Calendar, FileText,
+  Home, MessageCircle, Calendar, FileText, Receipt,
   HelpCircle, User, ClipboardList, X, Menu,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { href: '/student/chat', label: 'My Chat', icon: MessageCircle },
   { href: '/student/meetings', label: 'My Meetings', icon: Calendar },
   { href: '/student/documents', label: 'My Documents', icon: FileText },
+  { href: '/student/invoices', label: 'My Invoices', icon: Receipt },
   { href: '/student/complaint', label: 'Raise a Complaint', icon: HelpCircle },
 ]
 

@@ -1,41 +1,13 @@
 import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { PAYMENT_METHODS, type PaymentMethod } from '@/lib/admin/dealTypes'
-import { parseClientJoin, parseCounselorName } from '@/lib/admin/parseCounselorJoin'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
 import { sendEmail, paymentReceiptEmailHtml } from '@/lib/email'
+import { mapInvoice } from '@/lib/invoices/mapInvoice'
+import { termsVersionReference } from '@/lib/invoices/terms'
+import { INVOICE_SELECT } from '@/lib/invoices/types'
+import type { TermsSnapshot } from '@/lib/invoices/types'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-
-function mapInvoice(row: Record<string, unknown>) {
-  const client = parseClientJoin(
-    row.clients as { name: string; id: string } | { name: string; id: string }[] | null
-  )
-  const product = row.products as { name: string } | null
-  return {
-    id: row.id as string,
-    invoice_number: row.invoice_number as string,
-    client_id: row.client_id as string,
-    deal_id: row.deal_id as string | null,
-    counselor_id: row.counselor_id as string | null,
-    product_id: row.product_id as string | null,
-    product_name: product?.name ?? null,
-    line_items: row.line_items as { description: string; amount: number }[],
-    subtotal: Number(row.subtotal),
-    tax_rate: Number(row.tax_rate),
-    tax_amount: Number(row.tax_amount),
-    total: Number(row.total),
-    currency: row.currency as string,
-    status: row.status as string,
-    due_date: row.due_date as string | null,
-    paid_at: row.paid_at as string | null,
-    notes: row.notes as string | null,
-    created_at: row.created_at as string,
-    client_name: client?.name ?? null,
-    counselor_name: parseCounselorName(
-      row.counselors as { name: string } | { name: string }[] | null
-    ),
-  }
-}
 
 export async function POST(
   request: Request,
@@ -56,7 +28,7 @@ export async function POST(
 
   const { data: invoice, error: fetchError } = await supabase
     .from('invoices')
-    .select('id, client_id, total, currency, status, invoice_number, line_items, deleted_at, clients(name, email)')
+    .select('id, client_id, total, currency, status, invoice_number, line_items, terms_snapshot, deleted_at, clients(name, email)')
     .eq('id', id)
     .is('deleted_at', null)
     .single()
@@ -104,9 +76,7 @@ export async function POST(
     .update({ status: 'paid', paid_at: paidAt, receipt_url: receipt_url || null })
     .eq('id', id)
     .is('deleted_at', null)
-    .select(
-      'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors!counselor_id(name), products(name)'
-    )
+    .select(INVOICE_SELECT)
     .single()
 
   if (updateError) {
@@ -134,9 +104,10 @@ export async function POST(
           timeStyle: 'short',
         }),
         lineItems,
+        termsReference: termsVersionReference((invoice.terms_snapshot as TermsSnapshot | null) ?? null),
       }),
     })
   }
 
-  return NextResponse.json({ invoice: mapInvoice(updated) })
+  return NextResponse.json({ invoice: mapInvoice(updated as Record<string, unknown>) })
 }
