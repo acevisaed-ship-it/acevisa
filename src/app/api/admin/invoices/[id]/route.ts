@@ -4,6 +4,7 @@ import { INVOICE_STATUSES, type InvoiceStatus } from '@/lib/admin/dealTypes'
 import { requireAdminApi, requireCeoApi } from '@/lib/admin/requireAdminApi'
 import { mapInvoice } from '@/lib/invoices/mapInvoice'
 import { INVOICE_SELECT } from '@/lib/invoices/types'
+import { writeAudit } from '@/lib/ledger/audit'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -153,6 +154,17 @@ export async function PATCH(
   const after = snapshot(mapped)
   const changes = changedFields(before, after)
 
+  await writeAudit({
+    actorId: admin.id,
+    actorRole: admin.role,
+    branchId: admin.branch_id,
+    entityType: 'invoice',
+    entityId: id,
+    action: 'updated',
+    before,
+    after,
+  })
+
   if (Object.keys(changes).length > 0) {
     const changeText = formatFieldChanges(changes)
     await logActivity({
@@ -214,6 +226,16 @@ export async function DELETE(
     line_items: existing.line_items as LineItem[],
     subtotal: Number(existing.subtotal),
     total: Number(existing.total),
+  })
+
+  await writeAudit({
+    actorId: admin.id,
+    actorRole: admin.role,
+    branchId: admin.branch_id,
+    entityType: 'invoice',
+    entityId: id,
+    action: 'deleted',
+    before,
   })
 
   await logActivity({

@@ -1,4 +1,5 @@
 import { logActivity } from '@/lib/activityLog'
+import { writeAudit } from '@/lib/ledger/audit'
 import { createNotification } from '@/lib/notifications'
 import { createAdminClient, getAuthenticatedAdmin } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
@@ -33,7 +34,7 @@ export async function POST(
 
   const { data: client } = await supabase
     .from('clients')
-    .select('name, counselor_id, phone')
+    .select('name, counselor_id, phone, branch_id')
     .eq('id', clientId)
     .single()
 
@@ -82,6 +83,44 @@ export async function POST(
     console.error('Assign client error:', error)
     return NextResponse.json({ error: 'Assignment failed' }, { status: 500 })
   }
+
+  const assignedAt = new Date().toISOString()
+  const { error: closeError } = await supabase
+    .from('client_assignments')
+    .update({ ended_at: assignedAt })
+    .eq('client_id', clientId)
+    .is('ended_at', null)
+  if (closeError && closeError.code !== 'PGRST205' && closeError.code !== '42P01') {
+    console.error('Close assignment error:', closeError)
+  }
+
+  const { data: historyRow, error: historyError } = await supabase
+    .from('client_assignments')
+    .insert({
+      client_id: clientId,
+      counselor_id: counselorId,
+      assigned_by: assignedBy,
+      assigned_at: assignedAt,
+      reason: transferNote || (isTransfer ? 'transfer' : 'assign'),
+    })
+    .select('id')
+    .maybeSingle()
+  if (historyError && historyError.code !== 'PGRST205' && historyError.code !== '42P01') {
+    console.error('Insert assignment history error:', historyError)
+    return NextResponse.json({ error: 'Assigned but history write failed' }, { status: 500 })
+  }
+
+  await writeAudit({
+    actorId: assignedBy,
+    actorRole: admin.role,
+    branchId: client.branch_id,
+    entityType: 'client',
+    entityId: clientId,
+    action: isTransfer ? 'reassigned' : 'assigned',
+    before: { counselor_id: previousCounselorId },
+    after: { counselor_id: counselorId, assignment_id: historyRow?.id ?? null },
+    reason: transferNote || null,
+  })
 
   await createNotification({
     counselorId,

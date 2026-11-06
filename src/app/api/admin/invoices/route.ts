@@ -3,6 +3,7 @@ import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
 import { mapInvoice } from '@/lib/invoices/mapInvoice'
 import { INVOICE_SELECT, INVOICE_SELECT_BRANCH } from '@/lib/invoices/types'
+import { writeAudit } from '@/lib/ledger/audit'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -211,6 +212,16 @@ export async function POST(request: Request) {
       }
     }
   }
+
+  await writeAudit({
+    actorId: admin.id,
+    actorRole: admin.role,
+    branchId: admin.branch_id,
+    entityType: 'invoice',
+    entityId: data.id,
+    action: 'created',
+    after: { invoice_number, client_id, total: subtotal, product_id: product_id || null },
+  })
 
   return NextResponse.json({ invoice: mapInvoice(data as Record<string, unknown>) })
 }

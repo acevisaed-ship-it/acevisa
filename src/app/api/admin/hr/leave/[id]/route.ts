@@ -1,6 +1,7 @@
 import { logActivity } from '@/lib/activityLog'
 import { createNotification } from '@/lib/notifications'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { writeAudit } from '@/lib/ledger/audit'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -35,6 +36,16 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     .eq('id', id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  await writeAudit({
+    actorId: admin.id,
+    actorRole: admin.role,
+    branchId: admin.branch_id,
+    entityType: 'leave_application',
+    entityId: id,
+    action: status,
+    after: { status, reviewNote: reviewNote ?? null },
+  })
 
   if (application) {
     const staffName = (application.counselors as unknown as { name: string } | null)?.name

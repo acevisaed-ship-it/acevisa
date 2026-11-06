@@ -3,7 +3,6 @@
 import { useState, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 
 export default function CounselorLoginPage() {
   const router = useRouter()
@@ -24,53 +23,24 @@ export default function CounselorLoginPage() {
     setError(null)
     setLoading(true)
 
-    const supabase = createClient()
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
-
-    if (signInError) {
-      setError('Invalid email or password')
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, rememberMe }),
+      })
+      const data = (await res.json()) as { error?: string; home?: string }
+      if (!res.ok) {
+        setError(data.error || 'Invalid email or password')
+        setLoading(false)
+        return
+      }
+      router.push(data.home || '/dashboard')
+      router.refresh()
+    } catch {
+      setError('Sign in failed. Try again.')
       setLoading(false)
-      return
     }
-
-    const { data: counselor } = await supabase
-      .from('counselors')
-      .select('id, name, status, role')
-      .eq('email', email)
-      .single()
-
-    if (!counselor) {
-      await supabase.auth.signOut()
-      setError('Account not set up. Contact admin.')
-      setLoading(false)
-      return
-    }
-
-    if (counselor.status !== 'active') {
-      await supabase.auth.signOut()
-      setError('Your account is inactive. Contact admin.')
-      setLoading(false)
-      return
-    }
-
-    document.cookie = `ace_remember=${rememberMe ? '1' : '0'}; path=/; max-age=${30 * 24 * 3600}; SameSite=Lax`
-
-    if (!rememberMe) {
-      const token = crypto.randomUUID()
-      document.cookie = `ace_session_token=${token}; path=/; SameSite=Lax`
-    } else {
-      document.cookie = 'ace_session_token=; path=/; max-age=0'
-    }
-
-    // Match middleware homeForRole: admin/ceo → /admin, receptionist → /receptionist, else → /dashboard
-    const home =
-      counselor.role === 'admin' || counselor.role === 'ceo'
-        ? '/admin'
-        : counselor.role === 'receptionist'
-          ? '/receptionist'
-          : '/dashboard'
-    router.push(home)
-    router.refresh()
   }
 
   async function handleForgotPassword(e: FormEvent) {

@@ -16,19 +16,20 @@ import {
 } from '@/lib/admin/dealTypes'
 import { downloadInvoicePdf } from '@/lib/admin/generateInvoicePdf'
 import { standardServiceLinesForProduct } from '@/lib/invoices/standardServiceLines'
-import { createClient } from '@/lib/supabase/client'
 import { ConfirmDeleteModal } from '@/components/admin/ConfirmDeleteModal'
 import { cn } from '@/lib/utils'
 import type { TermsSnapshot } from '@/lib/invoices/types'
 
 async function uploadReceipt(file: File): Promise<string | null> {
-  const supabase = createClient()
-  const ext = file.name.split('.').pop() ?? 'pdf'
-  const path = `receipts/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-  const { error } = await supabase.storage.from('receipts').upload(path, file)
-  if (error) { console.error('Receipt upload error:', error); return null }
-  const { data } = supabase.storage.from('receipts').getPublicUrl(path)
-  return data.publicUrl
+  const fd = new FormData()
+  fd.append('file', file)
+  const res = await fetch('/api/admin/receipts/upload', { method: 'POST', body: fd })
+  const data = (await res.json()) as { url?: string; error?: string }
+  if (!res.ok || !data.url) {
+    console.error('Receipt upload error:', data.error)
+    return null
+  }
+  return data.url
 }
 
 type ClientOption = { id: string; name: string; counselor_id: string | null; counselor_name?: string | null }
@@ -336,6 +337,7 @@ function InvoicesTab({
   const [deleting, setDeleting] = useState(false)
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('bank_transfer')
+  const [paymentAmount, setPaymentAmount] = useState('')
   const [referenceNumber, setReferenceNumber] = useState('')
   const [paidAt, setPaidAt] = useState(new Date().toISOString().slice(0, 10))
   const [paymentReceiptFile, setPaymentReceiptFile] = useState<File | null>(null)
@@ -582,7 +584,13 @@ function InvoicesTab({
       const res = await fetch(`/api/admin/invoices/${paymentModal.id}/payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payment_method: paymentMethod, reference_number: referenceNumber, paid_at: paidAt, receipt_url }),
+        body: JSON.stringify({
+          payment_method: paymentMethod,
+          reference_number: referenceNumber,
+          paid_at: paidAt,
+          receipt_url,
+          amount: paymentAmount ? Number(paymentAmount) : undefined,
+        }),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Failed to record payment'); return }
@@ -724,7 +732,7 @@ function InvoicesTab({
                       )}
                       {(invoice.status === 'sent' || invoice.status === 'overdue') && (
                         <button type="button"
-                          onClick={() => { setPaymentMethod('bank_transfer'); setReferenceNumber(''); setPaidAt(new Date().toISOString().slice(0, 10)); setError(''); setPaymentModal(invoice) }}
+                          onClick={() => { setPaymentMethod('bank_transfer'); setReferenceNumber(''); setPaidAt(new Date().toISOString().slice(0, 10)); setPaymentAmount(String(invoice.total)); setError(''); setPaymentModal(invoice) }}
                           className="rounded-full bg-green/20 px-3 py-1 text-xs font-medium text-white">
                           Mark Paid
                         </button>
@@ -997,7 +1005,19 @@ function InvoicesTab({
               </button>
             </div>
             <form onSubmit={handleMarkPaid} className="space-y-4">
-              <p className="text-sm text-white/80">Amount: <strong className="text-green">{formatPkr(paymentModal.total)}</strong></p>
+              <p className="text-sm text-white/80">Invoice total: <strong className="text-green">{formatPkr(paymentModal.total)}</strong></p>
+              <div>
+                <label className="mb-1.5 block text-sm text-white/70">Amount this installment (PKR)</label>
+                <input
+                  type="number"
+                  min="1"
+                  step="0.01"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  className={inputClass}
+                  required
+                />
+              </div>
               <div>
                 <label className="mb-1.5 block text-sm text-white/70">Payment method</label>
                 <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)} className={inputClass}>

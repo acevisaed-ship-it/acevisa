@@ -1,5 +1,6 @@
 import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { writeAudit } from '@/lib/ledger/audit'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -119,6 +120,16 @@ export async function POST(request: Request) {
       if (policyErr) return NextResponse.json({ error: policyErr.message }, { status: 500 })
     }
   }
+
+  await writeAudit({
+    actorId: admin.id,
+    actorRole: admin.role,
+    branchId: admin.branch_id,
+    entityType: 'commission_rules',
+    entityId: counselorId,
+    action: 'updated',
+    after: { counselorId, baseSalary, defaultCommissionRate, serviceRates },
+  })
 
   return NextResponse.json({ ok: true })
 }

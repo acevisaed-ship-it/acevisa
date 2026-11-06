@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { writeAudit } from '@/lib/ledger/audit'
 import { createAdminClient } from '@/lib/supabase/server'
 
 type Params = { params: Promise<{ productId: string }> }
 
 // Replace all stages for a product (full overwrite for simplicity)
 export async function POST(req: Request, { params }: Params) {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
   const { productId } = await params
@@ -37,5 +38,14 @@ export async function POST(req: Request, { params }: Params) {
     if (insertErr) return NextResponse.json({ error: insertErr.message }, { status: 500 })
   }
 
+  await writeAudit({
+    actorId: admin.id,
+    actorRole: admin.role,
+    branchId: admin.branch_id,
+    entityType: 'product_payment_stages',
+    entityId: productId,
+    action: 'replaced',
+    after: { count: stages.length },
+  })
   return NextResponse.json({ success: true })
 }

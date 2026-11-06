@@ -1,4 +1,5 @@
 import { logStaffActivity } from '@/lib/activityLog'
+import { writeAudit } from '@/lib/ledger/audit'
 import { changedFields, formatFieldChanges } from '@/lib/admin/accountEntries'
 import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { EXPENSE_CATEGORIES, type ExpenseCategory } from '@/lib/admin/dealTypes'
@@ -154,6 +155,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to create expense' }, { status: 500 })
   }
 
+  await writeAudit({
+    actorId: admin.id,
+    actorRole: admin.role,
+    branchId: admin.branch_id,
+    entityType: 'expense',
+    entityId: data.id,
+    action: 'created',
+    after: data,
+  })
+
   return NextResponse.json({ expense: data })
 }
 
@@ -228,6 +239,17 @@ export async function PATCH(request: Request) {
   const after = expenseSnapshot(data)
   const changes = changedFields(before, after)
 
+  await writeAudit({
+    actorId: admin.id,
+    actorRole: admin.role,
+    branchId: admin.branch_id,
+    entityType: 'expense',
+    entityId: id,
+    action: 'updated',
+    before,
+    after,
+  })
+
   if (Object.keys(changes).length > 0) {
     await logStaffActivity({
       counselorId: admin.id,
@@ -276,6 +298,16 @@ export async function DELETE(request: Request) {
     console.error('Expense delete error:', deleteError)
     return NextResponse.json({ error: 'Failed to delete expense' }, { status: 500 })
   }
+
+  await writeAudit({
+    actorId: admin.id,
+    actorRole: admin.role,
+    branchId: admin.branch_id,
+    entityType: 'expense',
+    entityId: id,
+    action: 'deleted',
+    before: expenseSnapshot(existing),
+  })
 
   await logStaffActivity({
     counselorId: admin.id,

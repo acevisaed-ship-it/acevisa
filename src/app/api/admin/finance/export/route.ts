@@ -1,4 +1,5 @@
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { writeAudit } from '@/lib/ledger/audit'
 import { parseMonth } from '@/lib/admin/parseMonth'
 import { parseClientJoin } from '@/lib/admin/parseCounselorJoin'
 import { EXPENSE_CATEGORY_LABELS, type ExpenseCategory } from '@/lib/admin/dealTypes'
@@ -137,7 +138,7 @@ function buildCommissions(
 }
 
 export async function GET(request: Request) {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
   const url = new URL(request.url)
@@ -264,6 +265,15 @@ export async function GET(request: Request) {
   }
 
   const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' })
+
+  await writeAudit({
+    actorId: admin.id,
+    actorRole: admin.role,
+    branchId: admin.branch_id,
+    entityType: 'finance_export',
+    action: 'exported',
+    after: { type, month },
+  })
 
   return new Response(buf, {
     headers: {

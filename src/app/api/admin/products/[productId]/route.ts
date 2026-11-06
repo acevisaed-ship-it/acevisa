@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { writeAudit } from '@/lib/ledger/audit'
 import { createAdminClient } from '@/lib/supabase/server'
 
 type Params = { params: Promise<{ productId: string }> }
 
 export async function PUT(req: Request, { params }: Params) {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
   const { productId } = await params
@@ -29,16 +30,33 @@ export async function PUT(req: Request, { params }: Params) {
     .eq('id', productId)
 
   if (err) return NextResponse.json({ error: err.message }, { status: 500 })
+  await writeAudit({
+    actorId: admin.id,
+    actorRole: admin.role,
+    branchId: admin.branch_id,
+    entityType: 'product',
+    entityId: productId,
+    action: 'updated',
+    after: { category, country, name, base_price, is_active },
+  })
   return NextResponse.json({ success: true })
 }
 
 export async function DELETE(_req: Request, { params }: Params) {
-  const { error } = await requireAdminApi()
+  const { admin, error } = await requireAdminApi()
   if (error) return error
 
   const { productId } = await params
   const supabase = createAdminClient()
   const { error: err } = await supabase.from('products').delete().eq('id', productId)
   if (err) return NextResponse.json({ error: err.message }, { status: 500 })
+  await writeAudit({
+    actorId: admin.id,
+    actorRole: admin.role,
+    branchId: admin.branch_id,
+    entityType: 'product',
+    entityId: productId,
+    action: 'deleted',
+  })
   return NextResponse.json({ success: true })
 }
