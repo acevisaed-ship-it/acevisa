@@ -1,4 +1,5 @@
 import type { createAdminClient } from '@/lib/supabase/server'
+import { findUnfilledTermPlaceholders } from '@/lib/invoices/termPlaceholders'
 import { escapeHtml } from '@/lib/invoices/tokens'
 import type { TermsSnapshot, TermsSnapshotDoc } from '@/lib/invoices/types'
 
@@ -51,6 +52,50 @@ export async function getActiveTerms(
     general: general as TermsSnapshotDoc,
     product: product as TermsSnapshotDoc,
   }
+}
+
+export async function checkTermsReadyForInvoice(
+  supabase: AdminDb,
+  productId: string | null | undefined
+): Promise<
+  | { ok: true; general: TermsSnapshotDoc; product: TermsSnapshotDoc }
+  | { ok: false; error: string; placeholders: string[]; status: number }
+> {
+  if (!productId) {
+    return {
+      ok: false,
+      error: 'Select a product with a published policy before sending this invoice.',
+      placeholders: [],
+      status: 400,
+    }
+  }
+
+  const terms = await getActiveTerms(supabase, productId)
+  if (!terms.ok) {
+    return { ok: false, error: terms.error, placeholders: [], status: 400 }
+  }
+
+  const placeholders = [
+    ...findUnfilledTermPlaceholders(terms.general.body),
+    ...findUnfilledTermPlaceholders(terms.product.body),
+  ]
+  const unique: string[] = []
+  for (const item of placeholders) {
+    if (!unique.includes(item)) unique.push(item)
+  }
+
+  if (unique.length > 0) {
+    return {
+      ok: false,
+      error:
+        'These terms still have blanks to fill before an invoice can be sent. Open Admin → Terms and replace the highlighted [brackets], then a CEO must publish. Remaining blanks: ' +
+        unique.join('; '),
+      placeholders: unique,
+      status: 400,
+    }
+  }
+
+  return { ok: true, general: terms.general, product: terms.product }
 }
 
 export async function findValidAgreedConsent(

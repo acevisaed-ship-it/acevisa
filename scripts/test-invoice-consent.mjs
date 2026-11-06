@@ -107,4 +107,24 @@ assert.equal(
   'usable'
 )
 
+function findUnfilledTermPlaceholders(text) {
+  const matches = text.match(/\[[^\[\]]{1,300}\]/g) ?? []
+  const unique = []
+  for (const match of matches) {
+    const normalised = match.replace(/\s+/g, ' ').trim()
+    if (!unique.includes(normalised)) unique.push(normalised)
+  }
+  return unique
+}
+
+assert.deepEqual(findUnfilledTermPlaceholders('No blanks here.'), [])
+assert.deepEqual(findUnfilledTermPlaceholders('Refund [__]% within [__] working days.'), [
+  '[__]',
+])
+assert.ok(
+  findUnfilledTermPlaceholders('Licence: [to be completed by the Company].').includes(
+    '[to be completed by the Company]'
+  )
+)
+
 console.log('invoice consent tests passed')

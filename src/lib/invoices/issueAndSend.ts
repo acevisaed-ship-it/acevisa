@@ -13,8 +13,8 @@ import { mapInvoice } from '@/lib/invoices/mapInvoice'
 import { paymentInstructionsHtml } from '@/lib/invoices/paymentInstructions'
 import {
   buildTermsSnapshot,
+  checkTermsReadyForInvoice,
   findValidAgreedConsent,
-  getActiveTerms,
   termsDisclaimerHtml,
 } from '@/lib/invoices/terms'
 import { INVOICE_SELECT } from '@/lib/invoices/types'
@@ -97,8 +97,8 @@ export async function sendInvoiceToClient(
     }
   }
 
-  const terms = await getActiveTerms(supabase, invoice.product_id)
-  if (!terms.ok) return { ok: false, error: terms.error, status: 400 }
+  const terms = await checkTermsReadyForInvoice(supabase, invoice.product_id)
+  if (!terms.ok) return { ok: false, error: terms.error, status: terms.status }
 
   const counselor = joinOne(
     invoice.counselors as { id: string; name: string; email: string } | { id: string; name: string; email: string }[] | null
@@ -276,8 +276,8 @@ export async function issueInvoice(
     return { ok: false, error: 'Invoice has no product; cannot attach a policy snapshot.', status: 400 }
   }
 
-  const terms = await getActiveTerms(supabase, invoice.product_id)
-  if (!terms.ok) return { ok: false, error: terms.error, status: 400 }
+  const terms = await checkTermsReadyForInvoice(supabase, invoice.product_id)
+  if (!terms.ok) return { ok: false, error: terms.error, status: terms.status }
 
   const client = joinOne(
     invoice.clients as { id: string; name: string; email: string | null } | { id: string; name: string; email: string | null }[] | null

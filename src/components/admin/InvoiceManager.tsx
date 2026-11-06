@@ -15,6 +15,7 @@ import {
   type PaymentMethod,
 } from '@/lib/admin/dealTypes'
 import { downloadInvoicePdf } from '@/lib/admin/generateInvoicePdf'
+import { standardServiceLinesForProduct } from '@/lib/invoices/standardServiceLines'
 import { createClient } from '@/lib/supabase/client'
 import { ConfirmDeleteModal } from '@/components/admin/ConfirmDeleteModal'
 import { cn } from '@/lib/utils'
@@ -325,6 +326,7 @@ function InvoicesTab({
   const [productId, setProductId] = useState('')
   const [products, setProducts] = useState<ProductOption[]>([])
   const [productsLoading, setProductsLoading] = useState(false)
+  const [termsWarning, setTermsWarning] = useState('')
   const [dueDate, setDueDate] = useState('')
   const [notes, setNotes] = useState('')
   const [lineItems, setLineItems] = useState<LineItem[]>([{ description: '', amount: '' }])
@@ -398,12 +400,40 @@ function InvoicesTab({
     [productId, products]
   )
 
+  useEffect(() => {
+    if (!productId) {
+      setTermsWarning('')
+      return
+    }
+    let cancelled = false
+    fetch(`/api/admin/terms/readiness?product_id=${encodeURIComponent(productId)}`)
+      .then((r) => r.json())
+      .then((data: { ready?: boolean; error?: string }) => {
+        if (cancelled) return
+        setTermsWarning(data.ready ? '' : data.error || '')
+      })
+      .catch(() => {
+        if (!cancelled) setTermsWarning('')
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [productId])
+
   function applyProductLineItems(nextProductId: string) {
     setProductId(nextProductId)
     const product = products.find((p) => p.id === nextProductId)
     if (!product) return
     const stages = product.product_payment_stages
-    if (stages.length === 0) return
+    if (stages.length === 0) {
+      setLineItems(
+        standardServiceLinesForProduct(product.name).map((description, index) => ({
+          description,
+          amount: index === 0 && product.base_price ? String(product.base_price) : '',
+        }))
+      )
+      return
+    }
     setLineItems(
       stages.map((s) => ({
         description: s.stage_name,
@@ -794,6 +824,14 @@ function InvoicesTab({
                     <option key={p.id} value={p.id}>{p.name}</option>
                   ))}
                 </select>
+                {termsWarning && (
+                  <p className="mt-2 text-xs text-orange">
+                    {termsWarning}{' '}
+                    <a href="/admin/terms" className="underline">
+                      Open Terms
+                    </a>
+                  </p>
+                )}
               </div>
 
               {/* ── Product breakdown preview ── */}

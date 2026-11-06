@@ -1,6 +1,7 @@
 'use client'
 
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
+import { findUnfilledTermPlaceholders } from '@/lib/invoices/termPlaceholders'
 import { cn } from '@/lib/utils'
 
 type TermsDoc = {
@@ -66,6 +67,7 @@ export function TermsEditor({ isCeo }: { isCeo: boolean }) {
     selectedKey === 'general' ? groups.general : (groups.byProduct.get(selectedKey) ?? [])
   const draft = currentList.find((d) => !d.published_at)
   const active = currentList.find((d) => d.is_active)
+  const remainingBlanks = useMemo(() => findUnfilledTermPlaceholders(body), [body])
 
   useEffect(() => {
     const source = draft ?? active ?? currentList[0]
@@ -196,8 +198,9 @@ export function TermsEditor({ isCeo }: { isCeo: boolean }) {
             </div>
 
             <p className="rounded-2xl bg-orange/15 px-4 py-3 text-xs text-orange">
-              Placeholder wording is marked DRAFT until the owner and a lawyer replace it. Sending an
-              invoice is blocked until the relevant policy is published.
+              Approved wording is loaded as a draft. Replace any remaining [brackets] here, then a CEO
+              publishes. Sending an invoice is blocked until this version is published and the blanks
+              are filled.
             </p>
 
             <div>
@@ -216,6 +219,11 @@ export function TermsEditor({ isCeo }: { isCeo: boolean }) {
                 rows={16}
                 className="w-full resize-y rounded-2xl px-4 py-3 text-sm outline-none glass-input"
               />
+              {remainingBlanks.length > 0 && (
+                <p className="mt-2 text-xs text-orange">
+                  Remaining blanks: {remainingBlanks.join('; ')}
+                </p>
+              )}
             </div>
 
             {error && <p className="text-sm text-orange">{error}</p>}
