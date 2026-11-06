@@ -201,7 +201,7 @@ export async function GET(request: Request) {
   } else if (type === 'invoices') {
     const { data } = await supabase
       .from('invoices')
-      .select('invoice_number, total, status, due_date, paid_at, created_at, clients(name, id), counselors(name)')
+      .select('invoice_number, total, status, due_date, paid_at, created_at, clients(name, id), counselors!counselor_id(name)')
       .is('deleted_at', null)
       .order('created_at', { ascending: false })
 

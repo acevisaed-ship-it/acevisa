@@ -105,7 +105,7 @@ export async function POST(
     .eq('id', id)
     .is('deleted_at', null)
     .select(
-      'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors(name), products(name)'
+      'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors!counselor_id(name), products(name)'
     )
     .single()
 

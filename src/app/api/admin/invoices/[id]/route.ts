@@ -9,7 +9,7 @@ import { NextResponse } from 'next/server'
 type LineItem = { description: string; amount: number }
 
 const INVOICE_SELECT =
-  'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors(name), products(name)'
+  'id, invoice_number, client_id, deal_id, counselor_id, product_id, line_items, subtotal, tax_rate, tax_amount, total, currency, status, due_date, paid_at, notes, created_at, clients(name, id), counselors!counselor_id(name), products(name)'
 
 function mapInvoice(row: Record<string, unknown>) {
   const client = parseClientJoin(
