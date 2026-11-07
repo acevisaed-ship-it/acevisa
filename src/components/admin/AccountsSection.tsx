@@ -8,8 +8,10 @@ import { InvoiceManager } from '@/components/admin/InvoiceManager'
 import { IncentivePolicyPanel } from '@/components/admin/IncentivePolicyPanel'
 import { HRMView } from '@/components/admin/HRMView'
 import { ProductsPanel } from '@/components/admin/ProductsPanel'
+import { CommissionsPanel } from '@/components/admin/CommissionsPanel'
+import { LedgerWorkbench } from '@/components/admin/LedgerWorkbench'
 
-type Tab = 'pl' | 'invoices' | 'payroll' | 'incentive' | 'products'
+type Tab = 'pl' | 'invoices' | 'payroll' | 'commissions' | 'registers' | 'incentive' | 'products'
 
 type ClientOption = { id: string; name: string; counselor_id: string | null; counselor_name?: string | null }
 type DealOption = { id: string; client_id: string; deal_value: number; service_type: string }
@@ -18,6 +20,8 @@ type CounselorOption = { id: string; name: string }
 const TABS: { id: Tab; label: string }[] = [
   { id: 'invoices', label: 'Invoices & Expenses' },
   { id: 'payroll', label: 'Payroll' },
+  { id: 'commissions', label: 'Commissions' },
+  { id: 'registers', label: 'Registers & Reports' },
   { id: 'pl', label: 'P&L Summary' },
   { id: 'incentive', label: 'Incentive Policy' },
   { id: 'products', label: 'Products' },
@@ -82,6 +86,8 @@ export function AccountsSection({
           />
         )}
         {tab === 'payroll' && <HRMView showBranchFilter={showBranchFilter} />}
+        {tab === 'commissions' && <CommissionsPanel counselors={counselors} />}
+        {tab === 'registers' && <LedgerWorkbench />}
         {tab === 'incentive' && (
           <IncentivePolicyPanel counselors={counselors} showBranchFilter={showBranchFilter} />
         )}

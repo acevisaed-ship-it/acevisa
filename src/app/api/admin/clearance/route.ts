@@ -1,7 +1,6 @@
 import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
 import { writeAudit } from '@/lib/ledger/audit'
-import { recomputeDealIncentives } from '@/lib/ledger/persistIncentives'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -53,6 +52,11 @@ export async function POST(request: Request) {
 
   if (insertError || !clearance) {
     console.error('Clearance insert error:', insertError)
+    // The database trigger rejects clearance with a readable reason (missing milestone %, shares not 100)
+    const reason = insertError?.message ?? ''
+    if (/milestone percentage|Approved shares/i.test(reason)) {
+      return NextResponse.json({ error: reason }, { status: 400 })
+    }
     return NextResponse.json({ error: 'Failed to clear case' }, { status: 500 })
   }
 
@@ -69,19 +73,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Cleared but audit failed' }, { status: 500 })
   }
 
-  const recomputed = await recomputeDealIncentives({
-    dealId,
-    clearanceId: clearance.id,
-    clearedAt,
-    actor: { id: admin.id, role: admin.role, branch_id: admin.branch_id },
-    reason: 'admin clearance',
-  })
-  if (recomputed.error) {
-    return NextResponse.json(
-      { error: `Case cleared but incentives failed: ${recomputed.error}`, clearance },
-      { status: 500 }
-    )
-  }
+  // Incentives are activated by the database trigger on case_clearance (ledger_reconcile).
+  const { count } = await supabase
+    .from('incentives')
+    .select('id', { count: 'exact', head: true })
+    .eq('deal_id', dealId)
+    .eq('status', 'active')
 
-  return NextResponse.json({ clearance, incentivesCreated: recomputed.inserted })
+  return NextResponse.json({ clearance, incentivesCreated: count ?? 0 })
 }
