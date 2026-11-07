@@ -162,5 +162,9 @@ BEGIN
   -- S11 is tested through the API: POST /api/admin/query {view:'v_clients_wide', fields:['phone'], filters:[{field:'city',op:'eq',value:'Karachi'}]}
   out := out || E'INFO S11 query API is checked in the app: fields=phone, city=Karachi, then confirm one audit_events row with action query\n';
 
-  RAISE EXCEPTION E'\n===== LEDGER SCENARIO RESULTS (transaction rolled back) =====\n%', out;
+  -- The CLI truncates long error text, so print a short summary: pass count + only the problem lines.
+  RAISE EXCEPTION E'RESULT: % passed. Problems:\n%',
+    (SELECT count(*) FROM unnest(string_to_array(out, E'\n')) l WHERE l LIKE 'PASS%'),
+    COALESCE((SELECT string_agg(left(l, 110), E'\n') FROM unnest(string_to_array(out, E'\n')) l
+               WHERE l LIKE 'FAIL%' OR l LIKE 'SKIP%'), 'none');
 END $$;

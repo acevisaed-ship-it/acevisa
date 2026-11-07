@@ -6,6 +6,7 @@ import {
 import { parseMonth } from '@/lib/admin/parseMonth'
 import { parseClientJoin } from '@/lib/admin/parseCounselorJoin'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { incentivesByCounselor } from '@/lib/ledger/monthIncentives'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -121,12 +122,14 @@ export async function GET(request: Request) {
     return closeDate >= startDate && closeDate < endDate
   })
 
+  // Commission now comes from the incentive ledger (milestone-based, cleared cases), not a flat rate on closed deals.
+  const stored = await incentivesByCounselor(month)
   const commissions = (counselors ?? []).map((counselor) => {
     const rule = (commissionRules ?? []).find((r) => r.counselor_id === counselor.id)
     const rate = Number(rule?.commission_rate ?? 10)
     const counselorDeals = dealsClosedThisMonth.filter((d) => d.counselor_id === counselor.id)
     const totalDealValue = counselorDeals.reduce((sum, d) => sum + Number(d.deal_value), 0)
-    const commissionAmount = (totalDealValue * rate) / 100
+    const inc = stored.get(counselor.id)
 
     return {
       counselorId: counselor.id,
@@ -134,7 +137,9 @@ export async function GET(request: Request) {
       dealsClosed: counselorDeals.length,
       totalDealValue,
       commissionRate: rate,
-      commissionAmount: Math.round(commissionAmount),
+      commissionAmount: Math.round(inc?.earned ?? 0),
+      commissionPending: Math.round(inc?.pending ?? 0),
+      commissionHeld: Math.round(inc?.held ?? 0),
     }
   })
 

@@ -1,4 +1,5 @@
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { incentivesByCounselor } from '@/lib/ledger/monthIncentives'
 import { computeRetentionRisk } from '@/lib/admin/retentionRisk'
 import { createAdminClient } from '@/lib/supabase/server'
 import { isSundayPKT, workingDaysInPKTMonth } from '@/lib/pkt'
@@ -68,6 +69,7 @@ export async function GET(request: Request) {
   ])
 
   const totalRevenue = (invoices ?? []).reduce((s, i) => s + Number(i.total), 0)
+  const stored = await incentivesByCounselor(month)
 
   const workingDaysThisMonth = workingDaysInPKTMonth(month)
 
@@ -80,7 +82,11 @@ export async function GET(request: Request) {
     const dealCount = counselorDeals.length
     const counselorInvoices = (invoices ?? []).filter((i) => i.counselor_id === c.id)
     const revenueGenerated = counselorInvoices.reduce((s, i) => s + Number(i.total), 0)
-    const commissionEarned = Math.round((revenueGenerated * commissionRate) / 100)
+    // From the incentive ledger (cleared, payable this month), not a flat rate on revenue
+    const inc = stored.get(c.id)
+    const commissionEarned = Math.round(inc?.earned ?? 0)
+    const commissionPending = Math.round(inc?.pending ?? 0)
+    const commissionHeld = Math.round(inc?.held ?? 0)
 
     const businessContributionPct =
       totalRevenue > 0 ? Math.round((revenueGenerated / totalRevenue) * 100) : 0
@@ -134,6 +140,8 @@ export async function GET(request: Request) {
       baseSalary,
       commissionRate,
       commissionEarned,
+      commissionPending,
+      commissionHeld,
       netSalary,
       deductionAmount,
       unexcusedDays,

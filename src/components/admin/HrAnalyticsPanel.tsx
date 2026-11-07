@@ -11,6 +11,8 @@ type CounselorAnalytics = {
   baseSalary: number
   commissionRate: number
   commissionEarned: number
+  commissionPending?: number
+  commissionHeld?: number
   netSalary: number
   deductionAmount: number
   unexcusedDays: number
@@ -142,8 +144,11 @@ export function HrAnalyticsPanel({
                   <p className="font-semibold text-white/80">{formatPkr(c.baseSalary)}</p>
                 </div>
                 <div>
-                  <p className="text-white/50 text-xs">Commission ({c.commissionRate}%)</p>
+                  <p className="text-white/50 text-xs">Commission earned (cleared)</p>
                   <p className="font-semibold text-white/80">{formatPkr(c.commissionEarned)}</p>
+                  {(c.commissionPending ?? 0) > 0 && (
+                    <p className="text-xs text-white/50">Pending clearance {formatPkr(c.commissionPending ?? 0)}</p>
+                  )}
                 </div>
                 {c.deductionAmount > 0 && (
                   <div>

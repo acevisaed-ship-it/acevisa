@@ -11,6 +11,8 @@ type CommissionRule = {
   dealsClosed: number
   totalDealValue: number
   commissionAmount: number
+  commissionPending?: number
+  commissionHeld?: number
 }
 
 type FinanceSummary = {
@@ -61,6 +63,8 @@ export function HRMView({ showBranchFilter = false }: { showBranchFilter?: boole
   const salaryExpenses = data?.expenseBreakdown.find((e) => e.category === 'salary')
   const totalSalaries = salaryExpenses?.amount ?? 0
   const totalCommissions = (data?.commissions ?? []).reduce((s, c) => s + c.commissionAmount, 0)
+  const totalPending = (data?.commissions ?? []).reduce((s, c) => s + (c.commissionPending ?? 0), 0)
+  const totalHeld = (data?.commissions ?? []).reduce((s, c) => s + (c.commissionHeld ?? 0), 0)
   const totalPayroll = totalSalaries + totalCommissions
 
   return (
@@ -113,6 +117,10 @@ export function HRMView({ showBranchFilter = false }: { showBranchFilter?: boole
                 <TrendingUp className="h-5 w-5 text-green" />
               </div>
               <p className="mt-2 text-2xl font-bold text-white">{formatPKR(totalCommissions)}</p>
+              <p className="mt-1 text-xs text-white/50">
+                Cleared and payable this month. Pending clearance {formatPKR(totalPending)}
+                {totalHeld > 0 ? ` · Held ${formatPKR(totalHeld)}` : ''}
+              </p>
             </div>
             <div className="rounded-2xl border border-white/10 glass-card crisp-on-dark p-5">
               <div className="flex items-center justify-between">
@@ -132,13 +140,15 @@ export function HRMView({ showBranchFilter = false }: { showBranchFilter?: boole
                   <th className="px-4 py-3">Commission Rate</th>
                   <th className="px-4 py-3">Deals Closed</th>
                   <th className="px-4 py-3">Deal Value</th>
+                  <th className="px-4 py-3">Pending Clearance</th>
+                  <th className="px-4 py-3">Held</th>
                   <th className="px-4 py-3">Commission Earned</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/8">
                 {(data?.commissions ?? []).length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-4 py-6 text-center text-white/40">
+                    <td colSpan={7} className="px-4 py-6 text-center text-white/40">
                       No commission data for this month
                     </td>
                   </tr>
@@ -149,6 +159,8 @@ export function HRMView({ showBranchFilter = false }: { showBranchFilter?: boole
                       <td className="px-4 py-3 text-white/60">{c.commissionRate}%</td>
                       <td className="px-4 py-3 text-white/60">{c.dealsClosed}</td>
                       <td className="px-4 py-3 text-white/60">{formatPKR(c.totalDealValue)}</td>
+                      <td className="px-4 py-3 text-white/60">{formatPKR(c.commissionPending ?? 0)}</td>
+                      <td className="px-4 py-3 text-white/60">{formatPKR(c.commissionHeld ?? 0)}</td>
                       <td className="px-4 py-3 font-semibold text-green">{formatPKR(c.commissionAmount)}</td>
                     </tr>
                   ))
