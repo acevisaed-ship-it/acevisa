@@ -17,7 +17,7 @@ type Totals = { count: number; students: number; sums: Record<string, number>; t
 type Adv = { field: string; op: string; value: string }
 type Config = {
   view: string; sel: Record<string, string[]>; dateField: string; preset: string; from: string; to: string
-  groupBy: string; sumField: string; cols: string[]; filters: Adv[]
+  groupBy: string; sumField: string; pivotBy?: string; cols: string[]; filters: Adv[]
 }
 type Saved = { id: string; name: string; config: Partial<Config>; shared: boolean; mine: boolean; starter: boolean }
 type RowAction = { label: string; action: string; map: Record<string, string>; ask?: { key: string; label: string; def?: string }[]; when?: (r: Row) => boolean; dialog?: 'case_details' }
@@ -175,6 +175,7 @@ export function LedgerWorkbench({ restricted = false }: { restricted?: boolean }
   const [adv, setAdv] = useState<Adv[]>([])
   const [groupBy, setGroupBy] = useState('')
   const [sumField, setSumField] = useState('')
+  const [pivotBy, setPivotBy] = useState('')
   const [rows, setRows] = useState<Row[]>([])
   const [columns, setColumns] = useState<string[]>([])
   const [facets, setFacets] = useState<Record<string, Facet[]>>({})
@@ -203,8 +204,9 @@ export function LedgerWorkbench({ restricted = false }: { restricted?: boolean }
   const body = useMemo(() => ({
     view, fields: [...new Set([...cols, ...(HIDDEN[view] ?? [])])], filters,
     groupBy: groupBy ? [groupBy] : [], agg: groupBy ? [{ fn: 'count' as const }, ...(sumField ? [{ fn: 'sum' as const, field: sumField }] : [])] : [],
+    pivot: groupBy && pivotBy ? pivotBy : undefined,
     limit: rowLimit,
-  }), [view, cols, filters, groupBy, sumField, rowLimit])
+  }), [view, cols, filters, groupBy, sumField, pivotBy, rowLimit])
 
   const run = useCallback(async () => {
     setLoading(true); setMsg('')
@@ -230,7 +232,7 @@ export function LedgerWorkbench({ restricted = false }: { restricted?: boolean }
   useEffect(() => { void loadSaved() }, [loadSaved])
 
   function resetFilters(v = view) {
-    setSel({}); setAdv([]); setPreset('all'); setFrom(''); setTo(''); setGroupBy(''); setSumField('')
+    setSel({}); setAdv([]); setPreset('all'); setFrom(''); setTo(''); setGroupBy(''); setSumField(''); setPivotBy('')
     setDateField(FACETS[v]?.dates[0] ?? ''); setSavedId('')
   }
   function changeView(v: string) {
@@ -245,13 +247,13 @@ export function LedgerWorkbench({ restricted = false }: { restricted?: boolean }
     const v = c.view as string
     setView(v); setCols(c.cols?.length ? c.cols : (DEFAULT_COLS[v] ?? QUERY_VIEWS[v].columns.slice(0, 8)))
     setSel(c.sel ?? {}); setAdv(c.filters ?? []); setPreset(c.preset ?? 'all'); setFrom(c.from ?? ''); setTo(c.to ?? '')
-    setDateField(c.dateField ?? FACETS[v]?.dates[0] ?? ''); setGroupBy(c.groupBy ?? ''); setSumField(c.sumField ?? '')
+    setDateField(c.dateField ?? FACETS[v]?.dates[0] ?? ''); setGroupBy(c.groupBy ?? ''); setSumField(c.sumField ?? ''); setPivotBy(c.pivotBy ?? '')
   }
 
   async function saveView() {
     const name = window.prompt('Name for this view')
     if (!name) return
-    const config: Config = { view, sel, dateField, preset, from, to, groupBy, sumField, cols, filters: adv }
+    const config: Config = { view, sel, dateField, preset, from, to, groupBy, sumField, pivotBy, cols, filters: adv }
     const shared = window.confirm('Share this view with other admins? (OK = share, Cancel = only me)')
     const res = await fetch('/api/admin/saved-views', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, config, shared }) })
     const json = await res.json()
@@ -267,11 +269,11 @@ export function LedgerWorkbench({ restricted = false }: { restricted?: boolean }
     if (res.ok) { setSavedId(''); await loadSaved() }
   }
 
-  async function exportCsv() {
-    const res = await fetch('/api/admin/query', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...body, export: 'csv', limit: 20000 }) })
+  async function exportFile(kind: 'csv' | 'xlsx') {
+    const res = await fetch('/api/admin/query', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...body, export: kind, limit: 20000 }) })
     if (!res.ok) { setMsg('Export failed'); return }
     const url = URL.createObjectURL(await res.blob())
-    const a = document.createElement('a'); a.href = url; a.download = `${view}.csv`; a.click(); URL.revokeObjectURL(url)
+    const a = document.createElement('a'); a.href = url; a.download = `${view}-${new Date().toISOString().slice(0, 10)}.${kind}`; a.click(); URL.revokeObjectURL(url)
   }
 
   async function act(a: RowAction, r: Row) {
@@ -404,12 +406,16 @@ export function LedgerWorkbench({ restricted = false }: { restricted?: boolean }
           {groupBy && (
             <select className="glass-input rounded-full px-3 py-1" value={sumField} onChange={(e) => setSumField(e.target.value)}>
               <option value="">count only</option>{def.numeric.map((c) => <option key={c} value={c}>sum of {pretty(c)}</option>)}</select>)}
+          {groupBy && (
+            <select className="glass-input rounded-full px-3 py-1" value={pivotBy} onChange={(e) => setPivotBy(e.target.value)}>
+              <option value="">No cross-tab</option>{def.columns.filter((c) => c !== groupBy).map((c) => <option key={c} value={c}>across {pretty(c)}</option>)}</select>)}
         </div>
       </details>
 
       <div className="flex flex-wrap items-center gap-3">
         <button onClick={() => void run()} className="min-h-[40px] rounded-full px-4 text-sm btn-primary">Refresh</button>
-        <button onClick={() => void exportCsv()} className="min-h-[40px] rounded-full px-4 text-sm glass-input text-white">Export CSV</button>
+        <button onClick={() => void exportFile('xlsx')} className="min-h-[40px] rounded-full px-4 text-sm glass-input text-white">Export Excel</button>
+        <button onClick={() => void exportFile('csv')} className="min-h-[40px] rounded-full px-4 text-sm glass-input text-white">Export CSV</button>
         {view === 'v_payroll_wide' && <button onClick={() => void payrollBuild()} className="min-h-[40px] rounded-full px-4 text-sm btn-primary">Build payroll</button>}
         <span className="text-sm text-white/60">
           {loading ? 'Loading…' : `${rows.length} ${groupBy ? 'groups' : 'rows'}${!groupBy && rows.length >= rowLimit ? ` (showing first ${rowLimit}; totals above cover everything)` : ''}`}
@@ -419,7 +425,7 @@ export function LedgerWorkbench({ restricted = false }: { restricted?: boolean }
 
       <div className="overflow-x-auto rounded-2xl glass-card">
         <table className="w-full text-sm text-white">
-          <thead><tr className="text-left text-white/60">{shown.map((c) => <th key={c} className="p-3 whitespace-nowrap">{pretty(c)}</th>)}<th className="p-3" /></tr></thead>
+          <thead><tr className="text-left text-white/60">{shown.map((c) => <th key={c} className="p-3 whitespace-nowrap">{groupBy && pivotBy && c !== groupBy ? c : pretty(c)}</th>)}<th className="p-3" /></tr></thead>
           <tbody>
             {rows.map((r, i) => (
               <tr key={i} className="border-t border-white/10">

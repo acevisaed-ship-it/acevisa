@@ -4,6 +4,7 @@ import { writeAudit } from '@/lib/ledger/audit'
 import { FILTER_OPS, QUERY_VIEWS, type FilterOp } from '@/lib/ledger/queryViews'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import * as XLSX from 'xlsx'
 
 export const runtime = 'nodejs'
 
@@ -16,7 +17,8 @@ type Body = {
   agg?: { fn: 'count' | 'sum'; field?: string }[]
   sort?: { field: string; dir?: 'asc' | 'desc' }
   limit?: number
-  export?: 'csv'
+  export?: 'csv' | 'xlsx'
+  pivot?: string // second field to spread across columns (needs exactly one groupBy)
   facets?: string[]
   totals?: boolean
 }
@@ -92,8 +94,10 @@ export async function POST(request: Request) {
     return out
   }
 
+  const pivot = body.pivot && allowed.has(body.pivot) && groupBy.length === 1 && aggs.length > 0 && body.pivot !== groupBy[0] ? body.pivot : null
+  const gb = pivot ? [...groupBy, pivot] : groupBy
   const limit = Math.min(Math.max(body.limit ?? 1000, 1), HARD_MAX)
-  const needed = new Set([...fields, ...groupBy, ...aggs.flatMap((a) => (a.field ? [a.field] : []))])
+  const needed = new Set([...fields, ...gb, ...aggs.flatMap((a) => (a.field ? [a.field] : []))])
 
   let rows: Record<string, unknown>[]
   try {
@@ -104,11 +108,11 @@ export async function POST(request: Request) {
   }
 
   let columns = fields
-  if (groupBy.length > 0 || aggs.length > 0) {
+  if (gb.length > 0 || aggs.length > 0) {
     const groups = new Map<string, Record<string, unknown>>()
     for (const r of rows) {
-      const key = groupBy.map((g) => String(r[g] ?? '')).join('|')
-      const g = groups.get(key) ?? Object.fromEntries(groupBy.map((c) => [c, r[c]]))
+      const key = gb.map((g) => String(r[g] ?? '')).join('|')
+      const g = groups.get(key) ?? Object.fromEntries(gb.map((c) => [c, r[c]]))
       aggs.forEach((a, i) => {
         const name = a.fn === 'count' ? `count_${i}` : `sum_${a.field}`
         g[name] = ((g[name] as number) ?? 0) + (a.fn === 'count' ? 1 : Number(r[a.field!] ?? 0))
@@ -116,7 +120,29 @@ export async function POST(request: Request) {
       groups.set(key, g)
     }
     rows = [...groups.values()]
-    columns = [...groupBy, ...aggs.map((a, i) => (a.fn === 'count' ? `count_${i}` : `sum_${a.field}`))]
+    columns = [...gb, ...aggs.map((a, i) => (a.fn === 'count' ? `count_${i}` : `sum_${a.field}`))]
+    if (pivot) {
+      // Spread the second field across columns: one row per first-field value, one column per second-field value, plus a total
+      const metric = columns[columns.length - 1]
+      const colVals = [...new Set(rows.map((r) => String(r[pivot] ?? '(none)')))].sort()
+      const byRow = new Map<string, Record<string, unknown>>()
+      for (const r of rows) {
+        const k = String(r[groupBy[0]] ?? '')
+        const o = byRow.get(k) ?? { [groupBy[0]]: r[groupBy[0]], Total: 0 }
+        const c = String(r[pivot] ?? '(none)')
+        o[c] = ((o[c] as number) ?? 0) + Number(r[metric] ?? 0)
+        o.Total = (o.Total as number) + Number(r[metric] ?? 0)
+        byRow.set(k, o)
+      }
+      rows = [...byRow.values()].sort((a, b) => Number(b.Total) - Number(a.Total))
+      const totalRow: Record<string, unknown> = { [groupBy[0]]: 'TOTAL', Total: 0 }
+      for (const r of rows) {
+        for (const c of colVals) totalRow[c] = ((totalRow[c] as number) ?? 0) + Number(r[c] ?? 0)
+        totalRow.Total = (totalRow.Total as number) + Number(r.Total)
+      }
+      rows.push(totalRow)
+      columns = [groupBy[0], ...colVals, 'Total']
+    }
   } else {
     rows = rows.map((r) => Object.fromEntries(fields.map((f) => [f, r[f]])))
   }
@@ -127,8 +153,22 @@ export async function POST(request: Request) {
     branchId: admin.branch_id,
     entityType: 'query',
     action: body.export ? 'export' : 'query',
-    after: { view: viewName, fields: columns, filters, groupBy, rowCount: rows.length },
+    after: { view: viewName, fields: columns, filters, groupBy, pivot, rowCount: rows.length },
   })
+
+  if (body.export === 'xlsx') {
+    const sheet = XLSX.utils.json_to_sheet(rows, { header: columns })
+    sheet['!cols'] = columns.map((c) => ({ wch: Math.min(Math.max(c.length + 2, 12), 40) }))
+    const book = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(book, sheet, viewName.replace(/^v_/, '').slice(0, 31))
+    const buf = XLSX.write(book, { type: 'buffer', bookType: 'xlsx' }) as Buffer
+    return new NextResponse(new Uint8Array(buf), {
+      headers: {
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition': `attachment; filename="${viewName}.xlsx"`,
+      },
+    })
+  }
 
   if (body.export === 'csv') {
     const csv = [columns.join(','), ...rows.map((r) => columns.map((c) => csvCell(r[c])).join(','))].join('\n')
@@ -172,5 +212,5 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ columns, rows, numeric: def.numeric, facets, totals })
+  return NextResponse.json({ columns, rows, numeric: def.numeric, facets, totals, pivoted: Boolean(pivot) })
 }
