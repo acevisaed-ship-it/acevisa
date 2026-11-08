@@ -1,5 +1,5 @@
 import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
-import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { ACCOUNTANT_ALLOWED_ACTIONS, requireAccountsApi } from '@/lib/admin/requireAccountsApi'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -10,13 +10,16 @@ export const runtime = 'nodejs'
 const CEO_ONLY = new Set(['owner.add', 'plan.set', 'vouchers.expire', 'instructor.set', 'instructor.plan'])
 
 export async function POST(request: Request) {
-  const { admin, error } = await requireAdminApi()
+  const { admin, error } = await requireAccountsApi('full')
   if (error) return error
 
   const body = (await request.json().catch(() => ({}))) as { action?: string; params?: Record<string, unknown> }
   const action = body.action?.trim()
   const params = body.params ?? {}
   if (!action) return NextResponse.json({ error: 'action is required' }, { status: 400 })
+  if (admin.role === 'accountant' && !ACCOUNTANT_ALLOWED_ACTIONS.has(action)) {
+    return NextResponse.json({ error: 'Accountants cannot perform this action' }, { status: 403 })
+  }
   if (CEO_ONLY.has(action) && admin.role !== 'ceo') {
     return NextResponse.json({ error: 'CEO access only' }, { status: 403 })
   }

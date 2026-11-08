@@ -1,6 +1,6 @@
 import { logActivity } from '@/lib/activityLog'
 import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
-import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { requireAccountsApi } from '@/lib/admin/requireAccountsApi'
 import { mapInvoice } from '@/lib/invoices/mapInvoice'
 import { INVOICE_SELECT } from '@/lib/invoices/types'
 import { createAdminClient } from '@/lib/supabase/server'
@@ -10,7 +10,7 @@ export async function POST(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { admin, error } = await requireAdminApi()
+  const { admin, error } = await requireAccountsApi('full')
   if (error) return error
 
   const { id } = await params

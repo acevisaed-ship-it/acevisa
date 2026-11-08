@@ -125,7 +125,28 @@ export async function requireAdmin() {
   }
 
   if (!ADMIN_PANEL_ROLES.includes(counselor.role as (typeof ADMIN_PANEL_ROLES)[number])) {
-    redirect(counselor.role === 'receptionist' ? '/receptionist' : '/dashboard')
+    redirect(counselor.role === 'receptionist' ? '/receptionist' : counselor.role === 'accountant' ? '/accountant' : '/dashboard')
+  }
+
+  return counselor
+}
+
+// Page guard for /accountant (the Accounts module only; no HR, clients or admissions).
+export async function requireAccountant() {
+  const counselor = await getAuthenticatedCounselor()
+
+  if (!counselor) {
+    redirect('/login')
+  }
+
+  if (counselor.role !== 'accountant') {
+    redirect(
+      ADMIN_PANEL_ROLES.includes(counselor.role as (typeof ADMIN_PANEL_ROLES)[number])
+        ? '/admin'
+        : counselor.role === 'receptionist'
+          ? '/receptionist'
+          : '/dashboard'
+    )
   }
 
   return counselor
@@ -160,7 +181,9 @@ export async function requireReceptionist() {
     redirect(
       ADMIN_PANEL_ROLES.includes(counselor.role as (typeof ADMIN_PANEL_ROLES)[number])
         ? '/admin'
-        : '/dashboard'
+        : counselor.role === 'accountant'
+          ? '/accountant'
+          : '/dashboard'
     )
   }
 

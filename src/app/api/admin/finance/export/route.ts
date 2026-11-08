@@ -1,4 +1,4 @@
-import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { requireAccountsApi } from '@/lib/admin/requireAccountsApi'
 import { writeAudit } from '@/lib/ledger/audit'
 import { parseMonth } from '@/lib/admin/parseMonth'
 import { parseClientJoin } from '@/lib/admin/parseCounselorJoin'
@@ -138,7 +138,7 @@ function buildCommissions(
 }
 
 export async function GET(request: Request) {
-  const { admin, error } = await requireAdminApi()
+  const { admin, error } = await requireAccountsApi('full')
   if (error) return error
 
   const url = new URL(request.url)

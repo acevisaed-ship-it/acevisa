@@ -31,7 +31,7 @@ export async function POST(
     return NextResponse.json({ error: 'Account not found' }, { status: 404 })
   }
 
-  if (!['counselor', 'receptionist'].includes(target.role)) {
+  if (!['counselor', 'receptionist', 'accountant'].includes(target.role)) {
     return NextResponse.json(
       { error: 'Can only reset counselor or receptionist passwords here' },
       { status: 400 }

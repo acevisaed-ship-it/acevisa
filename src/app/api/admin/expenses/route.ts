@@ -3,7 +3,8 @@ import { writeAudit } from '@/lib/ledger/audit'
 import { changedFields, formatFieldChanges } from '@/lib/admin/accountEntries'
 import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { EXPENSE_CATEGORIES, type ExpenseCategory } from '@/lib/admin/dealTypes'
-import { requireAdminApi, requireCeoApi } from '@/lib/admin/requireAdminApi'
+import { requireCeoApi } from '@/lib/admin/requireAdminApi'
+import { requireAccountsApi } from '@/lib/admin/requireAccountsApi'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -33,7 +34,7 @@ function expenseSnapshot(row: {
 }
 
 export async function GET(request: Request) {
-  const { admin, error } = await requireAdminApi()
+  const { admin, error } = await requireAccountsApi('full')
   if (error) return error
 
   const url = new URL(request.url)
@@ -102,7 +103,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const { error, admin } = await requireAdminApi()
+  const { error, admin } = await requireAccountsApi('full')
   if (error) return error
 
   const body = await request.json()

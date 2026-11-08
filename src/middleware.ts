@@ -59,7 +59,8 @@ export async function middleware(request: NextRequest) {
   const isProtected =
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/admin') ||
-    pathname.startsWith('/receptionist')
+    pathname.startsWith('/receptionist') ||
+    pathname.startsWith('/accountant')
 
   if (isProtected && !user) {
     return NextResponse.redirect(new URL('/login', request.url))
@@ -103,7 +104,8 @@ export async function middleware(request: NextRequest) {
     // 'admin' (Branch Manager). 'receptionist' gets its own single-purpose area.
     const isAdmin = account.role === 'admin' || account.role === 'ceo'
     const isReceptionist = account.role === 'receptionist'
-    const homeForRole = isAdmin ? '/admin' : isReceptionist ? '/receptionist' : '/dashboard'
+    const isAccountant = account.role === 'accountant'
+    const homeForRole = isAdmin ? '/admin' : isReceptionist ? '/receptionist' : isAccountant ? '/accountant' : '/dashboard'
 
     if (pathname.startsWith('/admin') && !isAdmin) {
       return NextResponse.redirect(new URL(homeForRole, request.url))
@@ -113,7 +115,11 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL(homeForRole, request.url))
     }
 
-    if (pathname.startsWith('/dashboard') && (isAdmin || isReceptionist)) {
+    if (pathname.startsWith('/accountant') && !isAccountant) {
+      return NextResponse.redirect(new URL(homeForRole, request.url))
+    }
+
+    if (pathname.startsWith('/dashboard') && (isAdmin || isReceptionist || isAccountant)) {
       return NextResponse.redirect(new URL(homeForRole, request.url))
     }
   }
@@ -125,5 +131,5 @@ export const config = {
   // Include /api so expired access tokens are refreshed before Route Handlers
   // run. Front desk keeps /receptionist open for hours; without this, register
   // and other receptionist APIs return 401/403 after the JWT expires.
-  matcher: ['/dashboard/:path*', '/admin/:path*', '/receptionist/:path*', '/api/:path*'],
+  matcher: ['/dashboard/:path*', '/admin/:path*', '/receptionist/:path*', '/accountant/:path*', '/api/:path*'],
 }

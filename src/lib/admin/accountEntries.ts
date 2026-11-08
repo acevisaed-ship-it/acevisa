@@ -1,4 +1,5 @@
 export function canMutateAccountEntries(role: string): boolean {
+  // Editing or deleting past entries stays with the CEO; accountants can record new ones.
   return role === 'ceo'
 }
 

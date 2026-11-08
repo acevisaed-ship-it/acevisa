@@ -5,13 +5,13 @@ import {
 } from '@/lib/admin/dealTypes'
 import { parseMonth } from '@/lib/admin/parseMonth'
 import { parseClientJoin } from '@/lib/admin/parseCounselorJoin'
-import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { requireAccountsApi } from '@/lib/admin/requireAccountsApi'
 import { incentivesByCounselor } from '@/lib/ledger/monthIncentives'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
-  const { admin, error } = await requireAdminApi()
+  const { admin, error } = await requireAccountsApi('full')
   if (error) return error
 
   const params = new URL(request.url).searchParams

@@ -7,6 +7,7 @@ export const runtime = 'nodejs'
 function homeForRole(role: string | null | undefined): string {
   if (role === 'admin' || role === 'ceo') return '/admin'
   if (role === 'receptionist') return '/receptionist'
+  if (role === 'accountant') return '/accountant'
   return '/dashboard'
 }
 

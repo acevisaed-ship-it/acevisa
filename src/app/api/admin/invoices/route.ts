@@ -1,6 +1,6 @@
 import { INVOICE_STATUSES, type InvoiceStatus } from '@/lib/admin/dealTypes'
 import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
-import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { counselorOwnsClient, requireAccountsApi } from '@/lib/admin/requireAccountsApi'
 import { mapInvoice } from '@/lib/invoices/mapInvoice'
 import { INVOICE_SELECT, INVOICE_SELECT_BRANCH } from '@/lib/invoices/types'
 import { writeAudit } from '@/lib/ledger/audit'
@@ -27,7 +27,7 @@ async function generateInvoiceNumber(supabase: ReturnType<typeof createAdminClie
 }
 
 export async function GET(request: Request) {
-  const { admin, error } = await requireAdminApi()
+  const { admin, error } = await requireAccountsApi('full')
   if (error) return error
 
   const params = new URL(request.url).searchParams
@@ -91,7 +91,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const { admin, error } = await requireAdminApi()
+  // Counselors may create invoices, but only for their own clients
+  const { admin, error } = await requireAccountsApi('cash')
   if (error) return error
 
   const body = await request.json()
@@ -122,6 +123,17 @@ export async function POST(request: Request) {
 
   if (isBranchScopedAdmin(admin) && clientRow.branch_id !== admin.branch_id) {
     return NextResponse.json({ error: 'Client not in your branch' }, { status: 403 })
+  }
+  if (admin.role === 'counselor') {
+    if (!(await counselorOwnsClient(admin.id, client_id))) {
+      return NextResponse.json({ error: 'You can only invoice your own clients' }, { status: 403 })
+    }
+    if (deal_id) {
+      const { data: dealRow } = await supabase.from('deals').select('client_id').eq('id', deal_id).maybeSingle()
+      if (!dealRow || dealRow.client_id !== client_id) {
+        return NextResponse.json({ error: 'That case does not belong to this client' }, { status: 403 })
+      }
+    }
   }
 
   const invoice_number = await generateInvoiceNumber(supabase)

@@ -6,7 +6,7 @@ import { saveStaffPasswordVault } from '@/lib/auth/passwordVault'
 import { NextResponse } from 'next/server'
 
 const CREATABLE_ROLES_BY_ADMIN = ['counselor', 'receptionist'] as const
-const CREATABLE_ROLES_BY_CEO = ['counselor', 'receptionist', 'admin'] as const
+const CREATABLE_ROLES_BY_CEO = ['counselor', 'receptionist', 'admin', 'accountant'] as const
 
 export async function POST(request: Request) {
   const { admin: requester, error: authError } = await requireAdminApi()

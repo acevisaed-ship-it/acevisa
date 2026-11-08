@@ -1,7 +1,7 @@
 import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { EXPENSE_CATEGORY_LABELS, type ExpenseCategory } from '@/lib/admin/dealTypes'
 import { parseClientJoin } from '@/lib/admin/parseCounselorJoin'
-import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { requireAccountsApi } from '@/lib/admin/requireAccountsApi'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -61,7 +61,7 @@ function getPeriodRange(mode: Mode, date: string, from: string, to: string) {
 }
 
 export async function GET(request: Request) {
-  const { admin, error: authError } = await requireAdminApi()
+  const { admin, error: authError } = await requireAccountsApi('full')
   if (authError) return authError
 
   const sp = new URL(request.url).searchParams

@@ -1,6 +1,6 @@
 import { isBranchScopedAdmin } from '@/lib/admin/branchScope'
 import { PAYMENT_METHODS, type PaymentMethod } from '@/lib/admin/dealTypes'
-import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { counselorOwnsClient, requireAccountsApi } from '@/lib/admin/requireAccountsApi'
 import { sendEmail, paymentReceiptEmailHtml } from '@/lib/email'
 import { mapInvoice } from '@/lib/invoices/mapInvoice'
 import { termsVersionReference } from '@/lib/invoices/terms'
@@ -15,7 +15,8 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { admin, error } = await requireAdminApi()
+  // Counselors may record INCOMING payments on their own clients' invoices (never refunds or expenses)
+  const { admin, error } = await requireAccountsApi('cash')
   if (error) return error
 
   const { id } = await params
@@ -53,6 +54,10 @@ export async function POST(
     | { name: string; email: string | null; branch_id: string | null }[]
     | null
   const clientRow = Array.isArray(clientJoin) ? clientJoin[0] : clientJoin
+
+  if (admin.role === 'counselor' && !(await counselorOwnsClient(admin.id, invoice.client_id))) {
+    return NextResponse.json({ error: 'You can only record payments for your own clients' }, { status: 403 })
+  }
 
   if (isBranchScopedAdmin(admin)) {
     if (!clientRow || clientRow.branch_id !== admin.branch_id) {

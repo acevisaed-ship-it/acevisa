@@ -24,6 +24,7 @@ const rolesForAdmin = [
 const rolesForCeo = [
   ...rolesForAdmin,
   { value: 'admin', label: 'Branch Manager' },
+  { value: 'accountant', label: 'Accountant' },
 ]
 
 export function CounselorAccountsPanel({ isCeo = false }: { isCeo?: boolean }) {

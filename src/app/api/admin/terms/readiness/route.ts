@@ -1,10 +1,10 @@
-import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { requireAccountsApi } from '@/lib/admin/requireAccountsApi'
 import { checkTermsReadyForInvoice } from '@/lib/invoices/terms'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
-  const { error } = await requireAdminApi()
+  const { error } = await requireAccountsApi('full')
   if (error) return error
 
   const productId = new URL(request.url).searchParams.get('product_id')

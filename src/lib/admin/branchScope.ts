@@ -6,7 +6,8 @@ export type AdminAccount = {
 }
 
 export function isBranchScopedAdmin(admin: AdminAccount): boolean {
-  return admin.role === 'admin' && admin.branch_id != null
+  // Branch managers and accountants that carry a branch_id only see that branch (an accountant without one sees all).
+  return (admin.role === 'admin' || admin.role === 'accountant') && admin.branch_id != null
 }
 
 export function requireBranchId(admin: AdminAccount): string {

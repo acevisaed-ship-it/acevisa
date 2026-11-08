@@ -10,8 +10,9 @@ import { HRMView } from '@/components/admin/HRMView'
 import { ProductsPanel } from '@/components/admin/ProductsPanel'
 import { CommissionsPanel } from '@/components/admin/CommissionsPanel'
 import { LedgerWorkbench } from '@/components/admin/LedgerWorkbench'
+import { ReferenceSetupPanel } from '@/components/admin/ReferenceSetupPanel'
 
-type Tab = 'pl' | 'invoices' | 'payroll' | 'commissions' | 'registers' | 'incentive' | 'products'
+type Tab = 'pl' | 'invoices' | 'payroll' | 'commissions' | 'registers' | 'incentive' | 'products' | 'setup'
 
 type ClientOption = { id: string; name: string; counselor_id: string | null; counselor_name?: string | null }
 type DealOption = { id: string; client_id: string; deal_value: number; service_type: string }
@@ -25,6 +26,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'pl', label: 'P&L Summary' },
   { id: 'incentive', label: 'Incentive Policy' },
   { id: 'products', label: 'Products' },
+  { id: 'setup', label: 'Institutions & Agents' },
 ]
 
 export function AccountsSection({
@@ -33,18 +35,22 @@ export function AccountsSection({
   counselors,
   canManageEntries,
   showBranchFilter = false,
+  role,
 }: {
   clients: ClientOption[]
   deals: DealOption[]
   counselors: CounselorOption[]
   canManageEntries: boolean
   showBranchFilter?: boolean
+  /** 'accountant' sees income, expenses, reports and ledgers only (no payroll, commissions, rates or setup). */
+  role?: string
 }) {
   const searchParams = useSearchParams()
   const tabParam = searchParams.get('tab') as Tab | null
   const dealIdParam = searchParams.get('dealId')
+  const visibleTabs = role === 'accountant' ? TABS.filter((t) => ['invoices', 'registers', 'pl'].includes(t.id)) : TABS
   const [tab, setTab] = useState<Tab>(
-    tabParam && TABS.some((t) => t.id === tabParam) ? tabParam : 'invoices'
+    tabParam && visibleTabs.some((t) => t.id === tabParam) ? tabParam : 'invoices'
   )
 
   return (
@@ -56,7 +62,7 @@ export function AccountsSection({
 
       {/* Tab bar */}
       <div className="flex gap-1 rounded-2xl tab-container p-1.5 w-fit">
-        {TABS.map((t) => (
+        {visibleTabs.map((t) => (
           <button
             key={t.id}
             type="button"
@@ -87,7 +93,8 @@ export function AccountsSection({
         )}
         {tab === 'payroll' && <HRMView showBranchFilter={showBranchFilter} />}
         {tab === 'commissions' && <CommissionsPanel counselors={counselors} />}
-        {tab === 'registers' && <LedgerWorkbench />}
+        {tab === 'registers' && <LedgerWorkbench restricted={role === 'accountant'} />}
+        {tab === 'setup' && <ReferenceSetupPanel />}
         {tab === 'incentive' && (
           <IncentivePolicyPanel counselors={counselors} showBranchFilter={showBranchFilter} />
         )}

@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { requireAccountsApi } from '@/lib/admin/requireAccountsApi'
 import { createAdminClient } from '@/lib/supabase/server'
 
 export async function GET() {
-  const { error } = await requireAdminApi()
+  const { error } = await requireAccountsApi('full')
   if (error) return error
 
   const supabase = createAdminClient()

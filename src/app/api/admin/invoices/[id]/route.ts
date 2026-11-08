@@ -1,7 +1,8 @@
 import { logActivity } from '@/lib/activityLog'
 import { changedFields, formatFieldChanges } from '@/lib/admin/accountEntries'
 import { INVOICE_STATUSES, type InvoiceStatus } from '@/lib/admin/dealTypes'
-import { requireAdminApi, requireCeoApi } from '@/lib/admin/requireAdminApi'
+import { requireCeoApi } from '@/lib/admin/requireAdminApi'
+import { requireAccountsApi } from '@/lib/admin/requireAccountsApi'
 import { mapInvoice } from '@/lib/invoices/mapInvoice'
 import { INVOICE_SELECT } from '@/lib/invoices/types'
 import { writeAudit } from '@/lib/ledger/audit'
@@ -40,7 +41,7 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireAdminApi()
+  const { error } = await requireAccountsApi('full')
   if (error) return error
 
   const { id } = await params

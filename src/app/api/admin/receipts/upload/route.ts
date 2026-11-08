@@ -1,4 +1,4 @@
-import { requireAdminApi } from '@/lib/admin/requireAdminApi'
+import { requireAccountsApi } from '@/lib/admin/requireAccountsApi'
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
@@ -14,7 +14,7 @@ const ALLOWED_MIME = new Set([
 const MAX_BYTES = 10 * 1024 * 1024
 
 export async function POST(request: Request) {
-  const { error } = await requireAdminApi()
+  const { error } = await requireAccountsApi('cash')
   if (error) return error
 
   const formData = await request.formData()

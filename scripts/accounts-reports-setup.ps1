@@ -28,18 +28,22 @@ $branch = (git branch --show-current).Trim()
 Say "Log file: $log"; Say "Git branch: $branch"
 if ($branch -eq 'main') { Say 'You are on main. Run first:  git checkout -b feat/accounts-reports'; exit 1 }
 
-if ($From -le 2) {
-  $ans = Read-Host "Step 2 applies additive SQL to the LIVE Supabase project. Type YES to continue"
+if ($From -le 3) {
+  $ans = Read-Host "Steps 2-3 apply additive SQL to the LIVE Supabase project. Type YES to continue"
   if ($ans -ne 'YES') { Say 'Cancelled.'; exit 0 }
 }
 
 $steps = @(
   @{ n = 1; name = 'Check Supabase link'; run = { Set-Content -Path "$env:TEMP\ping.sql" -Value 'select 1 as ok;'; Sql "$env:TEMP\ping.sql" -ReadOnly } },
   @{ n = 2; name = 'Apply migration: institutions, agents, case fields, report views'; run = { Sql 'supabase\migrations\20261109000000_accounts_reports_foundation.sql' } },
-  @{ n = 3; name = 'Self-check (read-only; every row should say ok = true)'; run = { Sql 'supabase\pending\accounts_reports_selfcheck.sql' -ReadOnly } },
-  @{ n = 4; name = 'TypeScript check'; run = { & npx.cmd tsc --noEmit } },
-  @{ n = 5; name = 'Build'; run = { & npm.cmd run build } }
+  @{ n = 3; name = 'Apply migration: saved views + 5 starter views'; run = { Sql 'supabase\migrations\20261109010000_saved_views.sql' } },
+  @{ n = 4; name = 'Self-check (read-only; every row should say ok = true)'; run = { Sql 'supabase\pending\accounts_reports_selfcheck.sql' -ReadOnly } },
+  @{ n = 5; name = 'TypeScript check'; run = { & npx.cmd tsc --noEmit } },
+  @{ n = 6; name = 'Build'; run = { & npm.cmd run build } },
+  @{ n = 7; name = 'OPTIONAL test data: mock institutions + agents on mock cases only (run with -From 7 -To 7)'; run = { Sql 'supabase\pending\mock_institutions_agents.sql' } },
+  @{ n = 8; name = 'OPTIONAL real data: institutions from the country decks, all non-partner (run with -From 8 -To 8)'; run = { Sql 'supabase\pending\institutions_from_country_decks.sql' } }
 )
-foreach ($s in $steps | Where-Object { $_.n -ge $From -and $_.n -le $To }) { Run "$($s.n). $($s.name)" $s.run }
+# Step 7 (optional test data) only runs when you ask for it explicitly with -From 7
+foreach ($s in $steps | Where-Object { $_.n -ge $From -and $_.n -le $To -and ($_.n -lt 7 -or $From -eq $_.n) }) { Run "$($s.n). $($s.name)" $s.run }
 
 Say ""; Say "Done. Log saved to $log"

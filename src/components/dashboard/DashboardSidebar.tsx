@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { CalendarCheck, CheckSquare, ChevronLeft, ChevronRight, Download, Home, Kanban, LogOut, Mail, MessageSquareMore, Users, X } from 'lucide-react'
+import { CalendarCheck, CheckSquare, ChevronLeft, ChevronRight, Download, Home, Kanban, LogOut, Mail, MessageSquareMore, Users, Wallet, X } from 'lucide-react'
 import { clearAceSessionCookies } from '@/lib/auth/session-cookies'
 import { createClient } from '@/lib/supabase/client'
 import { ProfilePicture } from '@/components/dashboard/ProfilePicture'
@@ -41,6 +41,8 @@ function buildNavItems(basePath: string, adminView: boolean): NavItem[] {
   // counselor's panel (that page doesn't exist under /admin/counselors/*).
   if (!adminView) {
     items.splice(3, 0, { href: `${basePath}/attendance`, label: 'Attendance', icon: CalendarCheck })
+    // Invoices and incoming payments for the counselor's own clients (not shown on an admin's view of a counselor)
+    items.splice(items.length - 1, 0, { href: `${basePath}/accounts`, label: 'Accounts', icon: Wallet })
   }
   return items
 }

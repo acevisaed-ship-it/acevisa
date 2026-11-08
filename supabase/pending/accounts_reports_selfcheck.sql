@@ -33,6 +33,10 @@ SELECT 'every case has an application date',
        NOT EXISTS (SELECT 1 FROM deals WHERE applied_at IS NULL),
        (SELECT count(*) FROM deals WHERE applied_at IS NULL)::text || ' missing'
 UNION ALL
+SELECT 'five starter saved views exist',
+       (SELECT count(*) FROM saved_views WHERE owner_id IS NULL) >= 5,
+       (SELECT count(*) FROM saved_views WHERE owner_id IS NULL)::text || ' starter views'
+UNION ALL
 SELECT 'new tables exist and are locked down',
        (SELECT count(*) FROM pg_class WHERE relname IN ('agents', 'agent_institutions') AND relrowsecurity) = 2,
        'agents, agent_institutions';
